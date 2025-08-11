@@ -85,7 +85,6 @@
 \usepackage[includehead,hmargin={3.6cm, 2.6cm}, vmargin={2.5cm,2.7cm}, headsep=.8cm,footskip=1.2cm]{geometry}
 \fi
 
-\usepackage{xcolor}
 \usepackage{graphicx}
 
 \usepackage{fancyhdr}
@@ -143,7 +142,7 @@
 \usepackage{xfrac}
 
 % JEM the following package allows changing spacing in lists (for acknowledgements)
-\usepackage{enumitem}
+\usepackage[inline]{enumitem}
 
 % JEM the following allows table columns aligned by decimal point
 \usepackage{dcolumn}

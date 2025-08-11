@@ -1,0 +1,207 @@
+\lstset{language=C++,
+    keywordstyle={\bfseries\color{RoyalBlue}},
+    basicstyle=\small\ttfamily,
+    commentstyle=\color{ForestGreen}\ttfamily,
+    rulecolor=\color{black},
+    upquote=true,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+%belowcaptionskip=3mm,
+    tabsize=4,
+    captionpos=b
+%escapechar=\@
+}
+
+\lstdefinestyle{sidebyside}
+{
+    basicstyle=\small\ttfamily,
+    framexleftmargin=3pt,
+    xleftmargin=8pt,
+    numbersep=-4pt,
+}
+
+
+\definecolor{set1red}{RGB}{228, 26, 28}
+\definecolor{set1green}{RGB}{77, 175, 74}
+\definecolor{set1violet}{RGB}{152, 78, 163}
+\definecolor{set1orange}{RGB}{255, 127, 0}
+
+\lstdefinestyle{asmcode}{
+    language={[x86masm]Assembler},
+    escapechar=|,
+    frame=none,
+    keywordstyle={\bfseries\color{RoyalBlue}},
+    basicstyle=\small\ttfamily,
+    commentstyle=\color{ForestGreen}\ttfamily,
+    rulecolor=\color{black},
+    upquote=true,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+%belowcaptionskip=3mm,
+    tabsize=4,
+    captionpos=b,
+    morekeywords={vmovdqa,vmovdqu,vzeroupper},
+}
+
+\lstdefinestyle{coloredrads}{
+    keywords=[2]{BTRA1},
+    keywords=[3]{BTRA2},
+    keywords=[4]{BTRA3},
+    keywords=[5]{BTRA3},
+    keywordstyle=[2]{\color{set1red}},
+    keywordstyle=[3]{\color{set1green}},
+    keywordstyle=[4]{\color{set1violet}},
+    keywordstyle=[5]{\color{set1orange}},
+}
+
+\AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
+
+\newcommand{\makename}[3][s]{%
+    \expandafter\newcommand\csname #2\endcsname{#3\xspace}%
+    \expandafter\newcommand\csname #2s\endcsname{#3#1\xspace}%
+}
+
+\newcommand{\sbrtodo}[1]{\todo[inline,color=NavyBlue!80]{\textcolor{white}{sbr: #1}}}
+\newcommand{\fbetodo}[1]{\todo[inline,color=ForestGreen!80]{\textcolor{white}{fbe: #1}}}
+
+
+\newcommand{\prj}[1][]{%
+    \ifthenelse{\isempty{#1}}%
+    {\textsc{IRIdium}}%
+    {IRIdium}%
+    \xspace%
+}
+
+\makename{cra}{code-reuse attack}
+\makename{btra}{BTRA}
+\makename{heapbt}{BTDP}
+
+\newcommand{\specPerfAvg}{1.006$\times$}
+\newcommand{\specQuantRetAddr}{70\%}
+\newcommand{\wox}{W$\oplus$X\xspace}
+\newcommand{\plusplus}{\nolinebreak\hspace{-.02em}\raisebox{.1ex}{\small +}\nolinebreak\hspace{-.10em}\raisebox{.1ex}{\small +}\xspace}
+\newcommand{\cpp}{C\plusplus}
+\newcommand{\maxoverheadcfs}{3.61\%\xspace}
+\newcommand{\geomeancfs}{0.79\%\xspace}
+%\newcommand{\geomeanonlylib}{1.02\%\xspace}
+\newcommand{\geomeannobt}{2.44\%\xspace} % geometric mean overhead when moving only the stack pointer
+\newcommand{\avxomnetppimprov}{14\%\xspace} % improvvement in absolute percent points of omnetpp with AVX2
+\newcommand{\hardenedheapbtsoverhead}{2\%\xspace} % overhead in absolute percent points of hardened heap booby traps compared to regular heap booby traps
+\newcommand{\meanpercentcodepointers}{97\%\xspace}
+\newcommand{\protectedcodepointers}{93\%\xspace}
+\newcommand{\heapbtgeomean}{1.59\%\xspace}
+\newcommand{\allprotectionsgeomean}{7.48\%\xspace}
+\newcommand{\allprotectionspushgeomean}{12.47\%\xspace}
+\newcommand{\allprotectionshardenedgeomean}{9.89\%\xspace}
+%\newcommand{\adaptivepronegeomean}{4.19\%\xspace}
+%\newcommand{\adaptiveprtwogeomean}{7.19\%\xspace}
+\newcommand{\eg}{e.g.,~}
+\newcommand{\ie}{i.e.,~}
+\newcommand{\etal}{et al\@.\xspace}
+\newcommand{\cfs}{offset-invariant addressing\xspace}
+\newcommand{\Cfs}{Offset-invariant addressing\xspace}
+\newcommand{\code}{\texttt}
+\newcommand{\propername}{\textsf}
+\newcommand{\krx}{kR\^{}X\xspace}
+
+\newcommand{\musllib}{\propername{musl}/\propername{libc\plusplus}\xspace}
+\newcommand{\glibclib}{\propername{glibc}/\propername{libstdc\plusplus}\xspace}
+\newcommand*{\figuretitle}[1]{%
+        {\centering%   <--------  will only affect the title because of the grouping (by the
+    \sffamily{\textbf{#1}}%              braces before \centering and behind \medskip). If you remove
+    \par\medskip}%            these braces the whole body of a {figure} env will be centered.
+}
+
+\newacronym{CPH}{CPH}{Code-Pointer Hiding}
+\newacronym{XOM}{XOM}{Execute-Only Memory}
+\newacronym{AOCR}{AOCR}{Address-Oblivious Code Reuse}
+\newacronym[plural=TLBs,firstplural=Translation Lookaside Buffers (TLBs)]{TLB}{TLB}{Translation Lookaside Buffer}
+\newacronym[plural=EPTs,firstplural=Extended Page Tables (EPTs)]{EPT}{EPT}{Extended Page Table}
+\newacronym{PIC}{PIC}{Position Independent Code}
+\newacronym{GOT}{GOT}{Global Offset Table}
+\newacronym{CFI}{CFI}{Control-Flow Integrity}
+\newacronym{SFI}{SFI}{Software-based Fault Isolation}
+\newacronym{CFG}{CFG}{Control-Flow Graph}
+\newacronym{RSB}{RSB}{Return Stack Buffer}
+\newacronym{PGO}{PGO}{Profile-Guided Optimization}
+\newacronym{LTO}{LTO}{Link-Time Optimization}
+\newacronym{BTB}{BTB}{Branch Target Buffer}
+\newacronym{PC}{PC}{Program Counter}
+\newacronym{CMQ}{CMQ}{Cross-Module Quickening}
+
+\ifxetex
+% WORKAROUND for xelatex vs tikzmark:
+% Definition copied from /usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf-via-dvi.def
+% Compare https://tex.stackexchange.com/q/229500 and comments!
+\makeatletter
+\def\pgfsys@hboxsynced#1{%
+        {%
+        \pgfsys@beginscope%
+        \setbox\pgf@hbox=\hbox{%
+            \hskip\pgf@pt@x%
+            \raise\pgf@pt@y\hbox{%
+                \pgf@pt@x=0pt%
+                \pgf@pt@y=0pt%
+                \special{pdf: content q}%
+                \pgflowlevelsynccm%
+                \pgfsys@invoke{q -1 0 0 -1 0 0 cm}%
+                \special{pdf: content -1 0 0 -1 0 0 cm q}% translate to original coordinate system
+                \pgfsys@invoke{0 J [] 0 d}% reset line cap and dash
+                \wd#1=0pt%
+                \ht#1=0pt%
+                \dp#1=0pt%
+                \box#1%
+                \pgfsys@invoke{n Q Q Q}%
+            }%
+            \hss%
+        }%
+        \wd\pgf@hbox=0pt%
+        \ht\pgf@hbox=0pt%
+        \dp\pgf@hbox=0pt%
+        \pgfsys@hbox\pgf@hbox%
+        \pgfsys@endscope%
+    }%
+}
+\makeatother
+
+\newfontfamily\firasans[Path=fonts/,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic,
+    FontFace={xl}{n}{*-ExtraLight},
+    FontFace={xl}{it}{*-ExtraLightItalic},
+    FontFace={l}{n}{*-Light},
+    FontFace={l}{it}{*-LightItalic},
+    FontFace={mb}{n}{*-Medium},
+    FontFace={mb}{it}{*-MediumItalic},
+    FontFace={k}{n}{*-Black},
+    FontFace={k}{it}{*-BlackItalic},
+    Extension = .ttf,
+]{FiraSans}
+
+\newfontfamily\firacode[Path=fonts/,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    FontFace={l}{n}{*-Light},
+    FontFace={m}{n}{*-Medium},
+    FontFace={sb}{n}{*-SemiBold},
+    Extension = .ttf,
+]{FiraCode}
+
+\newcommand{\figurefont}[1]{{\sf{\firasans #1}}}%
+\else
+\newcommand{\figurefont}[1]{#1}%
+\fi
+
+\newcommand*\circledtikz[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+\newcommand*\circleddashedtikz[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle,dashed,draw,inner sep=1pt] (char) {#1};}}
