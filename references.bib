@@ -1,36 +1,1623 @@
 @inproceedings{berlakovich2024,
-  title         = {Cross {{Module Quickening}} - {{The Curious Case}} of {{C Extensions}}},
-  booktitle     = {38th {{European Conference}} on {{Object-Oriented Programming}} ({{ECOOP}} 2024)},
-  author        = {Berlakovich, Felix and Brunthaler, Stefan},
-  editor        = {Aldrich, Jonathan and Salvaneschi, Guido},
-  date          = {2024},
-  series        = {Leibniz {{International Proceedings}} in {{Informatics}} ({{LIPIcs}})},
-  volume        = {313},
-  pages         = {6:1--6:29},
-  publisher     = {Schloss Dagstuhl ? Leibniz-Zentrum f�r Informatik},
-  location      = {Dagstuhl, Germany},
-  issn          = {1868-8969},
-  doi           = {10.4230/LIPIcs.ECOOP.2024.6},
-  url           = {https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ECOOP.2024.6},
-  urldate       = {2025-06-12},
-  isbn          = {978-3-95977-341-6},
-  keywords      = {C extensions,interpreter,optimizations,Python,own},
-  file          = {/Users/felix/Zotero/storage/625DXXP8/LIPIcs.ECOOP.2024.html}
+    title = {Cross {{Module Quickening}} - {{The Curious Case}} of {{C Extensions}}},
+    booktitle = {38th {{European Conference}} on {{Object-Oriented Programming}} ({{ECOOP}} 2024)},
+    author = {Berlakovich, Felix and Brunthaler, Stefan},
+    editor = {Aldrich, Jonathan and Salvaneschi, Guido},
+    date = {2024},
+    series = {Leibniz {{International Proceedings}} in {{Informatics}} ({{LIPIcs}})},
+    volume = {313},
+    pages = {6:1--6:29},
+    publisher = {Schloss Dagstuhl ? Leibniz-Zentrum f�r Informatik},
+    location = {Dagstuhl, Germany},
+    issn = {1868-8969},
+    doi = {10.4230/LIPIcs.ECOOP.2024.6},
+    url = {https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ECOOP.2024.6},
+    urldate = {2025-06-12},
+    isbn = {978-3-95977-341-6},
+    keywords = {C extensions,interpreter,optimizations,Python,own},
+    file = {/Users/felix/Zotero/storage/625DXXP8/LIPIcs.ECOOP.2024.html}
 }
+
 @inproceedings{berlakovich2023a,
-  title         = {{{R2C}}: {{AOCR-Resilient Diversity}} with {{Reactive}} and {{Reflective Camouflage}}},
-  shorttitle    = {{R2C}},
-  booktitle     = {Proceedings of the {{Eighteenth European Conference}} on {{Computer Systems}}},
-  author        = {Berlakovich, Felix and Brunthaler, Stefan},
-  date          = {2023-05-08},
-  series        = {{{EuroSys}} '23},
-  pages         = {488--504},
-  publisher     = {Association for Computing Machinery},
-  location      = {New York, NY, USA},
-  doi           = {10.1145/3552326.3587439},
-  url           = {https://doi.org/10.1145/3552326.3587439},
-  urldate       = {2025-08-01},
-  abstract      = {Address-oblivious code reuse, AOCR for short, poses a substantial security risk, as it remains unchallenged. If neglected, adversaries have a reliable way to attack systems, offering an operational and profitable strategy. AOCR's authors conclude that software diversity cannot mitigate AOCR, because it exposes fundamental limits to diversification.Reactive and reflective camouflage, or R2C for short, is a full-fledged, LLVM-based defense that thwarts AOCR by combining code and data diversification with reactive capabilities through booby traps. R2C includes optimizations using AVX2 SIMD instructions, compiles complex real-world software, such as browsers, and offers full support of C++. R2C thus proves that AOCR poses no fundamental limits to software diversification, but merely indicates that code diversification without data diversification is a dead end.An extensive evaluation along multiple dimensions proves the practicality of R2C. We evaluate the impact of our defense on performance, and find that R2C shows low performance impacts on compute-intensive benchmarks (6.6 -- 8.5\% geometric mean on SPEC CPU 2017). A security evaluation indicates R2C's resistance against different types of code-reuse attacks.},
-  isbn          = {978-1-4503-9487-1},
-  keywords      = {own}
+    title = {{{R2C}}: {{AOCR-Resilient Diversity}} with {{Reactive}} and {{Reflective Camouflage}}},
+    shorttitle = {{R2C}},
+    booktitle = {Proceedings of the {{Eighteenth European Conference}} on {{Computer Systems}}},
+    author = {Berlakovich, Felix and Brunthaler, Stefan},
+    date = {2023-05-08},
+    series = {{{EuroSys}} '23},
+    pages = {488--504},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3552326.3587439},
+    url = {https://doi.org/10.1145/3552326.3587439},
+    urldate = {2025-08-01},
+    abstract = {Address-oblivious code reuse, AOCR for short, poses a substantial security risk, as it remains unchallenged. If neglected, adversaries have a reliable way to attack systems, offering an operational and profitable strategy. AOCR's authors conclude that software diversity cannot mitigate AOCR, because it exposes fundamental limits to diversification.Reactive and reflective camouflage, or R2C for short, is a full-fledged, LLVM-based defense that thwarts AOCR by combining code and data diversification with reactive capabilities through booby traps. R2C includes optimizations using AVX2 SIMD instructions, compiles complex real-world software, such as browsers, and offers full support of C++. R2C thus proves that AOCR poses no fundamental limits to software diversification, but merely indicates that code diversification without data diversification is a dead end.An extensive evaluation along multiple dimensions proves the practicality of R2C. We evaluate the impact of our defense on performance, and find that R2C shows low performance impacts on compute-intensive benchmarks (6.6 -- 8.5\% geometric mean on SPEC CPU 2017). A security evaluation indicates R2C's resistance against different types of code-reuse attacks.},
+    isbn = {978-1-4503-9487-1},
+    keywords = {own}
+}
+
+@inproceedings{Shacham2007,
+    abstract = {We present new techniques that allow a return-into-libc attack to be mounted on x86 executables that calls no functions at all. Our attack combines a large number of short instruction sequences to build gadgets that allow arbitrary computation. We show how to discover such instruction sequences by means of static analysis. We make use, in an essential way, of the properties of the x86 instruction set.},
+    address = {New York, New York, USA},
+    author = {Shacham, Hovav},
+    booktitle = {Proceedings of the 14th ACM conference on Computer and communications security - CCS '07},
+    doi = {10.1145/1315245.1315313},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Shacham - 2007 - The geometry of innocent flesh on the bone Return-into-libc without function calls (on the x86)(3).pdf:pdf},
+    isbn = {9781595937032},
+    issn = {15437221},
+    keywords = {Instruction set,Return-into-libc,Turing completeness},
+    number = {4},
+    pages = {552},
+    publisher = {ACM Press},
+    title = {{The geometry of innocent flesh on the bone}},
+    volume = {22},
+    year = {2007}
+}
+
+@inproceedings{Crane2015,
+    abstract = {—Code-reuse attacks such as return-oriented pro-gramming (ROP) pose a severe threat to modern software. Designing practical and effective defenses against code-reuse attacks is highly challenging. One line of defense builds upon fine-grained code diversification to prevent the adversary from constructing a reliable code-reuse attack. However, all solutions proposed so far are either vulnerable to memory disclosure or are impractical for deployment on commodity systems. In this paper, we address the deficiencies of existing solutions and present the first practical, fine-grained code randomization defense, called Readactor, resilient to both static and dynamic ROP attacks. We distinguish between direct memory disclosure, where the attacker reads code pages, and indirect memory disclosure, where attackers use code pointers on data pages to infer the code layout without reading code pages. Unlike previous work, Readactor resists both types of memory disclosure. Moreover, our technique protects both statically and dynamically generated code. We use a new compiler-based code generation paradigm that uses hardware features provided by modern CPUs to enable execute-only memory and hide code pointers from leakage to the adversary. Finally, our extensive evaluation shows that our approach is practical—we protect the entire Google Chromium browser and its V8 JIT compiler—and efficient with an average SPEC CPU2006 performance overhead of only 6.4{\%}.},
+    annote = {XO Memory indirect memory disclosure code pointer hiding (stack und heap)},
+    author = {Crane, Stephen and Liebchen, Christopher and Homescu, Andrei and Davi, Lucas and Larsen, Per and Sadeghi, Ahmad-Reza and Brunthaler, Stefan and Franz, Michael},
+    booktitle = {2015 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2015.52},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Crane et al. - 2015 - Readactor Practical code randomization resilient to memory disclosure.pdf:pdf},
+    isbn = {978-1-4673-6949-7},
+    issn = {10816011},
+    month = may,
+    pages = {763--780},
+    publisher = {IEEE},
+    shorttitle = {Readactor},
+    title = {{Readactor: Practical Code Randomization Resilient to Memory Disclosure}},
+    volume = {2015-July},
+    year = {2015}
+}
+
+@inproceedings{Crane2015b,
+    abstract = {Code-reuse attacks continue to evolve and remain a severe threat to modern software. Recent research has proposed a variety of defenses with differing security, efficiency, and practicality characteristics. Whereas the majority of these solutions focus on specific code-reuse attack variants such as return-oriented programming (ROP), other attack variants that reuse whole functions, such as the classic return-into-libc, have received much less attention. Mitigating function-level code reuse is highly challenging because one needs to distin-guish a legitimate call to a function from an illegitimate one. In fact, the recent counterfeit object-oriented programming (COOP) attack demonstrated that the majority of code-reuse defenses can be bypassed by reusing dynamically bound func-tions, i.e., functions that are accessed through global offset tables and virtual function tables, respectively. In this paper, we first significantly improve and simplify the COOP attack. Based on a strong adversarial model, we then present the design and implementation of a compre-hensive code-reuse defense which is resilient against reuse of dynamically-bound functions. In particular, we introduce two novel defense techniques: (i) a practical technique to randomize the layout of tables containing code pointers re-silient to memory disclosure and (ii) booby trap insertion to mitigate the threat of brute-force attacks iterating over the randomized tables. Booby traps serve the dual purpose of preventing fault-analysis side channels and ensuring that each table has sufficiently many possible permutations. Our detailed evaluation demonstrates that our approach is secure, effective, and practical. We prevent realistic, COOP-style attacks against the Chromium web browser and report an av-erage overhead of 1.1{\%} on the SPEC CPU2006 benchmarks.},
+    address = {New York, New York, USA},
+    author = {Crane, Stephen and Franz, Michael and Volckaert, Stijn and Schuster, Felix and Liebchen, Christopher and Larsen, Per and Davi, Lucas and Sadeghi, Ahmad-Reza and Holz, Thorsten and {De Sutter}, Bjorn},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
+    doi = {10.1145/2810103.2813682},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Crane et al. - 2015 - It's a TRaP.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    keywords = {Categories and,Descriptors,Subject},
+    pages = {243--255},
+    publisher = {ACM Press},
+    title = {{It's a TRaP}},
+    year = {2015}
+}
+
+@inproceedings{Snow2013b,
+    author = {Snow, K. Z. and Monrose, F. and Davi, L. and Dmitrienko, A. and Liebchen, C. and Sadeghi, A.},
+    booktitle = {2013 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2013.45},
+    file = {:/mnt/c/Users/felixl/Downloads/06547134.pdf:pdf},
+    isbn = {978-0-7695-4977-4},
+    month = may,
+    pages = {574--588},
+    publisher = {IEEE},
+    title = {{Just-In-Time Code Reuse: On the Effectiveness of Fine-Grained Address Space Layout Randomization}},
+    year = {2013}
+}
+
+@inproceedings{Backes2014f,
+    abstract = {The latest effective defense against code reuse attacks is fine-grained, per-process memory randomization. However, such process randomization prevents code sharing since there is no longer any identical code to share between processes. Without shared libraries, however, tremendous memory savings are forfeit. This drawback may hinder the adoption of fine-grained memory randomization.We present Oxymoron, a secure fine-grained memory randomization technique on a per-process level that does not interfere with code sharing. Executables and libraries built with Oxymoron feature 'memory-layout-agnostic code', which runs on a commodity Linux. Our theoretical and practical evaluations show that Oxymoron is the first solution to be secure against just-in-time code reuse attacks and demonstrate that fine-grained memory randomization is feasible without forfeiting the enormous memory savings of shared libraries.},
+    address = {USA},
+    author = {Backes, Michael and N{\"{u}}rnberger, Stefan},
+    booktitle = {Proceedings of the 23rd {USENIX} Conference on Security Symposium},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Backes et al. - 2014 - Oxymoron Making Fine-Grained Memory Randomization Practical by Allowing Code Sharing.pdf:pdf},
+    isbn = {978-1-931971-15-7},
+    pages = {433--447},
+    publisher = {{USENIX} Association},
+    series = {SEC'14},
+    title = {{Oxymoron: Making Fine-Grained Memory Randomization Practical by Allowing Code Sharing}},
+    year = {2014}
+}
+
+@inproceedings{Backes2014b,
+    abstract = {Code reuse attacks allow an adversary to impose malicious behavior on an otherwise benign program. To mitigate such attacks, a common approach is to disguise the address or content of code snippets bymeans of randomization or rewrit- ing, leaving the adversary with no choice but guessing. How- ever, disclosure attacks allow an adversary to scan a process— even remotely—and enable her to read executable memory on-the-fly, thereby allowing the just-in-time assembly of ex- ploits on the target site. In this paper, we propose an approach that fundamentally thwarts the root cause of memory disclosure exploits by pre- venting the inadvertent reading of code while the code itself can still be executed. We introduce a new primitive we call Execute-no-Read (XnR) which ensures that code can still be executed by the processor, but at the same time code cannot be read as data. This ultimately forfeits the self-disassembly which is necessary for just-in-time code reuse attacks (JIT- ROP) to work. To the best of our knowledge, XnR is the first approach to prevent memory disclosure attacks of exe- cutable code and JIT-ROP attacks in general. Despite the lack of hardware support for XnR in contemporary Intel x86 and ARMprocessors, our software emulations for Linux and Windows have a run-time overhead of only 2.2{\%} and 3.4{\%}, respectively.},
+    address = {New York, New York, USA},
+    author = {Backes, Michael and Holz, Thorsten and Kollenda, Benjamin and Koppe, Philipp and N{\"{u}}rnberger, Stefan and Pewny, Jannik},
+    booktitle = {Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security - CCS '14},
+    doi = {10.1145/2660267.2660378},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Backes et al. - Unknown - You Can Run but You Can't Read Preventing Disclosure Exploits in Executable Code.pdf:pdf},
+    isbn = {9781450329576},
+    issn = {15437221},
+    keywords = {Buffer overflows,Code reuse attacks,Information leaks,Memory disclosure exploits,Return-oriented programming},
+    pages = {1342--1353},
+    publisher = {ACM Press},
+    title = {{You Can Run but You Can't Read}},
+    year = {2014}
+}
+
+@inproceedings{Giontaa2015,
+    abstract = {Memory disclosure vulnerabilities have become a common component for enabling reliable exploitation of systems by leaking the contents of executable data. Previous research towards protecting executable data fromdisclosure has failed to gain popularity due to large performance penalties and required architectural changes. Other research has focused on protecting application data but fails to consider a vul- nerable application that leaks its own executable data. In this paper we presentHideM, a practical system for pro- tecting against memory disclosures in contemporary com- modity systems. HideM addresses limitations in existing ad- vanced security protections (e.g., fine-grained ASLR, CFI) wherein an adversary discloses executable data from mem- ory, reasons about protection weaknesses, and builds cor- responding exploits. HideM uses the split-TLB architec- ture, commonly found in CPUs, to enable fine-grained exe- cute and read permission on memory. HideM enforces fine- grained permission based on policy generated from binary structure thus enabling protection of Commercial-Off-The- Shelf (COTS) binaries. In our evaluation of HideM, we find application overhead ranges from a 6.5{\%} increase to a 2{\%} reduction in runtime and observe runtime memory overhead ranging from 0.04{\%} to 25{\%}. HideM requires adversaries to guess ROP gadget locations making exploitation unreliable. We find adversaries have less than a 16{\%} chance of correctly guessing a single gadget across all 28 evaluated applications. Thus, HideM is a practical system for protecting vulnerable applications which leak executable data.},
+    author = {Gionta, Jason and Enck, William and Ning, Peng},
+    booktitle = {CODASPY 2015 - Proceedings of the 5th ACM Conference on Data and Application Security and Privacy},
+    doi = {10.1145/2699026.2699107},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Gionta, Enck, Ning - Unknown - HideM Protecting the Contents of Userspace Memory in the Face of Disclosure Vulnerabilities ⇤ General (2).pdf:pdf},
+    isbn = {9781450331913},
+    keywords = {Code reuse attacks,Information leaks,Memory disclosure exploits,Memory protection,Return-oriented programming},
+    pages = {325--336},
+    title = {{HideM: Protecting the contents of userspace memory in the face of disclosure vulnerabilities}},
+    year = {2015}
+}
+
+@inproceedings{Tang2015,
+    abstract = {Vulnerabilities that disclose executable memory pages en-able a new class of powerful code reuse attacks that build the attack payload at runtime. In this work, we present Heisenbyte, a system to protect against memory disclosure attacks. Central to Heisenbyte is the concept of destructive code reads – code is garbled right after it is read. Gar-bling the code after reading it takes away from the attacker her ability to leverage memory disclosure bugs in both static code and dynamically generated just-in-time code. By lever-aging existing virtualization support, Heisenbyte's novel use of destructive code reads sidesteps the problem of incom-plete binary disassembly in binaries, and extends protection to close-sourced COTS binaries, which are two major limi-tations of prior solutions against memory disclosure vulner-abilities. Our experiments demonstrate that Heisenbyte can tolerate some degree of imperfect static analysis in disas-sembled binaries, while effectively thwarting dynamic code reuse exploits in both static and JIT code, at a modest 1.8{\%} average runtime overhead due to virtualization and 16.5{\%} average overhead due to the destructive code reads.},
+    address = {New York, New York, USA},
+    author = {Tang, Adrian and Sethumadhavan, Simha and Stolfo, Salvatore},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
+    doi = {10.1145/2810103.2813685},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Tang, Sethumadhavan, Stolfo - Unknown - Heisenbyte Thwarting Memory Disclosure Attacks using Destructive Code Reads.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    keywords = {Binary rewriting,Destructive code reads,Memory disclosure},
+    pages = {256--267},
+    publisher = {ACM Press},
+    title = {{Heisenbyte}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@inproceedings{Werner2016,
+    abstract = {Memory disclosure vulnerabilities enable an adversary to successfully mount arbitrary code execution attacks against applications via so-called just-in-time code reuse attacks, even when those applications are fortified with fine-grained address space layout random-ization. This attack paradigm requires the adversary to first read the contents of randomized application code, then construct a code reuse payload using that knowledge. In this paper, we show that the recently proposed Execute-no-Read (XnR) technique fails to prevent just-in-time code reuse attacks. Next, we introduce the design and implementation of a novel memory permission primitive, dubbed No-Execute-After-Read (NEAR), that foregoes the problems of XnR and provides strong security guarantees against just-in-time attacks in commodity binaries. Specifically, NEAR allows all code to be disclosed, but prevents any disclosed code from subsequently being executed, thus thwarting just-in-time code reuse. At the same time, commodity binaries with mixed code and data regions still operate correctly, as legitimate data is still readable. To demonstrate the practicality and portability of our approach we implemented prototypes for both Linux and Android on the ARMv8 architecture, as well as a prototype that protects unmodified Mi-crosoft Windows executables and dynamically linked libraries. In addition, our evaluation on the SPEC2006 benchmark demonstrates that our prototype has negligible runtime overhead, making it suitable for practical deployment.},
+    address = {New York, New York, USA},
+    author = {Werner, Jan and Baltas, George and Dallara, Rob and Otterness, Nathan and Snow, Kevin Z and Monrose, Fabian and Polychronakis, Michalis},
+    booktitle = {Proceedings of the 11th ACM on Asia Conference on Computer and Communications Security - ASIA CCS '16},
+    doi = {10.1145/2897845.2897891},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Renci et al. - Unknown - No-Execute-After-Read Preventing Code Disclosure in Commodity Software(3).pdf:pdf},
+    isbn = {9781450342339},
+    pages = {35--46},
+    publisher = {ACM Press},
+    title = {{No-Execute-After-Read}},
+    year = {2016}
+}
+
+@inproceedings{Snow2016,
+    abstract = {The concept of destructive code reads is a new defensive strategy that prevents code reuse attacks by coupling finegrained address space layout randomization with a mitigation for online knowledge gathering that destroys potentially useful gadgets as they are disclosed by an adversary. The intuition is that by destroying code as it is read, an adversary is left with no usable gadgets to reuse in a control-flow hijacking attack. In this paper, we examine the security of this new mitigation. We show that while the concept initially appeared promising, there are several unforeseen attack tactics that render destructive code reads ineffective in practice. Specifically, we introduce techniques for leveraging constructive reloads, wherein multiple copies of native code are loaded into a process' address space (either side-by-side or one-afteranother). Constructive reloads allow the adversary to disclose one code copy, destroying it in the process, then use another code copy for their code reuse payload. For situations where constructive reloads are not viable, we show that an alternative, and equally powerful, strategy exists: leveraging code association via implicit reads, which allows an adversary to undo in-place code randomization by inferring the layout of code that follows already disclosed bytes. As a result, the implicitly learned code is not destroyed, and can be used in the adversary's code reuse attack. We demonstrate the effectiveness of our techniques with concrete instantiations of these attacks against popular applications. In light of our successes, we argue that the code inference strategies presented herein paint a cautionary tale for defensive approaches whose security blindly rests on the perceived inability to undo the application of in-place randomization},
+    author = {Snow, Kevin Z. and Rogowski, Roman and Werner, Jan and Koo, Hyungjoon and Monrose, Fabian and Polychronakis, Michalis},
+    booktitle = {2016 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2016.61},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Snow et al. - Unknown - Return to the Zombie Gadgets Undermining Destructive Code Reads via Code Inference Attacks.pdf:pdf},
+    isbn = {978-1-5090-0824-7},
+    issn = {0096-140X},
+    keywords = {application security,code reuse,fine-grained randomization,memory disclosure,return-oriented programming},
+    month = may,
+    pages = {954--968},
+    publisher = {IEEE},
+    title = {{Return to the Zombie Gadgets: Undermining Destructive Code Reads via Code Inference Attacks}},
+    year = {2016}
+}
+
+@incollection{Morton2017,
+    abstract = {Over the past few years, return-oriented programming (ROP) attacks have emerged as a prominent strategy for hijacking control of software. The full power and flexibility of ROP attacks was recently demonstrated using just-in-time ROP tactics (JIT-ROP), whereby an adversary repeatedly leverages a memory disclosure vulnerability to identify useful instruction sequences and compile them into a functional ROP payload at runtime. Since the advent of just-in-time code reuse attacks, numerous proposals have surfaced for mitigating them, the most practical of which involve the re-randomization of code at runtime or the destruction of gadgets upon their disclosure. Even so, several avenues exist for performing code inference, which allows JIT-ROP attacks to infer values at specific code locations without directly reading the memory contents of those bytes. This is done by reloading code of interest or implicitly determining the state of randomized code. These so-called “zombie gadgets” completely undermine defenses that rely on destroying code bytes once they are read. To mitigate these attacks, we present a low-overhead, binary-compatible defense which ensures an attacker is unable to execute gadgets that were identified through code reloading or code inference. We have implemented a prototype of the proposed defense for closed-source Windows binaries, and demonstrate that our approach effectively prevents zombie gadget attacks with negligible runtime overhead.},
+    author = {Morton, Micah and Koo, Hyungjoon and Li, Forrest and Snow, Kevin Z and Polychronakis, Michalis and Monrose, Fabian},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/978-3-319-62105-0_10},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Morton et al. - Unknown - Defeating Zombie Gadgets by Re-randomizing Code Upon Disclosure.pdf:pdf},
+    isbn = {9783319621043},
+    issn = {16113349},
+    keywords = {Code inference,Code reuse,Destructive reads,JIT-ROP},
+    pages = {143--160},
+    title = {{Defeating Zombie Gadgets by Re-randomizing Code upon Disclosure}},
+    volume = {10379 LNCS},
+    year = {2017}
+}
+
+@inproceedings{Bigelow2015,
+    abstract = {Address Space Layout Randomization (ASLR) can increase the cost of exploiting memory corruption vulnerabilities. One major weakness of ASLR is that it assumes the secrecy of memory addresses and is thus ineffective in the face of memory disclosure vulnerabilities. Even fine-grained variants of ASLR are shown to be ineffective against memory disclosures. In this paper we present an approach that synchronizes randomization with potential runtime disclosure. By applying rerandomization to the memory layout of a process every time it generates an output, our approach renders disclosures stale by the time they can be used by attackers to hijack control flow. We have developed a fully functioning prototype for x86 64 C programs by extending the Linux kernel, GCC, and the libc dynamic linker. The prototype operates on C source code and recompiles programs with a set of augmented information required to track pointer locations and support runtime rerandomization. Using this augmented information we dynamically relocate code segments and update code pointer values during runtime. Our evaluation on the SPEC CPU2006 benchmark, along with other applications, show that our technique incurs a very low performance overhead (2.1{\%} on average).},
+    address = {New York, New York, USA},
+    annote = {generate pointer information during compilation (including dynamic pointer tracking)
+randomize the position of the code after each output syscall},
+    author = {Bigelow, David and Hobson, Thomas and Rudd, Robert and Streilein, William and Okhravi, Hamed},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
+    doi = {10.1145/2810103.2813691},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Bigelow et al. - 2015 - Timely Rerandomization for Mitigating Memory Disclosures.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    pages = {268--279},
+    publisher = {ACM Press},
+    title = {{Timely Rerandomization for Mitigating Memory Disclosures}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@inproceedings{Davi2015,
+    abstract = {—Until recently, it was widely believed that code randomization (such as fine-grained ASLR) can effectively mit-igate code reuse attacks. However, a recent attack strategy, dubbed just-in-time return oriented programming (JIT-ROP), circumvents code randomization by disclosing the (randomized) content of many memory pages at runtime. In order to remedy this situation, new and improved code randomization defenses have been proposed. The contribution of this paper is twofold: first, we conduct a security analysis of a recently proposed fine-grained ASLR scheme that aims at mitigating JIT-ROP based on hiding direct code references in branch instructions. In particular, we demon-strate its weaknesses by constructing a novel JIT-ROP attack that is solely based on exploiting code references residing on the stack and heap. Our attack stresses that designing code randomization schemes resilient to memory disclosure is highly challenging. Second, we present a new and hybrid defense approach, dubbed Isomeron, that combines code randomization with execution-path randomization to mitigate conventional ROP and JIT-ROP attacks. Our reference implementation of Isomeron neither requires source code nor a static analysis phase. We evaluated its efficiency based on SPEC benchmarks and discuss its effectiveness against various kinds of code reuse attacks.},
+    address = {Reston, VA},
+    annote = {diversifier erstellt zwei diversifizierte kopien vom programm im memory
+calls und returns werden zu diversifier umgeleitet
+diversifier entscheidet zuf{\"{a}}llig, welche kopie angesprungen wird
+kopien haben gadgets an unterschiedlichen stellen},
+    author = {Davi, Lucas and Liebchen, Christopher and Sadeghi, Ahmad-Reza and Snow, Kevin Z. and Monrose, Fabian},
+    booktitle = {Proceedings 2015 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2015.23262},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Davi et al. - 2015 - Isomeron Code Randomization Resilient to (Just-In-Time) Return-Oriented Programming.pdf:pdf},
+    isbn = {1-891562-38-X},
+    issn = {1545-5971},
+    language = {en},
+    publisher = {Internet Society},
+    shorttitle = {Isomeron},
+    title = {{Isomeron: Code Randomization Resilient to (Just-In-Time) Return-Oriented Programming}},
+    year = {2015}
+}
+
+@inproceedings{Bittau2014a,
+    abstract = {We show that it is possible to write remote stack buffer overflow exploits without possessing a copy of the target binary or source code, against services that restart after a crash. This makes it possible to hack proprietary closed-binary services, or open-source servers manually compiled and installed from source where the binary remains unknown to the attacker. Traditional techniques are usually paired against a particular binary and distribution where the hacker knows the location of useful gadgets for Return Oriented Programming (ROP). Our Blind ROP (BROP) attack instead remotely finds enough ROP gadgets to perform a write system call and transfers the vulnerable binary over the network, after which an exploit can be completed using known techniques. This is accomplished by leaking a single bit of information based on whether a process crashed or not when given a particular input string. BROP requires a stack vulnerability and a service that restarts after a crash. We implemented Braille, a fully automated exploit that yielded a shell in under 4,000 requests (20 minutes) against a contemporary nginx vulnerability, yaSSL + MySQL, and a toy proprietary server written by a colleague. The attack works against modern 64-bit Linux with address space layout randomization (ASLR), no-execute page protection (NX) and stack canaries.},
+    author = {Bittau, Andrea and Belay, Adam and Mashtizadeh, Ali and Mazi{\`{e}}res, David and Boneh, Dan},
+    booktitle = {2014 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2014.22},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Bittau et al. - 2014 - Hacking blind.pdf:pdf},
+    isbn = {978-1-4799-4686-0},
+    issn = {10816011},
+    month = may,
+    pages = {227--242},
+    publisher = {IEEE},
+    title = {{Hacking Blind}},
+    year = {2014}
+}
+
+@inproceedings{Crane2013,
+    abstract = {Cyber warfare is asymmetric in the current paradigm, with attackers having the high ground over defenders. This asymmetry stems from the situation that attackers have the initiative, while defenders concentrate on passive fortifications. Defenders are constantly patching the newest hole in their defenses and creating taller and thicker walls, without placing guards on those walls to watch for the enemy and react to attacks. Current passive cyber security defenses such as intrusion detection, anti-virus, and hardened software are not sufficient to repel attackers. In fact, in conventional warfare this passivity would be entirely nonsensical, given the available active strategies, such as counterattacks and deception. Based on this observation, we have identified the technique of booby trapping software. This extends the arsenal of weaponry available to defenders with an active technique for directly reacting to attacks. Ultimately, we believe this approach will restore some of the much sought after equilibrium between attackers and defenders in the digital domain. Copyright 2013 ACM.},
+    address = {New York, New York, USA},
+    author = {Crane, Stephen and Larsen, Per and Brunthaler, Stefan and Franz, Michael},
+    booktitle = {Proceedings of the 2013 workshop on New security paradigms workshop - NSPW '13},
+    doi = {10.1145/2535813.2535824},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Crane et al. - 2013 - Booby trapping software.pdf:pdf},
+    isbn = {9781450325820},
+    keywords = {Active defense,Booby traps,Compilers,Intrusion detection},
+    language = {en},
+    pages = {95--106},
+    publisher = {ACM Press},
+    title = {{Booby trapping software}},
+    year = {2013}
+}
+
+@inproceedings{WilliamsKing2016,
+    abstract = {While code injection attacks have been virtually eliminated on modern systems, programs today remain vulnerable to code reuse attacks. Particularly pernicious are Just-In-Time ROP (JIT-ROP) techniques, where an attacker uses a memory disclosure vulnerability to discover code gadgets at runtime. We designed a code-reuse defense, called Shuffler, which continuously re-randomizes code locations on the order of milliseconds, introducing a real-time deadline on the attacker. This deadline makes it extremely difficult to form a complete exploit, particularly against server programs that often sit tens of milliseconds away from attacker machines. Shuffler focuses on being fast, self-hosting, and nonintrusive to the end user. Specifically, for speed, Shuffler randomizes code asynchronously in a separate thread and atomically switches from one code copy to the next. For security, Shuffler adopts an “egalitarian” principle and randomizes itself the same way it does the target. Lastly, to deploy Shuffler, no source, kernel, compiler, or hardware modifications are necessary. Evaluation shows that Shuffler defends against all known forms of code reuse, including ROP, direct JITROP, indirect JIT-ROP, and Blind ROP. We observed 14.9{\%} overhead on SPEC CPU when shuffling every 50 ms, and ran Shuffler on real-world applications such as Nginx. We showed that the shuffled Nginx scales up to 24 worker processes on 12 cores.},
+    address = {Savannah, GA},
+    author = {Williams-King, David and Gobieski, Graham and Williams-King, Kent and Blake, James P and Yuan, Xinhao and Colp, Patrick and Zheng, Michelle and Kemerlis, Vasileios P and Yang, Junfeng and Aiello, William},
+    booktitle = {12th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 16)},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Williams-King et al. - Unknown - Shuffler Fast and Deployable Continuous Code Re-Randomization.pdf:pdf},
+    isbn = {978-1-931971-33-1},
+    keywords = {read},
+    mendeley-tags = {read},
+    month = nov,
+    pages = {367--382},
+    publisher = {{USENIX} Association},
+    title = {{Shuffler: Fast and Deployable Continuous Code Re-Randomization}},
+    year = {2016}
+}
+
+@inproceedings{Goktas2020,
+    abstract = {To defeat ASLR or more advanced fine-grained and leakage-resistant code randomization schemes, modern software exploits rely on information disclosure to locate gadgets inside the victim's code. In the absence of such info-leak vulnerabilities, attackers can still hack blind and derandomize the address space by repeatedly probing the victim's memory while observing crash side effects, but doing so is only feasible for crash-resistant programs. However, high-value targets such as the Linux kernel are not crash-resistant. Moreover, the anomalously large number of crashes is often easily detectable. In this paper, we show that the Spectre era enables an attacker armed with a single memory corruption vulnerability to hack blind without triggering any crashes. Using speculative execution for crash suppression allows the elevation of basic memory write vul-nerabilities into powerful speculative probing primitives that leak through microarchitectural side effects. Such primitives can repeatedly probe victim memory and break strong randomization schemes without crashes and bypass all deployed mitigations against Spectre-like attacks. The key idea behind speculative probing is to break Spectre mitigations using memory corruption and resurrect Spectre-style disclosure primitives to mount practical blind software exploits. To showcase speculative probing, we target the Linux kernel, a crash-sensitive victim that has so far been out of reach of blind attacks, mount end-to-end exploits that compromise the system with just-in-time code reuse and data-only attacks from a single memory write vulnerability, and bypass strong Spectre and strong randomization defenses. Our results show that it is crucial to consider synergies between different (Spectre vs. code reuse) threat models to fully comprehend the attack surface of modern systems. CCS CONCEPTS • Security and privacy → Operating systems security.},
+    address = {New York, NY, USA},
+    author = {G{\"{o}}kta{\c s}, Enes and Razavi, Kaveh and Portokalidis, Georgios and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security},
+    doi = {10.1145/3372297.3417289},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Göktaş et al. - Unknown - Speculative Probing Hacking Blind in the Spectre Era.pdf:pdf},
+    isbn = {9781450370899},
+    keywords = {Code-reuse attacks,Speculative execution},
+    month = oct,
+    pages = {1871--1885},
+    publisher = {ACM},
+    title = {{Speculative Probing}},
+    year = {2020}
+}
+
+@incollection{Abadi2005,
+    abstract = {Control-Flow Integrity (CFI) means that the execution of a program dynamically follows only certain paths, in accordance with a static policy. CFI can prevent attacks that, by exploiting buffer over-flows and other vulnerabilities, attempt to control program behavior. This paper develops the basic theory that underlies two practical techniques for CFI enforcement, with precise formulations of hypotheses and guarantees. {\textcopyright} Springer-Verlag Berlin Heidelberg 2005.},
+    author = {Abadi, Mart{\'{i}}n and Budiu, Mihai and Erlingsson, {\'{U}}lfar and Ligatti, Jay},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/11576280_9},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Abadi et al. - Unknown - A Theory of Secure Control Flow.pdf:pdf},
+    isbn = {3540297979},
+    issn = {03029743},
+    pages = {111--124},
+    title = {{A Theory of Secure Control Flow}},
+    volume = {3785 LNCS},
+    year = {2005}
+}
+
+@article{Abadi2009,
+    abstract = {Current software attacks often build on exploits that subvert machine-code execution. The enforcement of a basic safety property, Control-Flow Integrity (CFI), can prevent such attacks from arbitrarily controlling program behavior. CFI enforcement is simple, and its guarantees can be established formally, even with respect to powerful adver- saries. Moreover, CFI enforcement is practical: it is compatible with existing software and can be efficiently implemented using software rewriting in commodity systems. Fi- nally, CFI provides a useful foundation for enforcing further security policies, such as policies that constrain the use of data memory},
+    address = {New York, New York, USA},
+    author = {Abadi, Mart{\'{i}}n and Budiu, Mihai and Erlingsson, {\'{U}}lfar and Ligatti, Jay},
+    doi = {10.1145/1609956.1609960},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Abadi et al. - 2009 - Control-flow integrity principles, implementations, and applications.pdf:pdf},
+    isbn = {1595932267},
+    issn = {1094-9224},
+    journal = {ACM Transactions on Information and System Security},
+    keywords = {Binary Rewriting,Control-Flow Graph,Inlined Reference Monitors,Vulnerabilities},
+    month = oct,
+    number = {1},
+    pages = {1--40},
+    publisher = {ACM Press},
+    title = {{Control-flow integrity principles, implementations, and applications}},
+    volume = {13},
+    year = {2009}
+}
+
+@article{Grove2001a,
+    abstract = {A large number of call graph construction algorithms for object-oriented and functional languages have been proposed, each embodying different tradeoffs between analysis cost and call graph precision. In this article we present a unifying framework for understanding call graph construction algorithms and an empirical comparison of a representative set of algorithms. We first present a general parameterized algorithm that encompasses many well-known and novel call graph construction algorithms. We have implemented this general algorithm in the Vortex compiler infrastructure, a mature, multilanguage, optimizing compiler. The Vortex implementation provides a "level playing field" for meaningful cross-algorithm performance comparisons. The costs and benefits of a number of call graph construction algorithms are empirically assessed by applying their Vortex implementation to a suite of sizeable (5,000 to 50,000 lines of code) Cecil and Java programs. For many of these applications, interprocedural analysis enabled substantial speed-ups over an already highly optimized baseline. Furthermore, a significant fraction of these speed-ups can be obtained through the use of a scalable, near-linear time call graph construction algorithm.},
+    author = {Grove, David and Chambers, Craig},
+    doi = {10.1145/506315.506316},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Grove - Unknown - A Framework for Call Graph Construction Algorithms.pdf:pdf},
+    issn = {0164-0925},
+    journal = {ACM Transactions on Programming Languages and Systems},
+    keywords = {D.3.2 [Programming Languages]: Language Classifica,D.3.3 [Programming Languages]: Language Constructs,D.3.4,Object-oriented languages,Procedures,and Subroutines,functions},
+    month = nov,
+    number = {6},
+    pages = {685--746},
+    title = {{A framework for call graph construction algorithms}},
+    volume = {23},
+    year = {2001}
+}
+
+@inproceedings{Schuster2015a,
+    abstract = {Code reuse attacks such as return-oriented programming (ROP) have become prevalent techniques to exploit memory corruption vulnerabilities in software programs. A variety of corresponding defenses has been proposed, of which some have already been successfully bypassed -- and the arms race continues. In this paper, we perform a systematic assessment of recently proposed CFI solutions and other defenses against code reuse attacks in the context of C++. We demonstrate that many of these defenses that do not consider object-oriented C++ semantics precisely can be generically bypassed in practice. Our novel attack technique, denoted as counterfeit object-oriented programming (COOP), induces malicious program behavior by only invoking chains of existing C++ virtual functions in a program through corresponding existing call sites. COOP is Turing complete in realistic attack scenarios and we show its viability by developing sophisticated, real-world exploits for Internet Explorer 10 on Windows and Fire fox 36 on Linux. Moreover, we show that even recently proposed defenses (CPS, T-VIP, vfGuard, and VTint) that specifically target C++ are vulnerable to COOP. We observe that constructing defenses resilient to COOP that do not require access to source code seems to be challenging. We believe that our investigation and results are helpful contributions to the design and implementation of future defenses against control flow hijacking attacks.},
+    author = {Schuster, Felix and Tendyck, Thomas and Liebchen, Christopher and Davi, Lucas and Sadeghi, Ahmad-Reza and Holz, Thorsten},
+    booktitle = {2015 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2015.51},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Schuster et al. - 2015 - Counterfeit object-oriented programming On the difficulty of preventing code reuse attacks in C applications.pdf:pdf},
+    isbn = {978-1-4673-6949-7},
+    issn = {10816011},
+    keywords = {C++,CFI,ROP,code reuse attacks},
+    month = may,
+    pages = {745--762},
+    publisher = {IEEE},
+    shorttitle = {Counterfeit object-oriented programming},
+    title = {{Counterfeit Object-oriented Programming: On the Difficulty of Preventing Code Reuse Attacks in C++ Applications}},
+    volume = {2015-July},
+    year = {2015}
+}
+
+@inproceedings{Zhang2015,
+    abstract = {—In the recent past, a number of approaches have been proposed to protect certain types of control data in a program, such as return addresses saved on the stack, rendering most traditional control flow hijacking attacks ineffective. Attack-ers, however, can bypass these defenses by launching advanced attacks that corrupt other data, e.g., pointers indirectly used to access code. One of the most popular targets is virtual table pointers (vfptr), which point to virtual function tables (vtable) consisting of virtual function pointers. Attackers can exploit vul-nerabilities, such as use-after-free and heap overflow, to overwrite the vtable or vfptr, causing further virtual function calls to be hijacked (vtable hijacking). In this paper we propose a lightweight defense solution VTint to protect binary executables against vtable hijacking attacks. It uses binary rewriting to instrument security checks before virtual function dispatches to validate vtables' integrity. Experiments show that it only introduces a low performance overhead (less than 2{\%}), and it can effectively protect real-world vtable hijacking attacks.},
+    address = {Reston, VA},
+    author = {Zhang, Chao and Song, Chengyu and Chen, Kevin Zhijie and Chen, Zhaofeng and Song, Dawn},
+    booktitle = {Proceedings 2015 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2015.23099},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Zhang et al. - 2015 - VTint Protecting Virtual Function Tables ' Integrity.pdf:pdf},
+    isbn = {1-891562-38-X},
+    keywords = {c++ semantics,vulnerable by COOP},
+    language = {en},
+    mendeley-tags = {c++ semantics,vulnerable by COOP},
+    number = {February},
+    pages = {8--11},
+    publisher = {Internet Society},
+    shorttitle = {VTint},
+    title = {{VTint: Protecting Virtual Function Tables' Integrity}},
+    year = {2015}
+}
+
+@inproceedings{Prakash2015,
+    abstract = {—Control-Flow Integrity (CFI) is an important se-curity property that needs to be enforced to prevent control-flow hijacking attacks. Recent attacks have demonstrated that existing CFI protections for COTS binaries are too permissive, and vulnerable to sophisticated code reusing attacks. Accounting for control flow restrictions imposed at higher levels of semantics is key to increasing CFI precision. In this paper, we aim to provide more stringent protection for virtual function calls in COTS C++ binaries by recovering C++ level semantics. To achieve this goal, we recover C++ semantics, including VTables and virtual callsites. With the extracted C++ semantics, we construct a sound CFI policy and further improve the policy precision by devising two filters, namely " Nested Call Filter " and " Calling Convention Filter " . We implement a prototype system called vfGuard, and evaluate its accuracy, precision, effectiveness, coverage and performance overhead against a test set including complex C++ binary modules used by Internet Explorer. Our experiments show a runtime overhead of 18.3{\%} per module. On SpiderMonkey, an open-source JavaScript engine used by Firefox, vfGuard generated 199 call targets per virtual callsite – within the same order of magnitude as those generated from a source code based solution. The policies constructed by vfGuard are sound and of higher precision when compared to state-of-the-art binary-only CFI solutions.},
+    address = {Reston, VA},
+    author = {Prakash, Aravind and Hu, Xunchao and Yin, Heng},
+    booktitle = {Proceedings 2015 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2015.23297},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Prakash, Hu, Yin - 2015 - vfGuard Strict Protection for Virtual Function Calls in COTS C Binaries.pdf:pdf},
+    isbn = {1-891562-38-X},
+    language = {en},
+    publisher = {Internet Society},
+    shorttitle = {vfGuard},
+    title = {{vfGuard: Strict Protection for Virtual Function Calls in COTS C++ Binaries}},
+    year = {2015}
+}
+
+@inproceedings{Gawlik2014,
+    abstract = {Web browsers are one of the most used, complex, and popular software systems nowadays. They are prone to dangling pointers that result in use-after-free vulnerabilites and this is the de-facto way to exploit them. From a technical point of view, an attacker uses a technique called vtable hijacking to exploit such bugs. More specifically, she crafts bogus virtual tables and lets a freed C++ object point to it in order to gain control over the program at virtual function call sites. In this paper, we present a novel approach towards mitigating and detecting such attacks against C++ binary code. We propose a static binary analysis technique to extract virtual function call site information in an automated way. Leveraging this information, we instrument the given binary executable and add runtime policy enforcements to thwart the illegal usage of these call sites. We implemented the proposed techniques in a prototype called T-VIP and successfully hardened three versions of Microsoft's Internet Explorer and Mozilla Firefox. An evaluation with several zero-day exploits demonstrates that our method prevents all of them. Performance benchmarks both on micro and macro level indicate that the overhead is reasonable with about 2.2{\%}, which is only slightly higher compared to recent compiler-based approaches that address this problem.},
+    address = {New York, New York, USA},
+    author = {Gawlik, Robert and Holz, Thorsten},
+    booktitle = {Proceedings of the 30th Annual Computer Security Applications Conference on - ACSAC '14},
+    doi = {10.1145/2664243.2664249},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Gawlik, Holz - 2014 - Towards automated integrity protection of C virtual function tables in binary programs.pdf:pdf},
+    isbn = {9781450330053},
+    language = {en},
+    pages = {396--405},
+    publisher = {ACM Press},
+    title = {{Towards automated integrity protection of C++ virtual function tables in binary programs}},
+    year = {2014}
+}
+
+@inproceedings{VanderVeen2015,
+    abstract = {Current Control-Flow Integrity (CFI) implementations track control edges individually, insensitive to the context of preceding edges. Recent work demonstrates that this leaves sufficient leeway for powerful ROP attacks. Context-sensitive CFI, which can provide enhanced security, is widely considered impractical for real-world adoption. Our work shows that Context-sensitive CFI (CCFI) for both the backward and forward edge can be implemented efficiently on commodity hardware. We present PathArmor, a binary-level CCFI implementation which tracks paths to sensitive program states, and defines the set of valid control edges within the state context to yield higher precision than existing CFI implementations. Even with simple context-sensitive policies, PathArmor yields significantly stronger CFI invariants than context-insensitive CFI, with similar performance.},
+    annote = {Why no xalancbmk?},
+    author = {{Van Der Veen}, Victor and Andriesse, Dennis and G{\"{o}}kta{\c s}, Enes and Gras, Ben and Sambuc, Lionel and Slowinska, Asia and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {Proceedings of the ACM Conference on Computer and Communications Security},
+    doi = {10.1145/2810103.2813673},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/van der Veen et al. - Unknown - Practical Context-Sensitive CFI Cristiano Giuffrida ‡ † Equal contribution joint first authors.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    keywords = {Context-sensitive CFI,Control-flow integrity},
+    pages = {927--940},
+    title = {{Practical context-sensitive CFI}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@inproceedings{VanderVeen2015b,
+    abstract = {Current binary-level Control-Flow Integrity (CFI) techniques are weak in determining the set of valid targets for indirect control flow transfers on the forward edge. In particular, the lack of source code forces existing techniques to resort to a conservative address-taken policy that over-approximates this set. In contrast, source-level solutions can accurately infer the targets of indirect callsites and thus detect malicious control-flow transfers more precisely. Given that source code is not always available, however, offering similar quality of protection at the binary level is important, but, unquestionably, more challenging than ever: recent work demonstrates powerful attacks, such as Counterfeit Object-oriented Programming (COOP), which made the community believe that protecting software against control-flow diversion attacks at the binary level is impossible. In this paper, we propose binary-level analysis techniques to significantly reduce the number of possible targets for indirect callsites. More specifically, we reconstruct a conservative approximation of target function prototypes by means of use-def analysis at possible callees. We then couple this with liveness analysis at each indirect callsite to derive a many-to-many relationship between callsites and target callees with a much higher precision compared to prior binary-level solutions. Experimental results on popular server programs and on SPEC CPU2006 show that TypeArmor, a prototype implementation of our approach, is efficient-with a runtime overhead of less than 3{\%}. Furthermore, we evaluate to what extent TypeArmor can mitigate COOP and other advanced attacks and show that our approach can significantly reduce the number of targets on the forward edge. Moreover, we show that TypeArmor breaks published COOP exploits, providing concrete evidence that strict binary-level CFI can still mitigate advanced attacks, despite the absence of source information or C++ semantics.},
+    author = {van der Veen, Victor and G{\"{o}}kta{\c s}, Enes and Contag, Moritz and Pawoloski, Andre and Chen, Xi and Rawat, Sanjay and Bos, Herbert and Holz, Thorsten and Athanasopoulos, Elias and Giuffrida, Cristiano},
+    booktitle = {2016 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2016.60},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/van der Veen et al. - Unknown - A Tough call Mitigating Advanced Code-Reuse Attacks At The Binary Level Equal contribution joint first a.pdf:pdf},
+    isbn = {978-1-5090-0824-7},
+    month = may,
+    pages = {934--953},
+    publisher = {IEEE},
+    title = {{A Tough Call: Mitigating Advanced Code-Reuse Attacks at the Binary Level}},
+    year = {2016}
+}
+
+@inproceedings{Kuznetsov2014,
+    abstract = {Systems code is often written in low-level languages like C/C++, which offer many benefits but also dele- gate memory management to programmers. This invites memory safety bugs that attackers can exploit to divert control flow and compromise the system. Deployed de- fense mechanisms (e.g., ASLR, DEP) are incomplete, and stronger defense mechanisms (e.g., CFI) often have high overhead and limited guarantees [19, 15, 9]. We introduce code-pointer integrity (CPI), a new de- sign point that guarantees the integrity of all code point- ers in a program (e.g., function pointers, saved return ad- dresses) and thereby prevents all control-flow hijack at- tacks, including return-oriented programming. We also introduce code-pointer separation (CPS), a relaxation of CPI with better performance properties. CPI and CPS offer substantially better security-to-overhead ratios than the state of the art, they are practical (we protect a complete FreeBSD system and over 100 packages like apache and postgresql), effective (prevent all attacks in the RIPE benchmark), and efficient: on SPEC CPU2006, CPS averages 1.2{\%} overhead for C and 1.9{\%} for C/C++, while CPI's overhead is 2.9{\%} for C and 8.4{\%} for C/C++. A prototype implementation of CPI and CPS can be obtained from http://levee.epfl.ch. 1},
+    author = {Kuznetsov, Volodymyr and Szekeres, Laszlo and Payer, Mathias and Candea, George and Sekar, R. and Song, Dawn},
+    booktitle = {Proceedings of the 11th {USENIX} Symposium on Operating Systems Design and Implementation},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Kuznetsov, Szekeres, Payer - 2014 - Code-pointer integrity.pdf:pdf},
+    isbn = {9781931971164},
+    keywords = {c++ semantics,vulnerable by COOP},
+    mendeley-tags = {c++ semantics,vulnerable by COOP},
+    pages = {147--163},
+    title = {{Code-Pointer Integrity}},
+    volume = {14},
+    year = {2014}
+}
+
+@inproceedings{Lu2015,
+    abstract = {A general prerequisite for a code reuse attack is that the attacker needs to locate code gadgets that perform the desired operations and then direct the control flow of a vulnerable application to those gadgets. Address Space Layout Randomization (ASLR) attempts to stop code reuse attacks by making the first part of the prerequisite unsatisfiable. However, research in recent years has shown that this protection is often defeated by commonly existing information leaks, which provides attackers clues about the whereabouts of cer-tain code gadgets. In this paper, we present ASLR-GUARD, a novel mechanism that completely prevents the leaks of code pointers, and render other information leaks (e.g., the ones of data pointers) use-less in deriving code address. The main idea behind ASLR-GUARD is to render leak of data pointer useless in deriving code address by separating code and data, provide a secure storage for code point-ers, and encode the code pointers when they are treated as data. ASLR-GUARD can either prevent code pointer leaks or render their leaks harmless. That is, ASLR-GUARD makes it impossible to over-write code pointers with values that point to or will hijack the control flow to a desired address when the code pointers are dereferenced. We have implemented a prototype of ASLR-GUARD, including a compilation toolchain and a C/C++ runtime. Our evaluation results show that (1) ASLR-GUARD supports normal operations correctly; (2) it completely stops code address leaks and can resist against re-cent sophisticated attacks; (3) it imposes almost no runtime overhead ({\textless} 1{\%}) for C/C++ programs in the SPEC benchmark. Therefore, ASLR-GUARD is very practical and can be applied to secure many applications.},
+    address = {New York, New York, USA},
+    author = {Lu, Kangjie and Song, Chengyu and Lee, Byoungyoung and Chung, Simon P. and Kim, Taesoo and Lee, Wenke},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
+    doi = {10.1145/2810103.2813694},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Lu et al. - Unknown - ASLR-Guard Stopping Address Space Leakage for Code Reuse Attacks.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    keywords = {ASLR,Code reuse attack,Information leak,Randomization},
+    pages = {280--291},
+    publisher = {ACM Press},
+    title = {{ASLR-Guard}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@article{Burow2016,
+    abstract = {Memory corruption errors in C/C ++ programs remain the most common source of security vulnerabilities in today's systems. Control-flow hijacking attacks exploit memory corruption vulnerabilities to divert program execution away from the intended control flow. Researchers have spent more than a decade studying and refining defenses based on Control-Flow Integrity (CFI), and this technique is now integrated into several production compilers. However, so far no study has systematically compared the various proposed CFI mechanisms, nor is there any protocol on how to compare such mechanisms. We compare a broad range of CFI mechanisms using a unified nomenclature based on (i) a qualitative discussion of the conceptual security guarantees, (ii) a quantitative security evaluation, and (iii) an empirical evaluation of their performance in the same test environment. For each mechanism, we evaluate (i) protected types of control-flow transfers, (ii) the precision of the protection for forward and backward edges. For open-source compiler-based implementations, we additionally evaluate (iii) the generated equivalence classes and target sets, and (iv) the runtime performance.},
+    author = {Burow, Nathan and Carr, Scott A and Nash, Joseph and Larsen, Per and Franz, Michael and Brunthaler, Stefan and Payer, Mathias},
+    doi = {10.1145/3054924},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Burow et al. - 2016 - Control-Flow Integrity Precision, Security, and Performance.pdf:pdf},
+    issn = {0360-0300},
+    journal = {ACM Computing Surveys},
+    keywords = {Additional Key Words and Phrases: control-flow int,CCS Concepts: •Security and privacy → Systems secu,Information flow control,Software and application security,control-flow hijacking,return oriented programming,shadow stack ACM Reference Format:,•General and reference → Surveys and overviews},
+    month = apr,
+    number = {1},
+    pages = {1--33},
+    title = {{Control-Flow Integrity}},
+    volume = {50},
+    year = {2017}
+}
+
+@inproceedings{Almakhdhub2020,
+    abstract = {Embedded systems are deployed in security critical environments and have become a prominent target for remote attacks. Microcontroller-based systems (MCUS) are particularly vulnerable due to a combination of limited resources and low level programming which leads to bugs. Since MCUS are often a part of larger systems, vulnerabilities may jeopardize not just the security of the device itself but that of other systems as well. For example, exploiting a WiFi System on Chip (SoC) allows an attacker to hijack the smart phone's application processor. Control-flow hijacking targeting the backward edge (e.g., Return-Oriented Programming-ROP) remains a threat for MCUS. Current defenses are either susceptible to ROP-style attacks or require special hardware such as a Trusted Execution Environment (TEE) that is not commonly available on MCUS. We present µRAI 1 , a compiler-based mitigation to prevent control-flow hijacking attacks targeting backward edges by enforcing the Return Address Integrity (RAI) property on MCUS. µRAI does not require any additional hardware such as TEE, making it applicable to the wide majority of MCUS. To achieve this, µRAI introduces a technique that moves return addresses from writable memory, to readable and executable memory. It re-purposes a single general purpose register that is never spilled, and uses it to resolve the correct return location. We evaluate against the different control-flow hijacking attacks scenarios targeting return addresses (e.g., arbitrary write), and demonstrate how µRAI prevents them all. Moreover, our evaluation shows that µRAI enforces its protection with negligible overhead.},
+    address = {Reston, VA},
+    author = {Almakhdhub, Naif Saleh and Clements, Abraham A and Bagchi, Saurabh and Payer, Mathias},
+    booktitle = {Proceedings 2020 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2020.24016},
+    file = {:/mnt/c/Users/felixl/Downloads/24016-paper.pdf:pdf},
+    isbn = {1-891562-61-4},
+    number = {February},
+    publisher = {Internet Society},
+    title = {{{$\mu$}RAI: Securing Embedded Systems with Return Address Integrity}},
+    year = {2020}
+}
+
+@inproceedings{Mashtizadeh2015,
+    abstract = {Recent Pwn2Own competitions have demonstrated the continued effectiveness of control hijacking attacks despite deployed countermeasures including stack canaries and ASLR. A powerful defense called Control flow Integrity (CFI) offers a principled approach to preventing such attacks. However, prior CFI implementations use static analysis and must limit protection to remain practical. These limitations have enabled attacks against all known CFI systems, as demonstrated in recent work. This paper presents a cryptographic approach to control flow integrity (CCFI) that is both fine-grain and practical: using message authentication codes (MAC) to protect control flow elements such as return addresses, function pointers, and vtable pointers. MACs on these elements prevent even powerful attackers with random read/write access to memory from tampering with program control flow. We implemented CCFI in Clang/LLVM, taking advantage of recently available cryptographic CPU instructions. We evaluate our system on several large software packages (including nginx, Apache and memcache) as well as all their dependencies. The cost of protection ranges from a 3-18{\%} decrease in request rate.},
+    address = {New York, New York, USA},
+    author = {Mashtizadeh, Ali Jose and Bittau, Andrea and Boneh, Dan and Mazi{\`{e}}res, David},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
+    doi = {10.1145/2810103.2813676},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Mashtizadeh et al. - Unknown - CCFI Cryptographically Enforced Control Flow Integrity.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    keywords = {Control flow integrity,Return oriented programming,Vulnerabilities},
+    pages = {941--951},
+    publisher = {ACM Press},
+    title = {{CCFI}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@incollection{Payer2015,
+    abstract = {Applications written in low-level languages without type or memory safety are prone to memory corruption. Attackers gain code execution capabilities through memory corruption despite all currently deployed defenses. Control-Flow Integrity (CFI) is a promising security property that restricts indirect control-flow transfers to a static set of well-known locations. We present Lockdown, a modular, fine-grained CFI policy that protects binary-only applications and libraries without requiring sourcecode. Lockdown adaptively discovers the control-flow graph of a running process based on the executed code. The sandbox component of Lockdown restricts interactions between different shared objects to imported and exported functions by enforcing fine-grained CFI checks using information from a trusted dynamic loader. A shadow stack enforces precise integrity for function returns. Our prototype implementation shows that Lockdown results in low performance overhead and a security analysis discusses any remaining gadgets.},
+    author = {Payer, Mathias and Barresi, Antonio and Gross, Thomas R.},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/978-3-319-20550-2_8},
+    isbn = {9783319205496},
+    issn = {16113349},
+    pages = {144--164},
+    publisher = {Springer Verlag},
+    title = {{Fine-Grained Control-Flow Integrity Through Binary Hardening}},
+    volume = {9148},
+    year = {2015}
+}
+
+@inproceedings{Burow2018a,
+    abstract = {Control-Flow Hijacking attacks are the dominant attack vector against C/C++ programs. Control-Flow Integrity (CFI) solutions mitigate these attacks on the forward edge,i.e., indirect calls through function pointers and virtual calls. Protecting the backward edge is left to stack canaries, which are easily bypassed through information leaks. Shadow Stacks are a fully precise mechanism for protecting backwards edges, and should be deployed with CFI mitigations. We present a comprehensive analysis of all possible shadow stack mechanisms along three axes: performance, compatibility, and security. For performance comparisons we use SPEC CPU2006, while security and compatibility are qualitatively analyzed. Based on our study, we renew calls for a shadow stack design that leverages a dedicated register, resulting in low performance overhead, and minimal memory overhead, but sacrifices compatibility. We present case studies of our implementation of such a design, Shadesmar, on Phoronix and Apache to demonstrate the feasibility of dedicating a general purpose register to a security monitor on modern architectures, and the deployability of Shadesmar. Our comprehensive analysis, including detailed case studies for our novel design, allows compiler designers and practitioners to select the correct shadow stack design for different usage scenarios.},
+    archiveprefix = {arXiv},
+    arxivid = {1811.03165},
+    author = {Burow, Nathan and Zhang, Xinping and Payer, Mathias},
+    booktitle = {2019 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2019.00076},
+    eprint = {1811.03165},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Burow, Zhang, Payer - Unknown - SoK Shining Light on Shadow Stacks.pdf:pdf},
+    isbn = {978-1-5386-6660-9},
+    keywords = {read},
+    mendeley-tags = {read},
+    month = may,
+    pages = {985--999},
+    publisher = {IEEE},
+    title = {{SoK: Shining Light on Shadow Stacks}},
+    year = {2019}
+}
+
+@inproceedings{Wahbe1993,
+    abstract = {One way to provide fault isolation among cooperating software modules is to place each in its own address space. However, for tightly-coupled modules, this solution incurs prohibitive context switch overhead. In this paper, we present a software approach to implementing fault isolation within a single address space.Our approach has two parts. First, we load the code and data for a distrusted module into its own fault do main, a logically separate portion of the application's address space. Second, we modify the object code of a distrusted module to prevent it from writing or jumping to an address outside its fault domain. Both these software operations are portable and programming language independent.Our approach poses a tradeoff relative to hardware fault isolation: substantially faster communication between fault domains, at a cost of slightly increased execution time for distrusted modules. We demonstrate that for frequently communicating modules, implementing fault isolation in software rather than hardware can substantially improve end-to-end application performance.},
+    address = {New York, New York, USA},
+    author = {Wahbe, Robert and Lucco, Steven and Anderson, Thomas E and Graham, Susan L},
+    booktitle = {Proceedings of the fourteenth ACM symposium on Operating systems principles - SOSP '93},
+    doi = {10.1145/168619.168635},
+    isbn = {0897916328},
+    pages = {203--216},
+    publisher = {ACM Press},
+    series = {SOSP '93},
+    title = {{Efficient software-based fault isolation}},
+    year = {1993}
+}
+
+@inproceedings{Goktas2016,
+    abstract = {In the absence of hardware-supported segmentation, many state-of-the-art defenses resort to "hiding" sensitive information at a random location in a very large address space. This paper argues that information hiding is a weak isolation model and shows that attackers can find hidden information, such as CPI's SafeStacks, in seconds-by means of thread spraying. Thread spraying is a novel attack technique which forces the victim program to allocate many hidden areas. As a result, the attacker has a much better chance to locate these areas and compromise the defense. We demonstrate the technique by means of attacks on Firefox, Chrome, and MySQL. In addition, we found that it is hard to remove all sensitive information (such as pointers to the hidden region) from a program and show how residual sensitive information allows attackers to bypass defenses completely. We also show how we can harden information hiding techniques by means of an Authenticating Page Mapper (APM) which builds on a user-level page-fault handler to authenticate arbitrary memory reads/writes in the virtual address space. APM bootstraps protected applications with a minimum-sized safe area. Every time the program accesses this area, APM authenticates the access operation, and, if legitimate, expands the area on demand. We demonstrate that APM hardens information hiding significantly while increasing the overhead, on average, 0.3{\%} on baseline SPEC CPU 2006, 0.0{\%} on SPEC with SafeStack and 1.4{\%} on SPEC with CPI.},
+    address = {Austin, TX},
+    author = {G{\"{o}}kta{\c s}, Enes and Gawlik, Robert and Kollenda, Benjamin and Athanasopoulos, Elias and Portokalidis, Georgios and Giuffrida, Cristiano and Bos, Herbert},
+    booktitle = {25th {USENIX} Security Symposium ({USENIX} Security 16)},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Göktaş et al. - 2016 - Undermining Information Hiding (and What to Do about It).pdf:pdf},
+    isbn = {978-1-931971-32-4},
+    month = aug,
+    pages = {105--119},
+    publisher = {{USENIX} Association},
+    title = {{Undermining Information Hiding (and What to Do about It)}},
+    year = {2016}
+}
+
+@inproceedings{Evans2015,
+    abstract = {—Memory corruption attacks have been known for decades, but they are still a major vector of attack for compro-mising modern systems. Numerous defenses have been proposed against memory corruption attacks, but they all have their limitations and weaknesses. Stronger defenses such as complete memory safety incur a large overhead, while weaker ones such as practical control flow integrity have been shown to be ineffective. A recent technique called code pointer integrity (CPI) promises to balance security and performance by focusing memory safety on code pointers thus preventing most control-hijacking attacks while maintaining low overhead. CPI protects access to code pointers by storing them in a safe region that is protected by instruction level isolation. On x86-32, this isolation is enforced by hardware; on x86-64 and ARM, isolation is enforced by information hiding. We show that, for architectures that rely on information hiding, CPI's safe region can be leaked and then maliciously modified by using data pointer overwrites. We implement a proof-of-concept exploit against Nginx and successfully bypass CPI in 6 seconds with 13 observed crashes. We also present an attack that generates no crashes and is able to bypass CPI in 98 hours. Our attack demonstrates the importance of adequately protecting secrets in security mechanisms and the dangers of relying on difficulty of guessing without guaranteeing the absence of memory leaks},
+    annote = {defeats: Code-Pointer Integrity},
+    author = {Evans, Isaac and Fingeret, Sam and Gonzalez, Julian and Otgonbaatar, Ulziibayar and Tang, Tiffany and Shrobe, Howard and Sidiroglou-Douskos, Stelios and Rinard, Martin and Okhravi, Hamed},
+    booktitle = {2015 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2015.53},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Evans et al. - 2015 - Missing the point(er) On the effectiveness of code pointer integrity.pdf:pdf},
+    isbn = {978-1-4673-6949-7},
+    issn = {10816011},
+    language = {en},
+    month = may,
+    pages = {781--796},
+    publisher = {IEEE},
+    shorttitle = {Missing the Point(er)},
+    title = {{Missing the Point(er): On the Effectiveness of Code Pointer Integrity}},
+    volume = {2015-July},
+    year = {2015}
+}
+
+@inproceedings{Oikonomopoulos2016a,
+    abstract = {ASLR is no longer a strong defense in itself, but it still serves as a foundation for sophisticated defenses that use randomization for pseudo-isolation. Crucially, these defenses hide sensitive information (such as shadow stacks and safe regions) at a random position in a very large address space. Previous attacks on randomization-based information hiding rely on complicated side channels and/or probing of the mapped memory regions. Assuming no weaknesses exist in the implementation of hidden regions, the attacks typically lead to many crashes or other visible side-effects. For this reason, many researchers still consider the pseudo-isolation offered by ASLR sufficiently strong in practice. We introduce powerful new primitives to show that this faith in ASLR-based information hiding is misplaced, and that attackers can break ASLR and find hidden regions on 32 bit and 64 bit Linux systems quickly with very few malicious inputs. Rather than building on memory accesses that probe the allocated memory areas, we determine the sizes of the unallocated holes in the address space by repeatedly allocating large chunks of memory. Given the sizes, an attacker can infer the location of the hidden region with few or no side-effects. We show that allocation oracles are pervasive and evaluate our primitives on real-world server applications.},
+    address = {Austin, TX},
+    author = {Oikonomopoulos, Angelos and Athanasopoulos, Elias and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {25th {USENIX} Security Symposium ({USENIX} Security 16)},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Oikonomopoulos et al. - 2016 - Poking Holes in Information Hiding.pdf:pdf},
+    isbn = {9781931971324},
+    month = aug,
+    pages = {121--138},
+    publisher = {{USENIX} Association},
+    title = {{Poking Holes in Information Hiding}},
+    year = {2016}
+}
+
+@inproceedings{Homescu2013e,
+    abstract = {Code-reuse attacks are notoriously hard to defeat, and most current solutions to the problem focus on automated software diversity. This is a promising area of research, as diversity attacks the common denominator enabling code-reuse attacksthe software monoculture. Recent research in this area provides security, but at an unfortunate price: performance overhead. Leveraging previously collected profiling information, compilers can substantially improve subsequent code generation. Traditionally, profile-guided optimization focuses on hot program code, where a program spends most of its execution time. Optimizing rarely executed code does not significantly impact performance, so few optimizations focus on this code. We use profile-guided optimization to reduce the performance overhead of software diversity. The primary insight is that we are free to diversify cold code, but restrict our diversification efforts in hot code. Our work investigates the impact of profiling on an expensive diversification technique: NOP insertion. By differentiating between hot cold and cold code, we optimize NOP insertion overheads from a maximum of 25{\%} down to a negligible 1{\%}, while preserving the security properties of the original defense. Consequently, using our profile-guided diversification technique, even randomization techniques having a high performance overhead become practical.},
+    author = {Homescu, Andrei and Neisius, Steven and Larsen, Per and Brunthaler, Stefan and Franz, Michael},
+    booktitle = {Proceedings of the 2013 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)},
+    doi = {10.1109/CGO.2013.6494997},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Homescu et al. - 2013 - Profile-guided automated software diversity.pdf:pdf},
+    isbn = {978-1-4673-5525-4},
+    keywords = {Automated Software Diversity,Code,Code Generation,Compilers,NOP insertion,Optimization,Profiling},
+    month = feb,
+    pages = {1--11},
+    publisher = {IEEE},
+    title = {{Profile-guided automated software diversity}},
+    year = {2013}
+}
+
+@inproceedings{Rudd2017,
+    abstract = {—Memory corruption vulnerabilities not only allow modification of control data and injection of malicious payloads; they also allow adversaries to reconnoiter a diversified program, customize a payload, and ultimately bypass code randomization defenses. In response, researchers have proposed and built various leakage-resilient defenses against code reuse. Leakage-resilient defenses use memory protection techniques to prevent adversaries from directly reading code as well as pointer indirection or encryption techniques to decouple code pointers from the ran-domized code layout, avoiding indirect leakage. In this paper, we show that although current code pointer protections do prevent leakage per se, they are fundamentally unable to stop code reuse. Specifically, we demonstrate a new class of attacks we call address-oblivious code reuse that bypasses state-of-the-art leakage-resilience techniques by profiling and reusing protected code pointers, without leaking the code layout. We show that an attacker can accurately identify protected code pointers of interest and mount code-reuse attacks at the abstraction level of pointers without requiring any knowledge of code addresses. We analyze the prevalence of opportunities for such attacks in popular code bases and build three real-world exploits against Nginx and Apache to demonstrate their practicality. We analyze recently proposed leakage resilient defenses and show that they are vulnerable to address oblivious code reuse. Our findings indicate that because of the prevalence of code pointers in realistic programs and the fundamental need to expose them to " read " operations (even indirectly), diversity defenses face a fundamental design challenge in mitigating such attacks.},
+    address = {Reston, VA},
+    annote = {defeats: Code-Pointer Hiding},
+    author = {Rudd, Robert and Skowyra, Richard and Bigelow, David and Dedhia, Veer and Hobson, Thomas and Crane, Stephen and Liebchen, Christopher and Larsen, Per and Davi, Lucas and Franz, Michael and Sadeghi, Ahmad-Reza and Okhravi, Hamed},
+    booktitle = {Proceedings 2017 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2017.23477},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Rudd et al. - 2017 - Address-Oblivious Code Reuse On the Effectiveness of Leakage-Resilient Diversity.pdf:pdf},
+    isbn = {1-891562-46-0},
+    publisher = {Internet Society},
+    title = {{Address Oblivious Code Reuse: On the Effectiveness of Leakage-Resilient Diversity}},
+    year = {2017}
+}
+
+@inproceedings{Corbato1965,
+    abstract = {Multics (Multiplexed Information and Computing Service) is a comprehensive, general-purpose programming system which is being developed as a research project. The initial Multics system will be implemented on the GE 645 computer. One of the overall design goals is to create a computing system which is capable of meeting almost all of the present and near-future requirements of a large computer utility. Such systems must run continuously and reliably 7 days a week, 24 hours a day in a way similar to telephone or power systems, and must be capable of meeting wide service demands: from multiple man-machine interaction to the sequential processing of absentee-user jobs; from the use of the system with dedicated languages and subsystems to the programming of the system itself; and from centralized bulk card, tape, and printer facilities to remotely located terminals. Such information processing and communication systems are believed to be essential for the future growth of computer use in business, in industry, in government and in scientific laboratories as well as stimulating applications which would be otherwise undone.},
+    address = {New York, New York, USA},
+    author = {Corbat{\'{o}}, F. J. and Vyssotsky, V. A.},
+    booktitle = {Proceedings of the November 30--December 1, 1965, fall joint computer conference, part I on XX - AFIPS '65 (Fall, part I)},
+    doi = {10.1145/1463891.1463912},
+    month = nov,
+    pages = {185},
+    publisher = {ACM Press},
+    title = {{Introduction and overview of the multics system}},
+    year = {1965}
+}
+
+@inproceedings{Mohan2015,
+    abstract = {A new binary software randomization and Control- Flow Integrity (CFI) enforcement system is presented, which is the first to efficiently resist code-reuse attacks launched by informed adversaries who possess full knowledge of the in- memory code layout of victim programs. The defense mitigates a recent wave of implementation disclosure attacks , by which adver- saries can exfiltrate in-memory code details in order to prepare code-reuse attacks (e.g., Return-Oriented Programming (ROP) attacks) that bypass fine-grained randomization defenses. Such implementation-aware attacks defeat traditional fine-grained ran- domization by undermining its assumption that the randomized locations of abusable code gadgets remain secret. Opaque CFI (O-CFI) overcomes this weakness through a novel combination of fine-grained code-randomization and coarse- grained control-flow integrity checking. It conceals the graph of hijackable control-flow edges even from attackers who can view the complete stack, heap, and binary code of the victim process. For maximal efficiency, the integrity checks are implemented using instructions that will soon be hardware-accelerated on commodity x86-x64 processors. The approach is highly practical since it does not require a modified compiler and can protect legacy binaries without access to source code. Experiments using our fully functional prototype implementation show that O-CFI provides significant probabilistic protection against ROP attacks launched by adversaries with complete code layout knowledge, and exhibits only 4.7{\%} mean performance overhead on current hardware (with further overhead reductions to follow on forth- coming Intel processors).},
+    address = {Reston, VA},
+    annote = {CFI with bounds checks. Control Flow targets are restricted to aligned addresses and basic blocks are randomized. To decrease the range of bounds checks trampolines (portals) are used which can be packed together.},
+    author = {Mohan, Vishwath and Larsen, Per and Brunthaler, Stefan and Hamlen, Kevin W and Franz, Michael},
+    booktitle = {Proceedings 2015 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2015.23271},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Mohan et al. - 2015 - Opaque Control-Flow Integrity.pdf:pdf},
+    isbn = {1-891562-38-X},
+    publisher = {Internet Society},
+    title = {{Opaque Control-Flow Integrity}},
+    year = {2015}
+}
+
+@incollection{Jackson2011,
+    abstract = {Present approaches to software security are to a large extent reactive: when vulnerabilities are discovered, developers scramble to fix the underlying error. The advantage is on the side of the attackers because they only have to find a single vulnerability to exploit all vulnerable systems, while defenders have to prevent the exploitation of all vulnerabilities. We argue that the compiler is at the heart of the solution for this problem: when the compiler is translating high-level source code to low-level machine code, it is able to automatically diversify the machine code, thus creating multiple functionally equivalent, but internally different variants of a program.We present two orthogonal compiler-based techniques.With multi-variant execution, a monitoring layer executes several diversified variants in lockstep while examining their behavior for differences that indicate attacks. With massive-scale software diversity, every user gets its own diversified variant, so that the attacker has no knowledge about the internal structure of that variant and therefore cannot construct an attack. Both techniques make it harder for an attacker to run a successful attack.We discuss variation techniques that the compiler can utilize to diversify software, and evaluate their effectiveness for our two execution models.},
+    author = {Jackson, Todd and Salamat, Babak and Homescu, Andrei and Manivannan, Karthikeyan and Wagner, Gregor and Gal, Andreas and Brunthaler, Stefan and Wimmer, Christian and Franz, Michael},
+    booktitle = {Moving Target Defense: Creating Asymmetric Uncertainty for Cyber Threats},
+    doi = {10.1007/978-1-4614-0977-9_4},
+    pages = {77--98},
+    publisher = {Springer, New York, NY},
+    title = {{Compiler-Generated Software Diversity}},
+    year = {2011}
+}
+
+@inproceedings{Pappas2012a,
+    abstract = {The wide adoption of non-executable page protec- tions in recent versions of popular operating systems has given rise to attacks that employ return-oriented programming (ROP) to achieve arbitrary code execution without the injection of any code. Existing defenses against ROP exploits either require source code or symbolic debugging information, or impose a significant runtime overhead, which limits their applicability for the protection of third-party applications. In this paper we present in-place code randomization, a practical mitigation technique against ROP attacks that can be applied directly on third-party software. Our method uses various narrow-scope code transformations that can be applied statically, without changing the location of basic blocks, allowing the safe randomization of stripped binaries even with partial disassembly coverage. These transformations effectively eliminate about 10{\%}, and probabilistically break about 80{\%} of the useful instruction sequences found in a large set of PE files. Since no additional code is inserted, in-place code randomization does not incur any measurable runtime overhead, enabling it to be easily used in tandem with existing exploit mitigations such as address space layout randomization. Our evaluation using publicly available ROP exploits and two ROP code generation toolkits demonstrates that our technique prevents the exploitation of the tested vulnerableWindows 7 applications, including Adobe Reader, as well as the automated construction of alternative ROP payloads that aim to circumvent in-place code randomization using solely any remaining unaffected instruction sequences.},
+    author = {Pappas, Vasilis and Polychronakis, Michalis and Keromytis, Angelos D.},
+    booktitle = {2012 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2012.41},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Pappas, Polychronakis, Keromytis - 2012 - Smashing the gadgets Hindering return-oriented programming using in-place code randomization.pdf:pdf},
+    isbn = {978-1-4673-1244-8},
+    issn = {10816011},
+    month = may,
+    pages = {601--615},
+    publisher = {IEEE},
+    title = {{Smashing the Gadgets: Hindering Return-Oriented Programming Using In-place Code Randomization}},
+    year = {2012}
+}
+
+@inproceedings{Hiser2012,
+    abstract = {Through randomization of the memory space and the confinement of code to non-data pages, computer security researchers have made a wide range of attacks against program binaries more difficult. However, attacks have evolved to exploit weaknesses in these defenses. To thwart these attacks, we introduce a novel technique called Instruction Location Randomization (ILR). Conceptually, ILR randomizes the location of every instruction in a program, thwarting an attacker's ability to re-use program functionality (e.g., arc-injection attacks and return-oriented programming attacks). ILR operates on arbitrary executable programs, requires no compiler support, and requires no user interaction. Thus, it can be automatically applied post-deployment, allowing easy and frequent re-randomization. Our preliminary prototype, working on 32-bit x86 Linux ELF binaries, provides a high degree of entropy. Individual instructions are randomly placed within a 31-bit address space. Thus, attacks that rely on a priori knowledge of the location of code or derandomization are not feasible. We demonstrated ILR's defensive capabilities by defeating attacks against programs with vulnerabilities, including Adobe's PDF viewer, acroread, which had an in-the-wild vulnerability. Additionally, using an industry-standard CPU performance benchmark suite, we compared the run time of prototype ILR-protected executables to that of native executables. The average run-time overhead of ILR was 13{\%} with more than half the programs having effectively no overhead (15 out of 29), indicating that ILR is a realistic and cost-effective mitigation technique.},
+    author = {Hiser, Jason and Nguyen-Tuong, Anh and Co, Michele and Hall, Matthew and Davidson, Jack W.},
+    booktitle = {Proceedings - IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2012.39},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Hiser et al. - 2012 - ILR Where'd my gadgets go.pdf:pdf},
+    isbn = {9780769546810},
+    issn = {10816011},
+    keywords = {ASLR,Diversity,Exploit prevention,Randomization,Return-oriented-programming,arc-injection},
+    month = may,
+    pages = {571--585},
+    publisher = {IEEE},
+    shorttitle = {ILR},
+    title = {{ILR: Where'd my gadgets go?}},
+    year = {2012}
+}
+
+@article{Cohen1993,
+    abstract = {In this paper, we introduce the use of program evolution as a technique for defending against automated attacks on operating systems. {\textcopyright} 1993.},
+    author = {Cohen, Frederick B.},
+    doi = {10.1016/0167-4048(93)90054-9},
+    file = {:/mnt/c/Users/felixl/Downloads/evolve.pdf:pdf},
+    issn = {01674048},
+    journal = {Computers and Security},
+    keywords = {Computational complexity,Operating systems,Program evolution,Trusted systems},
+    month = oct,
+    number = {6},
+    pages = {565--584},
+    title = {{Operating system protection through program evolution}},
+    volume = {12},
+    year = {1993}
+}
+
+@inproceedings{Larsen2014,
+    abstract = {The idea of automatic software diversity is at least two decades old. The deficiencies of currently deployed defenses and the transition to online software distribution (the "App store" model) for traditional and mobile computers has revived the interest in automatic software diversity. Consequently, the literature on diversity grew by more than two dozen papers since 2008. Diversity offers several unique properties. Unlike other defenses, it introduces uncertainty in the target. Precise knowledge of the target software provides the underpinning for a wide range of attacks. This makes diversity a broad rather than narrowly focused defense mechanism. Second, diversity offers probabilistic protection similar to cryptography-attacks may succeed by chance so implementations must offer high entropy. Finally, the design space of diversifying program transformations is large. As a result, researchers have proposed multiple approaches to software diversity that vary with respect to threat models, security, performance, and practicality. In this paper, we systematically study the state-of-the-art in software diversity and highlight fundamental trade-offs between fully automated approaches. We also point to open areas and unresolved challenges. These include "hybrid solutions", error reporting, patching, and implementation disclosure attacks on diversified software.},
+    author = {Larsen, Per and Homescu, Andrei and Brunthaler, Stefan and Franz, Michael},
+    booktitle = {2014 IEEE Symposium on Security and Privacy},
+    doi = {10.1109/SP.2014.25},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Larsen et al. - Unknown - SoK Automated Software Diversity.pdf:pdf},
+    isbn = {978-1-4799-4686-0},
+    issn = {10816011},
+    month = may,
+    pages = {276--291},
+    publisher = {IEEE},
+    title = {{SoK: Automated Software Diversity}},
+    year = {2014}
+}
+
+@inproceedings{Franz2010,
+    abstract = {We contend that the time has come to revisit the idea of software diversity for defense purposes. Four fundamental paradigm shifts that have occurred in the past decade now make it viable to distribute a unique version of every program to every user. We outline a practical approach for providing compiler-generated software diversity on a massive scale. It is based on an "App Store" containing a diversification engine (a "multicompiler") that automatically generates a unique, but functionally identical version of every program each time that a downloader requests it. All the different versions of the same program behave in exactly the same way from the perspective of the end-user, but they implement their functionality in subtly different ways. As a result, any specific attack will succeed only on a small fraction of targets. An attacker would require a large number of different attacks and would have no way of knowing a priori which specific attack will succeed on which specific target. Hence, the cost to the attacker is raised dramatically. Equally importantly, our approach makes it much more difficult for an attacker to generate attack vectors by way of reverse engineering of security patches. An attacker requires two pieces of information to extract a vulnerability from a bug fix: the version of the program that is vulnerable and the specific patch that fixes the vulnerability. In an environment in which software is diversified and every instance of every program is unique, we can set things up so that the attacker never obtains a matching pair of vulnerable program and its corresponding bug fix that could be used to identify the vulnerability. We propose a mechanism for incremental updating of diversified software that has this property.},
+    address = {New York, New York, USA},
+    author = {Franz, Michael},
+    booktitle = {Proceedings of the 2010 workshop on New security paradigms - NSPW '10},
+    doi = {10.1145/1900546.1900550},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Franz - 2010 - E unibus pluram massive-scale software diversity as a defense mechanism.pdf:pdf},
+    isbn = {9781450304153},
+    keywords = {compiler-generated software diversity,dynamic patching of soft-,nerabilities,patches,reverse engineering of security,service computing architectures,software vul-,ware vulnerabilities},
+    pages = {7},
+    publisher = {ACM Press},
+    shorttitle = {E unibus pluram},
+    title = {{E unibus pluram}},
+    year = {2010}
+}
+
+@inproceedings{Homescu2013a,
+    abstract = {Just-in-time compilers (JITs) are here to stay. Unfortunately, they also provide new capabilities to cyber attackers, namely the ability to supply input programs (in languages such as JavaScript) that will then be compiled to executable code. Once this code is placed and marked as executable, it can then be leveraged by the attacker. Randomization techniques such as constant blinding raise the cost to the attacker, but they significantly add to the burden of implementing a JIT. There are a great many JITs in use today, but not even all of the most commonly used ones randomize their outputs. We present librando, the first comprehensive technique to harden JIT compilers in a completely generic manner by randomizing their output transparently ex post facto. We implement this approach as a system-wide service that can simultaneously harden multiple running JITs. It hooks into the memory protections of the target OS and randomizes newly generated code on the fly when marked as executable. In order to provide “black box” JIT hardening, librando needs to be extremely conservative. For example, it completely preserves the contents of the calling stack, presenting each JIT with the illusion that it is executing its own generated code. Yet in spite of the heavy lifting that librando performs behind the scenes, the performance impact is surprisingly low. For Java (HotSpot), we measured slow- downs by a factor of 1.15×, and for compute-intensive JavaScript (V8) benchmarks, a slowdown of 3.5×. For many applications, this overhead},
+    address = {New York, New York, USA},
+    author = {Homescu, Andrei and Brunthaler, Stefan and Larsen, Per and Franz, Michael},
+    booktitle = {Proceedings of the 2013 ACM SIGSAC conference on Computer {\&} communications security - CCS '13},
+    doi = {10.1145/2508859.2516675},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Homescu et al. - 2013 - librando Transparent Code Randomization for Just-in-Time Compilers.pdf:pdf},
+    isbn = {9781450324779},
+    issn = {15437221},
+    keywords = {attacks,binary rewriting,code reuse,diversification,jit compilers,jit spraying,randomiza-,return-oriented programming,security},
+    pages = {993--1004},
+    publisher = {ACM Press},
+    title = {{Librando}},
+    year = {2013}
+}
+
+@inproceedings{Koo2018,
+    abstract = {Despite decades of research on software diversification, only address space layout randomization has seen widespread adoption. Code randomization, an effective defense against return-oriented programming exploits, has remained an academic exercise mainly due to i) the lack of a transparent and streamlined deployment model that does not disrupt existing software distribution norms, and ii) the inherent incompatibility of program variants with error reporting, whitelisting, patching, and other operations that rely on code uniformity. In this work we present compiler-assisted code randomization (CCR), a hybrid approach that relies on compiler-rewriter cooperation to enable fast and robust fine-grained code randomization on end-user systems, while maintaining compatibility with existing software distribution models. The main concept behind CCR is to augment binaries with a minimal set of transformation-assisting metadata, which i) facilitate rapid fine-grained code transformation at installation or load time, and ii) form the basis for reversing any applied code transformation when needed, to maintain compatibility with existing mechanisms that rely on referencing the original code. We have implemented a prototype of this approach by extending the LLVM compiler toolchain, and developing a simple binary rewriter that leverages the embedded metadata to generate randomized variants using basic block reordering. The results of our experimental evaluation demonstrate the feasibility and practicality of CCR, as on average it incurs a modest file size increase of 11.46{\%} and a negligible runtime overhead of 0.28{\%}, while it is compatible with link-time optimization and control flow integrity.},
+    author = {Koo, Hyungjoon and Chen, Yaohui and Lu, Long and Kemerlis, Vasileios P and Polychronakis, Michalis},
+    booktitle = {2018 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2018.00029},
+    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Koo et al. - Unknown - Compiler-assisted Code Randomization.pdf:pdf},
+    isbn = {978-1-5386-4353-2},
+    issn = {10816011},
+    keywords = {code randomization,compiler level protection,return oriented programming},
+    month = may,
+    pages = {461--477},
+    publisher = {IEEE},
+    title = {{Compiler-Assisted Code Randomization}},
+    volume = {2018-May},
+    year = {2018}
+}
+
+@online{Turner2018,
+    author = {Turner, Paul},
+    title = {{Retpoline: a software construct for preventing branch-targetinjection.}},
+    url = {https://support.google.com/faqs/answer/7625886},
+    year = {2018}
+}
+
+@article{krahmer2005,
+    author = {Krahmer, Sebastian},
+    title = {x86-64 buffer overflow exploits and the borrowed code chunks exploitation technique},
+    year = {2005}
+}
+
+@article{Luk2005,
+    abstract = {Robust and powerful software instrumentation tools are essential for program analysis tasks such as profiling, performance evaluation , and bug detection. To meet this need, we have developed a new instrumentation system called Pin. Our goals are to provide easy-to-use, portable, transparent, and efficient instrumenta-tion. Instrumentation tools (called Pintools) are written in C/C++ using Pin's rich API. Pin follows the model of ATOM, allowing the tool writer to analyze an application at the instruction level without the need for detailed knowledge of the underlying instruction set. The API is designed to be architecture independent whenever possible, making Pintools source compatible across different archi-tectures. However, a Pintool can access architecture-specific details when necessary. Instrumentation with Pin is mostly transparent as the application and Pintool observe the application's original, unin-strumented behavior. Pin uses dynamic compilation to instrument executables while they are running. For efficiency, Pin uses several techniques, including inlining, register reallocation , liveness analysis, and instruction scheduling to optimize instrumentation. This fully automated approach delivers significantly better instru-mentation performance than similar tools. For example, Pin is 3.3x faster than Valgrind and 2x faster than DynamoRIO for basic-block counting. To illustrate Pin's versatility, we describe two Pintools in daily use to analyze production software. Pin is publicly available for Linux platforms on four architectures: IA32 (32-bit x86), EM64T (64-bit x86), Itanium R V , and ARM. In the ten months since Pin 2 was released in July 2004, there have been over 3000 down-loads from its website.},
+    author = {Luk, Chi-Keung and Cohn, Robert and Muth, Robert and Patil, Harish and Klauser, Artur and Lowney, Geoff and Wallace, Steven and Reddi, Vijay Janapa and Hazelwood, Kim},
+    doi = {10.1145/1064978.1065034},
+    file = {:C\:/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Luk et al. - Unknown - Pin Building Customized Program Analysis Tools with Dynamic Instrumentation.pdf:pdf},
+    issn = {0362-1340},
+    journal = {ACM SIGPLAN Notices},
+    keywords = {D25 [Software Engineer-ing]: Testing and Debugging,D34 [Programming Languages]: Processors-compilers,Experimentation Keywords Instrumentation,Performance,debugging aids,dynamic com-pilation,incremental compilers General Terms Languages,program analysis tools,tracing},
+    month = jun,
+    number = {6},
+    pages = {190--200},
+    title = {{Pin}},
+    volume = {40},
+    year = {2005}
+}
+
+@online{Chromium,
+    title = {{Chromium}},
+    url = {https://www.chromium.org/},
+    year = 2022
+}
+
+@online{Webkit,
+    title = {{WebKit}},
+    url = {https://webkit.org/},
+    year = 2022
+}
+
+@online{Sloccount,
+    author = {Wheeler, David A.},
+    title = {{SLOCCount}},
+    url = {https://dwheeler.com/sloccount/},
+    year = 2022
+}
+
+@online{Speedometer,
+    title = {Speedometer Benchmark},
+    url = {https://browserbench.org/Speedometer2.0/},
+    year = 2022
+}
+
+@online{DEP,
+    author = {Microsoft},
+    title = {{Data Execution Prevention}},
+    url = {https://docs.microsoft.com/en-us/windows/win32/memory/data-execution-prevention},
+    year = 2022
+}
+
+@article{Pettis1990,
+    abstract = {This paper presents the results of our investigation of code positioning techniques using execution profile data as input into the compilation process. The primary objective of the positioning is to reduce the overhead of the instruction memory hierarchy. After initial investigation in the literature, we decided to implement two prototypes for the Hewlett-Packard Precision Architecture 1990. The first, built on top of the linker, positions code based on whole procedures. This prototype has the ability to move procedures into an order that is determined by a “closest is best” strategy. The second prototype, built on top of an existing optimizer package, positions code based on basic blocks within procedures. Groups of basic blocks that would be better as straight-line sequences are identified as chains. These chains are then ordered according to branch heuristics. Code that is never executed during the data collection runs can be physically separated from the primary code of a procedure by a technique we devised called procedure splitting. The algorithms we implemented are described through examples in this paper. The performance improvements from our work are also summarized in various tables and charts. {\textcopyright} 1990, ACM. All rights reserved.},
+    author = {Pettis, Karl and Hansen, Robert C.},
+    doi = {10.1145/93548.93550},
+    issn = {0362-1340},
+    journal = {ACM SIGPLAN Notices},
+    month = jun,
+    number = {6},
+    pages = {16--27},
+    title = {{Profile guided code positioning}},
+    volume = {25},
+    year = {1990}
+}
+
+@mastersthesis{Neustifter2010,
+    author = {Neustifter, Andreas},
+    month = apr,
+    school = {Vienna University of Technology},
+    title = {{Efficient Profiling in the LLVM Compiler Infrastructure}},
+    url = {www.tuwien.ac.at},
+    year = {2010}
+}
+
+@inproceedings{Lattner2004,
+    abstract = {This paper describes LLVM (Low Level Virtual Machine), a compiler framework designed to support transparent, life-long program analysis and transformation for arbitrary programs, by providing high-level information to compiler transformations at compile-time, link-time, run-time, and in idle time between runs. LLVM defines a common, low-level code representation in Static Single Assignment (SSA) form, with several novel features: a simple, language-independent type-system that exposes the primitives commonly used to implement high-level language features; an instruction for typed address arithmetic; and a simple mechanism that can be used to implement the exception handling features of high-level languages (and setjmp/longjmp in C) uniformly and efficiently. The LLVM compiler framework and code representation together provide a combination of key capabilities that are important for practical, lifelong analysis and transformation of programs. To our knowledge, no existing compilation approach provides all these capabilities. We describe the design of the LLVM representation and compiler framework, and evaluate the design in three ways: (a) the size and effectiveness of the representation, including the type information it provides; (b) compiler performance for several interprocedural problems; and (c) illustrative examples of the benefits LLVM provides for several challenging compiler problems.},
+    author = {Lattner, Chris and Adve, Vikram},
+    booktitle = {International Symposium on Code Generation and Optimization, 2004. CGO 2004.},
+    doi = {10.1109/CGO.2004.1281665},
+    isbn = {0-7695-2102-9},
+    pages = {75--86},
+    publisher = {IEEE},
+    title = {{LLVM: A compilation framework for lifelong program analysis \& transformation}},
+    year = {2004}
+}
+
+@inproceedings{Carlini2015a,
+    abstract = {Control-Flow Integrity (CFI) is a defense which prevents control-flow hijacking attacks. While recent research has shown that coarse-grained CFI does not stop attacks, fine-grained CFI is believed to be secure. We argue that assessing the effectiveness of practical CFI implementations is non-trivial and that common evaluation metrics fail to do so. We then evaluate fullyprecise static CFI — the most restrictive CFI policy that does not break functionality — and reveal limitations in its security. Using a generalization of non-control-data attacks which we call Control-Flow Bending (CFB), we show how an attacker can leverage a memory corruption vulnerability to achieve Turing-complete computation on memory using just calls to the standard library. We use this attack technique to evaluate fully-precise static CFI on six real binaries and show that in five out of six cases, powerful attacks are still possible. Our results suggest that CFI may not be a reliable defense against memory corruption vulnerabilities. We further evaluate shadow stacks in combination with CFI and find that their presence for security is necessary: deploying shadow stacks removes arbitrary code execution capabilities of attackers in three of six cases.},
+    author = {Carlini, Nicholas and Barresi, Antonio and Payer, Mathias and Wagner, David and Gross, Thomas R.},
+    booktitle = {USENIX Security Symposium},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/USENIX Security Symposium/2015 - Carlini et al. - Control-Flow Bending On the Effectiveness of Control-Flow Integrity.pdf:pdf},
+    isbn = {978-1-931971-232},
+    pages = {161--176},
+    title = {{Control-Flow Bending: On the Effectiveness of Control-Flow Integrity}},
+    year = {2015}
+}
+
+@inproceedings{Evans2015b,
+    abstract = {Control flow integrity (CFI) has been proposed as an approach to defend against control-hijacking memory corruption attacks. CFI works by assigning tags to indirect branch targets statically and checking them at runtime. Coarse-grained enforcements of CFI that use a small number of tags to improve the performance over-head have been shown to be ineffective. As a result, a number of recent efforts have focused on fine-grained enforcement of CFI as it was originally proposed. In this work, we show that even a fine-grained form of CFI with unlimited number of tags and a shadow stack (to check calls and returns) is ineffective in protecting against malicious attacks. We show that many popular code bases such as Apache and Nginx use coding practices that create flexibility in their intended control flow graph (CFG) even when a strong static analyzer is used to construct the CFG. These flexibilities allow an attacker to gain control of the execution while strictly adhering to a fine-grained CFI. We then construct two proof-of-concept exploits that attack an unlimited tag CFI system with a shadow stack. We also evaluate the difficulties of generating a precise CFG using scal-able static analysis for real-world applications. Finally, we perform an analysis on a number of popular applications that highlights the availability of such attacks.},
+    address = {New York, NY, USA},
+    author = {Evans, Isaac and Long, Fan and Otgonbaatar, Ulziibayar and Shrobe, Howard and Rinard, Martin and Okhravi, Hamed and Sidiroglou-Douskos, Stelios},
+    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security},
+    doi = {10.1145/2810103.2813646},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15/2015 - Evans et al. - Control Jujutsu.pdf:pdf},
+    isbn = {9781450338325},
+    issn = {15437221},
+    month = {oct},
+    pages = {901--913},
+    publisher = {ACM},
+    title = {{Control Jujutsu}},
+    volume = {2015-Octob},
+    year = {2015}
+}
+
+@inproceedings{Aga2019,
+    abstract = {Memory corruption vulnerabilities in type-unsafe languages are often exploited to perform a control-flow hijacking attack, in which an attacker uses vulnerabilities to corrupt control data in the program to eventually gain control over the execution of the program. However, widespread adoption of control-flow attack defenses such as Control-flow Integrity (CFI) has led attackers to exploit memory errors to corrupt non-control data that can not be detected by these defenses. Non-control data attacks can be used to corrupt security critical data or leak sensitive information. Moreover, recent attacks such as data-oriented programming (DOP) have generalized non-control data attacks to achieve Turing-complete computation capabilities within the programmer-specified control-flow graph, leaving previously proposed control-flow protections unable to stop these attacks.In this paper, we present a stack-layout randomization scheme that can effectively thwart DOP attacks. Our approach, called Smokestack, provides each function invocation with a randomly permuted ordering of the local stack organization. In addition, we utilize true-random value sources combined with disclosure-resistant pseudo-random number generation to ensure that an adversary cannot anticipate a function-s invocation permutation of automatic variables. Our evaluation on SPEC benchmarks and various real-world applications shows that Smokestack can stop DOP attacks with minimal overhead.},
+    author = {Aga, Misiker Tadesse and Austin, Todd},
+    booktitle = {2019 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)},
+    doi = {10.1109/CGO.2019.8661202},
+    isbn = {978-1-7281-1436-1},
+    month = {feb},
+    pages = {26--36},
+    publisher = {IEEE},
+    title = {{Smokestack: Thwarting DOP Attacks with Runtime Stack Layout Randomization}},
+    year = {2019}
+}
+
+@inproceedings{Kocher2019,
+    abstract = {Modern processors use branch prediction and speculative execution to maximize performance. For example, if the destination of a branch depends on a memory value that is in the process of being read, CPUs will try to guess the destination and attempt to execute ahead. When the memory value finally arrives, the CPU either discards or commits the speculative computation. Speculative logic is unfaithful in how it executes, can access the victim's memory and registers, and can perform operations with measurable side effects. Spectre attacks involve inducing a victim to speculatively perform operations that would not occur during correct program execution and which leak the victim's confidential information via a side channel to the adversary. This paper describes practical attacks that combine methodology from side channel attacks, fault attacks, and return-oriented programming that can read arbitrary memory from the victim's process. More broadly, the paper shows that speculative execution implementations violate the security assumptions underpinning numerous software security mechanisms, including operating system process separation, containerization, just-in-time (JIT) compilation, and countermeasures to cache timing and side-channel attacks. These attacks represent a serious threat to actual systems since vulnerable speculative execution capabilities are found in microprocessors from Intel, AMD, and ARM that are used in billions of devices. While makeshift processor-specific countermeasures are possible in some cases, sound solutions will require fixes to processor designs as well as updates to instruction set architectures (ISAs) to give hardware architects and software developers a common understanding as to what computation state CPU implementations are (and are not) permitted to leak.},
+    author = {Kocher, Paul and Horn, Jann and Fogh, Anders and Genkin, Daniel and Gruss, Daniel and Haas, Werner and Hamburg, Mike and Lipp, Moritz and Mangard, Stefan and Prescher, Thomas and Schwarz, Michael and Yarom, Yuval},
+    booktitle = {2019 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2019.00002},
+    isbn = {978-1-5386-6660-9},
+    issn = {10816011},
+    keywords = {Microarchitectural-attack,Microarchitecture-security,Spectre,Speculative-execution},
+    month = {may},
+    pages = {1--19},
+    publisher = {IEEE},
+    title = {{Spectre Attacks: Exploiting Speculative Execution}},
+    volume = {2019-May},
+    year = {2019}
+}
+
+@inproceedings{Lipp2018,
+    address = {Baltimore, MD},
+    author = {Lipp, Moritz and Schwarz, Michael and Gruss, Daniel and Prescher, Thomas and Haas, Werner and Fogh, Anders and Horn, Jann and Mangard, Stefan and Kocher, Paul and Genkin, Daniel and Yarom, Yuval and Hamburg, Mike},
+    booktitle = {27th {USENIX} Security Symposium ({USENIX} Security 18)},
+    isbn = {978-1-939133-04-5},
+    month = {aug},
+    pages = {973--990},
+    publisher = {{USENIX} Association},
+    title = {{Meltdown: Reading Kernel Memory from User Space}},
+    year = {2018}
+}
+
+@inproceedings{VanSchaik2019,
+    abstract = {We present Rogue In-flight Data Load (RIDL), a new class of speculative unprivileged and constrained attacks to leak arbitrary data across address spaces and privilege boundaries (e.g., process, kernel, SGX, and even CPU-internal operations). Our reverse engineering efforts show such vulnerabilities originate from a variety of micro-optimizations pervasive in commodity (Intel) processors, which cause the CPU to speculatively serve loads using extraneous CPU-internal in-flight data (e.g., in the line fill buffers). Contrary to other state-of-the-art speculative execution attacks, such as Spectre, Meltdown and Foreshadow, RIDL can leak this arbitrary in-flight data with no assumptions on the state of the caches or translation data structures controlled by privileged software. The implications are worrisome. First, RIDL attacks can be implemented even from linear execution with no invalid page faults, eliminating the need for exception suppression mechanisms and enabling system-wide attacks from arbitrary unprivileged code (including JavaScript in the browser). To exemplify such attacks, we build a number of practical exploits that leak sensitive information from victim processes, virtual machines, kernel, SGX and CPU-internal components. Second, and perhaps more importantly, RIDL bypasses all existing 'spot' mitigations in software (e.g., KPTI, PTE inversion) and hardware (e.g., speculative store bypass disable) and cannot easily be mitigated even by more heavyweight defenses (e.g., L1D flushing or disabling SMT). RIDL questions the sustainability of a per-variant, spot mitigation strategy and suggests more fundamental mitigations are needed to contain ever-emerging speculative execution attacks.},
+    author = {van Schaik, Stephan and Milburn, Alyssa and Osterlund, Sebastian and Frigo, Pietro and Maisuradze, Giorgi and Razavi, Kaveh and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {2019 IEEE Symposium on Security and Privacy (SP)},
+    doi = {10.1109/SP.2019.00087},
+    isbn = {978-1-5386-6660-9},
+    issn = {10816011},
+    keywords = {Side-channels,Speculative-execution-attacks},
+    month = {may},
+    pages = {88--105},
+    publisher = {IEEE},
+    title = {{RIDL: Rogue In-Flight Data Load}},
+    volume = {2019-May},
+    year = {2019}
+}
+
+@incollection{Schwarz2019b,
+    abstract = {All Spectre attacks so far required local code execution. We present the first fully remote Spectre attack. For this purpose, we demonstrate the first access-driven remote Evict+Reload cache attack over the network, leaking 15 bits per hour. We present a novel high-performance AVX-based covert channel that we use in our cache-free Spectre attack. We show that in particular remote Spectre attacks perform significantly better with the AVX-based covert channel, leaking 60 bits per hour from the target system. We demonstrate practical NetSpectre attacks on the Google cloud, remotely leaking data and remotely breaking ASLR.},
+    archiveprefix = {arXiv},
+    arxivid = {1807.10535},
+    author = {Schwarz, Michael and Schwarzl, Martin and Lipp, Moritz and Masters, Jon and Gruss, Daniel},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/978-3-030-29959-0_14},
+    eprint = {1807.10535},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)/2019 - Schwarz et al. - NetSpectr.pdf:pdf},
+    isbn = {9783030299583},
+    issn = {16113349},
+    month = {sep},
+    pages = {279--299},
+    publisher = {Springer},
+    title = {{NetSpectre: Read Arbitrary Memory over Network}},
+    volume = {11735 LNCS},
+    year = {2019}
+}
+
+@inproceedings{Maisuradze2018,
+    abstract = {Speculative execution is an optimization technique that has been part of CPUs for over a decade. It predicts the outcome and target of branch instructions to avoid stalling the execution pipeline. However, until recently, the security implications of speculative code execution have not been studied. In this paper, we investigate a special type of branch predictor that is responsible for predicting return addresses. To the best of our knowledge, we are the first to study return address predictors and their consequences for the security of modern software. In our work, we show how return stack buffers (RSBs), the core unit of return address predictors, can be used to trigger misspeculations. Based on this knowledge, we propose two new attack variants using RSBs that give attackers similar capabilities as the documented Spectre attacks. We show how local attackers can gain arbitrary speculative code execution across processes, e.g., to leak passwords another user enters on a shared system. Our evaluation showed that the recent Spectre countermeasures deployed in operating systems can also cover such RSB-based cross-process attacks. Yet we then demonstrate that attackers can trigger misspeculation in JIT environments in order to leak arbitrary memory content of browser processes. Reading outside the sandboxed memory region with JIT-compiled code is still possible with 80% accuracy on average.},
+    address = {New York, NY, USA},
+    archiveprefix = {arXiv},
+    arxivid = {1807.10364},
+    author = {Maisuradze, Giorgi and Rossow, Christian},
+    booktitle = {Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security},
+    doi = {10.1145/3243734.3243761},
+    eprint = {1807.10364},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security/2018 - Maisuradze, Rossow - ret2spec.pdf:pdf},
+    isbn = {9781450356930},
+    issn = {15437221},
+    keywords = {Hardware security,JavaScript,Side channel attacks},
+    month = {oct},
+    pages = {2109--2122},
+    publisher = {ACM},
+    title = {ret2spec},
+    year = {2018}
+}
+
+@inproceedings{Canella2019,
+    address = {Santa Clara, CA},
+    author = {Canella, Claudio and Bulck, Jo Van and Schwarz, Michael and Lipp, Moritz and von Berg, Benjamin and Ortner, Philipp and Piessens, Frank and Evtyushkin, Dmitry and Gruss, Daniel},
+    booktitle = {28th {USENIX} Security Symposium ({USENIX} Security 19)},
+    isbn = {978-1-939133-06-9},
+    month = {aug},
+    pages = {249--266},
+    publisher = {{USENIX} Association},
+    title = {{A Systematic Evaluation of Transient Execution Attacks and Defenses}},
+    year = {2019}
+}
+
+@inproceedings{Gras2018,
+    address = {Baltimore, MD},
+    author = {Gras, Ben and Razavi, Kaveh and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {27th {USENIX} Security Symposium ({USENIX} Security 18)},
+    isbn = {978-1-939133-04-5},
+    month = {aug},
+    pages = {955--972},
+    publisher = {{USENIX} Association},
+    title = {{Translation Leak-aside Buffer: Defeating Cache Side-channel Protections with {TLB} Attacks}},
+    year = {2018}
+}
+
+@inproceedings{Schwarz2019a,
+    abstract = {In early 2018, Meltdown first showed how to read arbitrary kernel memory from user space by exploiting side-effects from transient instructions. While this attack has been mitigated through stronger isolation boundaries between user and kernel space, Meltdown inspired an entirely new class of fault-driven transient-execution attacks. Particularly, over the past year, Meltdown-type attacks have been extended to not only leak data from the L1 cache but also from various other microarchitectural structures, including the FPU register file and store buffer.In this paper, we present the ZombieLoad attack which uncovers a novel Meltdown-type effect in the processor's fill-buffer logic. Our analysis shows that faulting load instructions (i.e., loads that have to be re-issued) may transiently dereference unauthorized destinations previously brought into the fill buffer by the current or a sibling logical CPU. In contrast to concurrent attacks on the fill buffer, we are the first to report data leakage of recently loaded and stored stale values across logical cores even on Meltdown- and MDS-resistant processors. Hence, despite Intel's claims, we show that the hardware fixes in new CPUs are not sufficient. We demonstrate ZombieLoad's effectiveness in a multitude of practical attack scenarios across CPU privilege rings, OS processes, virtual machines, and SGX enclaves. We discuss both short and long-term mitigation approaches and arrive at the conclusion that disabling hyperthreading is the only possible workaround to prevent at least the most-powerful cross-hyperthread attack scenarios on current processors, as Intel's software fixes are incomplete.},
+    address = {New York, NY, USA},
+    author = {Schwarz, Michael and Lipp, Moritz and Moghimi, Daniel and {Van Bulck}, Jo and Stecklina, Julian and Prescher, Thomas and Gruss, Daniel},
+    booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security},
+    doi = {10.1145/3319535.3354252},
+    isbn = {9781450367479},
+    keywords = {fill buffer,meltdown,side-channel attack,transient execution},
+    pages = {753--768},
+    publisher = {Association for Computing Machinery},
+    series = {CCS '19},
+    title = {{ZombieLoad: Cross-Privilege-Boundary Data Sampling}},
+    year = {2019}
+}
+
+@incollection{Rodes2013,
+    abstract = {This paper describes a novel technique to defend binaries against intra-frame stack-based attacks, including overflows into local variables, when source code is unavailable. The technique infers a specification of a function's stack layout, i.e., variable locations and boundaries, and then seeks to apply a combination of transformations, including variable reordering, random-sized padding between variables, and placement of canaries. To overcome the imprecision of static binary analysis, yet be as aggressive as possible in the transformations applied to the stack layout, the technique is speculative. A stack frame is aggressively transformed based on static analysis, and the validity of inferred stack layout is assessed through regression testing. If a transformation changes a program's semantics because of imprecision in the inference of the stack layout, a less aggressive layout is inferred until the transformed program passes the supplied regression tests. We present an overview of the technique and preliminary results of its feasibility and security effectiveness. {\textcopyright} 2013 Springer-Verlag Berlin Heidelberg.},
+    author = {Rodes, Benjamin D. and Nguyen-Tuong, Anh and Hiser, Jason D. and Knight, John C. and Co, Michele and Davidson, Jack W.},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/978-3-642-35632-2_29},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)/2013 - Rodes et al. - Defense aga.pdf:pdf},
+    isbn = {9783642356315},
+    issn = {16113349},
+    keywords = {artificial diversity,buffer overflow,non-control-data attacks,run-time verification,security attacks,stack layout transformation},
+    pages = {308--313},
+    publisher = {Springer Verlag},
+    title = {{Defense against Stack-Based Attacks Using Speculative Stack Layout Transformation}},
+    volume = {7687 LNCS},
+    year = {2013}
+}
+
+@inproceedings{Bhattacharyya2020,
+    abstract = {Speculative execution attacks, such as Spectre, reuse code from the victim's binary to access and leak secret information during speculative execution. Every variant of the attack requires very particular code sequences, necessitating elaborate gadget-search campaigns. Often, victim programs contain few, or even zero, usable gadgets. Consequently, speculative attacks are sometimes demonstrated by injecting usable code sequences into the victim. So far, attacks search for mono-lithic gadgets, a single sequence of code which performs all the attack steps. We introduce SpecROP, a novel speculative execution attack technique, inspired by classic code reuse attacks like Return-Oriented Programming to tackle the rarity of code gadgets. The SpecROP attacker uses multiple, small gadgets chained by poisoning multiple control-flow instructions to perform the same computation as a monolithic gadget. A key difference to classic code reuse attacks is that control-flow transfers between gadgets use speculative targets compared to targets in memory or registers. We categorize SpecROP gadgets into generic classes and demonstrate the abundance of such gadgets in victim libraries. Further, we explore the practicality of influencing multiple control-flow instructions on modern processors, and demonstrate an attack which uses gadget chaining to increase the leakage potential of a Spectre variant, SMoTherSpectre.},
+    author = {Bhattacharyya, Atri and S{\'{a}}nchez, Andr{\'{e}}s and Koruyeh, Esmaeil M and Abu-Ghazaleh, Nael and Song, Chengyu and Payer, Mathias},
+    booktitle = {RAID},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/RAID/2020 - Bhattacharyya et al. - SpecROP Speculative Exploitation of ROP Chains.pdf:pdf},
+    title = {{SpecROP: Speculative Exploitation of ROP Chains}},
+    year = {2020}
+}
+
+@inproceedings{Braden2016,
+    abstract = {—Attack techniques based on code reuse continue to enable real-world exploits bypassing all current mitigations. Code randomization defenses greatly improve resilience against code reuse. Unfortunately, sophisticated modern attacks such as JIT-ROP can circumvent randomization by discovering the actual code layout on the target and relocating the attack payload on the fly. Hence, effective code randomization additionally requires that the code layout cannot be leaked to adversaries. Previous approaches to leakage-resilient diversity have either relied on hardware features that are not available in all proces-sors, particularly resource-limited processors commonly found in mobile devices, or they have had high memory overheads. We introduce a code randomization technique that avoids these limitations and scales down to mobile and embedded devices: Leakage-Resilient Layout Randomization (LR 2). Whereas previous solutions have relied on virtualization, x86 segmentation, or virtual memory support, LR 2 merely requires the underlying processor to enforce a W⊕X policy—a feature that is virtually ubiquitous in modern processors, including mobile and embedded variants. Our evaluation shows that LR 2 provides the same security as existing virtualization-based solutions while avoiding design decisions that would prevent deployment on less capable yet equally vulnerable systems. Although we enforce execute-only permissions in software, LR 2 is as efficient as the best-in-class virtualization-based solution.},
+    address = {Reston, VA},
+    author = {Braden, Kjell and Crane, Stephen and Davi, Lucas and Franz, Michael and Larsen, Per and Liebchen, Christopher and Sadeghi, Ahmad-Reza},
+    booktitle = {Proceedings 2016 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2016.23364},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Proceedings 2016 Network and Distributed System Security Symposium/2016 - Braden et al. - Leakage-Resilient Layout Randomization for Mobile Devices.pdf:pdf},
+    isbn = {1-891562-41-X},
+    publisher = {Internet Society},
+    title = {{Leakage-Resilient Layout Randomization for Mobile Devices}},
+    year = {2016}
+}
+
+@inproceedings{Chen2015c,
+    abstract = {StackArmor is a comprehensive protection tech-nique for stack-based memory error vulnerabilities in binaries. It relies on binary analysis and rewriting strategies to drastically re-duce the uniquely high spatial and temporal memory predictabil-ity of traditional call stack organizations. Unlike prior solutions, StackArmor can protect against arbitrary stack-based attacks, requires no access to the source code, and offers a policy-driven protection strategy that allows end users to tune the security-performance tradeoff according to their needs. We present an implementation of StackArmor for x86 64 Linux and provide a detailed experimental analysis of our prototype on popular server programs and standard benchmarks (SPEC CPU2006). Our results demonstrate that StackArmor offers better security than prior binary-and source-level approaches, at the cost of only mod-est performance and memory overhead even with full protection.},
+    author = {Chen, Xi and Slowinska, Asia and Andriesse, Dennis and Bos, Herbert and Giuffrida, Cristiano},
+    doi = {10.14722/ndss.2015.23248},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Unknown/2015 - Chen et al. - StackArmor Comprehensive Protection from Stack-based Memory Error Vulnerabilities for Binaries.pdf:pdf},
+    isbn = {189156238X},
+    title = {{StackArmor: Comprehensive Protection from Stack-based Memory Error Vulnerabilities for Binaries}},
+    year = {2015}
+}
+
+@inproceedings{Chen2017a,
+    abstract = {—Code diversification is an effective strategy to pre-vent modern code-reuse exploits. Unfortunately, diversification techniques are inherently vulnerable to information disclosure. Recent diversification-aware ROP exploits have demonstrated that code disclosure attacks are a realistic threat, with an attacker able to read or execute arbitrary code memory and gather enough gadgets to bypass state-of-the-art code diversi-fication defenses. In this paper, we present CodeArmor, a binary-level system to harden code diversification against all the existing read-based and execution-based code disclosure attacks. To counter such attacks, CodeArmor virtualizes the code space to com-pletely decouple code pointer values from the concrete location of their targets in the memory address space. Using a com-bination of run-time randomization and pervasively deployed honey gadgets, code space virtualization probabilistically en-sures that only code references that can legitimately be issued by the program are effectively translated to the concrete code space. This strategy significantly reduces the attack surface, limiting the attacker to only code pointer gadgets that can be leaked from data memory. In addition, unlike existing leakage-resistant code diversification techniques that provide similar security guarantees, CodeArmor requires no access to source code, hypervisors, or special hardware support. Our experimental results show that CodeArmor provides a strong line of defense against existing and future attacks, at the cost of only low average performance overhead (6.9% on SPEC and 14.5% on popular server programs, and even lower—roughly halving such average overheads—when oper-ating aggressive inlining optimizations at the binary level).},
+    author = {Chen, Xi and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {Proceedings - 2nd IEEE European Symposium on Security and Privacy, EuroS and P 2017},
+    doi = {10.1109/EuroSP.2017.17},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Proceedings - 2nd IEEE European Symposium on Security and Privacy, EuroS and P 2017/2017 - Chen, Bos, Giuffrida - CodeArmor Virtualizing the Code Space to Counter Dis.pdf:pdf},
+    isbn = {9781509057610},
+    keywords = {code space virtualization,honey gadgets,randomization,read,rerandomization},
+    mendeley-tags = {read},
+    pages = {514--529},
+    title = {{CodeArmor: Virtualizing the Code Space to Counter Disclosure Attacks}},
+    year = {2017}
+}
+
+@online{IntelCET,
+    author = {Intel},
+    title = {{Intel CET}},
+    url = {https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html},
+    year = 2022
+}
+
+@online{IntelAVX,
+    author = {Intel},
+    title = {{Intel Advanced Vector Extensions}},
+    url = {https://www.intel.com/content/dam/develop/external/us/en/documents/36945},
+    year = 2022
+}
+
+@online{MicrosoftCFG,
+    author = {Microsoft},
+    title = {{Microsoft Control Flow Guard}},
+    url = {https://docs.microsoft.com/en-us/windows/win32/secbp/control-flow-guard},
+    year = 2022
+}
+
+@inproceedings{Tice2014,
+    abstract = {Constraining dynamic control transfers is a common tech-nique for mitigating software vulnerabilities. This de-fense has been widely and successfully used to protect return addresses and stack data; hence, current attacks instead typically corrupt vtable and function pointers to subvert a forward edge (an indirect jump or call) in the control-flow graph. Forward edges can be protected us-ing Control-Flow Integrity (CFI) but, to date, CFI im-plementations have been research prototypes, based on impractical assumptions or ad hoc, heuristic techniques. To be widely adoptable, CFI mechanisms must be inte-grated into production compilers and be compatible with software-engineering aspects such as incremental compi-lation and dynamic libraries. This paper presents implementations of fine-grained, forward-edge CFI enforcement and analysis for GCC and LLVM that meet the above requirements. An analysis and evaluation of the security, performance, and resource consumption of these mechanisms applied to the SPEC CPU2006 benchmarks and common benchmarks for the Chromium web browser show the practicality of our ap-proach: these fine-grained CFI mechanisms have signif-icantly lower overhead than recent academic CFI proto-types. Implementing CFI in industrial compiler frame-works has also led to insights into design tradeoffs and practical challenges, such as dynamic loading.},
+    address = {San Diego, CA},
+    author = {Tice, Caroline and Roeder, Tom and Collingbourne, Peter and Checkoway, Stephen and Erlingsson, {\'{U}}lfar and Lozano, Luis and Pike, Geoff},
+    booktitle = {23rd {USENIX} Security Symposium ({USENIX} Security 14)},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/23rd {USENIX} Security Symposium ({USENIX} Security 14)/2014 - Tice et al. - Enforcing Forward-Edge Control-Flow Integrity in {GCC} & {LLVM}.pdf:pdf},
+    isbn = {978-1-931971-15-7},
+    month = {aug},
+    pages = {941--955},
+    publisher = {{USENIX} Association},
+    title = {{Enforcing Forward-Edge Control-Flow Integrity in {GCC} \& {LLVM}}},
+    year = {2014}
+}
+
+@inproceedings{Rajasekaran2020,
+    address = {New York, NY, USA},
+    title = {{CoDaRR}: {Continuous} {Data} {Space} {Randomization} against {Data}-{Only} {Attacks}},
+    isbn = {978-1-4503-6750-9},
+    url = {https://doi.org/10.1145/3320269.3384757},
+    doi = {10.1145/3320269.3384757},
+    abstract = {The widespread deployment of exploit mitigations such as CFI and shadow stacks are making code-reuse attacks increasingly difficult. This has forced adversaries to consider data-only attacks against which the venerable ASLR remains the primary deployed defense. Data-Space Randomization (DSR) techniques raise the bar against data-only attacks by making it harder for adversaries to inject malicious data flows into vulnerable applications. DSR works by masking memory load and store instructions. Masks are chosen (i) to not interfere with intended data flows and (ii) such that masking likely interferes with unintended flows introduced by malicious program inputs. In this paper, we show two new attacks that bypass all existing static DSR approaches; one that directly discloses memory and another using speculative execution. We then present CoDaRR, the first dynamic DSR scheme resilient to disclosure attacks. CoDaRR continuously rerandomizes the masks used in loads and stores, and re-masks all memory objects to remain transparent w.r.t. program execution. Our evaluation confirms that CoDaRR successfully thwarts these attacks with limited run-time overhead in standard benchmarks as well as real-world applications.},
+    urldate = {2021-11-02},
+    booktitle = {Proceedings of the 15th {ACM} {Asia} {Conference} on {Computer} and {Communications} {Security}},
+    publisher = {ACM},
+    author = {Rajasekaran, Prabhu and Crane, Stephen and Gens, David and Na, Yeoul and Volckaert, Stijn and Franz, Michael},
+    month = oct,
+    year = {2020},
+    pages = {494--505},
+}
+
+@inproceedings{Stanley2013,
+    address = {San Diego, CA, USA},
+    title = {Improved kernel security through memory layout randomization},
+    isbn = {978-1-4799-3214-6 978-1-4799-3213-9},
+    url = {http://ieeexplore.ieee.org/document/6742768/},
+    doi = {10.1109/PCCC.2013.6742768},
+    urldate = {2022-10-17},
+    booktitle = {2013 {IEEE} 32nd {International} {Performance} {Computing} and {Communications} {Conference} ({IPCCC})},
+    publisher = {IEEE},
+    author = {Stanley, Dannie M. and Xu, Dongyan and Spafford, Eugene H.},
+    month = dec,
+    year = {2013},
+    pages = {1--10},
+}
+
+@inproceedings{Lin2009a,
+    title = {Polymorphing software by randomizing data structure layout},
+    volume = {5587 LNCS},
+    isbn = {3-642-02917-5},
+    url = {http://link.springer.com/chapter/10.1007/978-3-642-02918-9_7},
+    doi = {10.1007/978-3-642-02918-9_7},
+    abstract = {This paper introduces a new software polymorphism technique that randomizes program data structure layout. This technique will generate different data structure layouts for a program and thus diversify the binary code compiled from the same program source code. This technique can mitigate attacks (e.g., kernel rootkit attacks) that require knowledge about data structure definitions. It is also able to disrupt the generation of data structure-based program signatures. We have implemented our data structure layout randomization technique in the open source compiler collection gcc-4.2.4 and applied it to a number of programs. Our evaluation results show that our technique is able to achieve software binary diversity. We also apply the technique to one operating system data structure in order to foil a number of kernel rootkit attacks. Meanwhile, programs produced by the technique were analyzed by a state-of-the-art data structure inference system and it was demonstrated that reliance on data structure signatures alone may lead to false negatives in malware detection.},
+    urldate = {2016-06-26},
+    booktitle = {Lecture {Notes} in {Computer} {Science} (including subseries {Lecture} {Notes} in {Artificial} {Intelligence} and {Lecture} {Notes} in {Bioinformatics})},
+    publisher = {Springer},
+    author = {Lin, Zhiqiang and Riley, Ryan D. and Xu, Dongyan},
+    year = {2009},
+    note = {ISSN: 03029743},
+    pages = {107--126},
+}
+
+@incollection{Chen2015b,
+    title = {A practical approach for adaptive data structure layout randomization},
+    volume = {9326},
+    isbn = {978-3-319-24173-9},
+    url = {http://link.springer.com/10.1007/978-3-319-24174-6_4},
+    urldate = {2018-05-04},
+    booktitle = {Lecture {Notes} in {Computer} {Science} (including subseries {Lecture} {Notes} in {Artificial} {Intelligence} and {Lecture} {Notes} in {Bioinformatics})},
+    author = {Chen, Ping and Xu, Jun and Lin, Zhiqiang and Xu, Dongyan and Mao, Bing and Liu, Peng},
+    year = {2015},
+    doi = {10.1007/978-3-319-24174-6_4},
+    note = {ISSN: 16113349},
+    pages = {69--89},
+}
+
+@inproceedings{Carr,
+    title = {{DataShield: Configurable Data Confidentiality and Integrity}},
+    year = {2017},
+    booktitle = {Proceedings of the 2017 ACM on Asia Conference on Computer and Communications Security - ASIA CCS '17},
+    author = {Carr, Scott A and Payer, Mathias},
+    pages = {193--204},
+    publisher = {ACM Press},
+    url = {http://dx.doi.org/10.1145/3052973.3052983 http://dl.acm.org/citation.cfm?doid=3052973.3052983},
+    address = {New York, New York, USA},
+    isbn = {9781450349444},
+    doi = {10.1145/3052973.3052983}
+}
+
+@inproceedings{Hu2016,
+    title = {{Data-Oriented Programming: On the Expressiveness of Non-control Data Attacks}},
+    year = {2016},
+    booktitle = {Proceedings - 2016 IEEE Symposium on Security and Privacy, SP 2016},
+    author = {Hu, Hong and Shinde, Shweta and Adrian, Sendroiu and Chua, Zheng Leong and Saxena, Prateek and Liang, Zhenkai},
+    month = {5},
+    pages = {969--986},
+    publisher = {IEEE},
+    url = {http://ieeexplore.ieee.org/document/7546545/},
+    isbn = {9781509008247},
+    doi = {10.1109/SP.2016.62}
+}
+
+@incollection{Voulimeneas2020,
+    title = {{Distributed Heterogeneous N-Variant Execution}},
+    year = {2020},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    author = {Voulimeneas, Alexios and Song, Dokyung and Parzefall, Fabian and Na, Yeoul and Larsen, Per and Franz, Michael and Volckaert, Stijn},
+    pages = {217--237},
+    volume = {12223 LNCS},
+    publisher = {Springer},
+    url = {http://link.springer.com/10.1007/978-3-030-52683-2_11},
+    isbn = {9783030526825},
+    doi = {10.1007/978-3-030-52683-2{\_}11},
+    issn = {16113349}
+}
+
+@inproceedings{Bruschi2007,
+    title = {{Diversified process replic{\ae}; for defeating memory error exploits}},
+    year = {2007},
+    booktitle = {Conference Proceedings of the IEEE International Performance, Computing, and Communications Conference},
+    author = {Bruschi, Danilo and Cavallaro, Lorenzo and Lanzi, Andrea},
+    month = {4},
+    pages = {434--441},
+    isbn = {1424411386},
+    doi = {10.1109/PCCC.2007.358924},
+    issn = {1097-2641}
+}
+
+@inproceedings{Volckaert2016,
+    title = {{Secure and Efficient Application Monitoring and Replication}},
+    year = {2016},
+    booktitle = {2016 USENIX Annual Technical Conference (USENIX ATC 16)},
+    author = {Volckaert, Stijn and Coppens, Bart and Voulimeneas, Alexios and Homescu, Andrei and Larsen, Per and Sutter, Bjorn De and Franz, Michael},
+    month = {6},
+    pages = {167--179},
+    publisher = {USENIX Association},
+    url = {https://www.usenix.org/conference/atc16/technical-sessions/presentation/volckaert},
+    address = {Denver, CO},
+    isbn = {978-1-931971-30-0}
+}
+
+@inproceedings{Berger2006,
+    title = {{DieHard: Probabilistic Memory Safety for Unsafe Languages}},
+    year = {2006},
+    booktitle = {Proceedings of the 27th ACM SIGPLAN Conference on Programming Language Design and Implementation},
+    author = {Berger, Emery D and Zorn, Benjamin G},
+    pages = {158--168},
+    series = {PLDI '06},
+    publisher = {Association for Computing Machinery},
+    url = {https://doi.org/10.1145/1133981.1134000},
+    address = {New York, NY, USA},
+    isbn = {1595933204},
+    doi = {10.1145/1133981.1134000},
+    keywords = {DieHard, dynamic memory allocation, probabilistic memory safety, randomization, replication}
+}
+
+@inproceedings{vanderKouwe2019,
+    title = {{SoK: Benchmarking Flaws in Systems Security}},
+    year = {2019},
+    booktitle = {2019 IEEE European Symposium on Security and Privacy (EuroS{\&}P)},
+    author = {van der Kouwe, Erik and Heiser, Gernot and Andriesse, Dennis and Bos, Herbert and Giuffrida, Cristiano},
+    month = {6},
+    pages = {310--325},
+    publisher = {IEEE},
+    url = {https://ieeexplore.ieee.org/document/8806739/},
+    isbn = {978-1-7281-1148-3},
+    doi = {10.1109/EuroSP.2019.00031},
+    keywords = {Index Terms-benchmarking, computer systems, security}
+}
+
+@inproceedings{Pomonis2017,
+    author = {Pomonis, Marios and Petsios, Theofilos and Keromytis, Angelos D. and Polychronakis, Michalis and Kemerlis, Vasileios P.},
+    title = {{kR\string^X: Comprehensive Kernel Protection against Just-In-Time Code Reuse}},
+    year = {2017},
+    isbn = {9781450349383},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    doi = {10.1145/3064176.3064216},
+    booktitle = {Proceedings of the Twelfth European Conference on Computer Systems},
+    pages = {420–436},
+    numpages = {17},
+    keywords = {Code diversification, Execute-only memory},
+    location = {Belgrade, Serbia},
+    series = {EuroSys '17}
+}
+
+@inproceedings{Sotirov2007,
+    author = {Sotirov, Alexander},
+    booktitle = {Black Hat Europe},
+    title = {{Heap Feng Shui in JavaScript}},
+    year = {2007}
+}
+
+@book{Larsen2018,
+    doi = {10.1145/3129743},
+    editor = {Larsen, Per and Sadeghi, Ahmad-Reza},
+    isbn = {9781970001839},
+    month = {mar},
+    publisher = {ACM},
+    title = {{The Continuing Arms Race: Code-Reuse Attacks and Defenses}},
+    url = {https://dl.acm.org/citation.cfm?id=3129743},
+    year = {2018}
+}
+
+@inproceedings{Zhang2018,
+    author = {Zhang, Mingwei and Sahita, Ravi},
+    booktitle = {Black Hat Asia Briefings (Black Hat Asia)},
+    title = {{eXecutable-Only-Memory-Switch (XOM-Switch): Hiding Your Code From Advanced Code Reuse Attacks in One Shot}},
+    year = {2018}
+}
+
+@inproceedings{Bhatkar2008,
+    abstract = {Over the past several years, US-CERT advisories, as well as most critical updates from software vendors, have been due to memory corruption vulnerabilities such as buffer overflows, heap overflows, etc. Several techniques have been developed to defend against the exploitation of these vulnerabilities, with the most promising defenses being based on randomization. Two randomization techniques have been explored so far: address space randomization (ASR) that randomizes the location of objects in virtual memory, and instruction set randomization (ISR) that randomizes the representation of code. We explore a third form of randomization called data space randomization (DSR) that randomizes the representation of data stored in program memory. Unlike ISR, DSR is effective against non-control data attacks as well as code injection attacks. Unlike ASR, it can protect against corruption of non-pointer data as well as pointer-valued data. Moreover, DSR provides a much higher range of randomization (typically 232 for 32-bit data) as compared to ASR. Other interesting aspects of DSR include (a) it does not share a weakness common to randomization-based defenses, namely, susceptibility to information leakage attacks, and (b) it is capable of detecting some exploits that are missed by full bounds-checking techniques, e.g., some of the overflows from one field of a structure to the next field. Our implementation results show that with appropriate design choices, DSR can achieve a performance overhead in the range of 5% to 30% for a range of programs.},
+    address = {Berlin, Heidelberg},
+    author = {Bhatkar, Sandeep and Sekar, R.},
+    booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+    doi = {10.1007/978-3-540-70542-0_1},
+    file = {:/mnt/c/Users/felixl/OneDrive - Berlakovich & Sohn KG/Universität/Doktorat/PDFs/Mendeley/Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)/2008 - Bhatkar, Sekar - Data spac.pdf:pdf},
+    isbn = {3540705414},
+    issn = {03029743},
+    keywords = {Address space randomization,Buffer overflow,Memory error},
+    pages = {1--22},
+    publisher = {Springer},
+    title = {{Data space randomization}},
+    url = {http://link.springer.com/chapter/10.1007/978-3-540-70542-0_1 http://link.springer.com/10.1007/978-3-540-70542-0_1},
+    volume = {5137 LNCS},
+    year = {2008}
+}
+
+@techreport{Cadar2008,
+    author = {Cadar, Cristian and Akritidis, Periklis and Costa, Manuel and Martin, Jean-Phillipe and Castro, Miguel},
+    year = {2008},
+    month = {01},
+    title = {Data Randomization}
+}
+
+@article{Kim2014,
+    author = {Kim, Yoongu and Daly, Ross and Kim, Jeremie and Fallin, Chris and Lee, Ji Hye and Lee, Donghyuk and Wilkerson, Chris and Lai, Konrad and Mutlu, Onur},
+    doi = {10.1145/2678373.2665726},
+    isbn = {9781479943944},
+    issn = {0163-5964},
+    journal = {ACM SIGARCH Computer Architecture News},
+    month = {10},
+    number = {3},
+    pages = {361--372},
+    title = {Flipping bits in memory without accessing them},
+    volume = {42},
+    year = {2014}
+}
+
+@inproceedings{Bialek2018,
+    author = {Bialek, Joe},
+    title = {The Evolution of CFI Attacks and Defenses},
+    booktitle = {OffensiveCon 2018},
+    year = {2018},
+}
+
+@inproceedings{Cox2006,
+    address = {Vancouver, B.C. Canada},
+    author = {Cox, Benjamin and Evans, David},
+    booktitle = {15th USENIX Security Symposium (USENIX Security 06)},
+    month = {7},
+    publisher = {USENIX Association},
+    title = {N-Variant Systems: A Secretless Framework for Security through Diversity},
+    year = {2006}
+}
+
+@inproceedings{Goktas2018,
+    author = {G{\"{o}}kta{\c s}, Enes and Kollenda, Benjamin and Koppe, Philipp and Bosman, Erik and Portokalidis, Georgios and Holz, Thorsten and Bos, Herbert and Giuffrida, Cristiano},
+    booktitle = {2018 IEEE European Symposium on Security and Privacy (EuroS\&P)},
+    doi = {10.1109/EuroSP.2018.00024},
+    isbn = {978-1-5386-4228-3},
+    month = {4},
+    pages = {227--242},
+    publisher = {IEEE},
+    title = {Position-Independent Code Reuse: On the Effectiveness of ASLR in the Absence of Information Disclosure},
+    year = {2018}
+}
+
+@article{roemer2012,
+    title = {Return-{{Oriented Programming}}: {{Systems}}, {{Languages}}, and {{Applications}}},
+    shorttitle = {Return-{{Oriented Programming}}},
+    author = {Roemer, Ryan and Buchanan, Erik and Shacham, Hovav and Savage, Stefan},
+    date = {2012-03-01},
+    journaltitle = {ACM Trans. Inf. Syst. Secur.},
+    volume = {15},
+    number = {1},
+    pages = {2:1--2:34},
+    issn = {1094-9224},
+    doi = {10.1145/2133375.2133377},
+    url = {https://doi.org/10.1145/2133375.2133377},
+    urldate = {2025-08-22},
+    abstract = {We introduce return-oriented programming, a technique by which an attacker can induce arbitrary behavior in a program whose control flow he has diverted, without injecting any code. A return-oriented program chains together short instruction sequences already present in a program’s address space, each of which ends in a “return” instruction.Return-oriented programming defeats the W⊕X protections recently deployed by Microsoft, Intel, and AMD; in this context, it can be seen as a generalization of traditional return-into-libc attacks. But the threat is more general. Return-oriented programming is readily exploitable on multiple architectures and systems. It also bypasses an entire category of security measures---those that seek to prevent malicious computation by preventing the execution of malicious code.To demonstrate the wide applicability of return-oriented programming, we construct a Turing-complete set of building blocks called gadgets using the standard C libraries of two very different architectures: Linux/x86 and Solaris/SPARC. To demonstrate the power of return-oriented programming, we present a high-level, general-purpose language for describing return-oriented exploits and a compiler that translates it to gadgets.},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Roemer et al. - 2012 - Return-Oriented Programming Systems, Languages, and Applications.pdf}
+}
+
+@inproceedings{Niu2015,
+    title = {Per-{{Input Control-Flow Integrity}}},
+    booktitle = {Proceedings of the 22nd {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Niu, Ben and Tan, Gang},
+    date = {2015-10-12},
+    pages = {914--926},
+    publisher = {ACM},
+    location = {New York, NY, USA},
+    doi = {10.1145/2810103.2813644},
+    url = {http://dx.doi.org/10.1145/2810103.2813644.},
+    urldate = {2022-01-17},
+    abstract = {Control-Flow Integrity (CFI) is an effective approach to mitigating control-flow hijacking attacks. Conventional CFI techniques statically extract a control-flow graph (CFG) from a program and instrument the program to enforce that CFG. The statically generated CFG includes all edges for all possible inputs; however, for a concrete input, the CFG may include many unnecessary edges. We present Per-Input Control-Flow Integrity (PICFI or πCFI), which is a new CFI technique that can enforce a CFG computed for each concrete input. πCFI starts executing a program with the empty CFG and lets the program itself lazily add edges to the enforced CFG if such edges are required for the concrete input. The edge addition is performed by πCFI-inserted instrumentation code. To prevent attackers from arbitrarily adding edges, πCFI uses a statically computed all-input CFG to constrain what edges can be added at runtime. To minimize performance overhead, operations for adding edges are designed to be idempotent, so they can be patched to no-ops after their first execution. As our evaluation shows, πCFI provides better security than conventional fine-grained CFI with comparable performance overhead.},
+    isbn = {978-1-4503-3832-5},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Niu_Tan_2015_Per-Input_Control-Flow_Integrity.pdf}
+}
+
+@inproceedings{Carlini2015,
+    title = {Control-{{Flow Bending}}: {{On}} the {{Effectiveness}} of {{Control-Flow Integrity}}},
+    shorttitle = {Control-{{Flow Bending}}},
+    booktitle = {{{USENIX Security Symposium}}},
+    author = {Carlini, Nicholas and Barresi, Antonio and Payer, Mathias and Wagner, David and Gross, Thomas R.},
+    date = {2015},
+    pages = {161--176},
+    url = {https://www.usenix.org/conference/usenixsecurity15/technical-sessions/presentation/carlini},
+    urldate = {2016-06-25},
+    abstract = {Control-Flow Integrity (CFI) is a defense which prevents control-flow hijacking attacks. While recent research has shown that coarse-grained CFI does not stop attacks, fine-grained CFI is believed to be secure. We argue that assessing the effectiveness of practical CFI implementations is non-trivial and that common evaluation metrics fail to do so. We then evaluate fullyprecise static CFI — the most restrictive CFI policy that does not break functionality — and reveal limitations in its security. Using a generalization of non-control-data attacks which we call Control-Flow Bending (CFB), we show how an attacker can leverage a memory corruption vulnerability to achieve Turing-complete computation on memory using just calls to the standard library. We use this attack technique to evaluate fully-precise static CFI on six real binaries and show that in five out of six cases, powerful attacks are still possible. Our results suggest that CFI may not be a reliable defense against memory corruption vulnerabilities. We further evaluate shadow stacks in combination with CFI and find that their presence for security is necessary: deploying shadow stacks removes arbitrary code execution capabilities of attackers in three of six cases.},
+    isbn = {978-1-931971-23-2},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Carlini_et_al_2015_Control-Flow_Bending.pdf}
+}
+
+@inproceedings{Evans2015a,
+    title = {Control {{Jujutsu}}: {{On}} the {{Weaknesses}} of {{Fine-Grained Control Flow Integrity}}},
+    shorttitle = {Control {{Jujutsu}}},
+    booktitle = {Proceedings of the 22nd {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Evans, Isaac and Long, Fan and Otgonbaatar, Ulziibayar and Shrobe, Howard and Rinard, Martin and Okhravi, Hamed and Sidiroglou-Douskos, Stelios},
+    date = {2015-10-12},
+    pages = {901--913},
+    publisher = {ACM},
+    location = {Denver Colorado USA},
+    doi = {10.1145/2810103.2813646},
+    url = {https://dl.acm.org/doi/10.1145/2810103.2813646},
+    urldate = {2022-10-17},
+    eventtitle = {{{CCS}}'15: {{The}} 22nd {{ACM Conference}} on {{Computer}} and {{Communications Security}}},
+    isbn = {978-1-4503-3832-5},
+    langid = {english},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Evans_et_al_2015_Control_Jujutsu.pdf}
+}
+
+@inproceedings{Akritidis2008,
+    title = {Preventing Memory Error Exploits with {{WIT}}},
+    booktitle = {Proceedings - {{IEEE Symposium}} on {{Security}} and {{Privacy}}},
+    author = {Akritidis, Periklis and Cadar, Cristian and Raiciu, Costin and Costa, Manuel and Castro, Miguel},
+    date = {2008-05},
+    pages = {263--277},
+    publisher = {IEEE},
+    issn = {10816011},
+    doi = {10.1109/SP.2008.30},
+    url = {http://ieeexplore.ieee.org/document/4531158/},
+    urldate = {2018-03-16},
+    abstract = {Attacks often exploit memory errors to gain control over the execution of vulnerable programs. These attacks remain a serious problem despite previous research on techniques to prevent them. We present write integrity testing (WIT), a new technique that provides practical protection from these attacks. WIT uses points-to analysis at compile time to compute the control-flow graph and the set of objects that can be written by each instruction in the program. Then it generates code instrumented to prevent instructions from modifying objects that are not in the set computed by the static analysis, and to ensure that indirect control transfers are allowed by the control-flow graph. To improve coverage where the analysis is not precise enough, WIT inserts small guards between the original program objects. We describe an efficient implementation with optimizations to reduce space and time overhead. This implementation can be used in practice because it compiles C and C++ programs without modifications, it has high coverage with no false positives, and it has low overhead. WIT's average runtime overhead is only 7\% across a set of CPU intensive benchmarks and it is negligible when IO is the bottleneck.},
+    isbn = {978-0-7695-3168-7},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Akritidis_et_al_2008_Preventing_memory_error_exploits_with_WIT.pdf}
+}
+
+@inproceedings{li2022,
+    title = {{{PACMem}}: {{Enforcing Spatial}} and {{Temporal Memory Safety}} via {{ARM Pointer Authentication}}},
+    shorttitle = {{{PACMem}}},
+    booktitle = {Proceedings of the 2022 {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Li, Yuan and Tan, Wende and Lv, Zhizheng and Yang, Songtao and Payer, Mathias and Liu, Ying and Zhang, Chao},
+    date = {2022-11-07},
+    series = {{{CCS}} '22},
+    pages = {1901--1915},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3548606.3560598},
+    url = {https://dl.acm.org/doi/10.1145/3548606.3560598},
+    urldate = {2024-06-14},
+    abstract = {Memory safety is a key security property that stops memory corruption vulnerabilities. Different types of memory safety enforcement solutions have been proposed and adopted by sanitizers or mitigations to catch and stop such bugs, at the development or deployment phase. However, existing solutions either provide partial memory safety or have overwhelmingly high performance overheads. In this paper, we present a novel sanitizer PACMem to efficiently catch spatial and temporal memory safety bugs. PACMem removes the majority of the overheads by sealing metadata in pointers through the COTS hardware feature -- ARM PA (Pointer Authentication) and saving the overhead of pointer metadata tracking. We have developed a prototype of PACMem and systematically evaluated its security and performance on the Magma, Juliet, Nginx, and SPEC CPU2017 test suites. In our evaluation, PACMem shows no false positives together with negligible false negatives, while introducing stronger bug detection capabilities and lower performance overheads than state-of-the-art sanitizers, including HWASan, ASan, SoftBound+CETS, Memcheck, LowFat, and PTAuth. Compared to the widely deployed ASan, PACMem has no false positives and much fewer false negatives and reduces the runtime overheads by 15.80\% and the memory overheads by 71.58\%.},
+    isbn = {978-1-4503-9450-5},
+    keywords = {sanitizer,spatial memory safety,temporal memory safety},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Li_et_al_2022_PACMem.pdf}
+}
+
+@inproceedings{luo2025,
+    title = {Retrofitting {{XoM}} for {{Stripped Binaries}} without {{Embedded Data Relocation}}},
+    booktitle = {Proceedings 2025 {{Network}} and {{Distributed System Security Symposium}}},
+    author = {Luo, Chenke and Ming, Jiang and Xie, Mengfei and Peng, Guojun and Fu, Jianming},
+    date = {2025},
+    publisher = {Internet Society},
+    location = {San Diego, CA, USA},
+    doi = {10.14722/ndss.2025.240825},
+    url = {https://www.ndss-symposium.org/wp-content/uploads/2025-825-paper.pdf},
+    urldate = {2025-08-25},
+    eventtitle = {Network and {{Distributed System Security Symposium}}},
+    isbn = {979-8-9894372-8-3},
+    langid = {english},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Luo et al. - 2025 - Retrofitting XoM for Stripped Binaries without Embedded Data Relocation.pdf}
+}
+
+@inproceedings{Snow2013,
+    title = {Just-{{In-Time Code Reuse}}: {{On}} the {{Effectiveness}} of {{Fine-Grained Address Space Layout Randomization}}},
+    shorttitle = {Just-{{In-Time Code Reuse}}},
+    booktitle = {2013 {{IEEE Symposium}} on {{Security}} and {{Privacy}}},
+    author = {Snow, Kevin Z. and Monrose, Fabian and Davi, Lucas and Dmitrienko, Alexandra and Liebchen, Christopher and Sadeghi, A.},
+    date = {2013-05},
+    pages = {574--588},
+    publisher = {IEEE},
+    issn = {10816011},
+    doi = {10.1109/SP.2013.45},
+    url = {http://ieeexplore.ieee.org/document/6547134/},
+    urldate = {2016-06-28},
+    abstract = {Fine-grained address space layout randomization (ASLR) has recently been proposed as a method of efficiently mitigating runtime attacks. In this paper, we introduce the design and implementation of a framework based on a novel attack strategy, dubbed just-in-time code reuse, that undermines the benefits of fine-grained ASLR. Specifically, we derail the assumptions embodied in fine-grained ASLR by exploiting the ability to repeatedly abuse a memory disclosure to map an application’s memory layout on-the-fly, dynamically discover API functions and gadgets, and JIT-compile a target program using those gadgets—all within a script environment at the time an exploit is launched. We demonstrate the power of our framework by using it in conjunction with a real-world exploit against Internet Explorer, and also provide extensive evaluations that demonstrate the practicality of just-in-time code reuse attacks. Our findings suggest that fine-grained ASLR may not be as promising as first thought.},
+    isbn = {978-0-7695-4977-4},
+    keywords = {attack,notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Snow_et_al_2013_Just-In-Time_Code_Reuse.pdf}
+}
+
+@inproceedings{Bhat2019,
+    title = {{{ProbeGuard}}: {{Mitigating Probing Attacks Through Reactive Program Transformations}}},
+    booktitle = {International {{Conference}} on {{Architectural Support}} for {{Programming Languages}} and {{Operating Systems}} - {{ASPLOS}}},
+    author = {Bhat, Koustubha and Van Der Kouwe, Erik and Bos, Herbert and Giuffrida, Cristiano},
+    date = {2019-04-04},
+    pages = {545--558},
+    publisher = {ACM},
+    location = {New York, NY, USA},
+    doi = {10.1145/3297858.3304073},
+    url = {https://doi.org/10.1145/3297858.3304073},
+    urldate = {2020-10-01},
+    abstract = {Many modern defenses against code reuse rely on hiding sensitive data such as shadow stacks in a huge memory address space. While much more efficient than traditional integritybased defenses, these solutions are vulnerable to probing attacks which quickly locate the hidden data and compromise security. This has led researchers to question the value of information hiding in real-world software security. Instead, we argue that such a limitation is not fundamental and that information hiding and integrity-based defenses are two extremes of a continuous spectrum of solutions. We propose a solution, ProbeGuard, that automatically balances performance and security by deploying an existing information hiding based baseline defense and then incrementally moving to more powerful integrity-based defenses by hotpatching when probing attacks occur. ProbeGuard is efficient, provides strong security, and gracefully trades off performance upon encountering more probing primitives.},
+    isbn = {978-1-4503-6240-5},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Bhat_et_al_2019_ProbeGuard.pdf}
+}
+
+@inproceedings{duta2023,
+    title = {Let {{Me Unwind That For You}}: {{Exceptions}} to {{Backward-Edge Protection}}},
+    booktitle = {{{NDSS}}},
+    author = {Duta, Victor and Freyer, Fabian and Pagani, Fabio and Muench, Marius and Giuffrida, Cristiano},
+    date = {2023-02},
+    url = {Paper=https://download.vusec.net/papers/chop_ndss23.pdf Code=https://github.com/chop-project/chop},
+    keywords = {class_binary,notion,proj_intersect,proj_memo,proj_offcore,proj_theseus,proj_tropics,type_award,type_bounty,type_conf,type_paper,type_tier1,type_top},
+    file = {/Users/felix/Zotero/storage/JEEUC4LF/Duta et al. - Let Me Unwind That For You Exceptions to Backward.pdf}
+}
+
+@inproceedings{Gras2017,
+    title = {{{ASLR}} on the {{Line}}: {{Practical Cache Attacks}} on the {{MMU}}},
+    booktitle = {Proceedings 2017 {{Network}} and {{Distributed System Security Symposium}}},
+    author = {Gras, Ben and Razavi, Kaveh and Bosman, Erik and Bos, Herbert and Giuffrida, Cristiano},
+    date = {2017},
+    publisher = {Internet Society},
+    location = {Reston, VA},
+    doi = {10.14722/ndss.2017.23271},
+    url = {http://dx.doi.org/10.14722/ndss.2017.23271},
+    urldate = {2021-03-09},
+    abstract = {Address space layout randomization (ASLR) is an important first line of defense against memory corruption attacks and a building block for many modern countermeasures. Existing attacks against ASLR rely on software vulnerabilities and/or on repeated (and detectable) memory probing. In this paper, we show that neither is a hard requirement and that ASLR is fundamentally insecure on modern cache-based architectures, making ASLR and caching conflicting requirements (ASLR⊕Cache, or simply AnC). To support this claim, we describe a new EVICT+TIME cache attack on the virtual address translation performed by the memory management unit (MMU) of modern processors. Our AnC attack relies on the property that the MMU's page-table walks result in caching page-table pages in the shared last-level cache (LLC). As a result, an attacker can derandomize virtual addresses of a victim's code and data by locating the cache lines that store the page-table entries used for address translation. Relying only on basic memory accesses allows AnC to be implemented in JavaScript without any specific instructions or software features. We show our JavaScript implementation can break code and heap ASLR in two major browsers running on the latest Linux operating system with 28 bits of entropy in 150 seconds. We further verify that the AnC attack is applicable to every modern architecture that we tried, including Intel, ARM and AMD. Mitigating this attack without naively disabling caches is hard, since it targets the low-level operations of the MMU. We conclude that ASLR is fundamentally flawed in sandboxed environments such as JavaScript and future defenses should not rely on randomized virtual addresses as a building block.},
+    isbn = {1-891562-46-0},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Gras_et_al_2017_ASLR_on_the_Line.pdf}
+}
+
+@inproceedings{Kc2003,
+    title = {Countering Code-Injection Attacks with Instruction-Set Randomization},
+    booktitle = {Proceedings of the 10th {{ACM}} Conference on {{Computer}} and Communications Security},
+    author = {Kc, Gaurav S. and Keromytis, Angelos D. and Prevelakis, Vassilis},
+    date = {2003},
+    pages = {272--280},
+    publisher = {ACM},
+    issn = {15437221},
+    doi = {10.1145/948143.948146},
+    url = {http://portal.acm.org/citation.cfm?doid=948109.948146},
+    urldate = {2016-06-14},
+    abstract = {We describe a new, general approach for safeguarding systems against any type of code-injection attack. We apply Kerckhoff's principle, by creating process-specific randomized instruction sets (e.g., machine instructions) of the system executing potentially vulnerable software. An attacker who does not know the key to the randomization algorithm will inject code that is invalid for that randomized processor, causing a runtime exception. To determine the difficulty of integrating support for the proposed mechanism in the operating system, we modified the Linux kernel, the GNU binutils tools, and the bochs-x86 emulator. Although the performance penalty is significant, our prototype demonstrates the feasibility of the approach, and should be directly usable on a suitable-modified processor (e.g., the Transmeta Crusoe). Our approach is equally applicable against code-injecting attacks in scripting and interpreted languages, e.g., web-based SQL injection. We demonstrate this by modifying the Perl interpreter to permit randomized script execution. The performance penalty in this case is minimal. Where our proposed approach is feasible (i.e., in an emulated environment, in the presence of programmable or specialized hardware, or in interpreted languages), it can serve as a low-overhead protection mechanism, and can easily complement other mechanisms. Copyright 2003 ACM.},
+    isbn = {1-58113-738-9},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Kc_et_al_2003_Countering_code-injection_attacks_with_instruction-set_randomization.pdf}
 }

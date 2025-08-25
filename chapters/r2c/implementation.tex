@@ -1,0 +1,344 @@
+\section{The \rtwoc{} Compiler}\label{sec:r2c:implementation} % maximum 2-3 pages...
+
+We implemented \rtwoc using the LLVM compiler framework~\cite{Lattner2004}.
+Our modified compiler supports the compilation of a wide range of systems software for the Linux \code{x86\_64} platform (see \cref{ss:scalability}).
+To support complex applications like Webkit, \rtwoc{} is fully compatible with \gls{PIC} for ASLR, stack unwinding, and exception handling.
+\rtwoc combines a multitude of different diversification techniques, including function shuffling, global variable shuffling, and NOP insertion.
+In addition, \rtwoc supports two new diversification techniques that we describe in more detail in the following sections.
+Specifically, our compiler
+\begin{enumerate*}[label=(\roman*)]
+    \item instruments call sites with booby-trapped return addresses (see \cref{ss:impl-rads});
+    \item instruments functions to insert \heapbts, which thwart the statistical analysis of pointers on the stack (see \cref{ss:impl-heap-boobytraps}).
+\end{enumerate*}
+
+\subsection{BTRAs: Booby-Trapped Return Addresses}\label{ss:impl-rads}
+% To this end, \rtwoc encloses return address with BTRAs.
+To enclose return addresses with \btras, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{fig:rad-insertion} are required.
+First, the caller pushes randomly chosen \btras together with the return address on the stack \Circled{\code{1}}.
+Note that the position of the return address within the sequence of \btras is chosen randomly at compile time.
+Second, the caller positions the stack pointer above the return address \Circled{\code{2}}.
+Third, the caller executes the \texttt{call} instruction \Circled{\code{3}}.
+On x86, \texttt{call} instructions implicitly perform two operations:
+\begin{enumerate*}[label=(\roman*)]
+    \item write the return address to the current stack pointer position;
+    \item transfer control to the callee.
+\end{enumerate*}
+Due to the prior positioning of the stack pointer, the call instruction overwrites the return address already on the stack.
+Put differently, the addresses on the stack \emph{do not change} after step \Circled{\code{1}}.
+Writing all the addresses to the stack at once eliminates the possibility for a race condition window during which an attacker could observe stack changes.
+If, for example, only the \btras were inserted before the call, the attacker could learn the return address by observing the stack right before and after the call instruction~\cite{Pomonis2017}.
+While such a precise timing might seem unattainable in practice, a similar race-condition attack forced Microsoft to rethink their Return Flow Guard architecture~\cite{Bialek2018}.
+
+The position of the return address chosen by the \emph{caller} defines how many \btras \emph{precede} the return address.
+The preceding \btras create an offset between the return address and caller stack objects (\eg local variables in the caller).
+We call the resulting offset \emph{pre-offset}.
+
+After the control-flow transfer, the stack pointer points directly below the return address, still pointing into the \btra sequence.
+Subsequent register spills in the callee would, therefore, overwrite \btras below the return address.
+To avoid overwriting the \btras, in the last step the callee decreases the stack pointer by a random offset \Circled{\code{4}}.
+The random offset chosen by the \emph{callee} defines the number of \btras that \emph{succeed} the return address.
+The succeeding \btras create an offset between the return address and callee stack objects (\eg spilled registers).
+This resulting offset is called a \emph{post-offset}.
+
+After adjusting the stack pointer, the callee executes the regular function prologue.
+When reaching the epilogue of the callee, the setup process is reversed as shown in \cref{fig:rad-insertion}, steps \circleddashedtikz{\code{5}} to \circleddashedtikz{\code{7}}.
+First, to identify the correct return address, the callee reverts the post-offset \circleddashedtikz{\code{1}} before executing the return instruction.
+Next, the return instruction pops the return address from the stack \circleddashedtikz{\code{2}} and transfers control back to the caller.
+Finally, the caller reverts the pre-offset \circleddashedtikz{\code{3}}, which is required to perform stack-relative operations, such as referencing spilled local variables or function parameters.
+
+Since the caller chooses the \emph{number} of \btras to push and the \emph{pre-offset}, while the callee chooses the \emph{post-offset}, caller and callee cooperate in the setup of \btras.
+For direct call sites, \rtwoc bounds the number of \btras after the return address at compile-time to fit into the \emph{post-offset}.
+For indirect call sites, no synchronization between the caller and the callee is possible at compile time.
+Instead, we tolerate that the caller potentially overwrites \btras after the return address.
+Per default, \rtwoc does not add \btras to call sites that call unprotected code.
+While adding \btras would not harm functionality, unprotected callees would overwrite \emph{all} \btras after the return address.
+We discuss the security implications in \cref{ss:limitations-coverage}.
+
+Depending on the relocation model, the addresses are either embedded in the \code{push} instructions or read from the \gls{GOT}.
+Since an attacker cannot predictably identify the return address among the \btras, storing the addresses in the data section does not compromise security.
+
+If the randomly chosen number of \btras before the return address is odd, \rtwoc{} inserts an additional \btra to keep the stack aligned.
+On x86-64, the stack pointer must be 16 byte aligned, as
+% Keeping this alignment intact is crucial as certain instructions crash when accessing a misaligned stack.
+programs crash when certain instructions access a misaligned stack.
+
+\subsubsection{Stack Arguments}\label{sss:stack-arguments}
+The \btras inserted by \rtwoc change the distance between stack objects above and below the return address.
+In particular, the distance increases by the sum of pre- and post-offset.
+This increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
+With one notable exception:
+In the System V ABI a caller must pass arguments that do not fit into parameter registers on the stack, \emph{above} the return address.
+
+To access stack arguments despite the varying distance, we devised a method called \emph{\cfs}.
+\Cfs moves the setup of the frame pointer from the function prologue to the call site.
+In particular, the caller positions the frame pointer \emph{before} the varying pre-offset.
+Thus, the distance between the frame pointer and the stack arguments can be computed statically.
+In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
+
+\subsubsection{Optimization with AVX2}
+Implementing the \btra setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
+%    During the performance evaluation we noticed a performance impact particularly on call intensive benchmarks.
+%    We speculate that the large number of instructions puts pressure on the instruction cache.
+To improve \rtwoc{}'s performance, we built an optimized variant that sets up the \btras and the return address with AVX2 vector instructions (see \cref{fig:avx2-setup})~\cite{IntelAVX}.
+
+Before each call site, we initialize a vector register with \btras and the return address and write them to the stack.
+The addresses are read from a call-site specific array in the data section, prepared at compile time.
+Regarding the security of reading the addresses from the data section, the same reason as for the \gls{GOT} holds.
+After the \btras and the return address are written to the stack, \rtwoc{} positions the stack pointer before the return address.
+The \code{vmovdqa} instructions load the addresses from the data section into an AVX2 register.
+The \code{vzeroupper} instruction is needed to eliminate a penalty when switching between SSE and AVX2 instructions.
+Note that zeroing the upper half of the vector registers directly before a call does not affect program correctness.
+Since the affected registers are caller saved, the caller has to save and restore them before a call anyway, if they are used by subsequent basic blocks.
+Without \code{vzeroupper} we observed a performance impact of up to 50\%.
+We discuss the overall performance improvements afforded by the AVX2 instructions in \cref{ss:perf}.
+
+
+%    \newsavebox{\speculativebt}
+%    \begin{lrbox}{\speculativebt}
+%
+%        \begin{lstlisting}[style=asmcode,frame=none,basicstyle=\scriptsize\ttfamily,breaklines=false,linewidth=0.35\linewidth]
+%<boobytrap>: |\tikzmark{T-Boobytrap}|
+% call set_up_call
+%|\tikzmark{T-Decoy-Gadget}| jmp Target
+%set_up_call:
+% mov (%rsp), bt_call
+% ret|\tikzmark{T-Ret-Alarm}|
+%bt_call:
+% call alarm|\tikzmark{T-Call-Alarm}|
+%        \end{lstlisting}
+%    \end{lrbox}
+%
+%    \begin{figure}[t!]
+%        % We currently cannot properly generate this figure with pdflatex because we need a custom font in the Tikz
+%        % legend to match the figure font. Unfortunately, including a custom font in pdflatex is terribly cumbersome.
+%        % The figure generates correctly when using XeLatex as the compiler. The current approach is to generate the
+%        % document with XeLatex, take a screenshot of the magnified figure and save it for use with pdflatex. When
+%        % pdflatex is used, the code simply includes an image instead of generating the figure with Tikz. Words fail
+%        % to convey my disgust...
+%        \ifxetex
+%        \begin{minipage}[t]{\columnwidth}
+%            \resizebox{0.6\columnwidth}{!}{
+%                \includegraphics{img/stack-small.pdf}
+%            }
+%            \begin{tikzpicture}[overlay, remember picture]
+%                \node[draw, dash pattern={on 2pt off 2pt}] at (1.7,2.8) {\usebox\speculativebt};
+%                \node at ([shift={(0.1,0.1)}] pic cs:T-Boobytrap) {\Circled{\scriptsize\ttfamily1}};
+%                \draw[dash pattern={on 2pt off 2pt}] (-1.0, 3.70) -- (0.05, 4.05);
+%                \draw[dash pattern={on 2pt off 2pt}] (-1.05, 3.50) -- (0.05, 1.53);
+%                \node at ([shift={(-0.5,0.4)}] pic cs:T-Decoy-Gadget) {\code{\Circled{\scriptsize\ttfamily2}}};
+%                \node at ([shift={(0.5,0.35)}] pic cs:T-Call-Alarm)  {\Circled{\scriptsize\ttfamily3}};
+%                \draw[dash dot,-latex] ([shift={(0,2pt)}] pic cs:T-Decoy-Gadget) -- ([shift={(-15pt,2pt)}] pic cs:T-Decoy-Gadget) |- (-1.7, 2.35);
+%                \draw[-latex] ([shift={(3pt,2pt)}] pic cs:T-Ret-Alarm) -- ([shift={(50pt,2pt)}] pic cs:T-Ret-Alarm) |- ([shift={(3pt,2pt)}] pic cs:T-Call-Alarm);
+%                %\node at (0.5,2.8) {\figurefont{\small Speculative Execution}};
+%                \draw[dash dot,-latex] (0,1) -- (0.8,1);
+%                \draw[-latex] (0,0.52) -- (0.8,0.52);
+%                \node at (1.9,1) {\figurefont{{\tiny \scalebox{.9}{Speculative Execution}}}};
+%                \node at (2.1,0.52) {\figurefont{{\tiny \scalebox{.9}{Non-Speculative Execution}}}};
+%            \end{tikzpicture}
+%            \else
+%            \resizebox{\columnwidth}{!}{%
+%                \includegraphics{img/speculative-boobytrap.png}
+%            }
+%            \fi
+%            \caption{\rtwoc uses speculation-aware booby traps to mitigate speculative probing.}
+%            \label{fig:spec-boobytrap}
+%            \ifxetex
+%        \end{minipage}
+%        \fi
+%
+%    \end{figure}
+
+\newsavebox{\uninstrumented}
+\begin{lrbox}{\uninstrumented}
+
+\begin{lstlisting}[style=asmcode,breaklines=false]
+|\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
+
+call F|\tikzmark{T-Right-Start}|
+
+|\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
+\end{lstlisting}
+\end{lrbox}
+
+\newsavebox{\instrumented}
+\begin{lrbox}{\instrumented}
+
+\begin{lstlisting}[style=asmcode,breaklines=false,xleftmargin=2em]
+|\tikzmark{T-Before-Begin}|push BTRA1
+push BTRA2
+|\tikzmark{T-Before-End}|push BTRA3
+push BTRA3
+|\tikzmark{T-After-Begin}|push BTRA5
+|\tikzmark{T-After-End}|push BTRA6
+add %rsp, |$(\beta+1)*8$|
+call F
+add %rsp, |$\alpha*8$|
+
+\end{lstlisting}
+\end{lrbox}
+\tikzset{
+pics/numberline/.style n args={4}{
+code = { %
+\coordinate (#3) at (0,0);
+\coordinate (#4) at (0,1);
+\draw (0,0) -- (0,1) ; %edit here for the axis
+\foreach \x in  {0.2,0.4,0.6,0.8} % edit here for the vertical lines
+\draw[shift={(0,\x)},color=black] (0,0) -- (0.05,0);
+\draw[color=black] (#3) -- (0.15,0);
+\draw[color=black] (#4) -- (0.15,1);
+\node at (0.4,0) {#1};
+\node at (0.4,1) {#2};
+}
+}
+}
+%    \begin{figure*}[t!]
+%        \begin{subfigure}[b]{0.2\textwidth}
+%            \usebox\uninstrumented
+%            \begin{tikzpicture}[overlay, remember picture]
+%            \end{tikzpicture}
+%            \vspace*{4.5em}
+%            \caption{A call site with execution count $\mathcal{C}$.
+%            \newline
+%            }
+%        \end{subfigure}
+%        \hfill
+%        \begin{subfigure}[b]{0.4\textwidth}
+%            \begin{tikzpicture}[overlay, remember picture]
+%                \pic at (0,0.5) {numberline={$L_l$}{$U_l$}{lbottom}{ltop}};
+%                \pic at (0,2.5) {numberline={$L_u$}{$U_u$}{ubottom}{utop}};
+%                \pic at (3,1.5) {numberline={$l$}{$u$}{bottom}{top}};
+%                \node[inner sep=0pt] (dice) at (5,2.0) {\includegraphics[width=50pt]{img/dice.png}};
+%                \draw [-latex,out=10,in=180] ([shift={(6pt,-10pt)}] utop) to node[midway,above] {$\Pi$} ([shift={(-3pt,0pt)}] top);
+%                \draw [-latex,out=-10,in=180] ([shift={(6pt,-14pt)}] ltop) to node[midway,above] {$\Pi$} ([shift={(-3pt,0pt)}] bottom);
+%                \begin{scope}[on background layer]
+%                    \draw [-latex,dashed] ([shift={(6pt,-10pt)}] top) to [out=-10,in=190] (7.7,2.65);
+%                    \draw [-latex,dashed] ([shift={(6pt,8pt)}] bottom) to [out=10,in=170] (7.7,1.35);
+%                \end{scope}
+%                \draw[-latex] ([shift={(-75pt,-10pt)}] ubottom) to [out=10,in=170] ([shift={(-3pt,-15pt)}] utop);
+%                \draw[-latex] ([shift={(-75pt,14pt)}] ltop) to [out=-10,in=170] ([shift={(-3pt,-15pt)}] ltop);
+%                \node at ([shift={(-60pt,-12pt)}] ubottom)  {$\mathcal{C}$};
+%            \end{tikzpicture}
+%            \caption{The selection process for determining the total number of BTRAs for a call site, based on the configurable ranges $[U_u,L_u]$, $[U_l,L_l]$ and the execution count $\mathcal{C}$ (see \cref{ss:impl-pgo} for details).}
+%        \end{subfigure}
+%        \hfill
+%        \begin{subfigure}[b]{0.3\textwidth}
+%            \usebox\instrumented
+%            \vspace{0.8em}
+%            \begin{tikzpicture}[overlay, remember picture]
+%                \draw [decorate,decoration={brace,mirror,amplitude=5pt,raise=4pt},yshift=0pt] ([shift={(0pt,5pt)}] pic cs:T-Before-Begin) -- ([shift={(0pt,-2pt)}] pic cs:T-Before-End) node [black,midway,xshift=-0.5cm]  {$\alpha$};
+%                \draw [decorate,decoration={brace,mirror,amplitude=5pt,raise=4pt},yshift=0pt] ([shift={(0pt,5pt)}] pic cs:T-After-Begin) -- ([shift={(0pt,-2pt)}] pic cs:T-After-End) node [black,midway,xshift=-0.5cm] {$\beta$};
+%            \end{tikzpicture}
+%            \caption{\rtwoc instruments the call site to insert $\alpha$ BTRAs before and $\beta$ BTRAs after the return address.}
+%        \end{subfigure}
+%        \caption{\rtwoc automatically configures the random trial that determines the number of BTRAs based on the call site's execution count.}
+%        \label{fig:selection-process}
+%    \end{figure*}
+
+
+% \subsection{Accessing stack arguments}\label{ss:accessing-stack-arguments}
+% \begin{figure}[t]
+%     \centering
+%     \begin{subfigure}[t]{0.45\columnwidth}
+%         \centering
+%         \includegraphics[trim={0 0 5.5cm 0},width=0.9\columnwidth,clip]{img/parameter-addressing.pdf}
+%         \caption{Without \cfs the base pointer points below the spilled base pointer.}
+%         \label{fig:stack-arguments}
+%     \end{subfigure}
+%     \quad
+%     \begin{subfigure}[t]{0.45\columnwidth}
+%         \centering
+%         \includegraphics[trim={5.5cm 0 0 0},width=0.9\columnwidth,clip]{img/parameter-addressing.pdf}
+%         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
+%         \label{fig:stack-arguments-with-rads}
+%     \end{subfigure}
+%     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \btras.}
+% \end{figure}
+
+\begin{figure}[t]
+\centering
+\vspace{0.3cm}
+\resizebox{0.9\columnwidth}{!}{%
+\includegraphics{figures/hardened-btdps}
+}
+\begin{tikzpicture}[overlay, remember picture]
+\draw (-1.9,3.6) node {\sffamily{\textbf{\rtwoc{}}}};
+\draw (-6.65,3.6) node {\sffamily{\textbf{naive}}};
+\end{tikzpicture}
+\caption[]{An attacker could observe the \heapbts \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
+In \rtwoc{} no single \heapbt occurs in both places (right).
+The \heapbts \propername{X} and \propername{Y} mislead attempts to disclose the \heapbt array pointer from the data section (see \cref{ss:impl-heap-boobytraps}).}
+\label{fig:hardened-data-traps}
+\end{figure}
+
+% The \btras inserted by \rtwoc change the distance between stack objects above and below the return address.
+% In particular, the distance increases by the sum of pre-offset and post-offset.
+% The increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
+% With one notable exception:
+% In the System V ABI a caller must pass arguments that do not fit into parameter registers on the stack.
+% Stack arguments are written to the stack \emph{above} the return address.
+% Consider, for example, the stack arguments in the stack frame in \cref{fig:stack-arguments}.
+% The argument values \code{0x7} and \code{0x8} are located above the return address in the illustrated stack frame.
+% LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
+% Which pointer is actually used depends on the optimization level and several other factors.
+% Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
+% Without \btras, the compiler determines the distance between a stack argument and the anchor statically.
+% With \btras, however, the distance is not known at compile-time.
+% Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
+% As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function, but also its caller.
+
+% To access stack arguments despite the varying distance we devised a method called \emph{\cfs}.
+% \Cfs moves the setup of the frame pointer from the function prologue to the call site.
+% In particular, the caller positions the frame pointer \emph{before} the varying pre-offset (see \cref{fig:stack-arguments-with-rads} for an illustration).
+% Thus, the distance between the frame pointer and the stack arguments can be computed statically.
+% In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
+
+% \Cfs is required for all functions using both \btras and stack arguments.
+% As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
+% Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
+% We discuss the introduced performance overhead in \cref{s:eval}.
+
+\subsection{\heapbts: Booby-Trap Data Pointers}\label{ss:impl-heap-boobytraps}
+
+\heapbts aim to stop an attacker from following heap pointers found on the stack.
+To maintain the illusion of a benign heap pointer, \heapbts must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
+Ideally, \heapbts would point to random addresses on the heap that are protected by memory permissions.
+Unfortunately, the Intel architecture currently does not offer sub-page level permissions.
+We therefore simulate the desired effect by letting \heapbts point to random offsets in \emph{guard pages} allocated from heap memory.
+
+Since heap memory is managed by the standard library (e.g. \propername{glibc}), these allocations cannot be performed at compile time.
+Instead, \rtwoc{} registers a \emph{constructor function} that performs the allocations at program start.
+Specifically, the constructor function allocates a configurable number of page-aligned and page-sized chunks of heap memory.
+Next, the constructor function frees all but a randomly chosen subset of those allocations.
+The remaining allocations are scattered randomly across the heap, are page aligned, and span an entire page.
+\rtwoc{} stores pointers to random offsets within those allocations in a global pointer array in the data section.
+To protect the newly created heap pointers from dereferencing, the constructor function revokes the read permission from the occupied page.
+Allocating the guard pages with \code{malloc} without freeing them, prevents \propername{glibc} from reusing the protected page for other allocations.
+
+During compilation, \rtwoc{} instruments functions to write \heapbts from the pointer array to the stack.
+How many \heapbts are written per function is chosen randomly chosen using compile-time parameters.
+The stack slots for the \heapbts are allocated like stack slots for local variables.
+As a result, stack slot randomization shuffles \heapbts with other stack objects, including benign heap pointers.
+
+%    To write a \heapbt to the stack, the function first loads the \heapbt from a random index in the pointer array into a register.
+%    Second, the function writes the register to the assigned stack slot location.
+%    Thus, when storing the \heapbts directly in the data section, \rtwoc requires two instructions to write a single \heapbt to the stack.
+%    If the attacker has access to the data section (\ie knows its location), storing the \heapbts in the data section might pose a security risk.
+%    An attacker could compare heap pointers found in the data section with pointers observed on the stack (see \cref{fig:hardened-data-traps}).
+%    Pointers observed in both locations could potentially be \heapbts.
+%    To avoid the risk of triggering a \heapbt, an attacker could limit himself to pointers occurring on the stack only.
+
+Storing the \heapbts in the data section potentially poses a security risk.
+If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{fig:hardened-data-traps}).
+Pointers observed in both locations could potentially be \heapbts.
+To avoid the risk of triggering a \heapbt, an attacker could limit himself to pointers occurring on the stack only.
+To protect \heapbts against such an attack scenario, \rtwoc{} applies \rtwoc{}'s principle also to the array holding the \heapbts.
+Specifically, \rtwoc allocates the pointer array on the \emph{heap} and stores only a \emph{pointer to the array} in the data section.
+That is, instead of containing the \heapbts directly, the data section now contains only a single heap pointer (apart from application specific pointers).
+Since an attacker might still be able to locate the pointer to the pointer array, \rtwoc inserts additional \heapbts into the data section.
+Note, that these additional \heapbts never occur on the stack and the pointers on the heap are inaccessible to the attacker.
+The attacker thus loses the ability to reliably identify \heapbts.
+See \cref{fig:hardened-data-traps} for a comparison of a naive and a hardened implementation.
+
+As a simple optimization, we omit the instrumentation for all functions without stack allocations.
+Such functions are guaranteed to not write benign heap pointers to the stack either.
+While this optimization over-approximates the set of functions to instrument, it still improves performance for simple functions (\eg accessors).

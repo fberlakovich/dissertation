@@ -1,0 +1,113 @@
+%! root = thesis.tex
+
+\begin{savequote}[8cm]
+    \textlatin{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...}
+
+    There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...
+    \qauthor{--- Cicero's \textit{de Finibus Bonorum et Malorum}}
+\end{savequote}
+
+
+\chapter{\label{ch:1-intro}Introduction}
+
+\minitoc
+
+
+\section{Motivation}
+
+The construction of software today relies on an ever-growing ecosystem of technologies and towers of abstractions.
+For example, it is not uncommon for a browser to consist of several million lines of code\todo{Add reference}.
+While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
+Despite this rise in complexity, the core expectations on software have remained unchanged: software is supposed to be secure, fast, and reliable.
+Especially the goals of security and performance, however, regularly conflict with one another.
+Security measures like \gls{CFI} or randomization, for example, incur a non-negligible performance overhead.\todo{references}
+Performance optimizations such as JIT compilation, on the other hand, increase the complexity and as a result, risk introducing both security vulnerabilities and generally failures (\ie decreased reliability).
+The balancing act between security and reliability on the one side and performance on the other side influences important choices during the software development lifecycle.
+For example, programming languages with higher levels of abstraction can rule out whole classes of security vulnerabilities (\eg through automatic memory management).
+However, the increased comfort and safety afforded by higher abstraction often comes at the cost of decreased runtime performance.
+
+The flipside of the negative tensions between these ares is that improvements in one area increase the leeway developers have in other areas.
+Improvements in performance, for example, can either be used to increase the computational output or to maintain the same computational output but with more powerful security measures in place.
+Improvements in reliability, \eg through improved automated testing, increase the overall confidence in the software system.
+Such increased confidence allows for increased complexity (\eg through optimizations) and can even warrant the choice to reduce preventative security measures, while maintaining the same risk profile.
+This thesis makes contributions in software security (code-reuse defense), software performance (language runtime \cext performance), and reliability (JIT compiler fuzz testing).
+
+\subsection{Security}
+The tradeoff between abstraction and performance explains, at least in part, why languages like C or \cpp still form the foundation of critical infrastructure.
+The potential performance benefits\footnote{Not every program written in C or \cpp is automatically fast.} and the direct control of machine internals makes C and \cpp a popular choice for systems software.
+However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and more broadly speaking, for the pitfalls of undefined behavior.
+These pitfalls regularly lead to dangerous vulnerabilities, which make programs written in C and \cpp attractive targets for malicious actors --- with potentially disastrous consequences.\todo{cite high impact vulnerabilities}
+These vulnerabilities, which include stack and heap-based buffer overflows, use-after-free errors, and format string bugs, consistently rank among the most critical threats to software security and can have disastrous consequences.\todo{cite high impact vulnerabilities}
+
+Although the rising popularity of memory-safe, yet performant languages like Rust mitigates the issue of memory vulnerabilities, C and \cpp remain a popular choice.\todo{cite teobe index}
+What is more, the vulnerabilities stemming from memory safety also threaten memory-safe parts of a program.\todo{Add reference to combining Rust with C}
+Even if new software was written entirely in memory-safe languages from now on, there would still be millions of lines of C and \cpp code in production.
+As a result, vulnerabilities in systems software will likely remain a reality in the years to come.
+
+One class of popular security vulnerabilities is control-flow hijacking and within that class code-reuse attacks.
+Code-reuse attacks hijack a program's control flow and subsequently reuse code already present in the target process.
+This approach allows attackers to bypass defenses like \wox, which, thanks to widespread hardware support, have become a de facto standard.
+Over the years, researchers have continuously refined code-reuse attacks and defenses.
+Among the defenses, two broad categories have emerged:
+\begin{inline}
+    \item enforcement-based defenses (\eg \gls{CFI});
+    \item software diversity.
+\end{inline}
+\gls{CFI} attempts to restrict a program's control-flow at runtime to the control-flow intended by the developer.
+While \gls{CFI} has seen widespread industry adoption, various successful attacks demonstrate the difficulty of statically determining possible and intended control-flow transfers.\todo{cite papers}
+
+Software diversity, on the other hand, tolerates control-flow diversions but attempts to restrict an attacker's maneuverability.
+In particular, software diversity randomizes various aspects of a process (\eg code layout or data representation) to invalidate a-priori information an attacker has about its victim process.
+With an undiversified program, an attacker can use an identical copy of the target as a map to plan his steps.
+For example, with the exact code and its location in the victim process known, an attacker can construct a \gls{ROP} chain a-priori.
+Diversification, on the other hand, invalidates parts of the attacker's map, effectively transforming randomized program parts into unknown terrain.
+
+With software diversity in place, the cat and mouse game between attackers and defenders has become an information game.
+Whereas defenders try to conceal as much information about the process as possible, attackers use an array of tricks to leak information.
+For example, the \gls{JITROP} attack has demonstrated that code randomization alone cannot stop an attacker from learning about the process' code layout.
+Similarly, indirect \gls{JITROP} showed that not even code randomization in combination with execute-only memory protects against code reuse.
+
+A code-reuse attack, which proved to be particularly elusive and could withstand even leakage-resilient diversity, is \gls{AOCR}.
+Similar to indirect \gls{JITROP}, \gls{AOCR} brought to light the shortcomings of existing software-diversity defenses by leaking non-randomized data to infer randomized program parts.
+
+In the first part of this thesis, we demonstrate a new type of software-diversity-based defense that combines \emph{code randomization} with \emph{targeted data randomization}.
+We base our defense on a detailed analysis of \gls{AOCR} and prior work and devised a general principle to break \gls{AOCR}'s profiling stage.
+The combination of code randomization and data randomization renders \gls{AOCR} as well as other defenses relying on accurate information unreliable.
+At the same time, our techniques incur only a moderate performance overhead.
+
+\subsection{Performance}
+A way to escape the lack of abstraction and the high risk of security vulnerabilities with C and \cpp is to use high-level dynamic programming languages like Python.
+The TIOBE index clearly shows that the popularity of high-level languages like Ruby and Python is unbroken.\todo{cite tiobe}
+The performance cost of the higher abstraction, however, makes performance optimization a particularly important topic for dynamic languages.
+For example, optimizing Python has received considerable attention over the years.\todo{cite fater python and microsoft investment}
+All these optimization efforts focus on the core language runtime but face an important obstacle: C extensions.
+C extensions, or more generally native-code extensions, are a crucial part of the Python ecosystem, as they allow delegating certain tasks (\eg performance-critical computations) to native code.
+C extensions like \np have enabled widespread adoption of Python in scientific computing and machine learning.\todo{citations}
+Paradoxically, the reliance on C extensions for performance-critical workloads introduces an optimization barrier: language runtimes, whether they are based on an interpreter, a JIT compiler, or both, fall short of optimizing them.
+The root cause is that the optimizer cannot reason about the code hiding behind a C extension.
+
+The lack of semantics stops \eg JIT compilers from fully optimizing at the interface to \cexts or even into the native code.
+A workaround to close the semantic gap and to fully leverage JIT compilation is to rewrite entire extension in the host language (\eg Python).
+The PyPy project, for example, includes a pure Python implementation of \np to enable JIT compilation of \np code.
+PyPy's example shows the potential performance benefits of such a rewrite, but its incomplete implementation of \np is also testament to the difficulty of such a full rewrite.
+
+The two approaches of
+\begin{inline}
+    \item not optimizing extensions at all, or
+    \item rewriting them in the host language to make them accessible for JIT compilers,
+\end{inline}
+occupy two extremes on the design spectrum.
+In the second part of this thesis, we explore a point between those two extremes on the design spectrum.
+We introduce a technique called \gls{CMQ} that allows C extensions to participate in the optimization of programs.
+With \gls{CMQ}, C extensions can register highly optimized, extension-specific operations.
+These optimized operations can, for example, exploit type locality in C extension datatypes, which would otherwise be invisible to the interpreter.
+\gls{CMQ} does not require any changes such as type annotations to the Python program and also does not depend on runtime code-generation.
+The absence of runtime code-generation is particularly important for resource-constrained or hardened devices.
+
+While \gls{CMQ} is a general technique, we demonstrate its practicality by instantiating it for \cp and the popular extension \np.
+We provide optimized derivatives for a number of \np operations and evaluate our implementation in \npbench and the \propername{Phoronix} benchmark suite, both collections of compute-intensive \np programs.
+
+
+\section{Contributions}
+
+This dissertation makes the following contributions, organized by paper:

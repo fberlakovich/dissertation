@@ -54,6 +54,10 @@
 \usepackage{placeins}
 \usepackage{iftex}
 \usepackage[framemethod=tikz]{mdframed}
+\usepackage{newfloat}
+
+\usetikzlibrary{arrows.meta,arrows,automata,positioning,tikzmark,decorations.pathreplacing,backgrounds}
+
 
 \include{defines}
 
@@ -150,7 +154,6 @@
 
 %%%%% THE ACTUAL DOCUMENT STARTS HERE
 \begin{document}
-
 
 %%%%% CHOOSE YOUR LINE SPACING HERE
 \setlength{\textbaselineskip}{15pt plus2pt minus1pt}
@@ -263,9 +266,14 @@
 %%%%% CHAPTERS
 % Add or remove any chapters you'd like here, by file name (excluding '.tex'):
 \flushbottom
-\include{chapters/ch1-intro}
-\include{chapters/ch2-litreview}
+\include{chapters/introduction}\label{ch:introduction}
 
+\chapter{\rtwoc: AOCR-Resilient Diversity with Reactive and Reflective Camouflage}\label{ch:r2c}
+\include{chapters/r2c/background}
+\include{chapters/r2c/threat-model}
+\include{chapters/r2c/design}
+\include{chapters/r2c/implementation}
+\include{chapters/r2c/evaluation}
 
 %% APPENDICES %% 
 % Starts lettered appendices, adds a heading in table of contents, and adds a

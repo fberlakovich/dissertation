@@ -126,7 +126,9 @@
 \newacronym[plural=EPTs,firstplural=Extended Page Tables (EPTs)]{EPT}{EPT}{Extended Page Table}
 \newacronym{PIC}{PIC}{Position Independent Code}
 \newacronym{GOT}{GOT}{Global Offset Table}
+\newacronym{ROP}{ROP}{Return-Oriented Programming}
 \newacronym{CFI}{CFI}{Control-Flow Integrity}
+\newacronym{JITROP}{JIT ROP}{Just-In-Time Return-Oriented Programming}
 \newacronym{SFI}{SFI}{Software-based Fault Isolation}
 \newacronym{CFG}{CFG}{Control-Flow Graph}
 \newacronym{RSB}{RSB}{Return Stack Buffer}
@@ -135,6 +137,16 @@
 \newacronym{BTB}{BTB}{Branch Target Buffer}
 \newacronym{PC}{PC}{Program Counter}
 \newacronym{CMQ}{CMQ}{Cross-Module Quickening}
+\newacronym{MVEE}{MVEE}{Multi-Variant Execution Engine}
+\newacronym{PIROP}{PIROP}{Position-Independent Code Reuse}
+\newacronym{CPI}{CPI}{Control-Pointer Integrity}
+\newacronym{CCFI}{CCFI}{Cryptographically Enforced Control-Flow Integrity}
+\newacronym{PAC}{PAC}{Pointer Authentication Code}
+\newacronym{HMAC}{HMAC}{Hash-based Message Authentication Code}
+\newacronym{BROP}{BROP}{Blind ROP}
+\newacronym{DEP}{DEP}{Data Execution Prevention}
+\newacronym{CHOP}{CHOP}{Catch Handler Oriented Programming}
+\newacronym{ASLR}{ASLR}{Address Space Layout Randomization}
 
 \ifxetex
 % WORKAROUND for xelatex vs tikzmark:
@@ -205,3 +217,66 @@
     \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
 \newcommand*\circleddashedtikz[1]{\tikz[baseline=(char.base)]{
     \node[shape=circle,dashed,draw,inner sep=1pt] (char) {#1};}}
+
+\newcommand{\cnp}{\prj{}-\np{}\xspace}
+\newcommand{\oapilong}{Optimization Interface\xspace}
+\newcommand{\oapi}{OINT\xspace}
+
+\newcommand{\makepropername}[2]{
+    \expandafter\newcommand\csname #1\endcsname{\propername{#2}\xspace}%
+    \expandafter\newcommand\csname #1noformat\endcsname{#2\xspace}%
+}
+
+\makepropername{np}{NumPy}
+\makepropername{cp}{CPython}
+\makepropername{npbench}{NPBench}
+\makepropername{ocache}{occurence cache}
+\makepropername{Ocache}{Occurence cache}
+
+\newcommand{\cext}{C extension\xspace}
+\newcommand{\cexts}{C extensions\xspace}
+
+\makename{vm}{language VM}
+\makename{edsi}{extension-delimited superinstruction}
+\makename{ophandler}{\propername{opcode} handler}
+
+\newcommand{\XXX}{\fbetodo{Skipped during writing}<placeholder to be filled>}
+
+\newcommand{\perinstrcache}{per-instruction caches\xspace}
+\newcommand{\Perinstrcache}{Per-instruction caches\xspace}
+
+
+
+\DeclareRobustCommand{\rtwoc}{%
+    \ifdefined\pdfstringdefPreHook
+    % This branch is executed for PDF bookmarks and the Table of Contents.
+    \texorpdfstring{R\textsuperscript{2}C}{R²C}%
+    \else
+    % This branch is executed for the main document text.
+    \textsc{R\textsuperscript{2}C}%
+    \fi
+    \xspace
+}
+
+\newcommand*{\threeapprox}{%
+    \mathrel{\vcenter{\offinterlineskip
+    \hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}}}}
+
+\newcommand{\speccpu}{SPEC CPU 2017\xspace}
+
+
+
+\crefname{codelisting}{Listing}{Listings}
+\Crefname{codelisting}{Listing}{Listings}
+
+\crefname{enumfigure}{List}{Lists}
+\Crefname{enumfigure}{List}{Lists}
+\crefname{step}{Step}{Step}
+\Crefname{step}{Steps}{Steps}
+
+\DeclareFloatingEnvironment[placement={ht},name=Listing]{codelisting}
+\DeclareFloatingEnvironment[placement={!ht},name=List]{enumfigure}
+
+\newlist{inline}{enumerate*}{1}
+\setlist[inline]{label={(\roman*)}}
+
