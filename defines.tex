@@ -1,3 +1,19 @@
+\sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
+\UseTblrLibrary{booktabs,functional}
+\usetikzlibrary{arrows.meta,arrows,automata,positioning,tikzmark,decorations.pathreplacing,backgrounds}
+%\DeclareUnicodeCharacter{2212}{−}
+\usepgfplotslibrary{groupplots,dateplot}
+\usetikzlibrary{patterns,shapes.arrows}
+\pgfplotsset{compat=newest}
+
+\pgfplotsset{every axis/.append style={
+    scaled y ticks = false,
+    scaled x ticks = false,
+    y tick label style = {/pgf/number format/fixed},
+    x tick label style = {/pgf/number format/fixed},
+    legend style={font=\small}
+}}
+
 \lstset{language=C++,
     keywordstyle={\bfseries\color{RoyalBlue}},
     basicstyle=\small\ttfamily,
@@ -63,9 +79,25 @@
 
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
 
-\newcommand{\makename}[3][s]{%
-    \expandafter\newcommand\csname #2\endcsname{#3\xspace}%
-    \expandafter\newcommand\csname #2s\endcsname{#3#1\xspace}%
+\newglossaryentry{cra}{
+    name={code-reuse attack},
+    plural={code-reuse attacks},
+    description={Code-reuse attack}
+}
+\newglossaryentry{vm}{
+    name={language VM},
+    plural={Language virtual machine},
+    description={Language VM}
+}
+\newglossaryentry{btra}{
+    name={BTRA},
+    plural={BTRAs},
+    description={Booby-trapped return address}
+}
+\newglossaryentry{heapbt}{
+    name={BTDP},
+    plural={BTDPs},
+    description={Booby-trapped data pointer}
 }
 
 \newcommand{\sbrtodo}[1]{\todo[inline,color=NavyBlue!80]{\textcolor{white}{sbr: #1}}}
@@ -78,10 +110,6 @@
     {IRIdium}%
     \xspace%
 }
-
-\makename{cra}{code-reuse attack}
-\makename{btra}{BTRA}
-\makename{heapbt}{BTDP}
 
 \newcommand{\specPerfAvg}{1.006$\times$}
 \newcommand{\specQuantRetAddr}{70\%}
@@ -109,6 +137,7 @@
 \newcommand{\Cfs}{Offset-invariant addressing\xspace}
 \newcommand{\code}{\texttt}
 \newcommand{\propername}{\textsf}
+\newcommand{\propernamedecl}{\ttfamily}
 \newcommand{\krx}{kR\^{}X\xspace}
 
 \newcommand{\musllib}{\propername{musl}/\propername{libc\plusplus}\xspace}
@@ -236,10 +265,6 @@
 \newcommand{\cext}{C extension\xspace}
 \newcommand{\cexts}{C extensions\xspace}
 
-\makename{vm}{language VM}
-\makename{edsi}{extension-delimited superinstruction}
-\makename{ophandler}{\propername{opcode} handler}
-
 \newcommand{\XXX}{\fbetodo{Skipped during writing}<placeholder to be filled>}
 
 \newcommand{\perinstrcache}{per-instruction caches\xspace}
@@ -279,4 +304,3 @@
 
 \newlist{inline}{enumerate*}{1}
 \setlist[inline]{label={(\roman*)}}
-

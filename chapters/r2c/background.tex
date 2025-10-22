@@ -3,12 +3,12 @@
 \section{Background}\label{sec:r2c:background}
 \subsection{The Co-Evolution of Code-Reuse Attacks and Defenses}
 
-Before \cras, the most straightforward way for an attacker to execute arbitrary code was to use a memory corruption to inject code into the target process.
+Before \gls{cra}, the most straightforward way for an attacker to execute arbitrary code was to use a memory corruption to inject code into the target process.
 The introduction of the hardware feature \gls{DEP} made it practical, however, to prevent memory regions to be writable and executable at the same time.
-With the widespread adoption of \gls{DEP}, attackers switched to \cras.
+With the widespread adoption of \gls{DEP}, attackers switched to \gls{cra}.
 
-Unlike code injection, a \cra reuses the code that is already present in the target process.
-Initially \cras operated on the function level and \eg reused functions from the standard C library (a technique called \propername{return-to-libc}).
+Unlike code injection, a \gls{cra} reuses the code that is already present in the target process.
+Initially \gls{cra} operated on the function level and \eg reused functions from the standard C library (a technique called \propername{return-to-libc}).
 These functions are both powerful and likely present in most attacked programs.
 
 In 2007, Shacham introduced the first version of \gls{ROP} attacks~\cite{Shacham2007}.
@@ -95,7 +95,7 @@ Code-layout randomization techniques invalidate this a-priori adversarial knowle
 
 A crucial factor for code randomization is the granularity of randomization.
 For example, \gls{ASLR} provides only weak security guarantees, as the number of randomizable bits is limited and the randomization is susceptible to side-channel attacks~\cite{Gras2017}.
-Thus, code-randomization techniques typically provide finer-grained randomization, such as function permutation, basic-block shuffling~\cite{Koo2018} or instruction-level randomization~\cite{Kc2003}.
+Thus, code-randomization techniques typically provide finer-grained randomization, such as function permutation, basic-block shuffling~\cite{Koo2018}, or instruction-level randomization~\cite{Kc2003}.
 An attack called \gls{PIROP} showed that randomization that is too coarse grained, leaves randomized programs susceptible to partial address corruptions.
 \gls{PIROP} exploits the fact that the relative distances between code units (\eg gadgets) below the randomization granularity remain constant.
 For example, with a function permutation scheme, an attacker can partially corrupt a function address to address gadgets \emph{within} the function.

@@ -56,32 +56,32 @@ For example, in \cref{fig:overview-stack-unprotected} the return address is one 
 Second, an attacker can locate pointers based on their value ranges.
 The heap pointer in \cref{fig:overview-stack-unprotected}, for example, has a different address range than code pointers or the spilled base pointer.
 If both of these methods fail, an attacker can still resort to guessing.
-Under specific circumstances, such brute-force attacks are a reasonable option, e.g., some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
+Under specific circumstances, such brute-force attacks are a reasonable option; some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
 
 To address the described issues, \rtwoc combines two different techniques:
 \begin{enumerate}
 [label=(\roman*)]
 %    \vspace*{-0.5cm}
-    \item So-called \emph{booby-trapped return addresses}, or \btras for short, randomize the precise position of a return address in a stack frame.
-    By inserting \btras, \rtwoc changes the relative position of the return address to other stack objects.
+    \item So-called \emph{booby-trapped return addresses}, or \glspl{btra} for short, randomize the precise position of a return address in a stack frame.
+    By inserting \glspl{btra}, \rtwoc changes the relative position of the return address to other stack objects.
     An attacker is, therefore, no longer able to rely on specific stack objects as anchor points to locate the return address.
-    In addition, \btras disguise the return address among enclosing and similar-looking values, as they are specifically chosen to look and behave exactly like benign return addresses.
-    \btras point to booby-trap functions randomly distributed in the text section.
-    Without exact code-layout information, an adversary cannot separate \btra addresses from benign addresses.
+    In addition, \glspl{btra} disguise the return address among enclosing and similar-looking values, as they are specifically chosen to look and behave exactly like benign return addresses.
+    \glspl{btra} point to booby-trap functions randomly distributed in the text section.
+    Without exact code-layout information, an adversary cannot separate \glspl{btra} from benign addresses.
 
-    \item A combination of \emph{booby-trapped data pointers}, or \heapbts for short, and stack slot randomization protects heap pointers against disclosure.
+    \item A combination of \emph{booby-trapped data pointers}, or \glspl{heapbt} for short, and stack slot randomization protects heap pointers against disclosure.
     Stack object permutation randomizes the position of heap pointers relative to other stack objects.
-    The insertion of \heapbts misleads \gls{AOCR}'s statistical analysis based on pointer value ranges.
-    As \heapbts point into the heap like benign heap pointers, both share the same value range.
-    To protect against brute force attacks, \heapbts point into guard pages.
-    Dereferencing a \heapbt causes an immediate fault, giving defenders a way to respond to an ongoing attack.
+    The insertion of \glspl{heapbt} misleads \gls{AOCR}'s statistical analysis based on pointer value ranges.
+    As \glspl{heapbt} point into the heap like benign heap pointers, both share the same value range.
+    To protect against brute force attacks, \glspl{heapbt} point into guard pages.
+    Dereferencing a \gls{heapbt} causes an immediate fault, giving defenders a way to respond to an ongoing attack.
 
 \end{enumerate}
 
 The following subsections give an in-detail presentation of the relevant design decisions and requirements.
 First, we describe the details on inserting booby-trapped return addresses (see \Cref{ss:decoy-mimicry}).
-Second, we explain how \heapbts thwart the localization of heap pointers (see \Cref{ss:heap-boobytraps}).
-Third, we illustrate how additional code randomization strengthens the protection afforded by \btras and \heapbts (see \Cref{ss:strengthening}).
+Second, we explain how \glspl{heapbt} thwart the localization of heap pointers (see \Cref{ss:heap-boobytraps}).
+Third, we illustrate how additional code randomization strengthens the protection afforded by \glspl{btra} and \glspl{heapbt} (see \Cref{ss:strengthening}).
 
 \begin{figure*}[t]
     \begin{subfigure}[b]{\columnwidth}
@@ -110,7 +110,7 @@ add %rsp,0x8 |\circleddashedtikz{5}|
 
         \end{subfigure}
         \captionsetup{margin={0pt,1.3cm},oneside}
-        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \btras.}
+        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{btra}.}
         \label{fig:rad-insertion-code}
         \begin{tikzpicture}[overlay, remember picture]
             \draw[-Latex] ([shift={(18pt,2pt)}] pic cs:T-Call-Setup) -- +(1.6,0) |- ([shift={(-7pt,2pt)}] pic cs:T-Function);
@@ -137,33 +137,33 @@ add %rsp,0x8 |\circleddashedtikz{5}|
     \end{subfigure}
     \vspace*{-1em}
     \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{fig:rad-insertion-code}), and effect on the stack (\Cref{fig:rad-insertion-stack}).
-    For brevity the figure uses only two \btras before (\texttt{\btra1} and \texttt{\btra2}) and one \btra after (\texttt{\btra3}) the return address.}
+    For brevity the figure uses only two \glspl{btra} before (\texttt{\gls{btra}1}) and \texttt{\gls{btra}2}) and one \gls{btra} after (\texttt{\gls{btra}3}) the return address.}
     \label{fig:rad-insertion}
 \end{figure*}
 
 \subsection{The Mimicry of Booby-Trapped Return Addresses}\label{ss:decoy-mimicry}
-An indispensable prerequisite for effective BTRAs is that they must be virtually indistinguishable from actual, benign return addresses.
-For BTRAs to masquerade as return addresses, they must:
+An indispensable prerequisite for effective \glspl{btra} is that they must be virtually indistinguishable from actual, benign return addresses.
+For \glspl{btra} to masquerade as return addresses, they must:
 \begin{enumerate*}[label={(\roman*)}]
     \item look like return addresses;
     \item behave like return addresses;
     \item resist brute force attacks.
 \end{enumerate*}
 
-To achieve the first and the third goal, BTRAs point to booby trap functions.
-Booby trap functions are distributed randomly in the \emph{text section}, giving BTRAs the same value range as benign return addresses.
+To achieve the first and the third goal, \glspl{btra} point to booby trap functions.
+Booby trap functions are distributed randomly in the \emph{text section}, giving \glspl{btra} the same value range as benign return addresses.
 Absent exact information about return addresses and leakage through side channels, an attacker could still apply brute-force.
-Blind ROP, for example, demonstrates the effectiveness and feasibility of brute-force to learn the location of a \code{read} gadget~\cite{Bittau2014a}.
+\gls{BROP}, for example, demonstrates the effectiveness and feasibility of brute-force to learn the location of a \code{read} gadget~\cite{Bittau2014a}.
 Booby traps provide an effective way to penalize such brute force attempts~\cite{Crane2013}.
-In the context of \rtwoc, a classic Blind ROP attack is infeasible for two reasons:
+In the context of \rtwoc, a classic \gls{BROP} attack is infeasible for two reasons:
 \begin{enumerate*}[label={(\roman*)}]
     \item the booby trap functions distributed in the text section deter attempts to blindly locate gadgets with brute force;
-    \item execute-only memory prevents Blind ROP from disclosing the text section with a found \texttt{read} gadget.
+    \item execute-only memory prevents \gls{BROP} from disclosing the text section with a found \texttt{read} gadget.
 \end{enumerate*}
 Likewise, brute forcing an attack with all return address candidates is improbable because all but one of the candidates lead to a booby trap function.
 We discuss the combination of Blind ROP with the more powerful PIROP attack in \cref{sss:corrupting-code-pointers}.
 
-To achieve the second goal, BTRAs mimic the runtime behavior of return addresses.
+To achieve the second goal, \glspl{btra} mimic the runtime behavior of return addresses.
 Since return addresses are part of the control flow of a program, they show a distinct observable runtime behavior.
 Recall the following properties of return addresses and call sites, which must also hold for booby-trapped return addresses:
 \begin{enumerate}[label=(\Alph*)]
@@ -171,24 +171,24 @@ Recall the following properties of return addresses and call sites, which must a
     \item \label{itm:raprop2} Multiple invocations of the same call site have the same return address;
     \item \label{itm:raprop3} Different call sites have different return addresses.
 \end{enumerate}
-% BTRAs must have these properties as well.
+% \glspl{btra} must have these properties as well.
 Violating any of these properties might allow an attacker to learn the actual return address.
 %%% 20201118/1654/sbr/sp2021-urad.tex#519: parallel sentence construction...
 We take the following precautions to preserve the properties.
 To preserve property~\ref{itm:raprop1}, \rtwoc{} ensures that each call site uses the same booby-trapped return address just once.
-To preserve property~\ref{itm:raprop2}, \rtwoc{} does \emph{not} change the set of BTRAs for a call site at run-time.
+To preserve property~\ref{itm:raprop2}, \rtwoc{} does \emph{not} change the set of \glspl{btra} for a call site at run-time.
 This decision represents a rare case, where \emph{more} dynamism is \emph{less} effective.
-Consider a single call site with dynamically changing BTRAs: just two observations suffice to identify the return address, as it is the only pointer remaining identical.
-To preserve property~\ref{itm:raprop3},  \rtwoc{} inserts a randomly chosen set of BTRAs at each \emph{call-site}.
-If, instead, one were to insert them in the \emph{callee}, multiple call sites would have the identical set of BTRAs, with only one difference: the return address.
+Consider a single call site with dynamically changing \glspl{btra}: just two observations suffice to identify the return address, as it is the only pointer remaining identical.
+To preserve property~\ref{itm:raprop3},  \rtwoc{} inserts a randomly chosen set of \glspl{btra} at each \emph{call-site}.
+If, instead, one were to insert them in the \emph{callee}, multiple call sites would have the identical set of \glspl{btra}, with only one difference: the return address.
 
 For this very reason---preserving property~\ref{itm:raprop3}---\rtwoc{} also avoids reusing booby-trapped return addresses between different call sites as much as possible.
-% \rtwoc also tries to avoid reusing BTRAs between different call sites, as doing so would violate \cref{itm:raprop3}.
-In particular, an attacker could leak multiple stack frames and look for recurring addresses to identify BTRAs.
-Due to the ensuing combinatorial explosion, avoiding the reuse of BTRAs between call sites becomes increasingly difficult with an increasing number of call sites.
-To counter this combinatorial effect, we tolerate occasional reuse and parameterize the maximum number of BTRAs.
-An attacker would have to leak two specific stack frames reusing the same BTRAs to gain valuable information.
-Such a leak is unlikely in practice because the BTRAs are distributed randomly over the text section.
+% \rtwoc also tries to avoid reusing \glspl{btra} between different call sites, as doing so would violate \cref{itm:raprop3}.
+In particular, an attacker could leak multiple stack frames and look for recurring addresses to identify \glspl{btra}.
+Due to the ensuing combinatorial explosion, avoiding the reuse of \glspl{btra} between call sites becomes increasingly difficult with an increasing number of call sites.
+To counter this combinatorial effect, we tolerate occasional reuse and parameterize the maximum number of \glspl{btra}.
+An attacker would have to leak two specific stack frames reusing the same \glspl{btra} to gain valuable information.
+Such a leak is unlikely in practice because the \glspl{btra} are distributed randomly over the text section.
 
 \begin{figure*}[t]
     \begin{subfigure}[b]{0.95\columnwidth}
@@ -211,8 +211,8 @@ call callee
     \end{subfigure}
     \captionsetup{margin={0pt,1.3cm},oneside}
     \vspace*{-1em}
-    \caption{\btra setup with AVX2 instructions.
-    The AVX2 instructions load the \btras from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
+    \caption{\Gls{btra} setup with AVX2 instructions.
+    The AVX2 instructions load the \glspl{btra} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
     \label{fig:avx2-setup}
     \begin{tikzpicture}[overlay, remember picture]
         \draw[Latex-, line width=0.6] ([shift={(0pt,3pt)}] pic cs:T-First-Vex-Mov) -- +(3.0,0) |- ([shift={(2pt,114pt)}] pic cs:T-First-Vex-Move);
@@ -229,17 +229,17 @@ Such a reordering invalidates any a priori knowledge an attacker might have rega
 
 Without the knowledge of stack object positions, an attacker can still resort to analyzing the value ranges of stack objects.
 The \gls{AOCR} paper demonstrates that a statistical analysis of two pages of stack values suffices to reliably identify heap pointers.
-Due to the large address space of x64 systems, the values of pointers occur in clusters, with heap pointers typically constituting the third largest cluster.
+Due to the large address space of x64 systems, the values of pointers occur in clusters, with heap pointers typically constituting the third-largest cluster.
 To reach the heap, an attacker does not necessarily need to identify a \emph{specific} heap pointer.
-Note, however, that thanks to stack slot randomization an attacker also \emph{cannot} identify a specific heap pointer.
+Note, however, that thanks to stack slot randomization, an attacker also \emph{cannot} reliably identify a specific heap pointer.
 Instead, an attacker has to pick and dereference an arbitrary pointer from the cluster of heap pointers.
-\rtwoc{} uses this insight to penalize the random choice by mixing \heapbts into the cluster of benign heap pointers.
-\heapbts point into randomly distributed guard pages on the heap, thus, sharing the same value range as benign heap pointers.
-A statistical analysis will, thus, sort \heapbts and benign heap pointers into a single cluster.
-If an attacker dereferences a \heapbt, she causes a segmentation fault that can be handled by the program or a monitoring system.
+\rtwoc{} uses this insight to penalize the random choice by mixing \glspl{heapbt} into the cluster of benign heap pointers.
+\glspl{heapbt} point into randomly distributed guard pages on the heap, thus, sharing the same value range as benign heap pointers.
+A statistical analysis will, thus, sort \glspl{heapbt} and benign heap pointers into a single cluster.
+If an attacker dereferences a \gls{heapbt}, she causes a segmentation fault that can be handled by the program or a monitoring system.
 
 \subsection{Strengthening \rtwoc Through Code Randomization}\label{ss:strengthening}
-To strengthen security, \rtwoc diversifies the code layout at a sub-function granularity.
+To strengthen security, \rtwoc diversifies the code layout at a subfunction granularity.
 To this end, \rtwoc randomly inserts NOP instructions at call sites, traps in function prologs, and randomizes register allocation~\cite{Crane2015, Pappas2012a}.
 By diversifying these function parts, two specific types of inference are impeded:
 \begin{enumerate*}[label=(\roman*)]
@@ -250,7 +250,7 @@ By diversifying these function parts, two specific types of inference are impede
 The inserted NOPs at a call site change the relative offset between the return address and the calling function address.
 As a result, an attacker can no longer reliably infer the function address from a leaked return address, effectively restricting the use of return addresses to \emph{gadget localization}.
 Whereas for a whole-function reuse attack a \emph{single} function pointer might suffice, an attacker typically needs multiple leaked addresses to locate gadgets.
-Return addresses are protected by \btras and increasing the number of required leaks increases the probability of an attacker choosing a \btra over the real return address.
+Return addresses are protected by \glspl{btra} and increasing the number of required leaks increases the probability of an attacker choosing a \gls{btra} over the real return address.
 Thus, increasing the number of required leaks increases the overall security.
 
 The inserted traps in the prolog change the relative offset from the function start to a potential gadget location.
