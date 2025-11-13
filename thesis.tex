@@ -19,9 +19,59 @@
 % the lines you don't want.
 
 
+
+\begin{filecontents*}[overwrite]{mytimer.lua}
+
+    -- table to hold time performance
+    M = M or {}
+    local socket = require('socket')
+    local time_stat = time_stat or {}
+    local gettime = socket.gettime
+
+    -- start time measurement
+    time_stat["total"] = 0
+
+    -- @param done indicates timer was stopped
+    function start_time_measure(field)
+    time_stat[field] = {start = gettime(), done = false}
+    end
+
+    -- stop time measurement
+    -- if two calls to stop will return wrong value
+    function stop_time_measure(field)
+    if not time_stat[field].done then
+    time_stat[field] = {total = gettime() - time_stat[field].start, done=true}
+    end
+    end
+
+
+    M.start = start_time_measure
+    M.stop  = stop_time_measure
+    M.statistics = function(name) return time_stat[name].total end
+
+    -- M.start("document")
+    -- local s = 0
+    -- for i=1, 1 do s=s+1 end
+    -- M.stop("document")
+
+    -- print(M.statistics("document"))
+    -- print(M.statistics("document"))
+    return M
+\end{filecontents*}
+
+\directlua{timer = require("mytimer")}
+\def\timerstart#1{\directlua{timer.start("#1")}}
+\def\timerstop#1{\directlua{timer.stop("#1")}}
+\def\timerprint#1{
+    \directlua{
+timer.stop("#1")
+print("elapsed time (#1):", timer.statistics("#1").." s")
+}}
+
 %%%%% CHOOSE PAGE LAYOUT
 % The most common choices should be below.  You can also do other things, like replacing "a4paper" with "letterpaper", etc.
 
+\timerstart{document}
 % This one will format for two-sided binding (ie left and right pages have mirror margins; blank pages inserted where needed):
 \documentclass[a4paper,twoside]{uthesis}
 % This one will format for one-sided binding (ie left margin > right margin; no extra blank pages):
@@ -30,37 +80,10 @@
 %\documentclass[a4paper,nobind]{µthesis} 
 
 % Use Noto fonts - comment out to use default LaTeX fonts
-\usepackage{fontspec}
-\usepackage{noto-mono}
-\usepackage{notomath}
-\usepackage{tabularray}
 
-\usepackage{mathtools}
-
-% IEEEtran documentation recommends subfig instead of subfigure and
-\usepackage{subcaption}
-\usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
-\usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
-\usepackage[disable]{todonotes} % Provides tooltip-like todo notes.
-\usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
-\usepackage{xspace} % automatic space after user defined commands
-\usepackage[normalem]{ulem}
-\usepackage{listings} % source code listings
-\usepackage{mwe} % placeholder images
-\usepackage{tikz}
-\usepackage{circledsteps}
-\usepackage[latex=false]{svg}
-\usepackage{xifthen}% provides \isempty test
-\usepackage{placeins}
-\usepackage{iftex}
-\usepackage[framemethod=tikz]{mdframed}
-\usepackage{newfloat}
-\usepackage{siunitx}
-\usepackage{pgfplots}
-
-
-
-\include{defines}
+\timerstart{defines}
+\input{defines}
+\timerprint{defines}
 
 
 %%%%% SELECT YOUR DRAFT OPTIONS
@@ -122,7 +145,7 @@
 
 
 %%%%% THESIS / TITLE PAGE INFORMATION
-\title{Secure, Fast, Reliable - Pick Three}
+\title{Secure by Destruction - Compiler-assisted Program Hardening and Fuzzing}
 \author{Felix Berlakovich}
 \department{Informatik}
 % Your full degree name.
@@ -269,13 +292,23 @@
 \flushbottom
 \include{chapters/introduction}\label{ch:introduction}
 
-\chapter{\rtwoc: AOCR-Resilient Diversity with Reactive and Reflective Camouflage}\label{ch:r2c}
+
+\chapter{Defending against Code-Reuse with Mimicry}\label{ch:r2c}
 \include{chapters/r2c/background}
 \include{chapters/r2c/threat-model}
 \include{chapters/r2c/design}
 \include{chapters/r2c/implementation}
 \include{chapters/r2c/evaluation}
 \include{chapters/r2c/discussion}
+\include{chapters/r2c/future-work}
+
+\chapter{Compiler Fuzzing through Domain-Specific Mutation and Guidance}\label{ch:lool}
+\include{chapters/lool/background}
+\include{chapters/lool/graalvm-fuzzing}
+\include{chapters/lool/design}
+\include{chapters/lool/evaluation}
+\include{chapters/lool/discussion}
+\include{chapters/lool/related-work}
 
 %% APPENDICES %% 
 % Starts lettered appendices, adds a heading in table of contents, and adds a
@@ -287,17 +320,11 @@
 
 %%%%% REFERENCES
 
-% JEM: Quote for the top of references (just like a chapter quote if you're using them).  Comment to skip.
-\begin{savequote}[8cm]
-    The first kind of intellectual and artistic personality belongs to the hedgehogs, the second to the foxes \dots
-    \qauthor{--- Sir Isaiah Berlin \cite{berlin_hedgehog_2013}}
-\end{savequote}
-
 \setlength{\baselineskip}{0pt} % JEM: Single-space References
 
 {\renewcommand*\MakeUppercase[1]{#1}%
 \newrefcontext[sorting=none]%
 \printbibliography[heading=bibintoc,title={\bibtitle}]}
 
-
+\timerprint{document}
 \end{document}

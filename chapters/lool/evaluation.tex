@@ -1,0 +1,256 @@
+\section{Evaluation}\label{s:evaluation}
+The goal of our evaluation is to study the advantages and disadvantages of different mutation and feedback strategies for GraalVM compiler fuzzing.
+Our evaluation aims to confirm or refute the following hypotheses, which we formulated based on preliminary results:
+\begin{hypotheses}
+    \hypothesis[hpt:feedback-vs-nofeedback]{Feedback vs. No Feedback} Feedback-driven mutation of code generation parameters outperforms fuzzing without feedback with regard to
+    \begin{itemize}
+        \item triggering rare optimizations;
+        \item achieving code coverage.
+    \end{itemize}
+    \hypothesis[hpt:coverage-overhead]{Coverage Feedback Overhead} Context-blind and context-aware coverage incurs less overhead than code coverage;
+    \hypothesis[hpt:domain-specific-mutation]{Domain-Specific Mutation vs. Generic Mutation} Domain-specific mutation of generation parameters outperforms parametric, but general-purpose mutation with regards to
+    \begin{itemize}
+        \item triggering rare optimizations;
+        \item achieving code coverage.
+    \end{itemize}
+    \hypothesis[hpt:contextaware-vs-contextblind]{Context-Aware vs. Context-Blind} Context-aware coverage outperforms context-blind coverage with regards to
+    \begin{itemize}
+        \item triggering rare optimizations;
+        \item achieving code coverage.
+    \end{itemize}
+\end{hypotheses}
+In this section we present the results of our experiments and then discuss the hypotheses in \cref{s:discussion}.
+
+\subsection{Experimental Setup}\label{ss:experimental-setup}
+We performed all experiments on GraalVM 25.0 running on 3 identical machines with Debian 12.11.
+Each machine is equipped with an AMD Ryzen Threadripper PRO 7995WX with 192 cores (96 physical cores, each with hyper-threading) and 512 GB of RAM\@.
+To account for the large number of experiments, we partitioned each machine with \propername{cgroups} into 3 equally sized partitions with 64 cores each.
+We chose the core assignment such that logical cores are not split across partitions and partitions do not compete for shared resources such as the L3 cache.
+Experiments that use \aflpp as mutation engine, use version \propername{4.34a} with a 256 KB map and otherwise default options.
+A 256 KB map is less cache-friendly than the default 64 KB map, but for the \aflpp experiments coverage processing
+\begin{enumerate*}[label=(\roman*)]
+    \item is not the bottleneck
+    \item and 64 KB led to a large number of collisions.
+\end{enumerate*}
+The high collision rate is in line with previous work that observed high collision rates~\cite{Gan2018,sarafov2024}.
+
+Every fuzzing campaign ran for 24h and was repeated 10 times to account for the inherent randomness of fuzzing.
+A fuzzing campaign consists of a single process running our fuzzing framework and, in the \aflpp experiments, the \aflpp process.
+The GraalVM compiler is free to use any of the cores in its partition for compilation.
+
+Experiments that use code coverage share an instrumentation cache across all runs.
+This cache enables the instrumentation agent to reuse the already instrumented class file except for the first time a class is loaded.
+The cache is also important to guarantee consistent edge identifiers across multiple runs of the same experiment.
+For the experiments that do not use code coverage, we re-ran all test cases in a separate run with code-coverage enabled.
+This separate measurement step guarantees that experiments without code coverage are not negatively affected by the overhead induced by code coverage.
+
+\subsection{Experiment Evaluation}\label{ss:experiment-evaluation}
+
+We evaluated the following 8 different configurations:
+\aflpp configurations, by default, are fully parametric (see \cref{sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{ss:afl-parameter-mutation}).
+For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
+Configurations with \propername{memory} accumulate counters over time, whereas \propername{generation} in the name means genetic algorithm measures fitness relative only to other individuals in the same generation.
+\begin{configurations}
+    \configuration{Static-Params}\label{config:static} static, hardcoded parameters in the code generator and no feedback, as currently used in day-to-day GraalVM fuzzing.
+    \configuration{Random-Params}\label{config:no-feedback} no feedback mechanism, random code generation parameters.
+    \configuration{\aflpp Code Coverage}\label{config:aflcodecov} a configuration where we use \aflpp's code coverage and parametric input mutation to mutate the generated programs.
+    Specifically, we use bytecode-instrumentation to achieve \aflpp code coverage including frequencies.
+    We let \aflpp mutate the input generator's parameters by using a proxy binary as \aflpp's test subject, as implemented in Kelinci~\cite{kelinci}, Jazzer~\cite{jazzer} and JQF~\cite{Padhye2019a}.
+    The bits in the proxy binary resemble the code generator's parameters, effectively allowing \aflpp to mutate code generation parameters.
+    Similarly, the proxy binary allows an application (the GraalVM compiler) running in the JVM to send back coverage information to \aflpp.
+    \configuration{\aflpp Context-Blind}\label{config:aflcontextblind} a configuration where we use \aflpp for parametric input mutation together with lightweight optimization log counters as coverage.
+    The optimization log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
+    \configuration{\aflpp Context-Aware}\label{config:aflcontextaware} a configuration where we use \aflpp for parametric input mutation together with per-method optimization pairs as coverage.
+    Instead of aggregating the optimization counters, we record them for each method individually to identify pairs of optimizations that occurred together.
+    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{s:lool-design}) with code coverage as feedback.
+    \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization log counters as coverage.
+    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{s:lool-design}).
+    During each run, this configuration tries to breed as many generations as possible.
+    Each generation consists of 16 parameter vectors, and the fuzzer creates a new generation when each vector has generated 40 tests or after one hour, whichever happens first.
+\end{configurations}
+
+\cref{config:static,config:no-feedback,config:aflcodecov} serve as baselines to gauge the effectiveness of the other configurations.
+We deliberately chose an \aflpp baseline that uses parametric fuzzing instead of raw mutation of input programs as discussed in \cref{ss:design-overview}.
+\cref{config:static,config:no-feedback} allow us to separate the effect of varying generation parameters, but in an undirected way.
+\cref{config:aflcontextblind,config:aflcontextaware} measure the effectiveness of using optimization log information as coverage, but with an existing, popular mutation engine.
+These configurations essentially use \aflpp's algorithms but replace code-coverage with two different forms of optimization log counter coverage.
+Like in \cref{config:aflcodecov}, we let \aflpp operate on a proxy binary to bridge the gap between \aflpp and the GraalVM compiler.
+\cref{config:loolcodecov} measures whether a domain-specific input mutation improves upon parametric, but semantics-oblivious mutation.
+\cref{config:loolcontextblind,config:loolfull} combine \lool's contributions: domain-specific input mutation and optimization counters as coverage feedback.
+
+We evaluated the different configurations according to the following criteria:
+\begin{itemize}
+    \item amount of code coverage, measured as edge coverage (see \cref{sss:eval-code-coverage})
+    \item number of rare optimizations performed (see \cref{ss:eval-rare-opts})
+    \item number of rare optimization pairs performed (see \cref{ss:eval-rare-opts})
+\end{itemize}
+
+We also provide the number of unique bugs found by each configuration.
+We note, however, that without a ground truth the number of bugs found is unsuitable for comparing the configurations.
+
+\begin{table}[!t]
+    \small
+    \caption{The total number of successful, failed, skipped and timeout tests in each configuration summed over all runs as well as their median test runtimes and LoC.}
+    \label{tbl:test-overview}
+    \begin{tabular}{>{\nextrow}E C C C C r T T}
+        \toprule
+        {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Median \\ Runtime (s)}} & {\makecell{Median \\ LoC}} \\
+        \midrule
+        \fileInput{generated/lool/test-overview}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\cref{tbl:afl-overview} gives an overview of the total number of tests (sum of all runs) in each experiment.
+In total, the different fuzzing experiments found 4 new bugs.
+In the \aflpp configurations the program generator occasionally has to skip tests because the seed provided by \aflpp is too short.
+We discuss this phenomenon in more detail in \cref{ss:aflpp-vs-genetic}.
+
+\subsection{Overhead of Feedback Mechanisms}
+\begin{table}{}
+    \caption{Number of tests completed in a 30-minute period with different coverage feedback mechanisms.}
+    \label{tbl:coverage-overhead}
+    \centering
+    \begin{tabular}{>{\nextrow}Err}
+        \toprule
+        {Coverage} & \makecell[r]{Completed\\ Tests}          & \makecell[r]{Throughput\\ Decrease (\%)}          \\
+        \midrule
+        \propername{none} & 169 & 0  \\
+        \propername{code} & 49 & 71 \\
+        \propername{context-blind} & 157 & 7 \\
+        \propername{context-aware} & 148 & 12 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+We conducted an experiment to evaluate the performance overhead of code coverage, context-blind coverage (\ie global optimization counters) and context-aware coverage (\ie per-method optimization counters).
+In the experiment, our fuzzing framework runs the same, randomly generated test as often as possible within 30 minutes.
+As each test runs in a subprocess, later tests cannot profit from the VM warmup of previous tests.
+Using no coverage mechanism forms the baseline.
+\cref{tbl:coverage-overhead} shows the test case throughput decrease for each coverage type.
+
+\subsection{Code Coverage}\label{sss:eval-code-coverage}
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{every axis/.append style={
+        width=\linewidth,
+        height=0.8\linewidth,
+    }}
+
+    \input{figures/lool/coverage-timeline}
+    \endgroup
+    \caption{Median cumulative edge coverage of different configurations (and variants) over time.
+    The shaded area shows the interquartile range.
+    The legend is ordered based on the achieved median cumulative coverage after 24 hours.
+    See \cref{ss:experiment-evaluation} and \cref{sss:eval-code-coverage} for details}.
+    \label{fig:cumulative-coverage}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{every axis/.append style={
+        width=\linewidth,
+        height=0.8\linewidth,
+    }}
+    \input{figures/lool/coverage-timeline-upper}%
+    \endgroup
+    \caption{Median cumulative edge coverage of the better performing configurations after 4 hours.
+    See \cref{fig:cumulative-coverage} for the full graph.
+    The legend is ordered based on the achieved median cumulative coverage after 24 hours.}
+    \label{fig:cumulative-coverage-upper}
+\end{figure}
+
+
+%\begin{table}[!t]
+%
+%    \caption{Cumulative coverage development over time for the better performing half of configurations (see \cref{fig:cumulative-coverage-upper}).}
+%    \label{tbl:coverage-development}
+%    \rowcolors{1}{white}{rowgray}
+%    \begin{tabular}{>{\nextrow}l E E E E E E E E E }
+%        \toprule
+%        \hiderowcolors
+%        \multicolumn{2}{c}{} & \multicolumn{2}{c}{} & \multicolumn{4}{c}{\propername{genetic}} & \multicolumn{2}{c}{} \\
+%        {} & {\propername{afl}} & \multicolumn{2}{c}{\propername{genetic}} & \multicolumn{4}{c}{\propername{contextblind}} & \multicolumn{2}{c}{} \\
+%        \cmidrule(lr){5-8}
+%        {} & {\propername{contextblind}} & \multicolumn{2}{c}{\propername{contextaware}} & \multicolumn{2}{c}{\propername{ffif}} & \multicolumn{2}{c}{\propername{old}} & \multicolumn{2}{c}{} \\
+%        \cmidrule(lr){3-4}
+%        \cmidrule(lr){5-6}
+%        \cmidrule(lr){7-8}
+%        {Time} & {\propername{only-params}} & {\propername{generation}} & {\propername{memory}} & {\propername{generation}} & {\propername{memory}} & {\propername{generation}} & {\propername{memory}} & {\propername{random-params}} & {\propername{static-params}} \\
+%        \midrule
+%        \showrowcolors
+%        \fileInput{generated/lool/coverage-development}
+%        \bottomrule
+%    \end{tabular}
+%
+%\end{table}
+
+
+\cref{fig:cumulative-coverage} shows the cumulative code coverage of different configurations over time.
+The configurations roughly divide into an upper and a lower group.
+The bottom group contains all \aflpp configurations with the exception of \propername{afl-contextblind-only-params}.
+The upper group contains configurations without coverage, configurations based on the genetic algorithm and the outlier \propername{afl-contextblind-params}.
+The legend is ordered based on the achieved median cumulative coverage after 24 hours.
+To better distinguish the densely packed upper group, \cref{fig:cumulative-coverage-upper} shows the upper group of configurations after 4 hours and without the interquartile range.
+In the upper group, there is primarily a difference between configurations that vary generation parameters and the single configuration (\propername{static}) that does not.
+%\cref{tbl:coverage-development} shows the same data in table form with a 30 minute resolution.
+
+\subsection{Triggering Rare Optimizations}\label{ss:eval-rare-opts}
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{every axis/.append style={
+        yticklabel style={font=\propernamedecl\footnotesize},
+        execute at begin axis={
+            \pgfplotsset{title={Optimization Uniqueness after 24h},
+                width=0.75\textwidth,
+                height=0.7\linewidth}
+        },
+    }}
+    \input{figures/lool/optimization-rareness-boxplot}%
+    \endgroup
+    \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimizations.
+    \label{fig:rare-opts}
+    See \cref{ss:eval-rare-opts} for details.}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{
+        every axis/.append style={
+            yticklabel style={font=\propernamedecl\footnotesize},
+            execute at begin axis={
+                \pgfplotsset{title={Optimization Pair Uniqueness after 24h},
+                    width=0.75\textwidth,
+                    height=0.7\linewidth}
+            },
+        },
+    }
+    \input{figures/lool/optimization-pairs-rareness-boxplot}%
+    \endgroup
+    \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimization pairs.
+    \label{fig:rare-pairs}
+    See \cref{ss:eval-rare-opts} for details.}
+\end{figure}
+
+
+We evaluated both the rareness of single optimizations and the rareness of optimization pairs.
+In the following text, we use \emph{feature} to mean either optimizations or optimization pairs.
+
+We define the \enquote{rareness} $R(f)$ of a particular feature $f \in F$ as
+\[ R(f) = \log\left( \frac{\sum_{f_j \in F}{\mathrm{count}(f_j)}}{\mathrm{count}(f)} \right) \]
+where $\mathrm{count}(f)$ is the number of occurrences of $f$ across \emph{all} experiments.
+That is, the less often a feature occurred in \emph{any} experiment, the rarer it is.
+We only consider features that occurred at least once overall.
+The logarithm scales down extremely common features, such as the \propername{CanonicalReplacement} optimization.
+We found that due to the very high counts of these features, they would disproportionately contribute to an experiment's overall score, despite being so common.
+
+Based on this definition we calculate a score for each run in a configuration that rates how many rare optimizations or optimization pairs the configuration triggered.
+The score for a run is simply the sum of all individual feature scores in that run.
+The boxplots in \cref{fig:rare-opts,fig:rare-pairs} illustrate statistics based on the rareness scores of the runs in a configuration.
+The boxplot in \cref{fig:rare-opts} is based on optimization rareness scores and the boxplot in \cref{fig:rare-pairs} is based on optimization-pair rareness scores.
+Note that the scores for optimizations and optimization pairs are not directly comparable.

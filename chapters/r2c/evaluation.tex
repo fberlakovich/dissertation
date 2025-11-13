@@ -12,7 +12,7 @@
             },
         },
     }
-    \input{figures/r2c-exec-time}%
+    \input{figures/r2c/r2c-exec-time}%
     \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{sss:full-overhead}).}
     % \propername{Geomean int} shows the geometric mean overhead of the SPEC CPU 2017 integer benchmarks only and \propername{geomean all} of the entire benchmark suite.}
     \label{fig:perf-full}
@@ -40,7 +40,7 @@ To allow for direct comparison with prior work, we included the floating point b
 
 We compiled all benchmarks with the \code{-O3} optimization level and link-time optimization---LLVM's ThinLTO model in our case---enabled.
 As LLVM does not yet support the compilation of \propername{glibc}, we compiled the benchmarks against the unprotected system version of \propername{glibc} and \propername{libstdc\plusplus}.
-To measure the worst-case overhead, we also enabled \glspl{btra} for call sites to unprotected code (see \cref{ss:limitations-coverage}).
+To measure the worst-case overhead, we also enabled \glspl{BTRA} for call sites to unprotected code (see \cref{ss:limitations-coverage}).
 For the evaluation of full \rtwoc{} we took the median execution time of 20 runs.
 For the analysis of \rtwoc{}'s components we used \propername{EPYC Rome} and took the median execution time of 12 runs.
 %\rtwoc{} inserts between one and five traps into each function prolog and each pair of \btra AVX setup instructions contains one to three NOPs (see \cref{ss:strengthening}).
@@ -62,15 +62,15 @@ We compared the median throughput of five runs at the previously determined satu
 %    and to ensure comparability with prior work, we report only the results of the \propername{glibc} based benchmarks here.
 %    The performance results of the benchmarks compiled with the \musllib toolchain can be found in~\cref{apx:additional-benchmarks}.
 
-\subsubsection{\glspl{btra}}\label{sss:eval-btra}
-We evaluated the overhead of \glspl{btra} with the \code{push} setup and with our optimized AVX2 setup sequence respectively.
-To isolate the overhead of \glspl{btra}, we disabled other diversification measures.
-We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{btra} and between 1 and 9 NOPs (see \cref{ss:strengthening}).
+\subsubsection{\glspl{BTRA}}\label{sss:eval-btra}
+We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with our optimized AVX2 setup sequence respectively.
+To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
+We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{ss:strengthening}).
 
-For the \code{push} setup, 10 \glspl{btra} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{btra}, one for the return address, and one to keep the stack aligned (see \cref{ss:impl-rads}).
+For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{ss:impl-rads}).
 \cref{tab:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
 
-In contrast to the \code{push} instructions, setting up 10 \glspl{btra} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
+In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
 \fbetodo{adjust to new numbers}
 \cref{tab:perf-components} shows that the optimization improves the overall performance by 2\%.
 Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 13 absolute percent points, down to 8\%.
@@ -79,11 +79,11 @@ In this configuration, the maximum overhead of 10\% is caused by \propername{xal
 To analyze the overhead of \cfs (see \cref{sss:stack-arguments}), we built a configuration without applying any diversification measure, but with \cfs \emph{enabled}.
 Enabling only \cfs allows us to measure its performance impact, and the missed opportunities of the frame-pointer omission optimization.
 We found that the resulting geometric mean performance overhead is \geomeancfs with a maximum impact of \maxoverheadcfs.
-These numbers suggest that the majority of the overhead is caused by writing the \glspl{btra} to the stack.
+These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
 
-%\subsubsection{\glspl{btra} with vector instructions}
+%\subsubsection{\glspl{BTRA} with vector instructions}
 %We built a configuration that uses our optimized AVX2 instruction setup sequence (see \propername{AVX2} in \cref{fig:perf-components}).
-%In contrast to the \code{push} instructions, setting up ten \glspl{btra} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
+%In contrast to the \code{push} instructions, setting up ten \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
 %\cref{fig:perf-components} shows that the performance increase afforded by the optimization varies per benchmark.
 %\fbetodo{adjust to new numbers}
 %Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 16\% absolute percent points, to 6.82\%.
@@ -143,7 +143,7 @@ We built a configuration with all \rtwoc{} protections enabled (see \cref{fig:pe
 % would be nice to reiterate, but space is precious
 This configuration
 \begin{enumerate*}[label={(\roman*)}]
-    \item protects return addresses with \glspl{btra} (see \cref{ss:impl-rads});
+    \item protects return addresses with \glspl{BTRA} (see \cref{ss:impl-rads});
     \item injects \glspl{heapbt} (see \cref{ss:impl-heap-boobytraps});
     \item performs stack slot shuffling, global variable shuffling and register-allocation randomization;
     \item and inserts traps into function prologs and NOPs at call sites (see \cref{ss:strengthening}).
@@ -205,12 +205,12 @@ With child processes, \propername{maxrss} reflects the maximum usage among all c
 Instead, we started a separate monitoring process that records the RSS usage of each webserver process every second and calculated the median.
 With this methodology, we found the memory overhead of the webserver benchmarks to be about 100\%.
 We verified experimentally that about 55\% of the memory overhead is caused by the page allocations for \glspl{heapbt}.
-The rest is caused by \glspl{btra} and the increased binary size.
+The rest is caused by \glspl{BTRA} and the increased binary size.
 
 \subsection{Scalability}\label{ss:scalability}
 Although the SPEC benchmark suite covers a wide variety of test programs, we also compiled real-world software with \rtwoc.
 Apart from Apache and nginx, we also compiled the GTK version of WebKit~\cite{Webkit} and Chromium~\cite{Chromium}.
-We built both browsers with a fixed total number of 10 \glspl{btra} per call site.
+We built both browsers with a fixed total number of 10 \glspl{BTRA} per call site.
 WebKit and Chromium are massive \cpp projects with more than 4.5 million lines and almost 32 million lines of C/C\plusplus code, respectively.
 
 To verify that \rtwoc does not introduce errors into the browser, we ran the included tests as well as the Speedometer browser benchmark.

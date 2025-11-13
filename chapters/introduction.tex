@@ -1,113 +1,98 @@
 %! root = thesis.tex
 
-\begin{savequote}[8cm]
-    \textlatin{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...}
-
-    There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...
-    \qauthor{--- Cicero's \textit{de Finibus Bonorum et Malorum}}
-\end{savequote}
-
-
 \chapter{\label{ch:1-intro}Introduction}
 
 \minitoc
 
-
 \section{Motivation}
 
-The construction of software today relies on an ever-growing ecosystem of technologies and towers of abstractions.
-For example, it is not uncommon for a browser to consist of several million lines of code\todo{Add reference}.
+The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
+Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
+A modern web browser, for example, now consists of over 30 million lines of code. \todo{Add reference, e.g., Chromium line count}
 While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
-Despite this rise in complexity, the core expectations on software have remained unchanged: software is supposed to be secure, fast, and reliable.
-Especially the goals of security and performance, however, regularly conflict with one another.
-Security measures like \gls{CFI} or randomization, for example, incur a non-negligible performance overhead.\todo{references}
-Performance optimizations such as JIT compilation, on the other hand, increase the complexity and as a result, risk introducing both security vulnerabilities and generally failures (\ie decreased reliability).
-The balancing act between security and reliability on the one side and performance on the other side influences important choices during the software development lifecycle.
-For example, programming languages with higher levels of abstraction can rule out whole classes of security vulnerabilities (\eg through automatic memory management).
-However, the increased comfort and safety afforded by higher abstraction often comes at the cost of decreased runtime performance.
 
-The flipside of the negative tensions between these ares is that improvements in one area increase the leeway developers have in other areas.
-Improvements in performance, for example, can either be used to increase the computational output or to maintain the same computational output but with more powerful security measures in place.
-Improvements in reliability, \eg through improved automated testing, increase the overall confidence in the software system.
-Such increased confidence allows for increased complexity (\eg through optimizations) and can even warrant the choice to reduce preventative security measures, while maintaining the same risk profile.
-This thesis makes contributions in software security (code-reuse defense), software performance (language runtime \cext performance), and reliability (JIT compiler fuzz testing).
+Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, reliable, and efficient.
+Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
+Each new abstraction layer hides detail but introduces uncertainty; each performance optimization risks new corner cases; each extension of functionality opens new attack surfaces.
+Catastrophic security breaches like Heartbleed (a simple buffer over-read in a core library) \todo{Cite Heartbleed}, Spectre (exploiting CPU-level speculation) \todo{Cite Spectre}, or Log4Shell (a failure in input sanitization), each with global consequences, show that these problems are not just hypotheticals.
+
+Likewise, reliability failures such as silent miscompilations have plagued even widespread production compilers like GCC and LLVM~\cite{yang2011}.
+\citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
+Subsequent longitudinal analyses of hundreds of LLVM and GCC bug reports find that miscompilations continue to account for a large fraction of confirmed issues and often remain latent for months before being diagnosed~\cite{chen2016}.
+These data points underline that both the software we deploy and the toolchains we depend on remain fragile in practice.
+
+Security and reliability form two sides of the broader struggle for software \emph{trustworthiness}: the ability to rely on software to uphold its specification under both benign and adversarial conditions.
 
 \subsection{Security}
-The tradeoff between abstraction and performance explains, at least in part, why languages like C or \cpp still form the foundation of critical infrastructure.
-The potential performance benefits\footnote{Not every program written in C or \cpp is automatically fast.} and the direct control of machine internals makes C and \cpp a popular choice for systems software.
-However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and more broadly speaking, for the pitfalls of undefined behavior.
-These pitfalls regularly lead to dangerous vulnerabilities, which make programs written in C and \cpp attractive targets for malicious actors --- with potentially disastrous consequences.\todo{cite high impact vulnerabilities}
-These vulnerabilities, which include stack and heap-based buffer overflows, use-after-free errors, and format string bugs, consistently rank among the most critical threats to software security and can have disastrous consequences.\todo{cite high impact vulnerabilities}
+The tradeoff between abstraction and performance explains, in part, why languages like C or \cpp still form the foundation of critical infrastructure.
+The potential for high performance\footnote{Not every program written in C or \cpp is automatically fast.} and direct control of machine internals make C and \cpp a popular choice for operating systems, browsers, and embedded systems.
+However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and, more broadly, for the pitfalls of undefined behavior.
 
-Although the rising popularity of memory-safe, yet performant languages like Rust mitigates the issue of memory vulnerabilities, C and \cpp remain a popular choice.\todo{cite teobe index}
-What is more, the vulnerabilities stemming from memory safety also threaten memory-safe parts of a program.\todo{Add reference to combining Rust with C}
-Even if new software was written entirely in memory-safe languages from now on, there would still be millions of lines of C and \cpp code in production.
-As a result, vulnerabilities in systems software will likely remain a reality in the years to come.
+These pitfalls regularly lead to dangerous vulnerabilities.
+These vulnerabilities—which include stack and heap-based buffer overflows, use-after-free errors, and format string bugs—are the vector for a majority of remote code execution exploits.
+Industry telemetry highlights the breadth of the problem.
+Microsoft’s Security Response Center reports that roughly 70\% of critical vulnerabilities it handled over the past decade were due to memory-safety errors, despite major investments in defensive coding practices~\cite{msrcreport2019}.
+Google’s annual Android security review reaches similar conclusions, attributing more than three quarters of high-severity platform bugs between 2019 and 2022 to memory-safety violations, many rooted in native code dependencies\cite{projectzeroandroid2022}.
+Google's Project Zero also notes that the majority of the 2023 zero-days they investigated ultimately stemmed from memory corruption~\cite{projectzerointhewild2024}.
 
-One class of popular security vulnerabilities is control-flow hijacking and within that class code-reuse attacks.
-Code-reuse attacks hijack a program's control flow and subsequently reuse code already present in the target process.
+Although the rising popularity of memory-safe, yet performant languages like Rust mitigates this issue, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices. \todo{Cite TIOBE index}
+Furthermore, even new, memory-safe code is often integrated into legacy systems.
+A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it. \todo{Cite paper on Rust/C FFI vulnerabilities}
+Given the billions of lines of C and \cpp code in production, memory and spatial safety vulnerabilities will remain a critical threat for the foreseeable future.
+
+One dominant class of exploits targeting these vulnerabilities is code-reuse attacks.
+Attackers hijack a program's control flow and subsequently reuse existing code \enquote{gadgets} already present in the target process.
 This approach allows attackers to bypass defenses like \wox, which, thanks to widespread hardware support, have become a de facto standard.
-Over the years, researchers have continuously refined code-reuse attacks and defenses.
-Among the defenses, two broad categories have emerged:
-\begin{inline}
-    \item enforcement-based defenses (\eg \gls{CFI});
-    \item software diversity.
-\end{inline}
-\gls{CFI} attempts to restrict a program's control-flow at runtime to the control-flow intended by the developer.
-While \gls{CFI} has seen widespread industry adoption, various successful attacks demonstrate the difficulty of statically determining possible and intended control-flow transfers.\todo{cite papers}
 
-Software diversity, on the other hand, tolerates control-flow diversions but attempts to restrict an attacker's maneuverability.
-In particular, software diversity randomizes various aspects of a process (\eg code layout or data representation) to invalidate a-priori information an attacker has about its victim process.
-With an undiversified program, an attacker can use an identical copy of the target as a map to plan his steps.
-For example, with the exact code and its location in the victim process known, an attacker can construct a \gls{ROP} chain a-priori.
-Diversification, on the other hand, invalidates parts of the attacker's map, effectively transforming randomized program parts into unknown terrain.
+Over the years, different ways of defending against this type of attack have emerged.
+One prominent defense category is randomization or more broadly software diversity.
+Software diversity embraces the possibility of memory corruptions and control-flow diversion and instead aims to restrict an attacker's maneuverability.
+By introducing controlled randomness into code or data layouts, software diversity disrupts attackers’ assumptions.
+For example, without knowing the exact location of functions or gadgets, an attacker can no longer use them in a code-reuse attack.
+Unfortunately, closing all information channels an attacker could use to undermine the guarantees provided by randomization is difficult in practice.
+Recent work shows that even when code is perfectly hidden, predictable data structures such as the stack, global objects, or allocator metadata, can leak enough information for a successful attack~\cite{Rudd2017}.
+The consequence is that although, judging by the publication counts, the security community's interest in code-reuse mitigations has declined, unsolved problems remain.
 
-With software diversity in place, the cat and mouse game between attackers and defenders has become an information game.
-Whereas defenders try to conceal as much information about the process as possible, attackers use an array of tricks to leak information.
-For example, the \gls{JITROP} attack has demonstrated that code randomization alone cannot stop an attacker from learning about the process' code layout.
-Similarly, indirect \gls{JITROP} showed that not even code randomization in combination with execute-only memory protects against code reuse.
+\subsection{Reliability}
+Traditional software assurance techniques like static analysis, manual testing, and formal verification struggle to keep pace with the trend of ever-increasing complexity.
+Formal verification can, in principle, prove correctness properties, but its cost and scalability remain prohibitive for large, evolving systems.
+Meanwhile, the tools we use to build everything else—modern compilers, linkers, and virtual machines—have themselves grown complexity.
+Each new optimization pass, hardware backend, or language front-end enlarges the space of subtle interactions that manual review or unit tests rarely exercise, so bugs continue to slip through release pipelines.
+These observations are particularly true for \glspl{JIT}.
+\glspl{JIT} are typically part of a language VM and compile user-provided, potentially malicious code, which is supposed to be sandboxed.
+As such, the correctness of \glspl{JIT} has a security dimension as well.
 
-A code-reuse attack, which proved to be particularly elusive and could withstand even leakage-resilient diversity, is \gls{AOCR}.
-Similar to indirect \gls{JITROP}, \gls{AOCR} brought to light the shortcomings of existing software-diversity defenses by leaking non-randomized data to infer randomized program parts.
 
-In the first part of this thesis, we demonstrate a new type of software-diversity-based defense that combines \emph{code randomization} with \emph{targeted data randomization}.
-We base our defense on a detailed analysis of \gls{AOCR} and prior work and devised a general principle to break \gls{AOCR}'s profiling stage.
-The combination of code randomization and data randomization renders \gls{AOCR} as well as other defenses relying on accurate information unreliable.
-At the same time, our techniques incur only a moderate performance overhead.
+Fuzzing has become an important compiler testing tool to counter this trend. \todo{Cite \propername{Csmith}/differential testing}
+However, fuzzing a complex \gls{JIT} effectively presents a unique challenge.
+Most compiler fuzzers operate \enquote{blindly}, generating random test programs without a deep understanding of the compiler's internal state.
+Standard feedback metrics, such as code coverage of the compiler's source, are often a poor proxy for the semantic richness of the compilation process.
+A fuzzer might achieve high code coverage while completely failing to exercise the complex interactions between different optimization passes that are a common source of bugs.
+To find these deeper bugs, the fuzzer needs a better guide—one that is aware of the compiler's internal transformation and optimization logic.
+Two generated programs can produce identical edge coverage yet drive entirely different optimization histories—one might lower a loop into vector form while the other never leaves SSA canonicalization.
+Without feedback that reflects those semantics, fuzzers treat the runs as equivalent and fail to reward exploration of the rare pass combinations where the most pernicious bugs hide.
 
-\subsection{Performance}
-A way to escape the lack of abstraction and the high risk of security vulnerabilities with C and \cpp is to use high-level dynamic programming languages like Python.
-The TIOBE index clearly shows that the popularity of high-level languages like Ruby and Python is unbroken.\todo{cite tiobe}
-The performance cost of the higher abstraction, however, makes performance optimization a particularly important topic for dynamic languages.
-For example, optimizing Python has received considerable attention over the years.\todo{cite fater python and microsoft investment}
-All these optimization efforts focus on the core language runtime but face an important obstacle: C extensions.
-C extensions, or more generally native-code extensions, are a crucial part of the Python ecosystem, as they allow delegating certain tasks (\eg performance-critical computations) to native code.
-C extensions like \np have enabled widespread adoption of Python in scientific computing and machine learning.\todo{citations}
-Paradoxically, the reliance on C extensions for performance-critical workloads introduces an optimization barrier: language runtimes, whether they are based on an interpreter, a JIT compiler, or both, fall short of optimizing them.
-The root cause is that the optimizer cannot reason about the code hiding behind a C extension.
+\subsection{The Compiler's Role Beyond Optimization}
+In this thesis we argue that compilers are uniquely positioned to drive improvements in both areas.
+Every non-trivial program passes through a compiler before it runs, either ahead of time or just in time\footnote{Interpreted programs are an exception, but the interpreter itself has passed through a c compiler as well.}.
+This \enquote{choke point} turns the compiler into a linchpin for software trustworthiness: a single transformation deployed in the toolchain can harden millions of downstream binaries.
 
-The lack of semantics stops \eg JIT compilers from fully optimizing at the interface to \cexts or even into the native code.
-A workaround to close the semantic gap and to fully leverage JIT compilation is to rewrite entire extension in the host language (\eg Python).
-The PyPy project, for example, includes a pure Python implementation of \np to enable JIT compilation of \np code.
-PyPy's example shows the potential performance benefits of such a rewrite, but its incomplete implementation of \np is also testament to the difficulty of such a full rewrite.
+Compilers possess semantic insight that no runtime monitor or post-hoc analysis can easily replicate.
+The semantic insight encompasses both programming language semantics and details about the target backend.
+For example, compilers know the exact type hierarchy of compiled \cpp programs and the exact geometry of their stack frames.
+While this information can be partially reconstructed from binaries, the reconstruction is notoriously challenging because compilation is a lossy process.
+Similarly, compilers have detailed knowledge about the compilation process itself, such as which transformations were applied and which invariants justified those transformations.
 
-The two approaches of
-\begin{inline}
-    \item not optimizing extensions at all, or
-    \item rewriting them in the host language to make them accessible for JIT compilers,
-\end{inline}
-occupy two extremes on the design spectrum.
-In the second part of this thesis, we explore a point between those two extremes on the design spectrum.
-We introduce a technique called \gls{CMQ} that allows C extensions to participate in the optimization of programs.
-With \gls{CMQ}, C extensions can register highly optimized, extension-specific operations.
-These optimized operations can, for example, exploit type locality in C extension datatypes, which would otherwise be invisible to the interpreter.
-\gls{CMQ} does not require any changes such as type annotations to the Python program and also does not depend on runtime code-generation.
-The absence of runtime code-generation is particularly important for resource-constrained or hardened devices.
-
-While \gls{CMQ} is a general technique, we demonstrate its practicality by instantiating it for \cp and the popular extension \np.
-We provide optimized derivatives for a number of \np operations and evaluate our implementation in \npbench and the \propername{Phoronix} benchmark suite, both collections of compute-intensive \np programs.
-
+In this thesis we show ways to tap these information sources for security hardening and improved fuzzing.
 
 \section{Contributions}
+In the first part, we present \rtwoc, a novel, compiler-driven software diversity defense that addresses the challenge of predictability.
+It combines fine-grained code randomization with targeted randomization of program data structures.
+By diversifying not just the code but also the data layouts that recent attacks rely on for reconnaissance, \rtwoc renders such attacks ineffective while incurring a moderate performance overhead.
 
-This dissertation makes the following contributions, organized by paper:
+In the second part, we present \lool, a compiler-assisted fuzzing framework that provides a smarter guide for discovering compiler bugs.
+Instead of relying on simple code coverage, this \enquote{optimization-aware} method leverages the compiler’s own internal transformation records as a feedback signal.
+A genetic algorithm uses this feedback to systematically steer testcase generation towards rare and complex optimization interactions that are otherwise missed by traditional fuzzers.
+
+Together, these contributions address two fundamental aspects of trustworthy software: resisting deliberate exploitation and uncovering latent faults.
+Both are achieved by repurposing the compiler from a pure performance tool into a powerful instrument for building and verifying trustworthy software.

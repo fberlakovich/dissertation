@@ -1,0 +1,184 @@
+\section{Discussion}\label{s:discussion}
+
+\input{generated/lool/defines}
+
+\subsection{Coverage vs. No Coverage}
+The main advantage of having no coverage at all is the higher execution speed, as evidenced by the data in \cref{tbl:coverage-overhead}.
+On the other hand, coverage feedback enables guidance through feedback-directed input mutation.
+\cref{fig:cumulative-coverage} shows that \propername{random-params}, \ie without feedback but with random generation parameters, achieves the highest cumulative code coverage of all configurations.
+This advantage in code coverage is not, however, reflected in the achieved rare optimization scores (see \cref{fig:rare-opts,fig:rare-pairs}).
+\propername{Random-params} ranks below all of the feedback-driven configurations based on the genetic algorithm.
+One possible explanation is that even if \propername{random-params} discovers new code coverage, the lack of feedback means the configuration cannot build on these gains systematically.
+Unlike rare optimization scores, cumulative code coverage does not reflect how consistently a configuration triggers edges.
+A single lucky test can boost the cumulative coverage of an entire run.
+Although \propername{random-params} is more stable in terms of triggering rare optimizations, its best run is only as good as the weakest quartile of the feedback-driven runs.
+\propername{Static-params} on the other hand achieves less code coverage than the feedback-driven configurations, but reaches high rare optimization scores.
+The high scores are likely the result of the manual tuning that went into the \propername{static-params} configuration over the last years, with the explicit goal of triggering interesting optimizations.
+
+Despite the lack of feedback, both \propername{random-params} and \propername{static-params} achieve better results than \aflpp-based configurations.
+We attribute the improvement of the unguided configurations over \aflpp to the more structural issues with \aflpp, which we discuss in \cref{ss:aflpp-vs-genetic}.
+
+\begin{infobox}
+    \textbf{\ref{hpt:feedback-vs-nofeedback}}\hspace{0.8em}\ding{51}
+    While coverage feedback does not lead to higher cumulative code coverage compared to \propername{random-params}, the feedback enables higher optimization rareness scores.
+    Configurations based on the genetic algorithm achieve higher rareness scores than \propername{random-params} and also slightly higher scores than \propername{static-params}.
+
+\end{infobox}
+
+\subsection{\aflpp vs. Genetic Parameter Mutation}\label{ss:aflpp-vs-genetic}
+\begin{table}[!t]
+    \small
+    \caption{The number of identical test runs and how many tests were successfully generated on the first try or had to be retried with reduced generation parameters.}
+    \label{tbl:afl-overview}
+    \begin{tabular}{>{\nextrow}E C C C C C C C C C}
+        \toprule
+        \multicolumn{4}{c}{} & \multicolumn{6}{c}{Attempts} \\
+        \cmidrule(lr){5-10}
+        {Experiment} & {Total} & {Skipped} & {Identical} & {First} & {Once} & {Second} & {Third} & {Fourth} & {Fifth} \\
+        \midrule
+        \fileInput{generated/lool/afl-test-overview}
+        \bottomrule
+    \end{tabular}
+
+\end{table}
+
+
+The cumulative coverage in \cref{fig:cumulative-coverage} indicates that our custom genetic algorithm outperforms the \aflpp and \propername{static-params} configurations in terms of code coverage.
+The only exception is \propername{genetic-code}, which achieves less code coverage than the \propername{static-params} and the \propername{random-params} configuration.
+We attribute this difference to the significantly reduced test throughput of \propername{genetic-code}, caused by the code coverage instrumentation.
+\cref{fig:rare-opts,fig:rare-pairs} show that \propername{genetic-code} nonetheless triggers a similar amount of rare optimizations and pairs.
+
+Except for the \propername{afl-contextblind-only-params} configuration, all \aflpp-based configurations achieve less coverage than even the \propername{static-params} configuration.
+One reason for \aflpp's poor performance lies in the translation of \aflpp generated input files to generated test cases.
+We found that over stretches of dozens of generated tests the \aflpp configurations generate either \emph{identical} tests or \emph{small tests}, which are the result of re-generation attempts.
+The number of identical tests and re-generation attempts are shown in \cref{tbl:afl-overview}.
+
+Identical tests happen when \aflpp mutates bits in the input file that do not change the code generator's behavior.
+Although \aflpp eventually learns that mutating these bits is useless, the feedback loop in the GraalVM context is slow compared to traditional \aflpp targets such as image libraries.
+On average, a generated test case takes 9--10s, which means that \aflpp often wastes several minutes trying to mutate meaningless bits.
+In the variants that mutate only generation parameters (see \cref{sss:afl-hyperonly}), the generator reads a short, fixed byte sequence from the \aflpp generated input, making it easier for \aflpp to detect which bits have an effect.
+Nonetheless, even though we started with an ideally sized seed file, \aflpp eventually tries different sizes as well and wastes time with meaningless mutations.
+Another source of identical tests are \aflpp calibration runs, which become particularly expensive with long-running tests.
+The problem is compounded by the fact that neither the coverage feedback nor the execution times are fully stable, due to the JVM's profiling and class-loading heuristics.
+\cref{tbl:afl-overview} shows the number of identical tests summed over all runs of an experiment for each of the \aflpp configurations.
+
+Small tests happen when \aflpp generates input files that are too small for the generator to generate valid test cases.
+Again, this is more likely to happen in the fully parametric case because there, earlier bits in the file can change how many more random bits are needed later on.
+This variable length requirement makes it difficult for \aflpp to infer useful file sizes.
+In cases where there is too little randomness for the generator's random decisions, the generator tries to size down the generated test case by adapting structural parameters (see \cref{sss:afl-fully-parametric}).
+We found that in the fully parametric variant (see \cref{sss:afl-fully-parametric}) the generator reduced the parameters of almost all tests at least once.
+\cref{tbl:afl-overview} shows the number of tests with reduced generation parameters for each configuration.
+As expected, this effect is mitigated in the variant that reads only generation parameters from the seed (see \cref{sss:afl-hyperonly}).
+In this variant, the generator fails only if the seed is even too short to read generation parameters, which happened in about 5\% of the generated tests.
+The \enquote{Skipped} column in \cref{tbl:test-overview} shows the number of tests that had to be skipped due to such an unusable seed file.
+
+The difference between \propername{afl-contextblind-only-params} and the other \aflpp based configurations can be explained by looking at \aflpp's statistics.
+Apart from the slowdown caused by code coverage, the primary slowdown for \aflpp configurations is the calibration and trimming time.
+The code coverage and context-aware \aflpp configurations spent only between 10\% and 20\% of the total runtime actually fuzzing, the rest of the time was calibration and trimming.
+Paradoxically, \propername{afl-contextblind} and \propername{afl-contextblind-only-params} are less affected by trimming because \aflpp sees their coverage as \emph{less} stable.
+The mapping of global optimization counters to \aflpp's coverage bitmap occupies only about 80 bytes, leading to large relative changes if even only one counter changes.
+The code coverage and context-aware coverage types occupy larger parts of the bitmap and lead to higher stability.
+Unstable seeds are not further calibrated, thus avoiding the enormous overhead caused by calibrating slow running seeds.
+This difference is reflected in the low calibration times of 2\% and 4\% of the total runtime in \propername{afl-globalcounters} and \propername{afl-globalcounters-hyperonly}.
+\propername{afl-globalcounter} loses this advantage again, however, by spending 90\% of the total runtime in trimming.
+
+Configurations using the genetic algorithm consistently trigger more rare optimizations and optimization pairs than their \aflpp counterparts (see \cref{fig:rare-opts,fig:rare-pairs}).
+For example, \propername{genetic-code} achieves a higher rareness score than \propername{afl-code-only-params} and \propername{afl-code}.
+The domain-specific mutation has the advantage of knowing the types of the mutated parameters and is thus able to mutate them in small incremental steps.
+
+Some of the issues described above could be mitigated with \aflpp options, but nonetheless \aflpp's learning process through rapid iteration is hampered by long running tests.
+Overall, \aflpp's heuristics are tuned for fast iterations.
+
+\begin{infobox}
+    \textbf{\ref{hpt:domain-specific-mutation}}\hspace{0.8em}\ding{51}
+
+    Domain-specific mutation achieves higher cumulative code coverage compared to general-purpose parametric mutation.
+    In addition, domain-specific mutation achieves higher rareness scores for both optimizations and optimization pairs.
+\end{infobox}
+
+\subsection{Code Coverage vs. Optimization-Log Coverage}
+\cref{tbl:coverage-overhead} shows that coverage feedback based on the optimization log (either global counters or per-method counters) has a significantly lower overhead than code coverage.
+While our code coverage implementation is not fully optimized for speed, a considerable overhead, in particular for CPU-intensive code such as compilation, is likely to remain.
+\begin{infobox}
+    \textbf{\ref{hpt:coverage-overhead}}\hspace{0.8em}\ding{51}
+
+    Coverage feedback based on optimization-log counters has a lower overhead than code coverage.
+    Optimization-log counter feedback incurs a 7--12\% throughput decrease, whereas code coverage incurs a 71\% throughput decrease.
+\end{infobox}
+At the same time, \cref{fig:cumulative-coverage} shows that configurations based on code coverage consistently achieve less overall code coverage than configurations based on the optimization log, regardless of the mutation strategy.
+For example, \propername{genetic-code} achieves less code coverage than all other configurations using the genetic algorithm and any form of optimization-log coverage.
+\cref{fig:rare-opts,fig:rare-pairs} show that code coverage feedback triggers fewer rare optimizations and optimization pairs.
+We suspect that two factors contribute to the worse performance of code coverage.
+First, code coverage severely constrains the test throughput and fewer tests lead to less coverage overall.
+Second, code coverage does not differentiate between \enquote{interesting} code paths and \enquote{uninteresting} code paths.
+This loss of context can lead the fuzzer down a route where it tries to, \eg, increase the coverage of some library method called during compilation.
+
+\subsection{Context-Aware Coverage vs. Context-Blind Coverage}
+\begin{table}[!t]
+
+    \caption{Rankings of experiments by optimization rareness score or optimization pair rareness score.}
+    \label{tbl:contributor-crossover}
+
+    \begin{tabular}{>{\nextrow}EOOC}
+        \toprule
+        {Experiment} & {\makecell{Optimization\\ Score}} & {\makecell{Optimization\\ Pair Score}} & {\makecell{Optimization\\ Pair Rank}} \\
+        \midrule
+        \fileInput{generated/lool/optimization-scores}
+        \bottomrule
+    \end{tabular}
+
+\end{table}
+
+Cumulative code coverage (\cref{fig:cumulative-coverage}) and rareness scores (\cref{fig:rare-opts,fig:rare-pairs}) suggest that context-aware coverage is less beneficial than context-blind coverage.
+Surprisingly, the less fine-grained context-blind coverage performs slightly better in all three metrics than the more granular context-aware coverage.
+We note, however, that the results of context-blind and context-aware coverage are within the variance range of one another.
+
+The rankings of experiments based on their optimization uniqueness and optimization pair rareness scores mostly agree.
+Differences in ranking are caused by relatively minor differences in rareness score.
+For example, with both metrics the \propername{genetic-contextblind} variants occupy the first two places.
+This similar ranking between the two coverage metrics is reflected by a Spearman rank correlation of $\experimentrankcorrelation$, calling into question the usability of the more complex, context-aware metric.
+
+A possible explanation is that optimizations are largely independent of one another, meaning that $p\left((O_1, O_2)\right) \approx p(O_1) * p(O_2)$.
+We can test this assumption by computing the Pointwise Mutual Information
+$$
+PMI(O_1, O_2) = \log\left(\frac{p((O_1, O_2))}{p(O_1) * p(O_2)} \right)
+$$
+based on the empirical probabilities for each pair.
+Optimization pairs with a high/low $PMI$ are positively/negatively dependent, whereas a $PMI$ around 0 suggests that the two optimizations occur independently of each other.
+In our optimization pair dataset, a mean $PMI$ of \pmimean{} suggests that most optimizations are independent, with a few select exceptions.
+For example, a $PMI$ of 8.63 indicates a strong correlation between \propername{VectorMaterialization\_VectorMaterialization} and \propername{VectorSimplification\_NodeNarrowing}, both phases involved in vectorization.
+
+We also performed a regression analysis on rarity scores of pairs with the corresponding rarity scores of the pair elements.
+That is, can $R\left((O_1, O_2)\right)$ be approximated with $\alpha + \beta_1 * R(A) + \beta_2 * R(B)$?
+We find a coefficient of determination $R^2 \approx \regressionr$, meaning that almost 90\% of the variation in optimization pair rareness can be explained with the individual optimization rareness scores.
+
+A related issue contributing to the overlap of the coverage metrics is that rare optimizations also produce rare optimization pairs, even if they co-occur with relatively common optimizations.
+For example, when ranked based on the optimization pair rareness, most experiments have pairs such as \texttt{(X,Canonicalizer\_CanonicalReplacement)} among the top contributing pairs.
+In this case \texttt{X} is some rare optimization such as \texttt{LoopTransformations\_LoopPartialUnroll} and \texttt{Canonicalizer\_CanonicalReplacement} is a very common optimization.
+The rarity of this pair is dominated by the rare element.
+We can test for this effect by looking at the correlation of $R\left((A, B)\right)$ and $\max\left(R(A), R(B)\right)$.
+For our dataset, we find a Spearman correlation coefficient of $\rpairvsmaxcorrelation$, indicating a strong correlation between a pair's rareness score and the bigger of its element rareness scores.
+
+The above statistical metrics show that optimizations are mostly independent, with only a few exceptions.
+Neither \aflpp nor our genetic algorithm filter for these exceptional, dependent optimizations precisely enough to take advantage of the more fine-grained context-aware coverage.
+Similarly, optimizations and pairs follow a power distribution, where rare optimizations dominate both single optimization rareness and pair rareness.
+Again, neither \aflpp nor our genetic algorithm manage to extract optimization pairs that are not dominated by one of their elements.
+
+\begin{infobox}
+    \textbf{\ref{hpt:contextaware-vs-contextblind}}\hspace{0.8em}\ding{55}
+
+    Context-aware coverage shows no clear advantage over context-blind coverage.
+    Both types of coverage achieve cumulative code coverage and rareness scores within the variance range of one another.
+\end{infobox}
+
+\subsection{Configuration Variants}
+In addition to the configurations listed in \cref{s:evaluation}, we also evaluated variants of the different configurations.
+For example, the context-blind configurations with \propername{-ffiif} suffix use our \cref{p:ffiif} algorithm instead of the initial optimization ranking.
+Based on our evaluation, there seems to be little difference between these variants in terms of code coverage and triggering rare optimizations.
+The advantage of our \cref{p:ffiif} algorithm is that it works for single optimizations and for optimization pairs alike.
+
+Similarly, configurations using either the current generation (suffix \propername{-generation}) or the entire population history (suffix \propername{-memory}) perform similarly.
+A possible explanation is that 24-hour runs are too short to explore the state space exhaustively enough for the population-history approach to make a difference.
+Considering the population history helps avoid situations where the genetic algorithm circles between a network of distinct configurations.
+If such a network is large, the generation-based approach cannot fully explore the entire network and eventually return to an already known configuration.
+The population-history approach has the advantage, however, that knowledge about already explored optimizations could be transferred from one fuzzing campaign to the next.

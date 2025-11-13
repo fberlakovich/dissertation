@@ -13,9 +13,9 @@ Specifically, our compiler
 
 \subsection{BTRAs: Booby-Trapped Return Addresses}\label{ss:impl-rads}
 % To this end, \rtwoc encloses return address with BTRAs.
-To enclose return addresses with \glspl{btra}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{fig:rad-insertion} are required.
-First, the caller pushes randomly chosen \glspl{btra} together with the return address on the stack \Circled{\code{1}}.
-Note that the position of the return address within the sequence of \glspl{btra} is chosen randomly at compile time.
+To enclose return addresses with \glspl{BTRA}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{fig:rad-insertion} are required.
+First, the caller pushes randomly chosen \glspl{BTRA} together with the return address on the stack \Circled{\code{1}}.
+Note that the position of the return address within the sequence of \glspl{BTRA} is chosen randomly at compile time.
 Second, the caller positions the stack pointer above the return address \Circled{\code{2}}.
 Third, the caller executes the \texttt{call} instruction \Circled{\code{3}}.
 On x86, \texttt{call} instructions implicitly perform two operations:
@@ -26,18 +26,18 @@ On x86, \texttt{call} instructions implicitly perform two operations:
 Due to the prior positioning of the stack pointer, the call instruction overwrites the return address already on the stack.
 Put differently, the addresses on the stack \emph{do not change} after step \Circled{\code{1}}.
 Writing all the addresses to the stack at once eliminates the possibility for a race condition window during which an attacker could observe stack changes.
-If, for example, only the \glspl{btra} were inserted before the call, the attacker could learn the return address by observing the stack right before and after the call instruction~\cite{Pomonis2017}.
+If, for example, only the \glspl{BTRA} were inserted before the call, the attacker could learn the return address by observing the stack right before and after the call instruction~\cite{Pomonis2017}.
 While such a precise timing might seem unattainable in practice, a similar race-condition attack forced Microsoft to rethink their Return Flow Guard architecture~\cite{Bialek2018}.
 
-The position of the return address chosen by the \emph{caller} defines how many \glspl{btra} \emph{precede} the return address.
-The preceding \glspl{btra} create an offset between the return address and caller stack objects (\eg local variables in the caller).
+The position of the return address chosen by the \emph{caller} defines how many \glspl{BTRA} \emph{precede} the return address.
+The preceding \glspl{BTRA} create an offset between the return address and caller stack objects (\eg local variables in the caller).
 We call the resulting offset \emph{pre-offset}.
 
-After the control-flow transfer, the stack pointer points directly below the return address, still pointing into the \gls{btra} sequence.
-Subsequent register spills in the callee would, therefore, overwrite \glspl{btra} below the return address.
-To avoid overwriting the \glspl{btra}, in the last step the callee decreases the stack pointer by a random offset \Circled{\code{4}}.
-The random offset chosen by the \emph{callee} defines the number of \glspl{btra} that \emph{succeed} the return address.
-The succeeding \glspl{btra} create an offset between the return address and callee stack objects (\eg spilled registers).
+After the control-flow transfer, the stack pointer points directly below the return address, still pointing into the \gls{BTRA} sequence.
+Subsequent register spills in the callee would, therefore, overwrite \glspl{BTRA} below the return address.
+To avoid overwriting the \glspl{BTRA}, in the last step the callee decreases the stack pointer by a random offset \Circled{\code{4}}.
+The random offset chosen by the \emph{callee} defines the number of \glspl{BTRA} that \emph{succeed} the return address.
+The succeeding \glspl{BTRA} create an offset between the return address and callee stack objects (\eg spilled registers).
 This resulting offset is called a \emph{post-offset}.
 
 After adjusting the stack pointer, the callee executes the regular function prologue.
@@ -46,24 +46,24 @@ First, to identify the correct return address, the callee reverts the post-offse
 Next, the return instruction pops the return address from the stack \circleddashedtikz{\code{2}} and transfers control back to the caller.
 Finally, the caller reverts the pre-offset \circleddashedtikz{\code{3}}, which is required to perform stack-relative operations, such as referencing spilled local variables or function parameters.
 
-Since the caller chooses the \emph{number} of \glspl{btra} to push and the \emph{pre-offset}, while the callee chooses the \emph{post-offset}, caller and callee cooperate in the setup of \glspl{btra}.
-For direct call sites, \rtwoc bounds the number of \glspl{btra} after the return address at compile-time to fit into the \emph{post-offset}.
+Since the caller chooses the \emph{number} of \glspl{BTRA} to push and the \emph{pre-offset}, while the callee chooses the \emph{post-offset}, caller and callee cooperate in the setup of \glspl{BTRA}.
+For direct call sites, \rtwoc bounds the number of \glspl{BTRA} after the return address at compile-time to fit into the \emph{post-offset}.
 For indirect call sites, no synchronization between the caller and the callee is possible at compile time.
-Instead, we tolerate that the caller potentially overwrites \glspl{btra} after the return address.
-Per default, \rtwoc does not add \glspl{btra} to call sites that call unprotected code.
-While adding \glspl{btra} would not harm functionality, unprotected callees would overwrite \emph{all} \glspl{btra} after the return address.
+Instead, we tolerate that the caller potentially overwrites \glspl{BTRA} after the return address.
+Per default, \rtwoc does not add \glspl{BTRA} to call sites that call unprotected code.
+While adding \glspl{BTRA} would not harm functionality, unprotected callees would overwrite \emph{all} \glspl{BTRA} after the return address.
 We discuss the security implications in \cref{ss:limitations-coverage}.
 
 Depending on the relocation model, the addresses are either embedded in the \code{push} instructions or read from the \gls{GOT}.
-Since an attacker cannot predictably identify the return address among the \glspl{btra}, storing the addresses in the data section does not compromise security.
+Since an attacker cannot predictably identify the return address among the \glspl{BTRA}, storing the addresses in the data section does not compromise security.
 
-If the randomly chosen number of \glspl{btra} before the return address is odd, \rtwoc{} inserts an additional \gls{btra} to keep the stack aligned.
+If the randomly chosen number of \glspl{BTRA} before the return address is odd, \rtwoc{} inserts an additional \gls{BTRA} to keep the stack aligned.
 On x86-64, the stack pointer must be 16 byte aligned, as
 % Keeping this alignment intact is crucial as certain instructions crash when accessing a misaligned stack.
 programs crash when certain instructions access a misaligned stack.
 
 \subsubsection{Stack Arguments}\label{sss:stack-arguments}
-The \glspl{btra} inserted by \rtwoc change the distance between stack objects above and below the return address.
+The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
 In particular, the distance increases by the sum of pre- and post-offset.
 This increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
 With one notable exception:
@@ -76,15 +76,15 @@ Thus, the distance between the frame pointer and the stack arguments can be comp
 In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
 
 \subsubsection{Optimization with AVX2}
-Implementing the \gls{btra} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
+Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
 %    During the performance evaluation we noticed a performance impact particularly on call intensive benchmarks.
 %    We speculate that the large number of instructions puts pressure on the instruction cache.
-To improve \rtwoc{}'s performance, we built an optimized variant that sets up the \glspl{btra} and the return address with AVX2 vector instructions (see \cref{fig:avx2-setup})~\cite{IntelAVX}.
+To improve \rtwoc{}'s performance, we built an optimized variant that sets up the \glspl{BTRA} and the return address with AVX2 vector instructions (see \cref{fig:avx2-setup})~\cite{IntelAVX}.
 
-Before each call site, we initialize a vector register with \glspl{btra} and the return address and write them to the stack.
+Before each call site, we initialize a vector register with \glspl{BTRA} and the return address and write them to the stack.
 The addresses are read from a call-site specific array in the data section, prepared at compile time.
 Regarding the security of reading the addresses from the data section, the same reason as for the \gls{GOT} holds.
-After the \glspl{btra} and the return address are written to the stack, \rtwoc{} positions the stack pointer before the return address.
+After the \glspl{BTRA} and the return address are written to the stack, \rtwoc{} positions the stack pointer before the return address.
 The \code{vmovdqa} instructions load the addresses from the data section into an AVX2 register.
 The \code{vzeroupper} instruction is needed to eliminate a penalty when switching between SSE and AVX2 instructions.
 Note that zeroing the upper half of the vector registers directly before a call does not affect program correctness.
@@ -251,14 +251,14 @@ code = { %
 %         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
 %         \label{fig:stack-arguments-with-rads}
 %     \end{subfigure}
-%     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{btra}.}
+%     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
 % \end{figure}
 
 \begin{figure}[t]
 \centering
 \vspace{0.3cm}
 \resizebox{0.9\columnwidth}{!}{%
-\includegraphics{figures/hardened-btdps}
+\includegraphics{figures/r2c/hardened-btdps}
 }
 \begin{tikzpicture}[overlay, remember picture]
 \draw (-1.9,3.6) node {\sffamily{\textbf{\rtwoc{}}}};
@@ -270,7 +270,7 @@ The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclos
 \label{fig:hardened-data-traps}
 \end{figure}
 
-% The \glspl{btra} inserted by \rtwoc change the distance between stack objects above and below the return address.
+% The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
 % In particular, the distance increases by the sum of pre-offset and post-offset.
 % The increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
 % With one notable exception:
@@ -281,8 +281,8 @@ The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclos
 % LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
 % Which pointer is actually used depends on the optimization level and several other factors.
 % Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
-% Without \glspl{btra}, the compiler determines the distance between a stack argument and the anchor statically.
-% With \glspl{btra}, however, the distance is not known at compile-time.
+% Without \glspl{BTRA}, the compiler determines the distance between a stack argument and the anchor statically.
+% With \glspl{BTRA}, however, the distance is not known at compile-time.
 % Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
 % As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function, but also its caller.
 
@@ -292,7 +292,7 @@ The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclos
 % Thus, the distance between the frame pointer and the stack arguments can be computed statically.
 % In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
 
-% \Cfs is required for all functions using both \glspl{btra} and stack arguments.
+% \Cfs is required for all functions using both \glspl{BTRA} and stack arguments.
 % As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
 % Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
 % We discuss the introduced performance overhead in \cref{s:eval}.

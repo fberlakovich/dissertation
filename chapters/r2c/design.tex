@@ -2,29 +2,28 @@
 
 \begin{figure*}[t]
     \centering
-    \begin{subfigure}[t]{\columnwidth}
+    \begin{subfigure}[t]{0.6\linewidth}
         \figuretitle{Unprotected stack}
-        \resizebox{0.8\columnwidth}{!}{%
+        \resizebox{\linewidth}{!}{%
         %\includesvg{img/architecture-overview}
-            \includegraphics[trim={0.5cm 0 12.5cm 0},clip]{figures/architecture-overview-with-heap}%
+            \includegraphics[trim={0.5cm 0 12.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
         }
         \captionsetup{margin={0pt,0.3cm},oneside}
         \caption{In an unprotected stack frame the return address is at a predictable location surrounded by known values.}
         \label{fig:overview-stack-unprotected}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[t]{\columnwidth}
+    \begin{subfigure}[t]{0.6\linewidth}
         \figuretitle{Stack protected with \rtwoc{}}
-        \resizebox{0.8\columnwidth}{!}{%
-            \includegraphics[trim={12.5cm 0 0.5cm 0},clip]{figures/architecture-overview-with-heap}%
+        \resizebox{\linewidth}{!}{%
+            \includegraphics[trim={12.5cm 0 0.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
 %            }
         }
         \captionsetup{margin={0.3cm,0pt},oneside}
         \caption{\rtwoc inserts Booby-Trapped Return Addresses to conceal the return address and thus protect it from disclosure.}
         \label{fig:overview-stack-protected}
     \end{subfigure}
-    \caption{The stack layout of an unprotected stack (\emph{left}) and a stack protected by \rtwoc (\emph{right}). We assume the System V ABI on the x86\_64 platform.}
-    \vspace*{-1em}
+    \caption{The stack layout of an unprotected stack (\emph{top}) and a stack protected by \rtwoc (\emph{bottom}). We assume the System V ABI on the x86\_64 platform.}
     \label{fig:overview-stack}
 \end{figure*}
 
@@ -35,6 +34,7 @@
 
 %    maybe explain why hiding the return address with IH is a bad idea
 \rtwoc is a leakage-resilient diversity defense against advanced code-reuse attacks.
+As such, \rtwoc's main objective is to prevent information leakage that could help an attacker to undermine the effects of randomization.
 As a first step, and under the protection of execute-only memory, \rtwoc randomizes the order of functions in the text section to thwart ROP and JIT-ROP attacks.
 \rtwoc{} further aims to remove the building blocks of sophisticated code-reuse attacks such as indirect JIT-ROP and \gls{AOCR}:
 \begin{enumerate}
@@ -43,6 +43,8 @@ As a first step, and under the protection of execute-only memory, \rtwoc randomi
     \item the stack as a source for code and heap pointer leaks.
 \end{enumerate}
 Similar to Readactor\plusplus, \rtwoc protects global variables by randomizing their order and by inserting random padding~\cite{Crane2015b}.
+Protecting the stack against leakage is more challenging.
+Stack data necessarily has to remain readable, which poses the question of how to protect information in plain sight.
 
 %%% 20210507/0950/sbr/ccs2021.tex#595:
 %%% reordered paragraphs to: highlight overall design, going deep into challenges, and closing how our overall design addresses these challenges!
@@ -58,16 +60,23 @@ The heap pointer in \cref{fig:overview-stack-unprotected}, for example, has a di
 If both of these methods fail, an attacker can still resort to guessing.
 Under specific circumstances, such brute-force attacks are a reasonable option; some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
 
-To address the described issues, \rtwoc combines two different techniques:
+The core idea behind \rtwoc's techniques is \emph{mimicry}: deliberately disguising sensitive information by surrounding it with similar looking data, so that the real object cannot be distinguished using either spatial or semantic cues.
+In practice this means creating decoys that match the appearance and behavioral characteristics of the protected object.
+For example, addresses that have the same alignment, size, and value-range properties as genuine return or heap pointers, and that are positioned unpredictably relative to other stack objects.
+By making decoys and real pointers statistically and structurally similar, mimicry removes the usual anchors an attacker uses (predictable offsets, value ranges, and layout patterns) and forces an adversary to guess.
+\rtwoc further penalizes guessing attempts with booby traps, which afford an attacker at most incorrect guess.
+Mimicry therefore raises the cost and risk of disclosure attacks while preserving normal program semantics for non-adversarial execution.
+
+We instantiate this principle for return addresses and for heap pointers as follows:
 \begin{enumerate}
 [label=(\roman*)]
 %    \vspace*{-0.5cm}
-    \item So-called \emph{booby-trapped return addresses}, or \glspl{btra} for short, randomize the precise position of a return address in a stack frame.
-    By inserting \glspl{btra}, \rtwoc changes the relative position of the return address to other stack objects.
+    \item So-called \emph{booby-trapped return addresses}, or \glspl{BTRA} for short, randomize the precise position of a return address in a stack frame.
+    By inserting \glspl{BTRA}, \rtwoc changes the relative position of the return address to other stack objects.
     An attacker is, therefore, no longer able to rely on specific stack objects as anchor points to locate the return address.
-    In addition, \glspl{btra} disguise the return address among enclosing and similar-looking values, as they are specifically chosen to look and behave exactly like benign return addresses.
-    \glspl{btra} point to booby-trap functions randomly distributed in the text section.
-    Without exact code-layout information, an adversary cannot separate \glspl{btra} from benign addresses.
+    In addition, \glspl{BTRA} disguise the return address among enclosing and similar-looking values, as they are specifically chosen to look and behave exactly like benign return addresses.
+    \glspl{BTRA} point to booby-trap functions randomly distributed in the text section.
+    Without exact code-layout information, an adversary cannot separate \glspl{BTRA} from benign addresses.
 
     \item A combination of \emph{booby-trapped data pointers}, or \glspl{heapbt} for short, and stack slot randomization protects heap pointers against disclosure.
     Stack object permutation randomizes the position of heap pointers relative to other stack objects.
@@ -81,12 +90,12 @@ To address the described issues, \rtwoc combines two different techniques:
 The following subsections give an in-detail presentation of the relevant design decisions and requirements.
 First, we describe the details on inserting booby-trapped return addresses (see \Cref{ss:decoy-mimicry}).
 Second, we explain how \glspl{heapbt} thwart the localization of heap pointers (see \Cref{ss:heap-boobytraps}).
-Third, we illustrate how additional code randomization strengthens the protection afforded by \glspl{btra} and \glspl{heapbt} (see \Cref{ss:strengthening}).
+Third, we illustrate how additional code randomization strengthens the protection afforded by \glspl{BTRA} and \glspl{heapbt} (see \Cref{ss:strengthening}).
+Fourth, we discuss how the mimicry principle could be used to harden booby traps in the speculative domain (see \cref{ss:speculative-booby-traps}).
 
-\begin{figure*}[t]
-    \begin{subfigure}[b]{\columnwidth}
-        \begin{subfigure}[t]{0.48\columnwidth}
-            \begin{lstlisting}[style=asmcode,style=coloredrads]
+\newsavebox{\btrasetup}
+\begin{lrbox}{\btrasetup}
+    \begin{lstlisting}[style=asmcode,style=coloredrads]
 push BTRA1
 push BTRA2
 push RA
@@ -94,11 +103,12 @@ push BTRA3 |\circledtikz{1}|
 add %rsp, 0x10 |\circledtikz{2}|
 call F|\tikzmark{T-Call-Setup}| |\circledtikz{3}|
 add %rsp,0x10|\tikzmark{T-Add-Cleanup}| |\circleddashedtikz{7}|
-            \end{lstlisting}
-        \end{subfigure}
-        \hspace{-0.5em}
-        \begin{subfigure}[t]{0.48\columnwidth}
-            \begin{lstlisting}[style=asmcode]
+    \end{lstlisting}
+\end{lrbox}
+
+\newsavebox{\btrateardown}
+\begin{lrbox}{\btrateardown}
+    \begin{lstlisting}[style=asmcode]
 |\tikzmark{T-Function}|<F>:
 sub %rsp,0x8 |\circledtikz{4}|
 
@@ -106,52 +116,57 @@ sub %rsp,0x8 |\circledtikz{4}|
 
 add %rsp,0x8 |\circleddashedtikz{5}|
 |\tikzmark{T-Ret-Setup}|ret |\circleddashedtikz{6}|
-            \end{lstlisting}
+    \end{lstlisting}
+\end{lrbox}
 
-        \end{subfigure}
-        \captionsetup{margin={0pt,1.3cm},oneside}
-        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{btra}.}
-        \label{fig:rad-insertion-code}
-        \begin{tikzpicture}[overlay, remember picture]
-            \draw[-Latex] ([shift={(18pt,2pt)}] pic cs:T-Call-Setup) -- +(1.6,0) |- ([shift={(-7pt,2pt)}] pic cs:T-Function);
-            \draw[-Latex] ([shift={(-10pt,1pt)}] pic cs:T-Ret-Setup) -- ([shift={(18pt,2pt)}] pic cs:T-Add-Cleanup);
-        \end{tikzpicture}
-    \end{subfigure}\quad
-    \begin{subfigure}[b]{\columnwidth}
-        \hspace{-5em}
-        \resizebox{1.3\columnwidth}{!}{
-            \includegraphics{figures/btra-insertion-combined}
+\begin{figure}[t]
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \makebox[\linewidth][c]{%
+            \begin{subfigure}[t]{0.48\linewidth}
+                \usebox\btrasetup
+            \end{subfigure}
+            \begin{subfigure}[t]{0.48\linewidth}
+                \usebox\btrateardown
+            \end{subfigure}
         }
-        \captionsetup{margin={-1.15cm,0pt},oneside}
+        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{BTRA}.}
+        \label{fig:rad-insertion-code}
+    \end{subfigure}
+    \begin{tikzpicture}[overlay, remember picture]
+        \draw[-Latex] ([shift={(18pt,2pt)}] pic cs:T-Call-Setup) -- +(1.6,0) |- ([shift={(-7pt,2pt)}] pic cs:T-Function);
+        \draw[-Latex] ([shift={(-10pt,1pt)}] pic cs:T-Ret-Setup) -- ([shift={(18pt,2pt)}] pic cs:T-Add-Cleanup);
+    \end{tikzpicture}
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includeDrawioFigure[\linewidth]{figures/r2c/r2c-btra-setup}{
+            \draw ([yshift=-10pt] Arrow1) node {\circledtikz{\code{1}}};
+            \draw ([yshift=-10pt] Arrow2) node {\circledtikz{\code{2}}};
+            \draw ([yshift=-10pt] Arrow3) node {\circledtikz{\code{3}}};
+            \draw ([yshift=-10pt] Arrow4) node {\circledtikz{\code{4}}};
+            \draw ([yshift=-10pt] Arrow5) node {\circleddashedtikz{\code{5}}};
+            \draw ([yshift=-10pt] Arrow6) node {\circleddashedtikz{\code{6}}};
+            \draw ([yshift=-10pt] Arrow7) node {\circleddashedtikz{\code{7}}};
+        }
         \caption{Stack view of the booby-trapped return address setup and teardown process.\phantom{Latex is a piece of crap}}
         \label{fig:rad-insertion-stack}
-        \begin{tikzpicture}[overlay, remember picture]
-            \draw (-0.05,2.0) node {\circledtikz{\code{1}}};
-            \draw (1.35,2.85) node {\circledtikz{\code{2}}};
-            \draw (2.80,2.40) node {\circledtikz{\code{3}}};
-            \draw (4.20,2.0) node {\circledtikz{\code{4}}};
-            \draw (5.75,2.35) node {\circleddashedtikz{\code{5}}};
-            \draw (7.23,2.75) node {\circleddashedtikz{\code{6}}};
-            \draw (8.67,3.65) node {\circleddashedtikz{\code{7}}};
-        \end{tikzpicture}
-    \end{subfigure}
-    \vspace*{-1em}
+    \end{subfigure}%
     \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{fig:rad-insertion-code}), and effect on the stack (\Cref{fig:rad-insertion-stack}).
-    For brevity the figure uses only two \glspl{btra} before (\texttt{\gls{btra}1}) and \texttt{\gls{btra}2}) and one \gls{btra} after (\texttt{\gls{btra}3}) the return address.}
+    For brevity the figure uses only two \glspl{BTRA} before (\texttt{\gls{BTRA}1}) and \texttt{\gls{BTRA}2}) and one \gls{BTRA} after (\texttt{\gls{BTRA}3}) the return address.}
     \label{fig:rad-insertion}
-\end{figure*}
+\end{figure}
 
-\subsection{The Mimicry of Booby-Trapped Return Addresses}\label{ss:decoy-mimicry}
-An indispensable prerequisite for effective \glspl{btra} is that they must be virtually indistinguishable from actual, benign return addresses.
-For \glspl{btra} to masquerade as return addresses, they must:
+\subsection{Booby-Trapped Return Addresses}\label{ss:decoy-mimicry}
+An indispensable prerequisite for effective \glspl{BTRA} is that they must be virtually indistinguishable from actual, benign return addresses.
+For \glspl{BTRA} to masquerade as return addresses, they must:
 \begin{enumerate*}[label={(\roman*)}]
     \item look like return addresses;
     \item behave like return addresses;
     \item resist brute force attacks.
 \end{enumerate*}
 
-To achieve the first and the third goal, \glspl{btra} point to booby trap functions.
-Booby trap functions are distributed randomly in the \emph{text section}, giving \glspl{btra} the same value range as benign return addresses.
+To achieve the first and the third goal, \glspl{BTRA} point to booby trap functions.
+Booby trap functions are distributed randomly in the \emph{text section}, giving \glspl{BTRA} the same value range as benign return addresses.
 Absent exact information about return addresses and leakage through side channels, an attacker could still apply brute-force.
 \gls{BROP}, for example, demonstrates the effectiveness and feasibility of brute-force to learn the location of a \code{read} gadget~\cite{Bittau2014a}.
 Booby traps provide an effective way to penalize such brute force attempts~\cite{Crane2013}.
@@ -163,7 +178,7 @@ In the context of \rtwoc, a classic \gls{BROP} attack is infeasible for two reas
 Likewise, brute forcing an attack with all return address candidates is improbable because all but one of the candidates lead to a booby trap function.
 We discuss the combination of Blind ROP with the more powerful PIROP attack in \cref{sss:corrupting-code-pointers}.
 
-To achieve the second goal, \glspl{btra} mimic the runtime behavior of return addresses.
+To achieve the second goal, \glspl{BTRA} mimic the runtime behavior of return addresses.
 Since return addresses are part of the control flow of a program, they show a distinct observable runtime behavior.
 Recall the following properties of return addresses and call sites, which must also hold for booby-trapped return addresses:
 \begin{enumerate}[label=(\Alph*)]
@@ -171,27 +186,30 @@ Recall the following properties of return addresses and call sites, which must a
     \item \label{itm:raprop2} Multiple invocations of the same call site have the same return address;
     \item \label{itm:raprop3} Different call sites have different return addresses.
 \end{enumerate}
-% \glspl{btra} must have these properties as well.
+% \glspl{BTRA} must have these properties as well.
 Violating any of these properties might allow an attacker to learn the actual return address.
 %%% 20201118/1654/sbr/sp2021-urad.tex#519: parallel sentence construction...
 We take the following precautions to preserve the properties.
 To preserve property~\ref{itm:raprop1}, \rtwoc{} ensures that each call site uses the same booby-trapped return address just once.
-To preserve property~\ref{itm:raprop2}, \rtwoc{} does \emph{not} change the set of \glspl{btra} for a call site at run-time.
+To preserve property~\ref{itm:raprop2}, \rtwoc{} does \emph{not} change the set of \glspl{BTRA} for a call site at run-time.
 This decision represents a rare case, where \emph{more} dynamism is \emph{less} effective.
-Consider a single call site with dynamically changing \glspl{btra}: just two observations suffice to identify the return address, as it is the only pointer remaining identical.
-To preserve property~\ref{itm:raprop3},  \rtwoc{} inserts a randomly chosen set of \glspl{btra} at each \emph{call-site}.
-If, instead, one were to insert them in the \emph{callee}, multiple call sites would have the identical set of \glspl{btra}, with only one difference: the return address.
+Consider a single call site with dynamically changing \glspl{BTRA}: just two observations suffice to identify the return address, as it is the only pointer remaining identical.
+To preserve property~\ref{itm:raprop3},  \rtwoc{} inserts a randomly chosen set of \glspl{BTRA} at each \emph{call-site}.
+If, instead, one were to insert them in the \emph{callee}, multiple call sites would have the identical set of \glspl{BTRA}, with only one difference: the return address.
 
 For this very reason---preserving property~\ref{itm:raprop3}---\rtwoc{} also avoids reusing booby-trapped return addresses between different call sites as much as possible.
-% \rtwoc also tries to avoid reusing \glspl{btra} between different call sites, as doing so would violate \cref{itm:raprop3}.
-In particular, an attacker could leak multiple stack frames and look for recurring addresses to identify \glspl{btra}.
-Due to the ensuing combinatorial explosion, avoiding the reuse of \glspl{btra} between call sites becomes increasingly difficult with an increasing number of call sites.
-To counter this combinatorial effect, we tolerate occasional reuse and parameterize the maximum number of \glspl{btra}.
-An attacker would have to leak two specific stack frames reusing the same \glspl{btra} to gain valuable information.
-Such a leak is unlikely in practice because the \glspl{btra} are distributed randomly over the text section.
+% \rtwoc also tries to avoid reusing \glspl{BTRA} between different call sites, as doing so would violate \cref{itm:raprop3}.
+In particular, an attacker could leak multiple stack frames and look for recurring addresses to identify \glspl{BTRA}.
+Due to the ensuing combinatorial explosion, avoiding the reuse of \glspl{BTRA} between call sites becomes increasingly difficult with an increasing number of call sites.
+To counter this combinatorial effect, we tolerate occasional reuse and parameterize the maximum number of \glspl{BTRA}.
+An attacker would have to leak two specific stack frames reusing the same \glspl{BTRA} to gain valuable information.
+Such a leak is unlikely in practice because the \glspl{BTRA} are distributed randomly over the text section.
 
-\begin{figure*}[t]
-    \begin{subfigure}[b]{0.95\columnwidth}
+\begin{figure}[t!]
+    % --- ROW 1: GRAPHICAL CONTENT ---
+    % This row contains the graphics, aligned at their bottom edges.
+
+    \begin{minipage}[b]{0.4\linewidth}
         \begin{lstlisting}[style=asmcode,style=coloredrads]
 vmovdqa %ymm13,(arr) |\tikzmark{T-First-Vex-Mov}|
 vmovdqu -0x20(%rsp),%ymm13
@@ -202,25 +220,38 @@ sub $0x30,%rsp
 call callee
         \end{lstlisting}
         \vspace{1cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.95\columnwidth}
-        \centering
-        \resizebox{\columnwidth}{!} {
-            \includegraphics[trim={0 0.5cm 0 0}]{figures/avx2-setup}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.5\linewidth}
+        \includeDrawioFigure[\linewidth]{figures/r2c/r2c-avx-setup}[remember picture]{
+            \path
+            (Point1) coordinate (A)
+            ([yshift=5pt] Point2) coordinate (B)
+            (A) -- (B) coordinate[pos=.5] (M1)
+            coordinate (BraceTip1) at ($ (M1)!{7pt+5pt}!-90:(B) $);
+            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}] (A) -- (B);
+            \path
+            ([yshift=5pt] Point2) coordinate (C)
+            ([yshift=5pt] Point3) coordinate (D)
+            (C) -- (D) coordinate[pos=.5] (M2)
+            coordinate (BraceTip2) at ($ (M2)!{7pt+5pt}!-90:(D) $);
+            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}]
+            (C) -- (D);
         }
-    \end{subfigure}
-    \captionsetup{margin={0pt,1.3cm},oneside}
-    \vspace*{-1em}
-    \caption{\Gls{btra} setup with AVX2 instructions.
-    The AVX2 instructions load the \glspl{btra} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
-    \label{fig:avx2-setup}
-    \begin{tikzpicture}[overlay, remember picture]
-        \draw[Latex-, line width=0.6] ([shift={(0pt,3pt)}] pic cs:T-First-Vex-Mov) -- +(3.0,0) |- ([shift={(2pt,114pt)}] pic cs:T-First-Vex-Move);
-        \draw [decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt},yshift=0pt] ([shift={(20pt,135pt)}] pic cs:T-First-Vex-Move) -- ([shift={(20pt,93pt)}] pic cs:T-First-Vex-Move);
-        \draw[Latex-, line width=0.6] ([shift={(0pt,3pt)}] pic cs:T-Second-Vex-Mov) -- +(1.6,0) |- ([shift={(2pt,73pt)}] pic cs:T-Second-Vex-Move);
-        \draw [decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt},yshift=0pt] ([shift={(20pt,93pt)}] pic cs:T-Second-Vex-Move) -- ([shift={(20pt,53pt)}] pic cs:T-Second-Vex-Move);
+    \end{minipage}
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-First-Vex-Mov) -| ($ (pic cs:T-First-Vex-Mov)!0.4!(BraceTip1) $) |- ([xshift=-3pt]BraceTip1);
+        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-Second-Vex-Mov) -| ($ (pic cs:T-Second-Vex-Mov)!0.4!(BraceTip2) $) |- ([xshift=-3pt]BraceTip2);
     \end{tikzpicture}
-\end{figure*}
+
+    % --- ROW 2: CAPTIONS ---
+    % This row contains the captions, aligned at their top edges.
+    % The \subcaption command will work inside the minipage.
+    \caption{\Gls{BTRA} setup with AVX2 instructions.
+    The AVX2 instructions load the \glspl{BTRA} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
+    \label{fig:avx2-setup}
+
+\end{figure}
 
 \subsection{Booby-Trapped Data Pointers}\label{ss:heap-boobytraps}
 Contrary to return addresses, the runtime requirements for non-control-flow related stack objects are not as strict.
@@ -249,8 +280,8 @@ By diversifying these function parts, two specific types of inference are impede
 
 The inserted NOPs at a call site change the relative offset between the return address and the calling function address.
 As a result, an attacker can no longer reliably infer the function address from a leaked return address, effectively restricting the use of return addresses to \emph{gadget localization}.
-Whereas for a whole-function reuse attack a \emph{single} function pointer might suffice, an attacker typically needs multiple leaked addresses to locate gadgets.
-Return addresses are protected by \glspl{btra} and increasing the number of required leaks increases the probability of an attacker choosing a \gls{btra} over the real return address.
+Whereas for a whole-function reuse attack a \emph{single} function pointer might suffice, an attacker typically needs multiple leaked addresses to locate enough gadgets for a gadget chain.
+Return addresses are protected by \glspl{BTRA} and increasing the number of required leaks increases the probability of an attacker choosing a \gls{BTRA} over the real return address.
 Thus, increasing the number of required leaks increases the overall security.
 
 The inserted traps in the prolog change the relative offset from the function start to a potential gadget location.
@@ -261,57 +292,131 @@ Potential leaks are therefore less likely to meet those requirements.
 Compared with return addresses, function pointers on the stack occur less frequently and are, furthermore, protected by stack slot randomization.
 % Instead of crashing the target process, booby traps can actively react to an ongoing attack.
 % For example, a booby trap could prevent the restart of a crashed process, patch vulnerable code or start a honeypot process instead.
-%
-%    The idea of booby traps depends crucially on them being indistinguishable from benign code.
-%    Code-layout randomization in combination with execute-only memory provides a first line of defense to prevent the disclosure of booby traps.
-%    Due to novel capabilities demonstrated by the BlindSide attack~\cite{Goktas2020}, a second line of defense is required.
-%
-%    BlindSide presents a technique called \emph{gadget probing} that relies on speculative execution to discover gadgets.
-%    % memory disclosure primitives.
-%    The idea behind gadget probing is that gadgets can be identified by their cache behavior during speculative execution.
-%    Speculatively executing gadgets allows gadget probing to become stealthy and resistant to runtime exceptions.
-%    To initiate speculative execution, BlindSide combines a memory corruption with a branch misprediction, but poisoning the \gls{BTB} is also an option~\cite{Bhattacharyya2020}.
-%%    By itself, this observation is of no specific use;
-%%    when combined with speculative execution, however, gadget probing becomes stealthy and immune to runtime exceptions.
-%    % Gadget probing is based on the observation that different gadgets leave behind different cache traces.
-%    % As the gadgets are executed only speculatively, gadget probing is immune to potential exceptions raised during the execution.
-%    %  One of these primitives, called \emph{gadget probing}, identifies snippets of code by executing them \emph{speculatively}.
-%%    At present, only execute-only memory based on hardware-permission checks thwarts gadget probing.
-%    %%% 20201127/2141/sbr/sp2021-urad.tex#561:
-%    %%% sentence order was wrong...
-%
-%    Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
-%    To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
-%    Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
-%
-%    As a result, gadget probing poses an immediate threat to booby-trap functions.
-%%    We refer to these booby traps as \emph{speculation-invariant booby traps}.
-%    Specifically, booby traps are vulnerable because
-%    \begin{enumerate*}
-%        \item they exhibit the same behavior in both, speculative and non-speculative execution;
-%        \item their observable behavior during speculative execution is different from benign code.
-%    \end{enumerate*}
-%    Protecting booby traps against speculation requires a new approach.
-%    We introduce \emph{speculation-aware booby traps}.
-%    Speculation-aware booby traps leverage retpolines~\cite{Turner2018} to mimic the cache behavior of the code expected by the attacker when executed speculatively.
-%    Upon non-speculative execution, however, our speculation-aware booby traps raise an alarm.
-%    To summarize, speculation-aware booby traps enable \rtwoc to jam the results of gadget probing while at the same time deterring brute-force attacks.
-%
-%%    A Spectre mitigation called \emph{retpolines (return trampolines)} achieves this separation by trapping speculative control-flow in a spin loop~\cite{Turner2018}.
-%%    Since traditional retpolines protect indirect branches, we extend the underlying principle to build \emph{speculation-aware booby traps}.
-%    % While original retpolines harden indirect branches,
-%    % we extend the underlying idea to build \emph{speculation aware booby traps}.
-%
-%%    Instead of trapping control flow in a spin loop, speculation-aware booby traps deflect the speculative execution to a \emph{decoy gadget}.
-%%    The decoy gadget mimics identical cache traces to the code expected by the attacker.
-%%    Upon non-speculative execution, however, our speculation-aware booby trap raises an alarm.
-%%    By using speculation-aware booby traps, the results of gadget probing can be jammed.
-%    % Speculation-aware booby traps counter the danger emanating from gadget probing.
-%    %%% 20201127/2152/sbr/sp2021-urad.tex#583: is an effective antidote to gadget probing.
-%    % Observed cache traces could stem from benign code, but could also be the deed of a decoy gadget.
-%
-%
-%
+
+\subsection{Speculative Booby Traps}\label{ss:speculative-booby-traps}%
+Booby traps are an effective measure to deter random probing.
+For booby traps to be effective, two properties must hold:
+\begin{enumerate*}
+    \item they must be indistinguishable from benign code from the attacker's perspective and
+    \item triggering them must have negative consequences for the attacker.
+\end{enumerate*}
+Code-layout randomization in combination with execute-only memory ensures the first property.
+The negative consequences for the attacker depend on the booby trap used, but can range from simply crashing the program over raising an alarm to launching a counter-attack~\cite{Crane2013}.
+These observations hold true, however, only in the non-speculative domain.
+
+Over the last 8 years, transient-execution attacks have opened another battleground besides the classic \glspl{CRA}.
+In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code.
+Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods.\fbetodo{cite cache side channels}
+Apart from using this principle to directly leak sensitive information, attackers can also lift \glspl{CRA} into the speculative domain.
+
+The Blindside attack, for example, employs the same principles as Blind ROP to speculatively locate gadgets with a technique called \emph{gadget probing}.
+The idea behind gadget probing is that gadgets can be identified by their cache behavior during speculative execution.
+Similarly, SpecROP~\cite{Bhattacharyya2020} executes entire gadget chains speculatively.
+The speculative execution of gadgets makes these techniques immune to runtime exceptions.
+
+An attacker could use this fault-resistant capability to either leak data or to uncover booby trap addresses.
+Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
+To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
+Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
+Thus, speculative execution poses a threat to boob-trap functions.
+
+Booby traps are vulnerable because
+\begin{enumerate*}
+    \item they exhibit the \emph{same} behavior in both, speculative and non-speculative execution;
+    \item their observable behavior during speculative execution is \emph{different} from benign code.
+\end{enumerate*}
+Protecting booby traps against speculation requires a new approach.
+We call our approach \emph{speculation-aware booby traps}, as it lifts the deceiving properties of booby traps into the speculative domain.
+Although we have prototyped speculation-aware booby traps, we did not include them in the final defense, as we considered them out of scope for \rtwoc.
+We present the idea here to motivate more research in that direction.
+
+Speculation-aware booby traps build on the principle of separating speculative and non-speculative control flow.
+This principle was first demonstrated by retpolines~\cite{Turner2018}, which capture speculative control-flow in a spin loop.
+\cref{lst:retpoline} shows an example of a retpoline protecting an indirect branch to the address in \code{rax} against speculative execution.
+
+Instead of a spin loop, speculation-aware booby traps redirect speculative control-flow to the code an attacker expects behind an address.
+\cref{fig:speculation-aware-boobytrap} shows how speculation-aware booby traps could be used in the context of \rtwoc.
+For example, if \code{0x400530} is a booby trap address and \code{0x40055d} denotes the real return address, a speculation-aware booby trap would redirect the speculative control flow to \code{0x40055d}.
+The cache traces left behind by speculatively executing \code{0x400530} would, thus, reflect those of speculatively executing \code{0x40055d}.
+The only way for an attacker to know for sure what code hides behind \code{0x40055d} would be to execute it non-speculatively, which would trigger the booby trap.
+
+
+\newsavebox{\speculativebt}
+\begin{lrbox}{\speculativebt}
+
+    \begin{lstlisting}[style=asmcode,frame=none,breaklines=false,basicstyle=\scriptsize\ttfamily]
+<boobytrap>: |\Circled{1}|
+ call set_up_target
+|\tikzmark{T-Decoy-Gadget}| jmp F
+
+set_up_target:
+ mov (%rsp), target
+ ret|\tikzmark{T-Ret-Alarm}|
+
+target:
+ call alarm|\tikzmark{T-Call-Alarm}|
+    \end{lstlisting}
+\end{lrbox}
+
+
+\begin{figure}[t!]
+    % --- ROW 1: GRAPHICAL CONTENT ---
+    % This row contains the graphics, aligned at their bottom edges.
+
+    \begin{minipage}[b]{0.25\linewidth}
+        \begin{lstlisting}[style=asmcode,basicstyle=\footnotesize\ttfamily]
+call set_up_target
+
+capture_spec:
+ pause
+ jmp capture_spec
+
+set_up_target:
+ mov (%rsp), %rax
+ ret
+        \end{lstlisting}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.7\linewidth}
+        \resizebox{\linewidth}{!}{
+            \includeDrawioFigure{figures/r2c/r2c-btra-only-stack}[remember picture]{
+                \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
+                \draw[dash pattern=on 4pt off 4pt] (CodeBox.north west) rectangle (CodeBox.south east);
+                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
+                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
+                \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
+                \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
+                \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
+                \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
+                \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
+                \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
+                \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
+            }
+        }
+    \end{minipage}
+
+    % --- ROW 2: CAPTIONS ---
+    % This row contains the captions, aligned at their top edges.
+    % The \subcaption command will work inside the minipage.
+
+    \begin{minipage}[t]{0.3\linewidth}
+        \subcaption{Retpolines control the branch target speculation for indirect branches.}
+        \label{lst:retpoline}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{0.6\linewidth}
+        \subcaption{A speculation aware booby trap that looks like the expected code during speculative execution.}
+        \label{fig:speculation-aware-boobytrap}
+    \end{minipage}
+\end{figure}
+
+
+\begin{figure}[t!]
+
+
+\end{figure}
+
+
 %%    \subsection{Adaptive Security}\label{ss:adaptive-security}
 %%    \rtwoc provides probabilistic security against the disclosure of return addresses.
 %%    Specifically, each inserted BTRA decreases the success rate of a blind guess, while increasing the necessity for more observations.

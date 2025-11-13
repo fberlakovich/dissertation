@@ -1,0 +1,59 @@
+\section{Related Work}
+
+\paragraph{Swarm testing}
+\lool{} follows the idea of swarm testing~\cite{Groce2012}.
+The insight behind swarm testing is that inputs including more features are not necessarily beneficial and in some cases even detrimental to the testing effort~\cite{Groce2013}.
+Features, in our case Java language constructs, can either trigger, suppress or be irrelevant for a certain bug.
+Thus, \lool{} tries to achieve a large diversity of input features, which includes also the \emph{omission} of features in some inputs.
+\citeauthor{Alipour2016} extended swarm testing to be \emph{directed}~\cite{Alipour2016}.
+Like \lool{}, directed swarm testing incorporates statistical information about triggers and suppressors from previous runs into the generation of inputs.
+However, \lool{} chooses the targets for its directed swarm testing approach automatically based on the optimization log coverage.
+
+\paragraph{Alternative coverage metrics}
+The majority of fuzzers today uses some variant of code coverage (\eg branch coverage, block coverage or \(n\)-gram coverage) for the coverage-feedback mechanism.
+Recent work suggests, however, that code coverage alone is insufficient to judge a fuzzer's bug-finding performance~\cite{Bohme2022}.
+In particular, code coverage is often not \emph{sensitive} enough to detect bugs in already covered code~\cite{Wang2019}.
+Improved versions of code coverage, such as context-sensitive branch coverage aim to increase the sensitivity but suffer from coverage-state explosion~\cite{Chen2018a}.
+To mitigate the shortcomings of code coverage, researchers have suggested alternative coverage metrics~\cite{Mantovani2022, Fioraldi2021, Herrera2022, Kim2023, Gan2018}.
+In contrast, \lool{} leverages a more abstract and domain-specific coverage metric and is, thus, less prone to state explosion.
+
+\paragraph{JIT compiler fuzzing}
+Fuzzili is a coverage-guided fuzzer for JavaScript VMs that builds and mutates JavaScript input programs based on a custom intermediate language~\cite{Gross2023}.
+The generated programs are always syntactically correct, avoid semantic errors, and contain JIT compilation triggering fragments.
+Fuzzili does not, however, detect miscompilations.
+JITPicker extends Fuzzili by creating JavaScript functions that expose the interpreter state at different points, such as variable values~\cite{Bernhard2022}.
+With this state exposure, JITPicker can perform differential testing against the JavaScript interpreter and detect miscompilations.
+FuzzJIT follows the same idea of differential testing against the interpreter~\cite{Wang2023}.
+To exercise more potentially interesting parts of the JavaScript JIT, FuzzJIT uses specialized input templates containing, for example, array expressions.
+JavaTailor follows a similar approach by weaving historical test programs into its seeds~\cite{Zhao2022}.
+
+Classfuzz mutates Java class files based on JVM code coverage~\cite{Chen2016a}.
+Classming follows a similar approach, but it guides the class file mutation based on the executed instructions in the class file~\cite{Chen2019a}.
+JITFuzz is a coverage-guided fuzzer for the JVM~\cite{Wu2023}.
+In contrast to \lool{}, JITFuzz uses Java class files as inputs and mutates them based on the coverage feedback.
+Similar to \lool{}, the mutations are specifically tailored to exercise JVM JIT compiler optimizations.
+Artemis generates input programs with Java* Fuzzer~\cite{JavaFuzzer} and transplants code snippets from JIT compiler test suites into the program~\cite{Li2023a}.
+In addition, Artemis tests combinations of compiled and interpreted methods by triggering only compilation of randomly selected methods in the input program.
+Following the spirit of swarm testing, the authors of JOpFuzz investigate triggering test case features and required JVM options based on real bug reports~\cite{Jia2023}.
+In an initial step, JOpFuzz tries to automatically infer the relationship between code features and JIT compiler optimizations.
+During the fuzzing campaign, JOpFuzz not only mutates Java input programs, but also JIT compiler options passed to the JVM\@.
+\citeauthor{georgescu2024} perform differential fuzzing of the Kotlin compiler generating semantically and syntactically valid Kotlin programs with a genetic algorithm~\cite{georgescu2024}.
+Unlike \lool, their genetic algorithm treats the Kotlin programs and not the generation parameters as individuals.
+
+Finally, some JIT compiler fuzzers focus on bug categories different from crashes and miscompilations.
+Confuzzion, for example, tries to find Java type confusion vulnerabilities~\cite{Bonnaventure2021}.
+\citeauthor{Brennan2020} use a fuzzer to detect timing side-channels in JIT-compiled Java programs~\cite{Brennan2020}.
+
+\paragraph{Compiler optimization logs}\label{par:compiler-optimization-logs}
+Our approach to guided fuzzing should apply to any mature compiler that saves information about the optimizations it performed.
+
+The optimization log closest to the Graal compiler's optimization log is V8's TurboFan optimization trace.
+The trace contains the graph nodes before and after each performed optimization for each method.
+Several other compilers produce some form of optimization log as well, such as LLVM's Remarks\footnote{\url{https://llvm.org/docs/Remarks.html}} or the Intel Compiler's Optimization Reports\footnote{\url{https://www.intel.com/content/www/us/en/developer/articles/technical/getting-the-most-out-of-your-compiler-with-new-optimization-reports.html}}.
+In contrast to GraalVM's optimization log, these compilers also include \emph{negative} entries in the log for optimizations that were attempted but did not succeed or were not considered profitable.
+This information could help the fuzzer to gradually approach an input code shape that eventually triggers the optimization.
+
+Other compilers, such as GCC, do not produce such structured logs.
+As an alternative to an explicit structured log, debug dumps of the program state before and after compiler phases could be compared to infer if an optimization has taken place.
+This would also provide a form of optimization coverage information suitable for use as feedback to a fuzzer.
+However, if a structured log proves to be helpful for fuzzing, it should be easy for compiler developers to retrofit the required logging in their compilers.

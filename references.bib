@@ -1621,3 +1621,335 @@ kopien haben gadgets an unterschiedlichen stellen},
     keywords = {notion},
     file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Kc_et_al_2003_Countering_code-injection_attacks_with_instruction-set_randomization.pdf}
 }
+
+@inproceedings{cloosters2022,
+    title = {{{RiscyROP}}: {{Automated Return-Oriented Programming Attacks}} on {{RISC-V}} and {{ARM64}}},
+    shorttitle = {{{RiscyROP}}},
+    booktitle = {Proceedings of the 25th {{International Symposium}} on {{Research}} in {{Attacks}}, {{Intrusions}} and {{Defenses}}},
+    author = {Cloosters, Tobias and Paaßen, David and Wang, Jianqiang and Draissi, Oussama and Jauernig, Patrick and Stapf, Emmanuel and Davi, Lucas and Sadeghi, Ahmad-Reza},
+    date = {2022-10-26},
+    series = {{{RAID}} '22},
+    pages = {30--42},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3545948.3545997},
+    url = {https://doi.org/10.1145/3545948.3545997},
+    urldate = {2025-10-29},
+    abstract = {Return-oriented programming\&nbsp;(ROP) is a powerful run-time exploitation technique to attack vulnerable software. Modern RISC architectures like RISC-V and ARM64 pose new challenges for ROP execution due to the lack of a stack-based return instruction and strict instruction alignment. Further, the large number of caller-saved argument registers significantly reduces the gadget space available to the attacker. Consequently, existing ROP gadget tools for other processor architectures cannot be applied to these RISC architectures. Previous work on RISC-V provides only manual construction of ROP attacks against specially crafted programs, and no analysis of ROP attacks has been conducted for ARM64 yet. In this paper, we address these challenges and present RiscyROP, the first automated ROP gadget finding and chaining toolkit for RISC-V and ARM64. RiscyROP analyzes available gadgets utilizing symbolic execution, and automatically generates complex multi-stage chains to conduct arbitrary function calls. Our approach enables the first investigation of the gadget space on RISC-V and ARM64 real-world binaries. RiscyROP successfully builds ROP chains that enable an attacker to execute arbitrary function calls for the nginx web server as well as any binary that contains the libc library.},
+    isbn = {978-1-4503-9704-9}
+}
+
+@inproceedings{jaloyan2020,
+    title = {Return-{{Oriented Programming}} on {{RISC-V}}},
+    booktitle = {Proceedings of the 15th {{ACM Asia Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Jaloyan, Georges-Axel and Markantonakis, Konstantinos and Akram, Raja Naeem and Robin, David and Mayes, Keith and Naccache, David},
+    date = {2020-10-05},
+    series = {{{ASIA CCS}} '20},
+    pages = {471--480},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3320269.3384738},
+    url = {https://doi.org/10.1145/3320269.3384738},
+    urldate = {2025-10-29},
+    abstract = {This paper provides the first analysis on the feasibility of Return-Oriented programming (ROP) on RISC-V, a new instruction set architecture targeting embedded systems. We show the existence of a new class of gadgets, using several Linear Code Sequences And Jumps (LCSAJ), undetected by current Galileo-based ROP gadget searching tools. We argue that this class of gadgets is rich enough on RISC-V to mount complex ROP attacks, bypassing traditional mitigation like DEP, ASLR, stack canaries, G-Free and some compiler-based backward-edge CFI, by jumping over any guard inserted by a compiler to protect indirect jump instructions. We provide examples of such gadgets, as well as a proof-of-concept ROP chain, using C code injection to leverage a privilege escalation attack on two standard Linux operating systems. Additionally, we discuss some of the required mitigations to prevent such attacks and provide a new ROP gadget finder algorithm that handles this new class of gadgets.},
+    isbn = {978-1-4503-6750-9},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Jaloyan et al. - 2020 - Return-Oriented Programming on RISC-V.pdf}
+}
+
+@inproceedings{checkoway2010,
+    title = {Return-Oriented Programming without Returns},
+    booktitle = {Proceedings of the 17th {{ACM}} Conference on {{Computer}} and Communications Security - {{CCS}} '10},
+    author = {Checkoway, Stephen and Davi, Lucas and Dmitrienko, Alexandra and Sadeghi, Ahmad-Reza and Shacham, Hovav and Winandy, Marcel},
+    date = {2010},
+    pages = {559},
+    publisher = {ACM Press},
+    location = {New York, New York, USA},
+    issn = {15437221},
+    doi = {10.1145/1866307.1866370},
+    url = {http://portal.acm.org/citation.cfm?doid=1866307.1866370},
+    urldate = {2018-05-04},
+    abstract = {We show that on both the x86 and ARM architectures it is possible to mount return-oriented programming attacks without using return instructions. Our attacks instead make use of certain instruction sequences that behave like a return, which occur with sufficient frequency in large libraries on (x86) Linux and (ARM) Android to allow creation of Turing-complete gadget sets. Because they do not make use of return instructions, our new attacks have negative implications for several recently proposed classes of defense against return-oriented programming: those that detect the too-frequent use of returns in the instruction stream; those that detect violations of the last-in, first-out invariant normally maintained for the return-address stack; and those that modify compilers to produce code that avoids the return instruction.},
+    isbn = {978-1-4503-0245-6},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Checkoway_et_al_2010_Return-oriented_programming_without_returns.pdf}
+}
+
+@inproceedings{Bletsch2011a,
+    title = {Jump-Oriented Programming},
+    booktitle = {Proceedings of the 6th {{ACM Symposium}} on {{Information}}, {{Computer}} and {{Communications Security}} - {{ASIACCS}} '11},
+    author = {Bletsch, Tyler and Jiang, Xuxian and Freeh, Vince W. and Liang, Zhenkai},
+    date = {2011},
+    pages = {30},
+    publisher = {ACM Press},
+    location = {New York, New York, USA},
+    doi = {10.1145/1966913.1966919},
+    url = {http://portal.acm.org/citation.cfm?doid=1966913.1966919},
+    urldate = {2018-05-04},
+    abstract = {8. Detection Techniques Techniques used for detecting malware can be categorized broadly into three categories: i) Signature-based detection ii) Behaviour-based detection iii) Anomaly-based detection Signature-based detection uses its characterization of what is known to be malicious to decide the maliciousness of a program under inspection. As one may imagine this [...]},
+    isbn = {978-1-4503-0564-8},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Bletsch_et_al_2011_Jump-oriented_programming.pdf}
+}
+
+@inproceedings{Davi2014,
+    title = {Stitching the {{Gadgets}}: {{On}} the {{Ineffectiveness}} of {{Coarse-Grained Control-Flow Integrity Protection}}},
+    booktitle = {23rd {{USENIX Security Symposium}} ({{USENIX Security}} 14)},
+    author = {Davi, Lucas and Sadeghi, Ahmad-Reza and Lehmann, Daniel and Monrose, Fabian},
+    date = {2014},
+    pages = {401--416},
+    url = {https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/davi},
+    urldate = {2019-10-08},
+    abstract = {Return-oriented programming (ROP) offers a robust attack technique that has, not surprisingly, been extensively used to exploit bugs in modern software programs (e.g., web browsers and PDF readers). ROP attacks require no code injection, and have already been shown to be powerful enough to bypass fine-grained memory randomization (ASLR) defenses. To counter this ingenious attack strategy, several proposals for enforcement of (coarse-grained) control-flow integrity (CFI) have emerged. The key argument put forth by these works is that coarse-grained CFI policies are sufficient to prevent ROP attacks. As this reasoning has gained traction, ideas put forth in these proposals have even been incorporated into coarse-grained CFI defenses in widely adopted tools (e.g., Microsoft’s EMET framework). In this paper, we provide the first comprehensive security analysis of various CFI solutions (covering kBouncer, ROPecker, CFI for COTS binaries, ROPGuard, and Microsoft EMET 4.1). A key contribution is in demonstrating that these techniques can be effectively undermined, even under weak adversarial assumptions. More specifically, we show that with bare minimum assumptions, turing-complete and real-world ROP attacks can still be launched even when the strictest of enforcement policies is in use. To do so, we introduce several new ROP attack primitives, and demonstrate the practicality of our approach by transforming existing real-world exploits into more stealthy attacks that bypass coarse-grained CFI defenses.},
+    isbn = {978-1-931971-15-7},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Davi_et_al_2014_Stitching_the_Gadgets.pdf}
+}
+
+@article{Cheng2014,
+    title = {{{ROPecker}}: {{A Generic}} and {{Practical Approach For Defending Against ROP Attacks}}},
+    shorttitle = {{{ROPecker}}},
+    author = {Cheng, Yueqiang and Zhou, Zongwei and Yu, Miao and Ding, Xuhua and Deng, Robert H.},
+    date = {2014},
+    journaltitle = {Proceedings 2014 Network and Distributed System Security Symposium},
+    doi = {10.14722/ndss.2014.23156},
+    url = {http://www.internetsociety.org/doc/ropecker-generic-and-practical-approach-defending-against-rop-attacks},
+    urldate = {2016-06-27},
+    abstract = {rop; return-oriented programming; cfi},
+    isbn = {1-891562-35-5},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Cheng_et_al_2014_ROPecker.pdf}
+}
+
+@inproceedings{koning2017,
+    title = {No {{Need}} to {{Hide}}: {{Protecting Safe Regions}} on {{Commodity Hardware}}},
+    shorttitle = {No {{Need}} to {{Hide}}},
+    booktitle = {Proceedings of the {{Twelfth European Conference}} on {{Computer Systems}}},
+    author = {Koning, Koen and Chen, Xi and Bos, Herbert and Giuffrida, Cristiano and Athanasopoulos, Elias},
+    date = {2017-04-23},
+    series = {{{EuroSys}} '17},
+    pages = {437--452},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3064176.3064217},
+    url = {https://doi.org/10.1145/3064176.3064217},
+    urldate = {2023-08-01},
+    abstract = {As modern 64-bit x86 processors no longer support the segmentation capabilities of their 32-bit predecessors, most research projects assume that strong in-process memory isolation is no longer an affordable option. Instead of strong, deterministic isolation, new defense systems therefore rely on the probabilistic pseudo-isolation provided by randomization to "hide" sensitive (or safe) regions. However, recent attacks have shown that such protection is insufficient; attackers can leak these safe regions in a variety of ways. In this paper, we revisit isolation for x86-64 and argue that hardware features enabling efficient deterministic isolation do exist. We first present a comprehensive study on commodity hardware features that can be repurposed to isolate safe regions in the same address space (e.g., Intel MPX and MPK). We then introduce MemSentry, a framework to harden modern defense systems with commodity hardware features instead of information hiding. Our results show that some hardware features are more effective than others in hardening such defenses in each scenario and that features originally conceived for other purposes (e.g., Intel MPX for bounds checking) are surprisingly efficient at isolating safe regions compared to their software equivalent (i.e., SFI).},
+    isbn = {978-1-4503-4938-3},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Koning_et_al_2017_No_Need_to_Hide.pdf}
+}
+
+@inproceedings{Szekeres,
+    title = {{{SoK}}: {{Eternal War}} in {{Memory}}},
+    booktitle = {2013 {{IEEE Symposium}} on {{Security}} and {{Privacy}}},
+    author = {Szekeres, László and Payer, Mathias and {Tao Wei} and Song, Dawn},
+    date = {2013-05},
+    pages = {48--62},
+    publisher = {IEEE},
+    issn = {10816011},
+    doi = {10.1109/SP.2013.13},
+    url = {http://ieeexplore.ieee.org/document/6547101/},
+    urldate = {2019-08-25},
+    abstract = {Memory corruption bugs in software written in low-level languages like C or C++ are one of the oldest problems in computer security. The lack of safety in these languages allows attackers to alter the program’s behavior or take full control over it by hijacking its control flow. This problem has existed for more than 30 years and a vast number of potential solutions have been proposed, yet memory corruption attacks continue to pose a serious threat. Real world exploits show that all currently deployed protections can be defeated. This paper sheds light on the primary reasons for this by describing attacks that succeed on today’s systems. We systematize the current knowledge about various protection techniques by setting up a general model for memory corrup- tion attacks. Using this model we show what policies can stop which attacks. The model identifies weaknesses of currently deployed techniques, as well as other proposed protections enforcing stricter policies. We analyze the reasons why protection mechanisms imple- menting stricter polices are not deployed. To achieve wide adoption, protection mechanisms must support a multitude of features and must satisfy a host of requirements. Especially important is performance, as experience shows that only solutions whose overhead is in reasonable bounds get deployed. A comparison of different enforceable policies helps de- signers of new protection mechanisms in finding the balance between effectiveness (security) and efficiency.We identify some open research problems, and provide suggestions on improving the adoption of newer techniques.},
+    isbn = {978-0-7695-4977-4},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Szekeres_et_al_2013_SoK.pdf}
+}
+
+@inproceedings{castro2006,
+    title = {Securing Software by Enforcing Data-Flow Integrity},
+    booktitle = {Proceedings of the 7th {{USENIX Symposium}} on {{Operating Systems Design}} and {{Implementation}} - {{Volume}} 7},
+    author = {Castro, Miguel and Costa, Manuel and Harris, Tim},
+    date = {2006-11-06},
+    series = {{{OSDI}} '06},
+    pages = {11},
+    publisher = {USENIX Association},
+    location = {USA},
+    abstract = {Software attacks often subvert the intended data-flow in a vulnerable program. For example, attackers exploit buffer overflows and format string vulnerabilities to write data to unintended locations. We present a simple technique that prevents these attacks by enforcing data-flow integrity. It computes a data-flow graph using static analysis, and it instruments the program to ensure that the flow of data at runtime is allowed by the data-flow graph. We describe an efficient implementation of data-flow integrity enforcement that uses static analysis to reduce instrumentation overhead. This implementation can be used in practice to detect a broad class of attacks and errors because it can be applied automatically to C and C++ programs without modifications, it does not have false positives, and it has low overhead.}
+}
+
+@article{Nagarakatte2009,
+    title = {{{SoftBound}}},
+    author = {Nagarakatte, Santosh and Zhao, Jianzhou and Martin, Milo M.K. and Zdancewic, Steve},
+    date = {2009-05-28},
+    journaltitle = {ACM SIGPLAN Notices},
+    volume = {44},
+    number = {6},
+    pages = {245},
+    publisher = {Association for Computing Machinery (ACM)},
+    issn = {03621340},
+    doi = {10.1145/1543135.1542504},
+    abstract = {The serious bugs and security vulnerabilities facilitated by C/C++’s lack of bounds checking are well known, yet C and C++ remain in widespread use. Unfortunately, C’s arbitrary pointer arithmetic, conflation of pointers and arrays, and programmer-visible memory layout make retrofitting C/C++ with spatial safety guarantees ex- tremely challenging. Existing approaches suffer from incomplete- ness, have high runtime overhead, or require non-trivial changes to the C source code. Thus far, these deficiencies have prevented widespread adoption of such techniques. This paper proposes SoftBound, a compile-time transformation for enforcing spatial safety of C. Inspired by HardBound, a previ- ously proposed hardware-assisted approach, SoftBound similarly records base and bound information for every pointer as disjoint metadata. This decoupling enables SoftBound to provide spatial safety without requiring changes to C source code. Unlike Hard- Bound, SoftBound is a software-only approach and performs meta- data manipulation only when loading or storing pointer values. A formal proof shows that this is sufficient to provide spatial safety even in the presence of arbitrary casts. SoftBound’s full checking mode provides complete spatial violation detection with 67\% run- time overhead on average. To further reduce overheads, SoftBound has a store-only checking mode that successfully detects all the se- curity vulnerabilities in a test suite at the cost of only 22\% runtime overhead on average.},
+    keywords = {notion}
+}
+
+@inproceedings{orthen2024,
+    title = {{{SoftBound}}+{{CETS Revisited}}: {{More Than}} a {{Decade Later}}},
+    shorttitle = {{{SoftBound}}+{{CETS Revisited}}},
+    booktitle = {Proceedings of the 17th {{European Workshop}} on {{Systems Security}}},
+    author = {Orthen, Benjamin and Braunsdorf, Oliver and Zieris, Philipp and Horsch, Julian},
+    date = {2024-04-22},
+    series = {{{EuroSec}} '24},
+    pages = {22--28},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3642974.3652285},
+    url = {https://dl.acm.org/doi/10.1145/3642974.3652285},
+    urldate = {2025-10-30},
+    abstract = {Memory safety issues, including buffer overflows and use-after-free errors, continue to pose significant security threats in C/C++ programs, necessitating robust defenses and detection mechanisms. Despite advancements in memory-safe languages like Rust, transitioning legacy codebases often remains impractical, highlighting the need for effective memory safety tools for existing C/C++ code. This paper revisits SoftBound+CETS, an influential combination of two software-only memory safety solutions for C programs, more than a decade after its initial introduction. We present an updated SoftBound+CETS prototype, now compatible with LLVM 12, offering enhanced C language compatibility, interoperability with uninstrumented code, and sub-object bounds checking. Our evaluation, utilizing the SPEC CPU 2017 benchmark suite and the Juliet Test Suite, demonstrates the prototype's improved effectiveness in detecting memory errors with a performance and memory overhead of less than 2x. This is comparable to the widely used but less capable sanitizer ASan. Our future work aims to further reduce overheads and expand compatibility with C++ code and newer LLVM versions. This research highlights the viability of SoftBound+CETS as a comprehensive and practical tool for improving memory safety in legacy C applications, providing a valuable asset for developers and researchers focused on software security.},
+    isbn = {979-8-4007-0542-7},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Orthen et al. - 2024 - SoftBound+CETS Revisited More Than a Decade Later.pdf}
+}
+
+@inproceedings{Kroes2018,
+    title = {Delta {{Pointers}}: {{Buffer Overflow Checks Without}} the {{Checks}}},
+    booktitle = {Proceedings of the 13th {{EuroSys Conference}}, {{EuroSys}} 2018},
+    author = {Kroes, Taddeus and Koning, Koen and family=Kouwe, given=Erik, prefix=van der, useprefix=true and Bos, Herbert and Giuffrida, Cristiano},
+    date = {2018},
+    volume = {2018-January},
+    doi = {10.1145/3190508.3190553},
+    abstract = {Despite decades of research, buffer overflows still rank among the most dangerous vulnerabilities in unsafe languages such as C and C++. Compared to other memory corruption vulnerabilities, buffer overflows are both common and typically easy to exploit. Yet, they have proven so challenging to detect in real-world programs that existing solutions either yield very poor performance, or introduce incompatibilities with the C/C++ language standard. We present Delta Pointers, a new solution for buffer overflow detection based on efficient pointer tagging. By carefully altering the pointer representation, without violating language specifications, Delta Pointers use existing hardware features to detect both contiguous and non-contiguous overflows on dereferences, without a single check incurring extra branch or memory access operations. By focusing on buffer overflows rather than other vulnerabilities (e.g., underflows), Delta Pointers offer a unique checkless design to provide high performance while still maintaining compatibility. We show that Delta Pointers are effective in detecting arbitrary buffer overflows and, at 35\% overhead on SPEC, offer much better performance than competing solutions.},
+    isbn = {978-1-4503-5584-1},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Kroes_et_al_2018_Delta_Pointers.pdf}
+}
+
+@inproceedings{kwon2013,
+    title = {Low-Fat Pointers: Compact Encoding and Efficient Gate-Level Implementation of Fat Pointers for Spatial Safety and Capability-Based Security},
+    shorttitle = {Low-Fat Pointers},
+    booktitle = {Proceedings of the 2013 {{ACM SIGSAC}} Conference on {{Computer}} \& Communications Security},
+    author = {Kwon, Albert and Dhawan, Udit and Smith, Jonathan M. and Knight, Thomas F. and DeHon, Andre},
+    date = {2013-11-04},
+    series = {{{CCS}} '13},
+    pages = {721--732},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/2508859.2516713},
+    url = {https://dl.acm.org/doi/10.1145/2508859.2516713},
+    urldate = {2025-10-30},
+    abstract = {Referencing outside the bounds of an array or buffer is a common source of bugs and security vulnerabilities in today's software. We can enforce spatial safety and eliminate these violations by inseparably associating bounds with every pointer (fat pointer) and checking these bounds on every memory access. By further adding hardware-managed tags to the pointer, we make them unforgeable. This, in turn, allows the pointers to be used as capabilities to facilitate fine-grained access control and fast security domain crossing. Dedicated checking hardware runs in parallel with the processor's normal datapath so that the checks do not slow down processor operation (0\% runtime overhead). To achieve the safety of fat pointers without increasing program state, we compactly encode approximate base and bound pointers along with exact address pointers for a 46b address space into one 64-bit word with a worst-case memory overhead of 3\%. We develop gate-level implementations of the logic for updating and validating these compact fat pointers and show that the hardware requirements are low and the critical paths for common operations are smaller than processor ALU operations. Specifically, we show that the fat-pointer check and update operations can run in a 4 ns clock cycle on a Virtex 6 (40nm) implementation while only using 1100 6-LUTs or about the area of a double-precision, floating-point adder.},
+    isbn = {978-1-4503-2477-9},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Kwon et al. - 2013 - Low-fat pointers compact encoding and efficient gate-level implementation of fat pointers for spati.pdf}
+}
+
+@inproceedings{kroes2017,
+    title = {Fast and {{Generic Metadata Management}} with {{Mid-Fat Pointers}}},
+    booktitle = {Proceedings of the 10th {{European Workshop}} on {{Systems Security}}},
+    author = {Kroes, Taddeus and Koning, Koen and Giuffrida, Cristiano and Bos, Herbert and family=Kouwe, given=Erik, prefix=van der, useprefix=true},
+    date = {2017-04-23},
+    series = {{{EuroSec}}'17},
+    pages = {1--6},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3065913.3065920},
+    url = {https://doi.org/10.1145/3065913.3065920},
+    urldate = {2025-10-30},
+    abstract = {Object metadata management schemes are a fundamental building block in many modern defenses and significantly affect the overall run-time overhead of a software hardening solution. To support fast metadata lookup, many metadata management schemes embed metadata tags directly inside pointers. However, existing schemes using such tagged pointers either provide poor compatibility or restrict the generality of the solution.In this paper, we propose mid-fat pointers to implement fast and generic metadata management while retaining most of the compatibility benefits of existing schemes. The key idea is to use spare bits in a regular 64-bit pointer to encode arbitrary metadata and piggyback on software fault isolation (SFI) already employed by many modern defenses to efficiently decode regular pointers at memory access time. Our experimental results demonstrate that we cut overhead in half compared to a defense running on top of SFI, more than compensating for SFI overhead. Moreover, we demonstrate good compatibility, which may be further improved by static analysis.},
+    isbn = {978-1-4503-4935-2}
+}
+
+@inproceedings{dang2017a,
+    title = {Oscar: {{A Practical Page-Permissions-Based Scheme}} for {{Thwarting Dangling Pointers}}},
+    shorttitle = {Oscar},
+    author = {Dang, Thurston H. Y. and Maniatis, Petros and Wagner, David},
+    date = {2017},
+    pages = {815--832},
+    url = {https://www.usenix.org/conference/usenixsecurity17/technical-sessions/presentation/dang},
+    urldate = {2025-10-30},
+    eventtitle = {26th {{USENIX Security Symposium}} ({{USENIX Security}} 17)},
+    isbn = {978-1-931971-40-9},
+    langid = {english},
+    file = {/Users/felix/Zotero/storage/YS5XU4CY/Dang et al. - 2017 - Oscar A Practical Page-Permissions-Based Scheme for Thwarting Dangling Pointers.pdf}
+}
+
+@inproceedings{vanderkouwe2017,
+    title = {{{DangSan}}: {{Scalable Use-after-free Detection}}},
+    shorttitle = {{{DangSan}}},
+    booktitle = {Proceedings of the {{Twelfth European Conference}} on {{Computer Systems}}},
+    author = {family=Kouwe, given=Erik, prefix=van der, useprefix=true and Nigade, Vinod and Giuffrida, Cristiano},
+    date = {2017-04-23},
+    series = {{{EuroSys}} '17},
+    pages = {405--419},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3064176.3064211},
+    url = {https://doi.org/10.1145/3064176.3064211},
+    urldate = {2024-06-18},
+    abstract = {Use-after-free vulnerabilities due to dangling pointers are an important and growing threat to systems security. While various solutions exist to address this problem, none of them is sufficiently practical for real-world adoption. Some can be bypassed by attackers, others cannot support complex multithreaded applications prone to dangling pointers, and the remainder have prohibitively high overhead. One major source of overhead is the need to synchronize threads on every pointer write due to pointer tracking. In this paper, we present DangSan, a use-after-free detection system that scales efficiently to large numbers of pointer writes as well as to many concurrent threads. To significantly reduce the overhead of existing solutions, we observe that pointer tracking is write-intensive but requires very few reads. Moreover, there is no need for strong consistency guarantees as inconsistencies can be reconciled at read (i.e., object deallocation) time. Building on these intuitions, DangSan's design mimics that of log-structured file systems, which are ideally suited for similar workloads. Our results show that DangSan can run heavily multithreaded applications, while introducing only half the overhead of previous multithreaded use-after-free detectors.},
+    isbn = {978-1-4503-4938-3},
+    keywords = {Dangling pointers,LLVM,use-after-free},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/van_der_Kouwe_et_al_2017_DangSan.pdf}
+}
+
+@online{zotero-item-2602,
+    title = {Preventing {{Use-after-free}} with {{Dangling Pointers Nullification}}},
+    url = {https://www.ndss-symposium.org/ndss2015/ndss-2015-programme/preventing-use-after-free-dangling-pointers-nullification/},
+    urldate = {2025-10-30},
+    abstract = {Author(s): Byoungyoung Lee, Chengyu Song, Yeongjin Jang, Tielei Wang, Taesoo Kim, Long Lu, Wenke Lee Download: Paper (PDF) Date: 8 Feb 2015 Document Type: Briefing Papers Additional Documents: Slides Associated Event: NDSS Symposium 2015 Abstract: Many system components and network applications are written in the unsafe C/C++ languages, and there have been countless cases where … Continued},
+    langid = {american},
+    organization = {NDSS Symposium}
+}
+
+@inproceedings{lee2015,
+    title = {Preventing {{Use-after-free}} with {{Dangling Pointers Nullification}}},
+    booktitle = {Proceedings 2015 {{Network}} and {{Distributed System Security Symposium}}},
+    author = {Lee, Byoungyoung and Song, Chengyu and Jang, Yeongjin and Wang, Tielei and Kim, Taesoo and Lu, Long and Lee, Wenke},
+    date = {2015},
+    publisher = {Internet Society},
+    location = {San Diego, CA},
+    doi = {10.14722/ndss.2015.23238},
+    url = {https://www.ndss-symposium.org/ndss2015/ndss-2015-programme/preventing-use-after-free-dangling-pointers-nullification/},
+    urldate = {2025-10-30},
+    eventtitle = {Network and {{Distributed System Security Symposium}}},
+    isbn = {978-1-891562-38-9},
+    langid = {english}
+}
+
+@www{msrcreport2019,
+    author = {Microsoft Security Response Center},
+    title = {A proactive approach to more secure code},
+    date = {2019-07-16},
+    urldate = {2025-01-05},
+    url = {https://www.microsoft.com/en-us/msrc/blog/2019/07/a-proactive-approach-to-more-secure-code},
+}
+
+@www{projectzeroandroid2022,
+    author = {Google Security Blog},
+    title = {Memory Safe Languages in {{Android}} 13},
+    date = {2022-12-01},
+    url = {https://security.googleblog.com/2022/12/memory-safe-languages-in-android-13.html},
+    urldate = {2025-01-05},
+    langid = {english}
+}
+
+@www{projectzerointhewild2024,
+    author = {Project Zero},
+    title = {Zero Day In-the-Wild Exploitation in 2023},
+    date = {2024-04-10},
+    url = {https://googleprojectzero.blogspot.com/2024/04/zero-day-in-the-wild-exploitation-in-2023.html},
+    urldate = {2025-01-05},
+    langid = {english}
+}
+
+@inproceedings{yang2011,
+    author = {Yang, Xuejun and Chen, Yang and Eide, Eric and Regehr, John},
+    title = {Finding and Understanding Bugs in {{C}} Compilers},
+    booktitle = {Proceedings of the {ACM} {SIGPLAN} 2011 Conference on Programming Language Design and Implementation},
+    date = {2011-06-01},
+    publisher = {{Association for Computing Machinery}},
+    location = {{San Jose, CA, USA}},
+    doi = {10.1145/1993498.1993532},
+    isbn = {9781450306637},
+    url = {https://dl.acm.org/doi/10.1145/1993498.1993532}
+}
+
+@inproceedings{chen2016,
+    author = {Chen, Peng and Li, Yuekang and Su, Zhendong and Chen, Chao and Xue, Jingling},
+    title = {Understanding the Impact of Compiler Bugs in {{GCC}} and {{LLVM}}},
+    booktitle = {Proceedings of the 2016 24th ACM SIGSOFT International Symposium on Foundations of Software Engineering},
+    date = {2016-11-13},
+    publisher = {{Association for Computing Machinery}},
+    location = {{Seattle, WA, USA}},
+    doi = {10.1145/2950290.2950347},
+    isbn = {9781450342185},
+    url = {https://dl.acm.org/doi/10.1145/2950290.2950347}
+}

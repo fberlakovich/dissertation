@@ -38,7 +38,7 @@
 \end{table}
 
 
-As evidenced by the benchmarks, the optimized \gls{btra} setup sequence improves \prj{}'s performance considerably (see \cref{tab:perf-components}).
+As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{tab:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
 For CPU's without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
 We ran our benchmarks also on a machine with AVX512 and found that the performance is roughly identical with the same number of vector moves.
@@ -46,10 +46,10 @@ On such machines, we could either half the BTRA performance impact, or use twice
 % We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
 % We could not evaluate this effect due to the lack of compatible hardware.
 
-\Cref{fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \prj{}.
-\prj{} adds \glspl{btra} \emph{per call site}, explaining the overhead for function heavy benchmarks.
+\Cref{fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \rtwoc{}.
+\rtwoc{} adds \glspl{BTRA} \emph{per call site}, explaining the overhead for function heavy benchmarks.
 To test this correlation with call frequency, we instrumented the SPEC CPU benchmark programs to count the number of executed call instructions.
-Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{btra} are inserted.
+Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
 \Cref{tab:call-frequencies} shows the median number of calls performed by the SPEC CPU 2017 benchmarks.
 For each benchmark we took the median call frequencies across all inputs.
 The data suggests that there is a correlation with the overhead, but this correlation is insufficient to predict the overhead:
@@ -61,14 +61,14 @@ Similarly, prolog trap insertion also contributes to the increased instruction c
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
 The results confirmed a memory overhead of only a few percent.
-We suspect that for the SPEC benchmarks, memory overhead caused by \prj{} is low compared to the memory consumed by the benchmark itself.
+We suspect that for the SPEC benchmarks, memory overhead caused by \rtwoc{} is low compared to the memory consumed by the benchmark itself.
 Further research is necessary to substantiate these suspicions.
 
-%The overhead of \glspl{heapbt} and \glspl{btra} is mostly independent.
+%The overhead of \glspl{heapbt} and \glspl{BTRA} is mostly independent.
 %Only in the case of \propername{omnetpp} is the combined overhead of \glspl{heapbt} and the AVX setup sequence bigger than the sum of the component overheads.
-%The overhead of \glspl{heapbt} varies less per benchmark, whereas \glspl{btra} affect different benchmarks to different degrees.
-%These changes in overhead can be attributed to the fact that \glspl{btra} are inserted \emph{per call site}.
-%As a result, benchmarks with a large number of function calls are affected more by \glspl{btra}.
+%The overhead of \glspl{heapbt} varies less per benchmark, whereas \glspl{BTRA} affect different benchmarks to different degrees.
+%These changes in overhead can be attributed to the fact that \glspl{BTRA} are inserted \emph{per call site}.
+%As a result, benchmarks with a large number of function calls are affected more by \glspl{BTRA}.
 % Interestingly, despite using the hardened pointer array (see~\ref{ss:impl-heap-boobytraps}), the variant \propername{AVX2+H\heapbt} shows a slightly improved performance on three benchmarks compared to \propername{AVX2+\heapbt}.
 % We suspect an improved cache locality of the pointer array with other data to be responsible for the improvement.
 
@@ -82,22 +82,22 @@ Further research is necessary to substantiate these suspicions.
 While execute-only memory and function shuffling defeat classic ROP and JIT-ROP attacks, indirect JIT-ROP and \gls{AOCR} remain an issue.
 For an indirect JIT-ROP attack, an attacker needs to locate valid code pointers, such as return addresses, in readable memory and infer gadget locations based on the found pointers.
 For an \gls{AOCR} attack an attacker needs to locate function pointers or infer them from other code pointers (\eg return addresses), as well as manipulate function parameters.
-In the following subsections we discuss how \prj{} counters each of these attack vectors.
+In the following subsections we discuss how \rtwoc{} counters each of these attack vectors.
 We also discuss the security of stack unwinding tables and the possibility of an attacker corrupting entire or partial code pointers.
 
 \subsubsection{Return Addresses}
-\prj protects return addresses with \glspl{btra}.
-As detailed in \cref{ss:decoy-mimicry}, the only way for an attacker to identify a return address among the \glspl{btra} is by applying brute force.
-An attacker's chance to correctly guess the return address depends on the number of \glspl{btra} used.
-If $R$ is the number of \glspl{btra} for a call site, the probability of correctly guessing the return address is given by $\frac{1}{R+1}$.
-\prj{}'s additional code randomization (see \cref{ss:strengthening}) means that an attacker cannot reliably infer the address of the \emph{calling} function based on a leaked return address.
+\rtwoc protects return addresses with \glspl{BTRA}.
+As detailed in \cref{ss:decoy-mimicry}, the only way for an attacker to identify a return address among the \glspl{BTRA} is by applying brute force.
+An attacker's chance to correctly guess the return address depends on the number of \glspl{BTRA} used.
+If $R$ is the number of \glspl{BTRA} for a call site, the probability of correctly guessing the return address is given by $\frac{1}{R+1}$.
+\rtwoc{}'s additional code randomization (see \cref{ss:strengthening}) means that an attacker cannot reliably infer the address of the \emph{calling} function based on a leaked return address.
 As a result, leaked return addresses are only useful to locate gadgets for a ROP chain.
 When using $n$ return addresses to construct a ROP chain, the success probability for locating all $n$ return addresses decreases to $(\frac{1}{R+1})^n$.
-For example, with ten \glspl{btra} the probability of successfully finding four return addresses is $(\frac{1}{11})^4 \approx 0.00007$.
+For example, with ten \glspl{BTRA} the probability of successfully finding four return addresses is $(\frac{1}{11})^4 \approx 0.00007$.
 
 \subsubsection{Function Pointers}\label{sss:security-function-pointers}
-\prj protects function pointers on the stack and in the data section with stack slot shuffling and global variable shuffling, respectively.
-\prj{}'s additional code randomization (see \cref{ss:strengthening}) ensures that such pointers cannot be used to locate gadgets, effectively forcing the attacker into a more constrained whole-function reuse setting.
+\rtwoc protects function pointers on the stack and in the data section with stack slot shuffling and global variable shuffling, respectively.
+\rtwoc{}'s additional code randomization (see \cref{ss:strengthening}) ensures that such pointers cannot be used to locate gadgets, effectively forcing the attacker into a more constrained whole-function reuse setting.
 An attacker can learn function pointers from either the stack, the heap, or the data section.
 Due to ASLR the location of the data section is unknown to the attacker a priori.
 Leaking a function pointer from the data section, therefore, requires a leaked data section pointer first.
@@ -106,11 +106,11 @@ Even if an attacker manages to disclose a function pointer that satisfies the cr
 \subsubsection{Leaking Heap Data}
 The attacker can try to leak data from the heap to either learn function pointers or pointers leading to the data section.
 As ASLR randomizes the heap's location, leaking data requires either a heap pointer or a heap over-read vulnerability.
-Although \prj{} does not protect against leaks from a heap over-read, it does, however, impede the disclosure of heap pointers with \glspl{heapbt}.
+Although \rtwoc{} does not protect against leaks from a heap over-read, it does, however, impede the disclosure of heap pointers with \glspl{heapbt}.
 The probability of correctly guessing a benign heap pointer among all heap pointers depends on the number of benign heap pointers $H$, and the number of \glspl{heapbt} $B$ per function.
 The probability of randomly picking a benign pointer is $\frac{H}{B+H}$.
 The exact number for $H$ is application specific and depends, for example, on the number of registers containing heap pointers that are spilled to the stack.
-$B$ on the other hand is a random variable with a uniform distribution that depends on \prj{}'s parameters (see \cref{ss:impl-heap-boobytraps}).
+$B$ on the other hand is a random variable with a uniform distribution that depends on \rtwoc{}'s parameters (see \cref{ss:impl-heap-boobytraps}).
 With an expected value of $E(B)$, each stack frame will contain $E(B)$ \glspl{heapbt} on average.
 A leak of $S$ stack frames, thus, contains $B=E(X)*S$ \glspl{heapbt}.
 \glspl{heapbt} also increase the risk of detection for attackers trying to locate the heap through random memory probes.
@@ -126,7 +126,7 @@ Even if an attacker achieves a heap leak through a heap pointer or a heap over-r
 \end{enumerate*}
 
 \subsubsection{Exception handling and stack unwinding}
-As part of the \gls{btra} setup and teardown code, \prj{} also emits the necessary \code{CFI} directives to support exception handling and stack unwinding.
+As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary \code{CFI} directives to support exception handling and stack unwinding.
 \code{CFI} directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
 Since the modifications are recorded relative to the beginning of the frame, decoding the \code{.eh\_frame} section could reveal the location of the return address.
 Entries in the \code{.eh\_frame} are not, however, associated with function symbols, but with \gls{PC} \emph{ranges}.
@@ -140,43 +140,43 @@ Through function reordering/permutation row-based references become invalid.
 Since exceptions occur infrequently, one could also use a more expensive protection scheme, such as encryption, to protect these meta-data.
 
 \subsubsection{Corrupting code pointers}\label{sss:corrupting-code-pointers}
-\Glspl{cra} typically corrupt entire code pointers.
+\Glspl{CRA} typically corrupt entire code pointers.
 An attack called \gls{PIROP} generalizes this principle by corrupting only parts of code pointers and, as a result, is immune to ASLR and page-level randomization~\cite{Goktas2018}.
-\prj{} impedes a \gls{PIROP} attack in two ways.
-First, \prj{} shuffles functions and randomizes at the sub-function level (see \cref{ss:strengthening}), thus increasing the entropy for \gls{PIROP}.
-Second, \glspl{btra} constrain candidate \gls{PIROP} gadgets that manipulate (partial) return addresses:
-In the presence of \glspl{btra} a \gls{PIROP} attack needs to corrupt \emph{all} return addresses, requiring either iterative gadget execution or more complex gadgets.
+\rtwoc{} impedes a \gls{PIROP} attack in two ways.
+First, \rtwoc{} shuffles functions and randomizes at the sub-function level (see \cref{ss:strengthening}), thus increasing the entropy for \gls{PIROP}.
+Second, \glspl{BTRA} constrain candidate \gls{PIROP} gadgets that manipulate (partial) return addresses:
+In the presence of \glspl{BTRA} a \gls{PIROP} attack needs to corrupt \emph{all} return addresses, requiring either iterative gadget execution or more complex gadgets.
 
 \subsection{Remaining attack surface}\label{ss:remaining-attack-surface}
-At present, \prj{} remains susceptible to two types of brute force attacks.
-In a Blind ROP scenario with restarting worker processes, an attacker could use \gls{PIROP} to brute force the entropy resulting from \prj{} randomization techniques.
+At present, \rtwoc{} remains susceptible to two types of brute force attacks.
+In a Blind ROP scenario with restarting worker processes, an attacker could use \gls{PIROP} to brute force the entropy resulting from \rtwoc{} randomization techniques.
 Similarly, an attacker could use the corruption of potential return addresses as a side channel.
 For example, by overwriting selected return address candidates with zero and observing whether the process crashes, the attacker could learn the location of the real return address.
 Both attacks could be prevented by load time re-randomization.
 
-\prj{} could also deter the corruption of \glspl{btra} by checking a random subset of \glspl{btra} for consistency after the return.
+\rtwoc{} could also deter the corruption of \glspl{BTRA} by checking a random subset of \glspl{BTRA} for consistency after the return.
 
-\prj{} focuses on code-reuse attacks and the leakage of \emph{control-flow} data.
-Although \prj{}'s layout randomization raises the bar for attackers~\cite{Hu2016}, \prj{} does not offer the same protection as defenses specialized for data-only attacks~\cite{Carr}.
+\rtwoc{} focuses on code-reuse attacks and the leakage of \emph{control-flow} data.
+Although \rtwoc{}'s layout randomization raises the bar for attackers~\cite{Hu2016}, \rtwoc{} does not offer the same protection as defenses specialized for data-only attacks~\cite{Carr}.
 
-A way to strengthen \prj{}'s security would be to combine it with \gls{MVEE}s~\cite{Cox2006,Berger2006,Bruschi2007,Volckaert2016,Voulimeneas2020}.
-\gls{MVEE}s and diversification defenses like \prj{} naturally complement each other.
-Considering that \prj{} diversifies along multiple dimensions, an \gls{MVEE} would detect data corruption or leakage in one of the variants with high probability.
+A way to strengthen \rtwoc{}'s security would be to combine it with \gls{MVEE}s~\cite{Cox2006,Berger2006,Bruschi2007,Volckaert2016,Voulimeneas2020}.
+\gls{MVEE}s and diversification defenses like \rtwoc{} naturally complement each other.
+Considering that \rtwoc{} diversifies along multiple dimensions, an \gls{MVEE} would detect data corruption or leakage in one of the variants with high probability.
 
 \subsection{Limitations}\label{ss:limitations}
 
 \subsubsection{Coverage}\label{ss:limitations-coverage}
-\prj{} is able to protect only the call-sites and functions it actually compiles.
-\glspl{btra} for calls to unprotected functions are disabled by default as these functions would overwrite all the \glspl{btra} after the return address.
-Without \glspl{btra} after the return address, the return address would always be the last address in the list of addresses.
-Overwritten \glspl{btra} are only an issue, however, if the attacker knows which parts of the program have not been compiled by \prj.
+\rtwoc{} is able to protect only the call-sites and functions it actually compiles.
+\glspl{BTRA} for calls to unprotected functions are disabled by default as these functions would overwrite all the \glspl{BTRA} after the return address.
+Without \glspl{BTRA} after the return address, the return address would always be the last address in the list of addresses.
+Overwritten \glspl{BTRA} are only an issue, however, if the attacker knows which parts of the program have not been compiled by \rtwoc.
 Lacking this information, an attacker does not know where the return address is the last address.
 
-\subsubsection{Support for stack argument calling convention with non-\prj{} compiled code}\label{ss:abi-change}
-At present, our prototype implementation does not support calling functions with stack arguments from code not compiled by \prj.
+\subsubsection{Support for stack argument calling convention with non-\rtwoc{} compiled code}\label{ss:abi-change}
+At present, our prototype implementation does not support calling functions with stack arguments from code not compiled by \rtwoc.
 This incompatibility is due to such functions expecting the caller to prepare a frame pointer to account for the changed calling convention.
-During our evaluation of \prj{}, we encountered just three such cases (one in the unit tests of WebKit, one in the XML parser callbacks of WebKit, and one in the regular expression implementation of Chromium).
-With three cases in 35 million lines of C/\cpp code, we conclude that this combination is rare in practice and, thus, opted for disabling the emission of \glspl{btra} for the affected functions.
+During our evaluation of \rtwoc{}, we encountered just three such cases (one in the unit tests of WebKit, one in the XML parser callbacks of WebKit, and one in the regular expression implementation of Chromium).
+With three cases in 35 million lines of C/\cpp code, we conclude that this combination is rare in practice and, thus, opted for disabling the emission of \glspl{BTRA} for the affected functions.
 Note that these cases could also be supported by automatically inserting a trampoline for externally visible functions with stack parameters.
 % For ease of implementation we simply deactivated DRAs for the affected functions.
 

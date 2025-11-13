@@ -1,0 +1,250 @@
+\section{Design and Implementation of \lool[noformat]{}}\label{s:lool-design}
+
+In \cref{sec:graalvm_fuzzing} we described how our GraalVM fuzzer solves three of the five challenges described in \cref{ss:jit-compiler-fuzzing} (\cref{problem_correct_inputs,problem_compiled_inputs,problem_miscompilations}).
+For the remaining challenges (\cref{problem_new_coverage,problem_steer_input}), we propose a new, domain-specific approach.
+\lool{} uses the compiler's optimization log (see \cref{sss:graalvm-optimization-log}) to select among suitable parameter vectors.
+The selection process is driven by a genetic algorithm that tries to breed more desirable parameter vectors over time.
+\cref{fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
+
+\begin{figure}
+    \centering
+    \resizebox{0.5\columnwidth}{!}{%
+    %\includesvg{img/architecture-overview}
+        \includegraphics{figures/lool/feedback-loop-noicons}%
+    }
+    \caption{The complete fuzzing loop with genetic mutation of input programs based on optimization-log coverage.
+    The differently shaded areas differentiate the GraalVM fuzzing framework (see \cref{sec:graalvm_fuzzing}) from \lool's components (see \cref{s:lool-design}).}
+    \label{fig:lool-overview}
+\end{figure}
+
+\subsection{Overview}\label{ss:design-overview}
+The idea of using an evolutionary algorithm in (compiler) fuzzing is not new.
+In fact, producing new inputs with an evolutionary algorithm is at the core of the popular fuzzer AFL and its descendants~\cite{Zalewski2016}.
+Some fuzzers even use genetic algorithms, a subbranch of evolutionary algorithms that includes crossover, to generate inputs~\cite{Veggalam2016,Hough2024}.
+The genetic algorithm can either mutate the inputs directly, or it can mutate the parameters of the input generator, an approach called \emph{parametric fuzzing}, exemplified by Zest~\cite{Padhye2019}.
+Zest treats the input generator's parameters as bit strings and applies bit-level mutations to those bit strings.
+The bit-level mutations can include genetic crossover operations for related bits~\cite{Hough2024}.
+Zest relies on the input generator to transform bit strings into syntactically and semantically valid inputs.
+The advantage of this approach is that existing general-purpose mutation engines, such as \aflpp, can mutate inputs without destroying their structural properties.
+
+In case of the GraalVM fuzzer, mutating the input program directly would, with a high probability, destroy the liveness and semantic-correctness properties of the input.
+Instead, we follow Zest's example and mutate the input generator's parameters.
+We note, however, that Zest's parameter mutation is oblivious to the semantics of the mutated parameters.
+While Zest can incorporate semantic feedback via test results, it still treats parameters as bit vectors.
+
+To test whether input mutation profits from domain specificity, we let a genetic algorithm mutate the code generator's parameters \emph{directly}.
+That is, a population consists of different parameter vectors, each of which we use to generate a certain number of input programs.
+We use a two-stage approach with multiple parameter vectors in a generation and multiple test cases per parameter vector.
+This two-stage approach is necessary as some of the parameters control probability distributions.
+In other words, even with fixed parameters, there remains randomness in the input generation.
+A parameter vector is desirable if it triggers new optimizations or bugs.
+The genetic algorithm starts with a set of baseline parameter vectors, fuzzes with each vector and builds a new generation of parameter vectors based on the fuzzed compiler's feedback.
+This process repeats for a set number of generations if specified, otherwise it runs indefinitely.
+We will compare both approaches to input mutation as part of our evaluation (see \cref{s:evaluation}).
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/lool/lool-workflow}
+    \caption{Workflow of the genetic algorithm loop (see \cref{ss:fitness} and \cref{ss:building-generations}).}\label{fig:workflow}
+\end{figure}
+
+\subsection{Shrinking the Search Space}
+\label{sec:search_space}
+Even with a relatively small number of tunable probabilities in a parameter vector, the search space is large.
+A large search space increases the time until the genetic algorithm discovers more interesting parameter vectors and thus slows down the fuzzing effort.
+Our code generator has more than~120 parameters, so we restrict the parameter vectors to a subset of these.
+The reason for this choice is that some parameters have a significant influence on the generated code, while changing others is less noticeable.
+
+We experimented with subsets of the parameters in the full parameter vector to analyze how the generator reacts to changes of each parameter.
+By matching the resulting optimization logs with sets of parameters, we calculated a rough correlation between parameters and optimizations.
+We consider all parameters that show a non-negligible absolute correlation coefficient (\(|r| > 0.3\)) to at least \emph{some} optimizations to be good candidates for mutation.
+
+More specifically, during our preliminary experiments, we restricted the genetic algorithm to consider the probabilities for five of the ten possible statement types: \texttt{if} statements; fold-style \texttt{for} loops; map-style \texttt{for} loops; \texttt{while} loops; and \texttt{synchronized} blocks.
+Similarly, we limited the optimization of expression probabilities to six of ten: local variable initialization; local variable usage; parameter usage; binary (arithmetic or logic) expression; call of a generated method; and ternary (conditional) expression.
+
+\subsection{Fitness}\label{ss:fitness}
+After fuzzing with each parameter vector in a generation, the genetic algorithm assesses the fitness of each vector.
+Our desired outcome is a population of diverse parameter vectors, each of which either triggers different optimizations with a greater likelihood than its siblings or even triggers bugs.
+For this scoring we compare the parameter vectors' fitness along multiple dimensions.
+The computation of fitness depends on the coverage used.
+We evaluate the genetic parameter mutation with code coverage, context-blind counter coverage (global optimization counters), and context-aware counter coverage (per-method optimization counters).
+The following subsections explain how the genetic algorithm computes an individual's fitness based on each of these coverage types.
+
+\subsubsection{Code-Coverage Fitness}
+With code coverage, the genetic algorithm rewards progress relative to the coverage known when the current generation was created.
+That is, like \aflpp the genetic algorithm keeps track of the maximum code coverage achieved so far.
+When the algorithm builds a new generation, it updates the currently known maximum with the progress made by the previous generation.
+Updating the maximum coverage only at the beginning of a new generation (\ie at the end of the current tournament) is important to give each individual an equal chance.
+
+Before calculating the individual fitness, the genetic algorithm bucketizes the coverage execution frequencies of each test case like \aflpp.
+The bucketization accounts for the fact that a change in execution frequency from 1 to 2 is likely more interesting than from 100 to 101.
+The algorithm's fitness function then awards points for newly discovered edges and for changed execution frequencies, whereas new edges receive more points than a mere change in frequencies.
+
+\subsubsection{Optimization Counter Fitness}\label{sss:opt-counter-fitness}
+
+\paragraph{Weighting of Global Counters}\label{p:old-weighting-scheme}
+In the preliminary experiments, which used only global optimization counters (\ie context-blind coverage), we used a simple weighting scheme to calculate the fitness based on the counters.
+With this weighting scheme, the genetic algorithm rewards occurrences of the $N$ rarest optimizations in a generation, where $N$ is configurable.
+Based on our preliminary results from Stage 1, we set $N$ to 7 for the evaluation.
+Note that these $N$ rare optimizations are not necessarily the same across generations.
+The rarest optimization receives the highest weight, which is half of the weight of a bug.
+For example, if optimization $O_{1}$ is the rarest and $O_{2}$ the second rarest, $O_{1}$ receives weight $(N-0+1) / 2 = 4$ and $O_{2}$ receives $(N-1+1) / 2 = 3.5$.
+For each individual and optimization, this weight is then combined with a ranking of how often the optimization occurred in the individual.
+
+\paragraph{Feature Frequency-Inverse Individual Frequency}\label{p:ffiif}
+
+While the weighting approach worked well for the preliminary experiments, it did not readily generalize to optimization pairs (\ie context-aware coverage).
+In particular, ordering individuals based on the number of occurrences is straightforward with scalars (how often did the optimization occur), but not intuitively defined with pairs of optimization counts.
+For example, one could count pairs with exactly the same occurrences (\eg two individuals each have a pair $(O_{1}=1, O_{2}=3)$).
+An occurrence of $(O_{1}=2, O_{2}=3)$ is equally interesting, however, and counting these occurrences separately would underrate an individual featuring both.
+We thus devised a more principled approach based on the \emph{Term Frequency-Inverse Document Frequency} (TF-IDF) algorithm, which can handle both global counters and per-method counters uniformly~\cite{sparckjones1972}.
+For the global counters we evaluate both variants, \ie the old weighting scheme and the TF-IDF algorithm, to allow for comparison with the preliminary results.
+
+To make the algorithm applicable to both, global optimization counts and optimization pairs, we introduce the concept of a \emph{feature}.
+We define a feature as either a global, scalar optimization count, or as an optimization pair $(O_{1}, O_{2})$ co-occurring within a method.
+This abstraction allows us to instantiate the algorithm for both use cases.
+The choice of the TF-IDF algorithm is motivated by the need to find parameter vectors (individuals) that are \emph{characteristic} for rare features.
+The TF-IDF algorithm provides a non-parametric statistical framework to find characteristic \enquote{documents} for given search \enquote{terms}.
+
+In our interpretation of the TF-IDF algorithm, a term resembles a feature.
+A document resembles the collection of all features observed for an individual $i$ (\eg all pairs across the test cases produced by that individual).
+The corpus resembles either all individuals in the current generation $G$ or all individuals created in the fuzzing campaign so far.
+The second variant gives the genetic algorithm a memory which prevents bouncing between effective parameter vectors over time.
+We evaluate both corpus variants for both counter-based coverage types.
+Since in our context the algorithm deals with features instead of terms and individuals instead of documents, we call our adaptation \emph{Feature Frequency-Inverse Individual Frequency}.
+
+Let $T_{i}$ be the tests of individual $i$ and $freq_{i}(f, t)$ be the frequency of feature $f$ in test $t$ belonging to individual $i$.
+Let $\mathrm{count}_{i}(f) = |\{t \in T_{i} : \mathrm{freq}_{i}(f, t) > 0\}|$ be the number of tests in individual $i$ where feature $f$ occurs at least once.
+We define the \emph{Feature Frequency} (cf. Term Frequency) as
+\[ FF(i, f) = \frac{1}{T_{i}} * \mathrm{count}_{i}(f) + \frac{1}{T_{i}} * \sum_{t \in T_{i}}{1 - e^{-\mathrm{freq}_{i}(f, t)}}\]
+Intuitively, the feature frequency defines how \enquote{characteristic} an individual is for a feature.
+This definition captures two forms of characteristicness.
+First,
+\[ \frac{1}{T_{i}} * \mathrm{count}_{i}(f) \]
+averages how often a feature occurs across the tests in an individual.
+That is, this expression rewards individuals that show a feature consistently in its tests, even if the feature occurs only once per test.
+Second,
+\[\frac{1}{T_{i}} * \sum_{t \in T_{i}}{1 - e^{-\mathrm{freq}_{i}(f, t)}}\]
+calculates a bounded sum of feature frequencies in an individual.
+That is, this expression rewards individuals that have higher frequencies of the feature, even if it occurs in only one or two tests.
+The $1 - e^{-\mathrm{freq}_{i}(f, t)}$ imposes an upper limit on the usefulness of higher frequencies.
+The combination of the expressions aims to reward individuals that consistently show a feature as well as individuals with local spikes of a feature.
+
+We define the \emph{Inverse Individual Frequency} (cf. inverse document frequency) as
+\[ IIF(G, f) = \log\left( \frac{|G| + 1}{|\{ i \in G : \mathrm{count}_{i}(f) > 0\}| + 1} \right) \]
+
+Intuitively, $IIF$ calculates in how many individuals a feature is present on average, \ie, how rare a feature is across individuals.
+In the extreme case, if a feature is present in \emph{every} individual, this term becomes $0$, leading to a $0$ total score.
+An example of this phenomenon is the \propername{Canonicalization} optimization which occurs in practically every method of every test.
+As a result, the $IIF$ for the global \propername{Canonicalization} optimization counter becomes 0.
+Similarly, since \propername{Canonicalization} also co-occurs with every other optimization (due to its ubiquity), the $IIF$ for any per-method optimization pair containing \propername{Canonicalization} (\eg (\propername{Canonicalization}, \propername{Duplication})) is also 0.
+If, on the other hand, a feature occurs only in a single individual, the feature is rare.
+In this case, the $IIF$ expression is greater than $1$, thus boosting the individual's score.
+
+If $F$ is the set of all features, the total score of an individual $i$ is given by
+\[ score(i) = \sum_{f \in F}{FF(i, f) * IIF(G, f)} \]
+
+\subsection{Building Generations}\label{ss:building-generations}
+As shown in \cref{fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
+During mutation the genetic algorithm adjusts the parameters in a parameter vector.
+Most of these parameters are independent of each other.
+For example, parameters such as \texttt{InitInStaticBlock} (probability that a variable is initialized in a static initializer block) describe probabilities that guide binary decisions in the generation process.
+We randomly decrease or increase independent probabilities by a small amount, while staying in the valid range, typically between~0.05 and~0.95.
+Similarly, for discrete parameters, such as \texttt{StatementDepth} (the maximum expression depth of a statement), we decrease or increase their value by a small discrete amount while staying within defined bounds.
+
+Statement and expression distributions form probability distributions, where each statement or expression type has some probability.
+We mutate distributions by selecting an entry that \enquote{steals} from another entry's probability by increasing itself and decreasing the other.
+This balancing of probabilities ensures that the total sum of probabilities in a distribution stays constant.
+As we only include a subset of the distribution in the parameter vectors (see \cref{sec:search_space}), we equally distribute the difference to 1 among the excluded probabilities.
+With a low probability, currently 5\%, we perform an extreme mutation where the property steals from \emph{every} other probability, biasing the distribution towards the chosen property.
+\cref{fig:gen_representation} shows an abbreviated example of a parameter vector before and after mutation.
+Before mutation, the parameter vector had probabilities 0.0767 and 0.1761 for \texttt{MapFor} and \texttt{While}, respectively.
+The \texttt{MapFor} entry steals an amount of 0.05 from the \texttt{While} entry's probability, resulting in a decreased probability for \texttt{While} ($0.1761 - 0.05 = 0.1261$) and an increased probability for \texttt{MapFor} ($0.0767 + 0.05 = 0.1267$).
+Similarly, the \texttt{Local} entry steals an amount of 0.04 from the \texttt{Param} entries probability.
+In contrast to this stealing process, independent probabilities (e.g. \texttt{InitInStaticBlock}) and discrete parameters (e.g. \texttt{StatementDepth}) do not need to balance the probability distribution and can be mutated independently.
+
+With a configurable probability, we perform a crossover of two parameter vectors to create a vector for the next generation.
+Independent probabilities and discrete parameters are each chosen randomly from either parent, but distributions are chosen as a whole to prevent violation of the constraints.
+
+\begin{table}{}
+    \caption{Simplified genetic representation of an individual before and after mutation.
+    Changed values are shown in bold.
+    For example, probabilities shifted from \texttt{While} to \texttt{MapFor} and from \texttt{Param} to \texttt{Local}.
+    Note that the table does not show all the probabilities, which is why the sum of probability distributions does not sum up to 1.}
+    % FIXME: show the full table (maybe in the final version) to make the numbers less confusing?
+    \label{fig:gen_representation}
+
+    \centering
+
+    \begin{tabular}{lrr}
+        \toprule
+        Parameter                  & Before & After           \\
+        \hline
+        \multicolumn{3}{c}{Statement distribution} \\
+        \texttt{If}                & 0.0637 & 0.0637          \\
+        \texttt{FoldFor}           & 0.0726 & 0.0726          \\
+        \texttt{MapFor}            & 0.0767 & \textbf{0.1267} \\
+        \texttt{While}             & 0.1761 & \textbf{0.1261} \\
+        \midrule
+        \multicolumn{3}{c}{Expression distribution} \\
+        \texttt{Init}              & 0.0703 & 0.0703          \\
+        \texttt{Local}             & 0.0891 & \textbf{0.1291} \\
+        \texttt{Param}             & 0.1206 & \textbf{0.0806} \\
+        \texttt{Binary}            & 0.1059 & 0.1059          \\
+        \midrule
+        \multicolumn{3}{c}{Independent probabilities} \\
+        \texttt{InitInStaticBlock} & 0.2548 & \textbf{0.2367} \\
+        \texttt{InheritClass}      & 0.5162 & \textbf{0.5001} \\
+        \texttt{Cloneable}         & 0.2074 & 0.2074          \\
+        \midrule
+        \multicolumn{3}{c}{Discrete parameters} \\
+        \texttt{StatementDepth}    & 2      & \textbf{3}      \\
+        \bottomrule
+    \end{tabular}
+
+\end{table}
+
+\subsection{\aflpp-compatible coverage}
+In our evaluation (see \cref{s:evaluation}) we evaluate various configurations that use \aflpp as the mutation engine.
+\aflpp expects a byte buffer as coverage in which each byte represents a unique counter from 0 to 255.
+In a standard \aflpp setup, this coverage map is provided by a binary instrumented for code coverage and each byte represents the execution count of a specific edge id.
+In experiments where we use \aflpp for mutation, but use coverage information that does not directly represent code coverage, we need to map our coverage onto such a byte buffer.
+
+In the case of context-blind coverage (global optimization counters), the number of optimization counters is known a priori.
+We assign each optimization counter a unique and consistent position in the coverage map and use a saturating counter to count the frequency of the optimization.
+This mapping allows \aflpp to treat optimization counter information like execution counts.
+\aflpp sorts execution counts into differently sized buckets.
+For example, the execution counts 1, 2 and 3 each have their own bucket, whereas counts 32--127 are grouped into a single bucket.
+The idea behind this principle is that small changes in execution-count frequency are more interesting for smaller execution counts than for larger ones.
+The same applies to optimization frequencies.
+Whether an optimization was applied once, twice or three times likely makes a bigger difference than whether it was applied 100 or 120 times.
+
+In the case of context-aware coverage (per-method optimization counters), only the number of optimization counters per method is known a priori.
+The total number of optimization counters depends on the number of compiled methods and varies from test to test.
+We calculate an index based on the compiled method's name and then assign each optimization counter a unique position based on its name starting from the method's index.
+For example, consider two tests with methods \propername{A}, \propername{B}, \propername{C} and \propername{A}, \propername{B}, \propername{D}.
+The counter positions for methods \propername{A} and \propername{B} will be the same in both cases, whereas the ones for \propername{C} and \propername{D} differ.
+Depending on the number of compiled methods, this approach likely leads to coverage collisions, as each method receives a fixed block of counter indices.
+We note, however, that this problem is not specific to using optimization counter coverage, but also occurs \eg when using \aflpp code coverage instrumentation without \gls{LTO}.
+
+\subsection{Parameter Mutation by \aflpp}\label{ss:afl-parameter-mutation}
+In our evaluation (see \cref{s:evaluation}), various configurations use \aflpp as the mutation engine.
+In these configurations the program generator needs to generate test cases based on an input provided by \aflpp.
+The exact composition of a generated program depends on two factors: the generation parameters and the concrete random decisions at various points during generation.
+We have implemented and evaluated two ways in the program generator to derive generation parameters and random decisions from \aflpp generated input files.
+
+\subsubsection{Fully Parametric}\label{sss:afl-fully-parametric}
+The program generator reads both the generation parameters and concrete random decisions directly from the input file.
+If the generator runs out of randomness, \ie the input is too short to generate a valid live program, the generator signals an error and tries again.
+On each retry, the generator reduces structural parameters determining the size of the generated program (\eg the number of statements in a method) by 50\%.
+If all structural parameters have already reached their limit, the generator signals an error and continues with the next input.
+How often such a reduction is possible, depends on the initial parameters.
+We implemented this approach because with certain program features the generator needs to perform backtracking to find valid programs with a limited set of live variables.
+Although we optimized this backtracking to use only 4 bytes of randomness in case of a failed attempt, multiple failed attempts can use up the available randomness quickly.
+We discuss the problems with this approach in \cref{ss:aflpp-vs-genetic}.
+
+\subsubsection{Generation Parameters Only}\label{sss:afl-hyperonly}
+The program generator reads only the generation parameters and a single integer directly from the file.
+The integer serves as random seed for a new, in-memory random instance that feeds the concrete random decisions.
+This approach allows \aflpp to mutate the generation parameters in a more targeted way.
+Reading the seed from the input file is important to guarantee the same generated program (and thus the same coverage feedback) given the same input file.

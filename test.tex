@@ -1,0 +1,14 @@
+\documentclass{article}
+\usepackage[inline]{enumitem}
+
+\newlist{inline}{enumerate*}{1}
+\setlist[inline]{label={(\roman*)}}
+\begin{document}
+
+Hello.
+\begin{inline}
+    \item First item.
+    \item Second item.
+\end{inline}
+
+\end{document}
