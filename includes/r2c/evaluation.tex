@@ -67,16 +67,16 @@ We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with ou
 To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
 We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{ss:strengthening}).
 
-For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{ss:impl-rads}).
+For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{r2c:ss:impl-btras}).
 \cref{tab:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
 
-In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
+In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-btras}).
 \fbetodo{adjust to new numbers}
 \cref{tab:perf-components} shows that the optimization improves the overall performance by 2\%.
 Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 13 absolute percent points, down to 8\%.
 In this configuration, the maximum overhead of 10\% is caused by \propername{xalancbmk}.
 
-To analyze the overhead of \cfs (see \cref{sss:stack-arguments}), we built a configuration without applying any diversification measure, but with \cfs \emph{enabled}.
+To analyze the overhead of \cfs (see \cref{r2c:sss:stack-arguments}), we built a configuration without applying any diversification measure, but with \cfs \emph{enabled}.
 Enabling only \cfs allows us to measure its performance impact, and the missed opportunities of the frame-pointer omission optimization.
 We found that the resulting geometric mean performance overhead is \geomeancfs with a maximum impact of \maxoverheadcfs.
 These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
@@ -143,7 +143,7 @@ We built a configuration with all \rtwoc{} protections enabled (see \cref{fig:pe
 % would be nice to reiterate, but space is precious
 This configuration
 \begin{enumerate*}[label={(\roman*)}]
-    \item protects return addresses with \glspl{BTRA} (see \cref{ss:impl-rads});
+    \item protects return addresses with \glspl{BTRA} (see \cref{r2c:ss:impl-btras});
     \item injects \glspl{heapbt} (see \cref{ss:impl-heap-boobytraps});
     \item performs stack slot shuffling, global variable shuffling and register-allocation randomization;
     \item and inserts traps into function prologs and NOPs at call sites (see \cref{ss:strengthening}).
@@ -213,6 +213,7 @@ Apart from Apache and nginx, we also compiled the GTK version of WebKit~\cite{We
 We built both browsers with a fixed total number of 10 \glspl{BTRA} per call site.
 WebKit and Chromium are massive \cpp projects with more than 4.5 million lines and almost 32 million lines of C/C\plusplus code, respectively.
 
+\fbetodo{show code that had to be changed}
 To verify that \rtwoc does not introduce errors into the browser, we ran the included tests as well as the Speedometer browser benchmark.
 To pass the tests, we had to modify a single source file in Chromium, and three source files in Webkit to deactivate \rtwoc for a few functions.
 In both cases, unprotected code called an \rtwoc compiled function with stack arguments.

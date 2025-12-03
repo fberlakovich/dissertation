@@ -1,0 +1,320 @@
+\section{Background}\label{lool:s:background}
+
+\subsection{Genetic Algorithms}
+Our proposed solution for input mutation is based on a genetic algorithm~\cite{holland1992adaptation}.
+In general, a genetic algorithm operates on a set of \emph{individuals}.
+The set of individuals is called the \emph{population} and the algorithm iteratively mutates and evaluates the individuals.
+The evaluation of each individual in a population yields a \emph{fitness} score to judge the individual's ability to reach some predefined goal.
+Based on this score, the genetic algorithm creates a new \emph{generation} (the next population) whose individuals are mutated descendants of selected individuals from the previous generation.
+The process of mutating individuals or combining individuals to form an individual of the new generation is sometimes called \emph{reproduction}.
+A high fitness score raises the chance of the genetic algorithm choosing an individual for reproduction.
+This selection process ensures that desirable individuals can pass their properties to more children while less desirable individuals might not reproduce at all.
+
+\subsection{JIT Compiler Fuzzing}\label{lool:ss:jit-compiler-fuzzing}
+
+As most software is processed by a compiler at some point, and compiler bugs can have severe consequences, compiler fuzzing is of particular importance~\cite{Ma2023,Xu2023,yang2011}.
+Compiler fuzzers face a number of specific challenges.
+First, constructing valid inputs (\ie inputs that are not rejected at the parsing stage) typically requires specialized input generators.
+Second, miscompilations, \ie incorrect compilations that neither crash the compiler nor the compiled program, but lead to compiled programs that deviate from the source program's semantics, are hard to detect.
+Generic fuzzers typically use sanitizers to detect non-crashing, but faulty program states in their subjects.
+Sanitizers cannot, however, detect miscompilations.
+As JIT compilers form only \emph{part} of a language VM, JIT compiler fuzzers face a specific fourth challenge:
+Even valid input programs might run solely in the VM's interpreter, never being compiled and thus never reaching the actual fuzzing target.
+Fourth, like fuzzers in general, compiler fuzzers try to reach previously unexplored states in the state space of the compiler, either implicitly without coverage or explicitly.
+To that end, compiler fuzzers must be able to \emph{differentiate} such compiler states and \emph{steer input generation} towards new states.
+\fbetodo{add system architecture figure}
+
+Summarizing, \gls{JITcomp} fuzzers must solve the following problems:
+\begin{problems}
+    \item \label{lool:prob:inputs} How to generate inputs that are both syntactically correct and do not exit prematurely due to a semantic error?
+    \item \label{lool:prob:miscompilations} How to detect miscompilations?
+    \item \label{lool:prob:compile} How to generate inputs that are actually JIT compiled?
+    \item \label{lool:prob:coverage} How to differentiate compiler states?
+    \item \label{lool:prob:steer} How to adjust the input generation to reach new states?
+\end{problems}
+
+\subsection{Landscape of \gls{JITcomp} fuzzers}\label{lool:ss:fuzzer-landscape}
+Different \glspl{JITcomp} solutions approach the problems described in \cref{lool:ss:jit-compiler-fuzzing} from different angles.
+The following paragraphs give a short overview of the \gls{JITcomp} fuzzer landscape.
+
+Fuzzilli, for example, is a coverage-guided fuzzer for JavaScript VMs that builds and mutates JavaScript input programs based on a custom intermediate language~\cite{Gross2023}.
+The generated programs are always syntactically correct, avoid semantic errors, and contain JIT compilation triggering fragments.
+The original version of Fuzzilli cannot detect miscompilations but only crashes.
+Fuzzilli does not strictly ensure that the generated testcases are compiled by the engine's \gls{JITcomp}.
+Instead, it increases the likelihood of \gls{JIT} compilation by, for example, avoiding \code{try/catch} statements and using code generation templates tailored to \gls{JIT} compilation.
+Fuzzilli and its descendants are guided entirely by coverage feedback.
+JITPicker adds the ability to detect miscompilations to Fuzzilli by comparing the target engine's output to an interpreter run~\cite{Bernhard2022}.
+To increase the range of detectable errors, JITPicker alters the input program generation to generate JavaScript functions that expose the interpreter state (\eg variable values) at different points.
+Dumpling further refines the state exposure, by comparing the \gls{JITcomp}'s state to the interpreter's state via deoptimization.
+FuzzJIT, another descendant of Fuzzilli, follows the same idea of differential testing against the interpreter as JITPicker~\cite{Wang2023}.
+To exercise more potentially interesting parts of the JavaScript JIT, FuzzJIT uses specialized input templates containing, for example, array expressions.
+
+TurboTV combines translation validation with fuzzing~\cite{kwon2024}.
+Instead of relying on the output of a test oracle, TurboTV formally specifies the semantics of V8's intermediate representation and uses an \gls{SMT} solver to verify that compilations are semantically correct.
+Since translation validation validates only a concrete translation (\ie a concrete input program), TurboTV combines the translation validation with a fuzzer like Fuzzilli.
+Optimuzz follows the same approach of combining coverage-guided fuzzing with translation validation but specifically tries to steer the fuzzer towards target optimizations (\eg recently added or modified optimizations).
+To that end, Optimuzz slices the compiler code and treats only coverage along the slice towards the target optimization as relevant.
+In addition, Optimuzz also learns the relationship between coverage gains and particular input program lines to prioritize the mutation of these coverage-triggering lines and their data dependencies.
+
+JavaTailor, a fuzzer for the \gls{JVM}, tries to generate more interesting inputs by weaving historical test programs into its seeds~\cite{Zhao2022}.
+With JavaTailor, input mutation happens at the bytecode level with the help of the Soot analysis framework~\cite{Soot}.
+JavaTailor does not guarantee \gls{JIT} compilation but instead relies on the ingredients from historical tests to reach the \gls{JITcomp}.
+As JavaTailor does not use any form of coverage feedback, its input generation is completely random and unguided.
+JAttack is another unguided, differential \gls{JVM} fuzzer that delegates the responsibility for generating inputs partly to the user~\cite{zang2023}.
+Similar in spirit to QuickTest, with JAttack the user writes Java programs containing \enquote{holes}.
+JAttack then replaces these holes with randomly generated expressions matching the hole's requirements, such as a random integer expression or an array-access expression.
+LeJit combines the approaches of JavaTailor and JAttack to eliminate the manual effort in JAttack.
+Specifically, LeJit automatically extracts Java templates from existing code and replaces concrete expresions with holes.
+Like in JAttack, these holes are then filled with random, matching expressions.
+
+Classfuzz mutates Java class files to test \gls{JVM} implementations with differential testing~\cite{Chen2016a}.
+While classfuzz uses code coverage feedback, the produced class are often invalid and, thus, do not reach the \gls{JITcomp}.
+As a result, classfuzz tends to find issues only in other parts of the \gls{JVM}, such as the bytecode verifier.
+Like classfuzz, classming generates class files as inputs but chooses different coverage feedback.
+Classming prioritizes input mutations based on how much of a class file mutant is executed, as opposed to how much code in the \gls{JVM} is executed.
+In other words, classming measures the state exposure of the \gls{JVM} indirectly by measuring how much of the input class file was \enquote{processed}.
+The reasoning behind this choice is that code coverage in the \gls{JVM} is unstable due to various non-deterministic parts, such as \gls{JIT} compilation heuristics and garbage collection.
+
+JITFuzz is a coverage-guided fuzzer for the JVM~\cite{Wu2023}.
+JITFuzz produces Java class files as inputs and mutates them based on the coverage feedback.
+The mutations are specifically tailored to exercise JVM JIT compiler optimizations.
+
+Artemis generates input programs with Java* Fuzzer~\cite{JavaFuzzer} and transplants code snippets from JIT compiler test suites into the program~\cite{Li2023a}.
+In addition, Artemis tests combinations of compiled and interpreted methods by triggering only compilation of randomly selected methods in the input program.
+
+\fbetodo{Integrate swarm testing into background}
+
+\citeauthor{Groce2012}~propose a method called \emph{swarm testing} that varies code generator configurations throughout a fuzzing campaign to generate more diverse test cases~\cite{Groce2012}.
+In the literature as well as in our own experiments, this has proven to be effective.
+\emph{Directed} swarm testing~\cite{Alipour2016} is a refinement that guides the configuration mutation by \emph{code coverage} data collected during testing.
+
+\paragraph{Swarm testing}
+\lool{} follows the idea of swarm testing~\cite{Groce2012}.
+The insight behind swarm testing is that inputs including more features are not necessarily beneficial and in some cases even detrimental to the testing effort~\cite{Groce2013}.
+Features, in our case Java language constructs, can either trigger, suppress or be irrelevant for a certain bug.
+Thus, \lool{} tries to achieve a large diversity of input features, which includes also the \emph{omission} of features in some inputs.
+\citeauthor{Alipour2016} extended swarm testing to be \emph{directed}~\cite{Alipour2016}.
+Like \lool{}, directed swarm testing incorporates statistical information about triggers and suppressors from previous runs into the generation of inputs.
+However, \lool{} chooses the targets for its directed swarm testing approach automatically based on the optimization log coverage.
+
+
+Following the spirit of swarm testing, the authors of JOpFuzz investigate triggering test case features and required JVM options based on real bug reports~\cite{Jia2023}.
+In an initial step, JOpFuzz tries to automatically infer the relationship between code features and JIT compiler optimizations.
+During the fuzzing campaign, JOpFuzz not only mutates Java input programs, but also JIT compiler options passed to the JVM\@.
+
+\citeauthor{georgescu2024} perform differential fuzzing of the Kotlin compiler generating semantically and syntactically valid Kotlin programs with a genetic algorithm~\cite{georgescu2024}.
+Their genetic algorithm treats the Kotlin programs as individuals and mutates and combines them with the help of a \enquote{semantic context}.
+
+Finally, some JIT compiler fuzzers focus on bug categories different from crashes and miscompilations.
+Confuzzion, for example, tries to find Java type confusion vulnerabilities~\cite{Bonnaventure2021}.
+\citeauthor{Brennan2020} use a fuzzer to detect timing side-channels in JIT-compiled Java programs~\cite{Brennan2020}.
+
+Unlike any of the previous examples, DPGen4JIT focuses not on \emph{finding} bugs, but on \emph{replicating} them.
+Based on an initial bug-triggering test, DPGen4JIT finds passing tests that are similar to the initial test and failing tests that are dissimilar to the initial test.
+
+\subsection{GraalVM}
+\label{sec:graalvm}
+
+We built our prototype for \lool in the context of GraalVM, a family of technologies for high-performance execution of programs written in various programming languages.\footnote{\url{https://www.graalvm.org}}
+
+\subsubsection{The GraalVM compiler}
+GraalVM features both just-in-time (JIT) and ahead-of-time (AOT) compilation of programs written in Java and other languages, such as Scala or Kotlin, that compile to Java virtual machine (JVM) bytecode.
+GraalVM also includes the Truffle language implementation framework~\cite{wuerthinger2013}.
+Truffle allows users to obtain a JIT compiler for domain-specific languages or other programming languages by implementing an interpreter for the language's semantics.
+The GraalVM project maintains Truffle implementations of several common languages including Python, JavaScript, and Ruby.
+The common GraalVM compiler compiles all languages running on GraalVM (\eg Java, Truffle languages, Scala, and Kotlin) to machine code.
+Thus, bugs in the compiler affect \emph{all} GraalVM languages, and the compiler's reliability is of utmost importance to the GraalVM project.
+
+\subsubsection{GraalVM optimization log}\label{lool:sss:graalvm-optimization-log}
+The GraalVM compiler can generate an optimization log during compilation.
+This log includes entries for every optimizing code transformation the compiler performs.
+Full log entries include the compiler phase performing the optimization, the name of the optimization performed, and the source code location of the program position where the optimization was performed.
+\Cref{fig:optimization_log} shows an example optimization log entry.
+The log data is used by various debug tooling and can be exported as a text file in JSON format.
+
+\begin{figure}
+    \begin{minted}{json}
+  "phaseName": "UseTrappingNullChecksPhase",
+  "optimizations": [ {
+    "optimizationName": "UseTrappingNullChecks",
+    "eventName": "NullCheckInsertion",
+    "position": {
+    "HashCodeTest.hashCodeSnippet01(Object)": 1
+    }
+  } ]
+    \end{minted}
+    \caption{Example GraalVM compiler optimization log entry, describing the elimination of an explicit \texttt{null} check.}
+    \label{fig:optimization_log}
+\end{figure}
+
+An abridged form of the optimization log only increments a counter for each optimization performed.
+These counters have very low overhead compared to the full log or code coverage information.
+Our current work aggregates the optimization counters for each compiled input program.
+Future extensions could incorporate more information from the log, such as in which order two optimizations were applied.
+
+\subsection{GraalVM Compiler Fuzzing}
+\label{lool:ss:graalvm-fuzzing}
+
+The goal of later sections is to demonstrate the principle of optimization-log coverage (see \cref{s:lool:design}).
+As the GraalVM compiler already provides such an optimization-log, we illustrate the \lool principle on the example of the GraalVM compiler.
+We discuss the applicability to other compilers in \cref{lool:ss:other-opt-logs}.
+
+To solve \cref{lool:prob:inputs,lool:prob:miscompilations,lool:prob:compile} discussed in \cref{lool:ss:jit-compiler-fuzzing}, we built a new fuzzer that specifically targets the GraalVM compiler.
+Since our fuzzer differs in certain aspects from existing Java fuzzers, we describe the relevant details in the following sections.
+
+\subsubsection{Input Program Generation}\label{ss:input-program-generation}
+Our fuzzer generates Java source code with a custom Java source-code generator.
+This generator is based on the liveness-driven random code generation approach~\cite{barany2017livenessdriven}.
+In this approach, all values computed by the program are guaranteed to be used by later statements in the program.
+This avoids unused computations being trivially eliminated by the compiler, thus increasing the density of \enquote{interesting} code per test case.
+Our generator ensures syntactically and semantically correct inputs by design, solving \cref{lool:prob:inputs}.
+
+Our generator supports a large subset of Java, including:
+\begin{itemize}
+    \item class structures: multiple classes with inheritance, multiple methods per class with overriding of inherited methods, \texttt{enum} classes, both \texttt{static} and non-\texttt{static} fields in classes;
+    \item statements: assignments, \texttt{if} statements, \texttt{while} and \texttt{for} loops including \texttt{break} and \texttt{continue}, \texttt{synchronized} blocks;
+    \item expressions: use of method parameters, class fields, local variables, array elements (inside \texttt{for} loops only); arithmetic, comparison, logic, and conditional expressions;
+    \item method calls: calls to methods defined in the same generated program, to a helper library, or to a small list of explicitly allowed pure methods from the Java standard library.
+\end{itemize}
+The likelihood of generating each of these features and their exact form (\eg the number of classes and methods generated or maximum statement depth) is parameterizable.
+We call a set of such parameters a \emph{parameter vector}.
+
+Our generator also combines the above features, such as loops and arrays, into certain patterns, such as map-style \texttt{for} loops (\ie loops that read an input array, compute on each element, and write corresponding elements of a result array).
+Such patterns enable specific optimizations~\cite{Livinskii2020}.
+
+The generated programs include a \texttt{main} method that calls other generated methods and prints their results.
+The inputs to these calls are embedded in the code as constants or are pseudo-randomly generated by the helper library, with a fixed seed per program.
+The helper library included with each program also contains methods for printing and hashing of data for which Java's default \texttt{toString} and \texttt{hashCode} methods do not provide deterministic behavior across runs.
+For example, the helper library avoids printing object references as they differ between runs.
+Instead, the library prints a structural representation of an object where possible.
+Similarly, the generator avoids reference comparisons to guarantee deterministic behavior.
+The result of the generation are fully self-contained, stand-alone programs that print the same deterministic data on each run.
+The generator itself uses a pseudo-random number generator and embeds the seed as a comment in the program for easy reproduction.
+
+\begin{listing}
+    \begin{minted}[breaklines]{Java}
+static class Class1 {
+  public Class1() {
+  }
+
+  public boolean Class1_method0(Boolean param0, double param1) {
+    int var6;
+    boolean var0 = FuzzerUtils.randomBoolean();
+    boolean var4 = FuzzerUtils.randomBoolean();
+    boolean var5 = param0;
+    boolean var3 = FuzzerUtils.randomBoolean();
+    float var2 = 3.975332E8f;
+    boolean var7 = FuzzerUtils.randomBoolean();
+    StringBuilder[] var8 = new StringBuilder[]{(new StringBuilder()), (new StringBuilder()), (new StringBuilder()), (new StringBuilder())};
+    String var9 = "ݽƬ��\\u000e���\\u0010]�";
+    float var10 = -3.4028235E38f;
+    short var11 = (short) param1;
+    String[] var12 = new String[]{("oIZ+.^"), ("")};
+    short var13 = (short) param1;
+    short[] var14 = FuzzerUtils.randomShortArray();
+    char var1 = (char) param1;
+    var6 = 0;
+    loop1: while (((!(var4 ? var4 : var5)) ? Character.isLetter(var1) : ((var3 ? ((float) param1) : var2) > (-1.0f))) ? ((var0 ? (var0 ? true : param0) : false) && Double.isInfinite(param1))
+      : (Boolean.valueOf(((boolean) param0)) ? Boolean.TRUE : false)) {
+    var1 = (char) ((((((FuzzerUtils.hashCode(var7) & var8.length) / (var10 + 34)) / (var11 + 105)) / (var12.length + 802)) - var13) - var14.length);
+    GraalDirectives.sideEffect();
+    if (GraalDirectives.injectBranchProbability(0.01, (var6 > 100))) {
+      break loop1;
+    }
+    var6 = var6 + 1;
+    var12 = var5 ? (param0
+        ? new String[]{var9, ("\\'\\u000f�.�^,")}
+        : (var3 ? new String[]{("��\\u001f\\u0002-�=R�����l�:")} : new String[]{var9}))
+        : ((param0 | var5)
+        ? (var0 ? new String[]{var9, ("\\u0005��.�2�Q")} : new String[]{var9, ("�Ng��\\\\0�v���")})
+        : new String[]{("*bH[L_T\\\\gE"), var9});
+    GraalDirectives.controlFlowAnchor();
+    }
+    // Tried to generate FoldForLoop
+    return var0;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) return true;
+    if (other == null || getClass() != other.getClass()) return false;
+    Class1 otherObj = (Class1) other;
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return FuzzerUtils.toString(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return FuzzerUtils.hashCode(this);
+  }
+}
+
+    \end{minted}
+    \label{lool:lst:generated-class}
+    \caption{Class generated by our liveness-driven code generator (see \cref{lool:ss:graalvm-fuzzing}).}
+\end{listing}
+
+\subsubsection{Test Execution}
+\begin{figure}[t]
+    \centering
+    \resizebox{0.7\columnwidth}{!}{%
+    %\includesvg{img/architecture-overview}
+        \includegraphics{figures/lool/architecture-noicons}%
+    }
+    \caption{Overview of the GraalVM fuzzing framework (see \cref{lool:ss:graalvm-fuzzing})}
+    \label{fig:fuzzing-framework-overview}
+\end{figure}
+
+Our fuzzer tests the generated programs using a test harness that compiles the Java source code to bytecode with \propername{javac} and loads the bytecode classes.
+\cref{fig:fuzzing-framework-overview} gives an overview of the test execution.
+First, the harness receives the generated program from the input generator \Circled{\texttt{1}} (see \cref{ss:input-program-generation}).
+The harness executes the program's \texttt{main} method in the Java bytecode interpreter and records its output as the reference output \Circled{\texttt{2}}.
+Running the interpreter prior to the compilation, but within the same VM instance, has two advantages:
+\begin{enumerate}
+    \item The interpreted run warms up the VM's profiles, which guide certain compiler decisions.
+    Compilation of methods with warmed up profiles resembles real-world compilations more faithfully.
+    We found certain profile-dependent bugs only due to the warmed up profiles.
+    \item The test program has to run in the interpreter only once.
+    In contrast, many Java fuzzers interpret a test program twice: once in interpreter-only mode and once with both the interpreter and the JIT compiler enabled.
+    Thus, the test program runs entirely in the interpreter the first time and at least partially during the second run, until the hot methods are eventually JIT-compiled~\cite{JavaFuzzer,Li2023a,Wu2023}.
+    Such an approach is more time-consuming due to the (initially) slower execution of interpreted code.
+    More importantly, with such an approach only certain parts of the test program actually reach the JIT compiler.
+\end{enumerate}
+
+After interpreting the test program, the harness compiles methods in the program with the GraalVM compiler \Circled{\texttt{3}}.
+The harness compiles all methods starting from \texttt{main} up to a certain call graph depth and installs the compiled code as the default.
+The explicit compilation of methods with existing profiles avoids the need for specific code patterns to trigger JIT compilation.
+As all later executions of the test program execute the \emph{compiled} methods, this compilation step solves \cref{lool:prob:compile}, \ie inputs not reaching the JIT compiler.
+Finally, the harness executes the \texttt{main} method again, this time using the newly GraalVM-compiled methods, and compares the output to the reference output \Circled{\texttt{4}}.
+
+The harness detects crashes of the GraalVM compiler and mismatches in the outputs of the reference and compiled runs, and reports these as errors.
+The differential testing against the interpreter solves \cref{lool:prob:miscompilations}, \ie detection of miscompilations.
+
+\begin{figure}
+% GR-53391, Test_0_86
+    \begin{minted}{java}
+public static void main(String[] args) {
+  double var12 = 95.5965959289008;
+  double var13;
+  for (int i2 = 527935578; i2 <= 527935876; i2 = i2 + 3) {
+    var13 = i2;
+    var12 = var12 - Math.log10(Long.sum(1706025860L, (long) var13));
+  }
+  GraalDirectives.deoptimize();
+}
+    \end{minted}
+    \caption{Example bug after test case reduction. The GraalVM compiler crashed while compiling this method.}
+    \label{fig:example_bug}
+\end{figure}
+
+This fuzzing framework has been in regular use within the GraalVM project for four years.
+It has been effective at finding both miscompilations and bugs that crash the compiler with failed assertions or unexpected exceptions being thrown.
+
+We use the existing source code reducers Perses~\cite{Sun2018} and C-Reduce~\cite{regehr2012} to reduce programs that provoke errors to minimal versions for easier debugging.
+\cref{fig:example_bug} shows an example of a reduced, crashing compiler bug found by the GraalVM fuzzer without optimization log coverage.
+During reduction, we ensure that the reducer does not remove methods such as \code{hashcode} and \code{equals}.
+Removing these methods causes the code to fall back to the default implementation that produces non-deterministic results in certain cases.

@@ -1,0 +1,26 @@
+\section{Background}
+
+\subsection{\cpp Polymorphism and Dynamic Binding}
+Object-oriented languages like \cpp are typically structured around classes and objects.
+While classes define the fields and methods belonging to a type, objects represent the runtime representation (\ie an instance of) a class.
+Methods are functions that belong to a class and that operate on an object, which is called the \emph{receiver}.
+A crucial feature of object-oriented languages is subtyping and with it the notion of polymorphic method calls.
+Subtyping in object-oriented languages means that, for example, an instance of type \propername{B} is assignable to a variable of type \propername{A}, given that \propername{B} is a subtype of \propername{A}.
+As a result, the static type of an object reference (\propername{A} in the example) is not necessarily the same as the runtime type (\propername{B} in the example).
+Subtypes can also provide new implementations of their parent type's methods, meaning that there can be multiple implementations of the same method in different types.
+In a static call, the call site selects the method implementation based on the receiver's \emph{static} type (\ie \propername{A} in the example).
+In a polymorphic call, the call site selects the method implementation based on the receiver's \emph{runtime} type.
+This process of dynamically selecting the appropriate method implementation is called \emph{dynamic binding}.
+
+The \cpp standard requires the implementation of dynamic binding but does not dictate how compilers should implement it.
+Nonetheless, all major compilers implement dynamic binding in \cpp with \emph{vtables}.
+A vtable is a table that contains pointers to the concrete method implementations for each type.
+A polymorphic method call consists of
+\begin{enumerate*}
+    \item resolving the vtable for an object's type.
+    Object's typically contain a pointer to their type's vtable as their first field.
+    \item resolving the correct method implementation.
+    The implementation is chosen by indexing into the vtable with a callsite-fixed index.
+\end{enumerate*}
+
+This process of dynamic dispatch is sometimes emulated in languages such as C, which lack builtin support for polymorphic method calls.

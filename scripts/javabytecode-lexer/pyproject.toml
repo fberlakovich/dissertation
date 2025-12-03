@@ -1,0 +1,10 @@
+[project]
+name = "pygments-javabytecode"
+version = "0.1.0"
+description = "Pygments lexer for javap-style Java bytecode disassembly"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["Pygments>=2.12"]
+
+[project.entry-points."pygments.lexers"]
+javabytecode = "pygments_javabytecode.lexer:JavaBytecodeLexer"

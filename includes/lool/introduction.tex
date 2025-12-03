@@ -1,0 +1,161 @@
+\section{Introduction}
+
+\definecolor{mylinecolor}{HTML}{113377}
+\begin{figure}[t]
+    \centering
+
+    \begin{tikzpicture}
+        \begin{axis}
+        [
+            title={Performed optimizations},
+            xbar, % Horizontal bars
+            xmode=log, % Logarithmic x-axis
+            xlabel={Count},
+            ylabel={}, % No label on the y-axis
+            xmin=10, % Start x-axis slightly above 1 to match original
+            width=0.9\textwidth,
+            height=13cm, % Adjust height as needed
+            ytick=data, % A tick for each bar
+            yticklabels from table={figures/lool/optimizationcounts.dat}{Optimization}, % Get y-labels from the 'Optimization' column
+            yticklabel style={font=\propernamedecl\footnotesize},
+            y axis line style={opacity=0}, % Hide y-axis line
+            axis x line*=bottom, % Show only bottom x-axis line
+            tick align=outside,
+            enlarge y limits={0.05},
+            bar width=0.7,
+            xminorticks=false,
+            axis lines*=left,
+            y axis line style={opacity=0},
+            point meta=explicit,
+            nodes near coords, % Activate nodes
+            every node near coord/.append style={
+                color=white,
+                font=\small
+            },
+            visualization depends on={meta < 30000 \as \mycond}, % Condition to move small-bar labels
+            nodes near coords style={
+                font=\footnotesize\propernamedecl,
+                color=black,                       % Set color directly to white
+                /pgf/number format/fixed,          % Use fixed-point number format
+                /pgf/number format/precision=0     % ...with zero decimal places
+            },
+            execute at begin node near coord/.code={
+                \pgfkeys{/tikz/anchor=west} % small bar: outside, black
+            },
+        ]
+            % Read data from the file for the plot
+            \addplot+[
+            fill=gray!20,
+            draw=mylinecolor,
+            line width=0.5pt
+            ]  table [
+            x=Count,
+            y expr=\coordindex, % Use the row number for the y-coordinate
+            meta=Count,
+            col sep=tab % Specify that columns are separated by tabs
+            ] {figures/lool/optimizationcounts.dat};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Counts of selected optimizations during the compilation of \num{1000} fuzzed test cases (logarithmic axis).}\label{fig:optimizations}
+\end{figure}
+
+Bugs in compilers can have a significant impact on users, especially when the symptom is not a crash, but a silent miscompilation.
+Determining that a suspected program bug actually is a miscompilation is a time-consuming process for software developers.
+Hand-written tests for the compiler, such as unit tests for specific components, typically cover cases the compiler engineer already considers during development, but edge cases are often overlooked.
+
+The GraalVM compiler, a compiler for Java and other languages (\cref{sec:graalvm}), serves as both an \gls{AOT} and \gls{JITcomp}.
+As such, bugs in the GraalVM compiler potentially have a far-reaching effect and are particularly problematic.
+Being written entirely in Java, the GraalVM compiler is not affected by memory safety issues plaguing compilers written in C or \cpp.
+Nonetheless, the GraalVM compiler is not immune to implementation errors, occasionally leading to miscompilations or failed assertions that lead to a crash.
+An effective way to compensate for the blind spot of hand-written tests is fuzzing in general and \emph{compiler fuzzing} in particular.
+Compiler fuzzing aims to cover the missing test scenarios by feeding random inputs to the compiler.
+We developed a compiler fuzzing framework targeting the GraalVM compiler and, in line with related work~\cite{yang2011}, found several previously unknown bugs.
+
+The sustained effectiveness of a compiler fuzzer depends on the capabilities of the input code generator.
+The generator can trigger certain compiler optimizations only with very specific combinations of language features.
+A naïve input generation approach uses a fixed probability distribution of language features to include.
+A problem with this approach, however, is the marginally small probability of certain language feature combinations occurring in a test program of limited size.
+If these combinations are necessary to trigger a specific optimization, the optimization remains untested with a high probability.
+Optimization frequencies vary: some trigger frequently, while others trigger only rarely.
+\cref{fig:optimizations} shows the execution counts for certain optimizations we recorded for one fuzzing campaign with~1000 randomly generated Java programs using the code generator's default configuration.
+The least frequent optimization in this data set occurs~11 times overall.
+In contrast, other optimizations occur hundreds of thousands or even millions of times on the same \num{1000} test programs.
+These data suggest that the GraalVM fuzzer would profit from fuzzer guidance.
+
+In \cref{ch:fuzzer-guidance}, we discussed how feedback can transform random exploration into a more efficient, guided process.
+While code coverage is a popular form of feedback, it is less common among compiler fuzzers (see \cref{lool:s:background} for an overview of JIT compiler fuzzing).
+Nevertheless, some JIT compiler fuzzers do guide input mutation using code coverage~\cite{Gross2023,Wu2023}.
+Code coverage would, in principle, tell us whether certain optimizations were exercised or not.
+While AFL's assembly-level instrumentation is not directly applicable to the GraalVM compiler, Java bytecode instrumentation solutions exist to achieve code coverage.
+For example, the coverage instrumentations of JQF~\cite{Padhye2019a}, Jazzer~\cite{jazzer}, and Kelinci~\cite{kelinci} all operate in a similar manner to AFL's coverage instrumentation.
+However, code coverage has two major drawbacks:
+
+\begin{description}
+    \item[Overhead]
+    Collecting code-coverage information while fuzzing the GraalVM compiler incurs non-negligible overhead.
+    In our experiments with our own coverage instrumentation, we observed a fuzzer-throughput decrease of up to 70\%.
+    Although our code coverage instrumentation is not optimized for speed, a non-trivial performance overhead is to be expected.
+    Apart from adding additional bytecode instructions in CPU-intensive code, the instrumentation also perturbs the JIT compilation of the instrumented code.
+    \item[Merging of execution contexts]
+    Existing Java code coverage solutions do not contain information about the execution \emph{context} of the covered code, such as the domain knowledge that a compiler compiles separate \emph{methods}.
+    As a result, conventional coverage tools merge the coverage information of, for example, an optimization pass optimizing different methods within the same input program.
+    Such merged information can tell us that on a given input program the compiler optimizations~\(X\) and~\(Y\) were exercised, but not whether optimizations~\(X\) and~\(Y\) happened during the compilation of the same method.
+    In other words, code coverage merges the coverage for an entire input program, even if compiler passes execute multiple times on different parts of the input (\eg methods).
+\end{description}
+
+\newlength{\originalbelowcaptionskip}
+\setlength{\originalbelowcaptionskip}{\belowcaptionskip}
+\begin{figure}
+    \setlength{\belowcaptionskip}{\baselineskip}
+
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \begin{minted}{java}
+int sum = 0;
+for (int i = 0; i < array.length; i++) {
+    if (i == 0)
+        log("summing non-empty array %s", array);
+    sum += array[i];
+}
+        \end{minted}
+        \caption{Example loop not amenable to loop vectorization due to control flow and a method call in the loop.}
+        \label{fig:loop_before_peeling}
+    \end{subfigure}
+    \setlength{\belowcaptionskip}{\originalbelowcaptionskip}
+
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \begin{minted}{java}
+int sum = 0;
+if (array.length > 0) {
+    log("summing non-empty array %s", array);
+    sum += array[0];
+    for (int i = 1; i < array.length; i++) {
+        sum += array[i];
+    }
+}
+        \end{minted}
+        \caption{Example loop after loop peeling. The remaining loop is amenable to loop vectorization.}
+        \label{fig:loop_after_peeling}
+    \end{subfigure}
+
+    \caption{Combination of compiler optimizations.}
+    \label{fig:context_example}
+\end{figure}
+
+
+Based on these observations, we extend the GraalVM compiler fuzzer to leverage a new kind of coverage:
+We propose to use the GraalVM compiler's optimization log for coverage feedback.
+Our fuzzer uses the precise, domain-specific information from the optimization log as context-rich coverage to guide input generation towards rare or entirely uncovered compiler optimizations.
+At the core of input generation is a genetic algorithm that uses coverage feedback to choose among different generation options.
+Wel call the combination of optimization-log guided feedback with genetic input generation \lool.
+
+In contrast to code coverage, \lool has lower overhead and allows for domain-specific context sensitivity.
+To understand which type of context is important in compiler fuzzing, consider the example loop in \cref{fig:loop_before_peeling}.
+This loop contains control flow and a method call, making the common optimization of \emph{loop vectorization} inapplicable.
+However, applying \emph{loop peeling} to separate the first loop iteration from the rest produces the loop in \cref{fig:loop_after_peeling}, which can be vectorized.
+Such information about pairs of optimizations can be interesting.
+In our experience with GraalVM, many intricate compiler bugs involve such interactions between multiple compilation phases.
+
+Our coverage based on the optimization log can record the fact that the optimizations happened in the same \emph{method} or even on the same \emph{loop}.
+Thus, a context-aware coverage metric that is aware of the context of separate compilations, and that does not merge information from separate contexts, can guide the fuzzer in the direction of such interesting optimization pairs.

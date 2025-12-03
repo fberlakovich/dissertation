@@ -1,0 +1,262 @@
+\section{Implementation}\label{sec:lool:implementation}
+
+\subsection{Code Coverage Instrumentation in Java}
+Fuzzers like \aflpp are designed to test binary programs, \ie programs that were previously compiled by a compiler to machine code.
+Coverage instrumentation is realized by inserting additional instructions into the subject's machine code.
+\aflpp supports this instrumentation step either during compilation of the test subject or, with certain tradeoffs, also after compilation.
+The most efficient coverage instrumentation in \aflpp is based on \gls{LTO}, which gives the instrumentation pass a holistic view of the entire instrumented program.
+\gls{LTO} instrumentation allows \aflpp to assign a \emph{unique} edge id to every edge, as the total number of edges is known at compile time.
+
+In the case of GraalVM and more generally in case of Java test subjects, the subject is not compiled to machine code, but to Java bytecode.
+Consequently, code coverage instrumentation needs to happen at the bytecode level.
+In principle, \gls{LTO} style instrumentation would be possible by instrumenting \emph{all} Java classes, \ie classes belonging to the subject or to any possible library (including the JDK itself).
+In practice, such an all-encompassing instrumentation is infeasible because classes are loaded dynamically, potentially even from locations only known at runtime.
+While the GraalVM compiler's classpath is known at (Java) compile time, instrumenting all classes, including JDK classes, upfront is still difficult.
+
+Instead, we use the \gls{JVM}'s agent facility to transform classes on the fly.
+Java agents belong to the instrumentation API and allow to alter an application's bytecode dynamically.
+The \gls{JVM} informs an agent whenever a class is loaded and allows the agent to modify the class bytecode.
+Our coverage agent checks whether a loaded class should be instrumented based on a preconfigured filter.
+For our experiments, we limited the filter to classes belonging to the GraalVM compiler project.
+The agent also keeps a cache to avoid paying the overhead of instrumentation for the same class multiple times.
+
+The code coverage instrumentation is based on \jacoco's instrumentation infrastructure and inserts a static method call at each instrumentation point.
+The static call increases the counter of the given edge identifier in a global byte buffer.
+\cref{lst:lool:java-if-cascade} shows a simple Java \code{if} cascade that checks the values in a byte array.
+\cref{lool:lst:code-coverage-instrumentation} shows the corresponding uninstrumented bytecode (left) and the inserted coverage instrumentation (right).
+
+Our coverage agent assigns a range of unique edge identifiers to each class.
+As we want to compare the coverage of different runs (from the same or different configurations), the id assignment must be deterministic and reproducible.
+A deterministic and reproducible assignment is challenging because classes are loaded not necessarily in the same order in different runs.
+Unlike \aflpp with \gls{LTO}, our coverage agent never has a holistic view of the entire program, as new classes could be loaded at any time.
+To guarantee consistent ids across runs, the agent relies on an id synchronization file containing the class id ranges assigned in previous runs.
+Before assigning a new range to a class, the agent checks whether a previous run has already assigned a range to the class.
+
+\definecolor{lightyellow}{rgb}{1,1,0.85}
+
+\begin{listing}
+    \begin{minted}{Java}
+if (bytes[0] == 'b') {
+    if (bytes[1] == 'u') {
+        if (bytes[2] == 'g') {
+            Assert.fail("Expected");
+        }
+    }
+}
+    \end{minted}
+    \label{lst:lool:java-if-cascade}
+    \caption{Java \code{if} cascade to demonstrate coverage instrumentation}
+\end{listing}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{javabytecode}
+aload         6
+iconst_0
+baload
+bipush        98
+if_icmpne     126
+
+
+
+
+aload         6
+iconst_1
+baload
+bipush        117
+if_icmpne     126
+
+
+
+
+aload         6
+iconst_2
+baload
+bipush        103
+if_icmpne     126
+
+
+
+
+// String Expected
+ldc           #58
+// Assert.fail
+invokestatic  #60
+        \end{minted}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \begin{minted}[fontsize=\footnotesize,highlightlines={5-9,14-18,23-27},highlightcolor=lightyellow]{javabytecode}
+aload         6
+iconst_0
+baload
+bipush        98
+if_icmpeq     163
+sipush        585
+// ByteBufferCoverageMap.increaseCounter
+invokestatic  #105
+goto          234
+aload         6
+iconst_1
+baload
+bipush        117
+if_icmpeq     181
+sipush        586
+// ByteBufferCoverageMap.increaseCounter
+invokestatic  #105
+goto          234
+aload         6
+iconst_2
+baload
+bipush        103
+if_icmpeq     199
+sipush        587
+// ByteBufferCoverageMap.increaseCounter
+invokestatic  #105
+goto          234
+// String Expected
+ldc           #58
+// Assert.fail
+invokestatic  #60
+    \end{minted}
+    \end{subfigure}
+    \label{lool:lst:code-coverage-instrumentation}
+    \caption{Bytecode from \cref{lst:lool:java-if-cascade} instrumented for code coverage.}
+\end{figure}
+
+\subsection{\aflpp-compatible Counter Coverage}
+In our evaluation (see \cref{lool:s:evaluation}) we evaluate various configurations that use \aflpp as the mutation engine.
+\aflpp expects a byte buffer as coverage in which each byte represents a unique counter from 0 to 255.
+In a standard \aflpp setup, this coverage map is provided by a binary instrumented for code coverage, and each byte represents the execution count of a specific edge identifier.
+In experiments where we use \aflpp for mutation but use coverage information that does not directly represent code coverage, we need to map our coverage onto such a byte buffer.
+
+In the case of context-blind coverage (global optimization counters), the number of optimization counters is known a priori.
+We assign each optimization counter a unique and consistent position in the coverage map and use a saturating counter to count the frequency of the optimization.
+This mapping allows \aflpp to treat optimization-counter information like execution counts.
+\aflpp sorts execution counts into differently sized buckets.
+For example, the execution counts 1, 2 and 3 each have their own bucket, whereas counts 32--127 are grouped into a single bucket.
+The idea behind this principle is that small changes in execution-count frequency are more interesting for smaller execution counts than for larger ones.
+The same applies to optimization frequencies.
+Whether an optimization was applied once, twice or three times likely makes a bigger difference than whether it was applied 100 or 120 times.
+
+\begin{listing}
+    \begin{minted}[escapeinside=||,fontsize=\footnotesize]{json}
+{
+  |...|
+  "DeDuplication_Deduplication": 64,
+  "Reassociation_ConstantReassociation": 51,
+  "Reassociation_ArithmeticWithMulReplacement": 848,
+  "FixReads_IfElimination": 1519
+  |...|
+}
+    \end{minted}
+\end{listing}
+\fbetodo{Arrows from optimization counts to boxes}
+\begin{figure}
+    \begingroup
+    \normalsize
+
+% -- measure natural sizes (3 digits and ellipses) --
+    \newsavebox{\digitbox}\sbox{\digitbox}{000}% exactly 3 digits
+    \newsavebox{\ellipsbox}\sbox{\ellipsbox}{$\cdots$}
+
+    \newlength{\SmallW} \setlength{\SmallW}{\wd\digitbox}
+    \newlength{\OuterH} \setlength{\OuterH}{\dimexpr\ht\digitbox+\dp\digitbox\relax}
+    \newlength{\EllW}   \setlength{\EllW}{\wd\ellipsbox}
+    \addtolength{\EllW}{0.6em} % small breathing room for the dots
+
+    \newcount\nboxes \nboxes=4\relax
+
+    \newlength{\BoxesW} \setlength{\BoxesW}{\dimexpr\nboxes\SmallW\relax}
+    \newlength{\OuterW} \setlength{\OuterW}{\dimexpr2\EllW+\BoxesW\relax}
+
+    \begin{tikzpicture}[x=1pt,y=1pt]
+        % outer rectangle: just big enough
+        \draw[thick] (0,0) rectangle (\the\OuterW,\the\OuterH);
+
+        % ellipses (centered in their bands)
+        \node at (0.5\EllW,0.5\OuterH) {$\cdots$};
+        \node at (\OuterW-0.5\EllW,0.5\OuterH) {$\cdots$};
+
+        % small boxes: natural width, no gaps
+        \newlength{\x}\setlength{\x}{\EllW}
+        \count255=0
+        \loop
+        \draw[thick,fill=gray!10] (\the\x,0) rectangle ++(\the\SmallW,\the\OuterH);
+        \addtolength{\x}{\SmallW}
+        \advance\count255 by 1
+        \ifnum\count255<\nboxes
+        \repeat
+    \end{tikzpicture}
+
+    \endgroup
+\end{figure}
+
+
+In the case of context-aware coverage (per-method optimization counters), only the number of optimization counters \emph{per method} is known a priori, but the total number of methods is not.
+Thus, the total number of optimization counters depends on the number of compiled methods and varies from test to test.
+Ideally, we want the transformation that converts optimization-log data into \aflpp compatible coverage to
+\begin{enumerate}
+\item \label{lool:enum:stable} be stable.
+The same optimization-log data should lead to the same \aflpp style coverage every time;
+\item \label{lool:enum:non-chaotic} map common optimization-log data to common code coverage;
+\item \label{lool:enum:injective} be injective.
+A non-injective mapping means there are coverage collisions.
+\end{enumerate}
+Condition \ref{lool:enum:stable} is satisfied as long as there is no non-determinism involved in the mapping.
+To satisfy condition \ref{lool:enum:non-chaotic}, we assign an index range to each compiled method, starting at an index based on the method name's hash code.
+Within each method's index range, we use the same optimization to index mapping as for the context-blind coverage mapping.
+For example, consider two tests with methods \propername{A}, \propername{B}, \propername{C} and \propername{A}, \propername{B}, \propername{D}, respectively.
+The counter positions for methods \propername{A} and \propername{B} will be the same in both cases, whereas the ones for \propername{C} and \propername{D} differ.
+Condition \ref{lool:enum:injective} is hard to fulfill in practice.
+The problem is similar to the problem \aflpp faces without \gls{LTO}.
+Without knowing a priori how many method indices there will be over the course of the entire fuzzing campaign, the method index assignment is only best effort.
+As the method index is based on the method name's hash code, this approach likely leads to coverage collisions.
+Specifically, the index range assigned to a method is likely to overlap with another method's index range.
+We note, however, that the problem of hash collisions is not specific to using optimization-counter coverage, but also occurs \eg when using \aflpp code coverage instrumentation without \gls{LTO}.
+
+\subsection{Parameter Mutation by \aflpp}\label{ss:afl-parameter-mutation}
+\fbetodo{Add figure}
+In our evaluation (see \cref{lool:s:evaluation}), various configurations use \aflpp as the mutation engine.
+In these configurations the program generator needs to generate test cases based on an input provided by \aflpp.
+The exact composition of a generated program depends on two factors: the generation parameters and the concrete random decisions at various points during generation.
+Both ultimately influence the program generator's behavior, but at different levels of abstraction.
+Generation parameters bias random decisions in a certain direction, but do not determine their exact outcome (except in extreme cases where, \eg a probability is 0).
+An example for a generation parameter is the probability distribution of different statement types (see \cref{lool:tbl:generation-parameters} for more examples).
+Concrete random decisions, on the other hand, are all the concrete decisions the program generator has to make.
+For example, while generating a program the generator might have to decide whether a \emph{particular} statement should be an \code{If} statement or a \code{While} statement.
+Even if the statement distribution dictates a 90\% probability for \code{If} statements, the concrete random outcome at this particular point might still be a \code{While} statement.
+We have implemented and evaluated two ways in the program generator to derive generation parameters and concrete random decisions from \aflpp generated input files.
+
+\subsubsection{Fully Parametric}\label{sss:afl-fully-parametric}
+The program generator reads \emph{both} the generation parameters and the values driving concrete random decisions directly from the input file.
+The header of the seed file determines the generation parameters, and each concrete random decision is based on a certain byte sequence in the seed file.
+If the generator runs out of randomness, \ie the input is too short to generate a valid live program, tries again with reduced structural parameters.
+Structural parameters determine the size of the generated program and, therefore, directly influence the amount of randomness needed to generate them.
+For example, the maximum number of statements in a method is a structural parameter.
+The generator contains a manual list of such structural parameters for reduction, together with meaningful minimums.
+On each retry, the generator reduces structural parameters by 50\%.
+If all structural parameters have reached their limit, the generator signals an error and continues skips the seed.
+How often such a reduction is possible depends on the initial generation parameters.
+
+Unlike an unconstrained generator, the liveness generator cannot stop generating code at arbitrary points, as it needs to guarantee the liveness property throughout generation.
+Another issue is that the generator occasionally needs to perform backtracking as it cannot decide upfront whether producing, \eg an expression of a certain type is possible with a given set of live variables.
+During these futile generation attempts, the generator uses large amounts of randomness that do not, however, result in concrete program elements.
+Although we optimized the random consumption during backtracking to use only 4 bytes of randomness in case of a failed attempt, multiple failed attempts can use up the available randomness quickly.
+
+In principle, the generator could just skip too short seeds entirely, but skipping seeds gives \aflpp only a coarse signal.
+A skipped seed does not produce any coverage feedback but tells \aflpp only that the seed is invalid.
+In contrast, a smaller program generated from a smaller seed does produce coverage, although less than a larger program generated from a larger seed would.
+We discuss the problems with the fully parametric mutation approach in \cref{ss:aflpp-vs-genetic}.
+
+\subsubsection{Generation Parameters Only}\label{sss:afl-hyperonly}
+The program generator reads only the generation parameters and a single integer directly from the file.
+All later bytes in the seed file are ignored.
+The integer serves as a random seed for a new, in-memory random instance that drives the concrete random decisions.
+This approach allows \aflpp to mutate the generation parameters in a more targeted way.
+Reading the seed for the in-memory random instance from the input file is important to guarantee the same generated program (and thus the same coverage feedback) given the same input file.
+
+
+\fbetodo{describe passing of information between parent and child process}

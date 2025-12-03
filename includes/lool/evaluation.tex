@@ -1,4 +1,4 @@
-\section{Evaluation}\label{s:evaluation}
+\section{Evaluation}\label{lool:s:evaluation}
 The goal of our evaluation is to study the advantages and disadvantages of different mutation and feedback strategies for GraalVM compiler fuzzing.
 Our evaluation aims to confirm or refute the following hypotheses, which we formulated based on preliminary results:
 \begin{hypotheses}
@@ -21,7 +21,7 @@ Our evaluation aims to confirm or refute the following hypotheses, which we form
 \end{hypotheses}
 In this section we present the results of our experiments and then discuss the hypotheses in \cref{s:discussion}.
 
-\subsection{Experimental Setup}\label{ss:experimental-setup}
+\subsection{Experimental Setup}\label{lool:ss:experimental-setup}
 We performed all experiments on GraalVM 25.0 running on 3 identical machines with Debian 12.11.
 Each machine is equipped with an AMD Ryzen Threadripper PRO 7995WX with 192 cores (96 physical cores, each with hyper-threading) and 512 GB of RAM\@.
 To account for the large number of experiments, we partitioned each machine with \propername{cgroups} into 3 equally sized partitions with 64 cores each.
@@ -44,8 +44,8 @@ The cache is also important to guarantee consistent edge identifiers across mult
 For the experiments that do not use code coverage, we re-ran all test cases in a separate run with code-coverage enabled.
 This separate measurement step guarantees that experiments without code coverage are not negatively affected by the overhead induced by code coverage.
 
-\subsection{Experiment Evaluation}\label{ss:experiment-evaluation}
-
+\subsection{Experiment Evaluation}\label{lool:ss:experiment-evaluation}
+\fbetodo{Add table with configurations}
 We evaluated the following 8 different configurations:
 \aflpp configurations, by default, are fully parametric (see \cref{sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{ss:afl-parameter-mutation}).
 For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
@@ -62,9 +62,9 @@ Configurations with \propername{memory} accumulate counters over time, whereas \
     The optimization log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
     \configuration{\aflpp Context-Aware}\label{config:aflcontextaware} a configuration where we use \aflpp for parametric input mutation together with per-method optimization pairs as coverage.
     Instead of aggregating the optimization counters, we record them for each method individually to identify pairs of optimizations that occurred together.
-    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{s:lool-design}) with code coverage as feedback.
+    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{s:lool:design}) with code coverage as feedback.
     \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization log counters as coverage.
-    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{s:lool-design}).
+    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{s:lool:design}).
     During each run, this configuration tries to breed as many generations as possible.
     Each generation consists of 16 parameter vectors, and the fuzzer creates a new generation when each vector has generated 40 tests or after one hour, whichever happens first.
 \end{configurations}
@@ -80,7 +80,7 @@ Like in \cref{config:aflcodecov}, we let \aflpp operate on a proxy binary to bri
 
 We evaluated the different configurations according to the following criteria:
 \begin{itemize}
-    \item amount of code coverage, measured as edge coverage (see \cref{sss:eval-code-coverage})
+    \item amount of code coverage, measured as edge coverage (see \cref{lool:sss:eval-code-coverage})
     \item number of rare optimizations performed (see \cref{ss:eval-rare-opts})
     \item number of rare optimization pairs performed (see \cref{ss:eval-rare-opts})
 \end{itemize}
@@ -91,7 +91,7 @@ We note, however, that without a ground truth the number of bugs found is unsuit
 \begin{table}[!t]
     \small
     \caption{The total number of successful, failed, skipped and timeout tests in each configuration summed over all runs as well as their median test runtimes and LoC.}
-    \label{tbl:test-overview}
+    \label{lool:tbl:test-overview}
     \begin{tabular}{>{\nextrow}E C C C C r T T}
         \toprule
         {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Median \\ Runtime (s)}} & {\makecell{Median \\ LoC}} \\
@@ -110,7 +110,7 @@ We discuss this phenomenon in more detail in \cref{ss:aflpp-vs-genetic}.
 \subsection{Overhead of Feedback Mechanisms}
 \begin{table}{}
     \caption{Number of tests completed in a 30-minute period with different coverage feedback mechanisms.}
-    \label{tbl:coverage-overhead}
+    \label{lool:tbl:coverage-overhead}
     \centering
     \begin{tabular}{>{\nextrow}Err}
         \toprule
@@ -128,9 +128,9 @@ We conducted an experiment to evaluate the performance overhead of code coverage
 In the experiment, our fuzzing framework runs the same, randomly generated test as often as possible within 30 minutes.
 As each test runs in a subprocess, later tests cannot profit from the VM warmup of previous tests.
 Using no coverage mechanism forms the baseline.
-\cref{tbl:coverage-overhead} shows the test case throughput decrease for each coverage type.
+\cref{lool:tbl:coverage-overhead} shows the test case throughput decrease for each coverage type.
 
-\subsection{Code Coverage}\label{sss:eval-code-coverage}
+\subsection{Code Coverage}\label{lool:sss:eval-code-coverage}
 \begin{figure}[t]
     \centering
     \begingroup
@@ -144,8 +144,8 @@ Using no coverage mechanism forms the baseline.
     \caption{Median cumulative edge coverage of different configurations (and variants) over time.
     The shaded area shows the interquartile range.
     The legend is ordered based on the achieved median cumulative coverage after 24 hours.
-    See \cref{ss:experiment-evaluation} and \cref{sss:eval-code-coverage} for details}.
-    \label{fig:cumulative-coverage}
+    See \cref{lool:ss:experiment-evaluation} and \cref{lool:sss:eval-code-coverage} for details}.
+    \label{lool:fig:cumulative-coverage}
 \end{figure}
 
 \begin{figure}[t]
@@ -158,9 +158,9 @@ Using no coverage mechanism forms the baseline.
     \input{figures/lool/coverage-timeline-upper}%
     \endgroup
     \caption{Median cumulative edge coverage of the better performing configurations after 4 hours.
-    See \cref{fig:cumulative-coverage} for the full graph.
+    See \cref{lool:fig:cumulative-coverage} for the full graph.
     The legend is ordered based on the achieved median cumulative coverage after 24 hours.}
-    \label{fig:cumulative-coverage-upper}
+    \label{lool:fig:cumulative-coverage-upper}
 \end{figure}
 
 
@@ -189,12 +189,12 @@ Using no coverage mechanism forms the baseline.
 %\end{table}
 
 
-\cref{fig:cumulative-coverage} shows the cumulative code coverage of different configurations over time.
+\cref{lool:fig:cumulative-coverage} shows the cumulative code coverage of different configurations over time.
 The configurations roughly divide into an upper and a lower group.
 The bottom group contains all \aflpp configurations with the exception of \propername{afl-contextblind-only-params}.
 The upper group contains configurations without coverage, configurations based on the genetic algorithm and the outlier \propername{afl-contextblind-params}.
 The legend is ordered based on the achieved median cumulative coverage after 24 hours.
-To better distinguish the densely packed upper group, \cref{fig:cumulative-coverage-upper} shows the upper group of configurations after 4 hours and without the interquartile range.
+To better distinguish the densely packed upper group, \cref{lool:fig:cumulative-coverage-upper} shows the upper group of configurations after 4 hours and without the interquartile range.
 In the upper group, there is primarily a difference between configurations that vary generation parameters and the single configuration (\propername{static}) that does not.
 %\cref{tbl:coverage-development} shows the same data in table form with a 30 minute resolution.
 

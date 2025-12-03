@@ -145,11 +145,11 @@ print("elapsed time (#1):", timer.statistics("#1").." s")
 
 
 %%%%% THESIS / TITLE PAGE INFORMATION
-\title{Secure by Destruction - Compiler-assisted Program Hardening and Fuzzing}
+\title{Beyond Optimization - Compiler-assisted Program Hardening and Fuzzing}
 \author{Felix Berlakovich}
 \department{Informatik}
 % Your full degree name.
-\degree{Doktors (Dr.)}
+\degree{Doktor der Naturwissenschaften (Dr. rer. nat.)}
 % Your examiners/supervisors.
 \firstexaminer{Prof. A}
 \secondexaminer{Prof. B}
@@ -273,10 +273,14 @@ print("elapsed time (#1):", timer.statistics("#1").." s")
 
     \chapter*{Publications}
     \mtcaddchapter[Publications]
-    This dissertation is based on the following peer-reviewed publications, ordered by recency:
+    This dissertation is based in part on the following publications:
     \vspace{2ex}
     \newrefcontext[sorting=ddnt] % most recent first
     \printbibliography[keyword=own, nottype=unpublished, heading=none, env=nolabelspaced]
+
+    We deliberately did not include Cross-Module Quickening~\cite{berlakovich2024} in this thesis.
+    While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
+
 % Uncomment if you have unpublished papers, articles etc.:
 % \vspace{4ex}
 % \noindent The following manuscripts are currently under review:
@@ -288,27 +292,43 @@ print("elapsed time (#1):", timer.statistics("#1").." s")
 
 
 %%%%% CHAPTERS
-% Add or remove any chapters you'd like here, by file name (excluding '.tex'):
+% Add or remove any includes you'd like here, by file name (excluding '.tex'):
 \flushbottom
-\include{chapters/introduction}\label{ch:introduction}
+\include{includes/introduction}\label{ch:introduction}
 
 
-\chapter{Defending against Code-Reuse with Mimicry}\label{ch:r2c}
-\include{chapters/r2c/background}
-\include{chapters/r2c/threat-model}
-\include{chapters/r2c/design}
-\include{chapters/r2c/implementation}
-\include{chapters/r2c/evaluation}
-\include{chapters/r2c/discussion}
-\include{chapters/r2c/future-work}
+\part{Defending Against Code-Reuse with Compiler Assistance}\label{part:defense}
+\chapter{The Co-Evolution of Code-Reuse Attacks and Defenses}\label{ch:code-reuse-coevolution}
+\include{includes/coevolution}
+\chapter{Plugging Information Leaks With Mimicry}
+\include{includes/r2c/motivation}
+\include{includes/r2c/background}
+\include{includes/r2c/threat-model}
+\include{includes/r2c/design}
+\include{includes/r2c/implementation}
+\include{includes/r2c/evaluation}
+\include{includes/r2c/discussion}
+\include{includes/r2c/limitations}
+\chapter{Outlook}\label{ch:outlook-defense}
+\include{includes/outlook-defense}
 
-\chapter{Compiler Fuzzing through Domain-Specific Mutation and Guidance}\label{ch:lool}
-\include{chapters/lool/background}
-\include{chapters/lool/graalvm-fuzzing}
-\include{chapters/lool/design}
-\include{chapters/lool/evaluation}
-\include{chapters/lool/discussion}
-\include{chapters/lool/related-work}
+\part{Improving Fuzzer-Guidance with Compiler Assistance}\label{part:fuzzing}
+\include{includes/fuzzer-guidance}
+\chapter{Program-State Convolution}
+\include{includes/psc/motivation}
+\include{includes/psc/background}
+\include{includes/psc/unfolding}
+\chapter{Fuzzer-Guidance with Optimization-Log Counters}
+\include{includes/lool/introduction}
+\include{includes/lool/background}
+\include{includes/lool/design}
+\include{includes/lool/implementation}
+\include{includes/lool/evaluation}
+\include{includes/lool/discussion}
+\include{includes/lool/future-work}
+\chapter{Outlook}\label{ch:outlook-fuzzing}
+\bookmarksetup{startatroot}
+\chapter{Conclusion}
 
 %% APPENDICES %% 
 % Starts lettered appendices, adds a heading in table of contents, and adds a

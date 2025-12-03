@@ -1,0 +1,113 @@
+%! root = thesis.tex
+
+\chapter{\label{ch:1-intro}Introduction}
+
+\minitoc
+
+\section{Motivation}
+
+The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
+Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
+A modern web browser, for example, now consists of over 30 million lines of code. \todo{Add reference, e.g., Chromium line count}
+While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
+
+Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, correct and reliable, and efficient.
+Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
+Each new abstraction layer hides detail but introduces uncertainty; each performance optimization risks new corner cases; each extension of functionality opens new attack surfaces.
+Catastrophic security breaches like Heartbleed (a simple buffer over-read in a core library) \todo{Cite Heartbleed}, Spectre (exploiting CPU-level speculation) \todo{Cite Spectre}, or Log4Shell (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
+
+Likewise, reliability failures such as silent miscompilations have plagued even widespread production compilers like GCC and LLVM~\cite{yang2011,wang2012}.
+\citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
+Subsequent longitudinal analyses of hundreds of LLVM and GCC bug reports find that miscompilations continue to account for a large fraction of confirmed issues and often remain latent for months before being diagnosed~\cite{chen2016}.
+Recent work also showed that bugs in the compiler not only threaten the reliability of the compiled software, but can also introduce security bugs~\cite{xu2023a,Xu2023}
+
+These data points underline that both the software we deploy and the toolchains we depend on remain fragile in practice.
+Thus, security and reliability form two sides of the broader struggle for software \emph{trustworthiness}: the ability to rely on software to uphold its specification under \emph{both} benign and adversarial conditions.
+The quest for software trustworthiness is not new.
+Despite decades of academic research and industrial mitigation efforts, however, challenges in software security and reliability remain, not least because the complexity of software keeps growing.
+The following sections analyze in more detail why security and reliability are no \enquote{solved problems} yet.
+
+
+\subsection{Security}
+The tradeoff between abstraction and performance explains, in part, why languages like C or \cpp still form the foundation of critical infrastructure.
+The potential for high performance\footnote{Not every program written in C or \cpp is automatically fast.} and direct control of machine internals make C and \cpp popular choices for operating systems, browsers, and embedded systems.
+However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and, more broadly, for the pitfalls of undefined behavior.
+
+These pitfalls regularly lead to dangerous vulnerabilities.
+These vulnerabilities—which include both spatial (\eg buffer and heap overflows) and temporal memory safety (\eg use after free) issues,are the vector for a majority of remote code execution exploits.
+Industry telemetry highlights the breadth of the problem.
+In 2019, Microsoft’s Security Response Center reported that roughly 70\% of the critical vulnerabilities it handled over the past decade were due to memory-safety errors, despite major investments in defensive coding practices~\cite{msrcreport2019}.
+Google’s annual Android security review reaches similar conclusions, attributing more than three quarters of high-severity platform bugs between 2019 and 2022 to memory-safety violations, many rooted in native code dependencies\cite{projectzeroandroid2022}.
+Google's Project Zero also notes that the majority of the 2023 zero-days they investigated ultimately stemmed from memory corruption~\cite{projectzerointhewild2024}.
+
+The rise in security-awareness and with it the increasing adoption of memory-safe languages also for system-related tasks is a welcome development.
+Nonetheless, despite the rise of languages like , C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices. \todo{Cite TIOBE index}
+Furthermore, even new, memory-safe code is often integrated into legacy systems.
+A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it. \todo{Cite paper on Rust/C FFI vulnerabilities}
+Even if from now no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise costing billions of euros.
+Thus, memory safety vulnerabilities will remain a critical threat in the foreseeable future and mitigations are needed to deal with them.
+
+A dominant class of exploits targeting these vulnerabilities is code-reuse attacks.
+Attackers hijack a program's control flow and subsequently reuse existing code \enquote{gadgets} already present in the target process.
+This approach allows attackers to bypass defenses like \wox, which, thanks to widespread hardware support, have become a de facto standard.
+
+Over the years, different ways of defending against this type of attack have emerged.
+One prominent defense category is randomization or more broadly, software diversity.
+Software diversity embraces the possibility of memory corruptions and control-flow diversion and instead aims to restrict an attacker's mobility.
+By introducing controlled randomness into code or data layouts, software diversity disrupts attackers’ assumptions.
+For example, without knowing the exact location of functions or gadgets, an attacker can no longer use them in a code-reuse attack.
+Unfortunately, closing all information channels an attacker could use to undermine the guarantees provided by randomization proves difficult in practice.
+Recent work shows that even when code is perfectly hidden, predictable data structures such as the stack, global objects, or allocator metadata, can leak enough information for a successful attack~\cite{Rudd2017}.
+The consequence is that although, judging by the publication counts, the security community's interest in code-reuse mitigations has declined, unsolved problems remain.
+\fbetodo{provide concrete numbers}
+
+\subsection{Reliability}
+Traditional approaches to software reliability—static analysis, unit testing, and formal verification—serve as the foundation of quality assurance.
+While formal verification offers the strongest theoretical guarantees, it faces significant practical hurdles.
+A primary obstacle is the \emph{specification bottleneck}: verification requires properties to be formally defined, yet formulating such specifications is often non-trivial.
+Moreover, even when adequate specifications exist, the computational cost and limited scalability of formal methods often prove prohibitive for large, evolving systems.
+Similarly, static analysis suffers from inherent trade-offs between precision and scalability.
+Finally, unit testing remains the most widespread technique but suffers from a critical blind spot: it is inherently limited by human foresight and can only validate scenarios explicitly anticipated by the developer.
+
+In light of these shortcomings, a long neglected technique named fuzz testing, or fuzzing for short, has become increasingly important over the past 10--15 years.
+This rise in popularity happened partly because of \propername{AFL}, a practical and fast fuzzer that combines code coverage feedback with carefully engineered heuristics.
+Early fuzzers mostly relied on simple, random input generation and were often dismissed as crude or ad hoc.
+Modern fuzzing, by contrast, combines feedback-guided input mutation and scheduling, constraint solving, and domain-specific generators to explore program behaviors more systematically.
+Industrial-strength frameworks such as \aflpp, \propername{libFuzzer}, and their successors have demonstrated that fuzzing can uncover deep, previously unknown bugs in widely deployed software, including operating systems, browsers, cryptographic libraries, and compilers.
+
+Most popular fuzzers like \aflpp and \propername{libfuzzer} rely on code coverage feedback to guide their mutation and scheduling decisions.
+Despite its widespread use, code coverage is an imperfect proxy for test effectiveness, particularly for state-rich systems such as compilers.
+Code coverage metrics---statement, branch, or edge coverage---abstract away the program’s internal state and treat all executions that follow the same control-flow paths as equivalent.
+As a result, fuzzers can quickly saturate coverage while still failing to explore nuanced interactions within the same control-flow.
+To find these deeper bugs, the fuzzer needs a better guide—--one that considers more of the target program's internal state space.
+
+%Meanwhile, the tools we use to build everything else—modern compilers, linkers, and virtual machines—have themselves grown complexity.
+%Each new optimization pass, hardware backend, or language front-end enlarges the space of subtle interactions that manual review or unit tests rarely exercise, so bugs continue to slip through release pipelines.
+%These observations are particularly true for \glspl{JIT}.
+%\glspl{JIT} are typically part of a language VM and compile user-provided, potentially malicious code.
+%When compiling such code, \glspl{JIT} are supposed to upkeep the sandboxing guarantees of the underlying language VM, such as enforcing array boundaries.
+%As such, the correctness of \glspl{JIT} has an important security dimension as well.
+%
+
+\subsection{The Compiler's Role Beyond Optimization}
+In this thesis I argue that compilers are uniquely positioned to help improve both software reliability and security.
+Every non-trivial program passes through a compiler at some point, either ahead of time or just in time\footnote{Interpreted programs are an exception, but the interpreter itself has passed through a compiler as well.}.
+This \enquote{choke point} turns the compiler into a linchpin for software trustworthiness: a single transformation deployed in the toolchain can harden millions of downstream binaries.
+
+Compilers possess semantic insight that no runtime monitor or post-hoc analysis can replicate.
+The compiler's knowledge encompasses both programming language semantics and details about the target machine.
+Compilers, for example, know the exact type hierarchy of compiled \cpp programs and the exact geometry of their stack frames.
+While this information can be partially recovered from binaries, the reconstruction is notoriously challenging because compilation is a lossy process.
+Similarly, compilers have detailed knowledge about the compilation process itself, such as which transformations were applied and which invariants justified those transformations.
+
+In this thesis I explore how to tap these sources of information for security hardening and improved fuzzing feedback.
+
+\section{Contributions}
+In the first part, I present \rtwoc, a novel, compiler-driven software diversity defense that addresses the challenge of layout inference through information leaks.
+It combines fine-grained code randomization with targeted randomization of program data structures.
+By diversifying not just the code but also the data layout that recent attacks rely on for reconnaissance, \rtwoc renders such attacks ineffective while incurring a moderate performance overhead.
+
+In the second part, I present \lool, a compiler-assisted fuzzing framework based on a new type of coverage feedback.
+Instead of relying on simple code coverage, this \enquote{optimization-aware} method leverages the compiler’s own internal transformation records as a feedback signal.
+A genetic algorithm uses this feedback to systematically steer testcase generation towards rare and complex optimization interactions that are difficult to trigger otherwise.
+

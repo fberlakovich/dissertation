@@ -1,0 +1,159 @@
+\section{Limitations}\label{ss:limitations}
+
+\subsection{Coverage}\label{ss:limitations-coverage}
+\rtwoc{} is able to protect only the call-sites and functions it actually compiles.
+\glspl{BTRA} for calls to unprotected functions are disabled by default as these functions would overwrite all the \glspl{BTRA} after the return address.
+Without \glspl{BTRA} after the return address, the return address would always be the last address in the list of addresses.
+Overwritten \glspl{BTRA} are only an issue, however, if the attacker knows which parts of the program have not been compiled by \rtwoc.
+Lacking this information, an attacker does not know where the return address is the last address.
+
+\subsection{Support for stack argument calling convention with non-\rtwoc{} compiled code}\label{ss:abi-change}
+At present, our prototype implementation does not support calling functions with stack arguments from code not compiled by \rtwoc.
+This incompatibility is due to such functions expecting the caller to prepare a frame pointer to account for the changed calling convention.
+During our evaluation of \rtwoc{}, we encountered just three such cases (one in the unit tests of WebKit, one in the XML parser callbacks of WebKit, and one in the regular expression implementation of Chromium).
+With three cases in 35 million lines of C/\cpp code, we conclude that this combination is rare in practice and, thus, opted for disabling the emission of \glspl{BTRA} for the affected functions.
+Note that these cases could also be supported by automatically inserting a trampoline for externally visible functions with stack parameters.
+% For ease of implementation we simply deactivated DRAs for the affected functions.
+
+\subsection{Probability}
+\fbetodo{Describe diminishing returns of adding more BTRAs}
+% We verified this insight by comparing nginx' baseline binary with a binary built with NOP insertion and function reordering.
+% As expected, the \code{.eh\_frame} entry for a function in the diversified binary occurs at a different position and has a different length.
+
+
+\section{Possible Extensions}
+
+\subsection{Caller and Callee \gls{BTRA} Synchronization}
+In \cref{r2c:ss:impl-btras} we described how caller and callee have to agree on how much space is needed after the real return address for additional \glspl{BTRA}.
+As for indirect calls the compiler cannot always determine the call target, the \rtwoc compiler tolerates occasional \gls{BTRA} overwrites.
+A possibility for caller and callee to synchronize at runtime would be to base the position of the real return address on the callee's runtime address.
+For example, a simple hash function could transform the caller's runtime address into a value between $0$ and $N+1$, where $N$ is the number of \glspl{BTRA} per function.
+Since both the caller and the callee know the callee's address, the caller can choose the right number of \glspl{BTRA} to push and the callee knows the required stack pointer offset.
+An added benefit of this approach would be that the position of the real return address changes with each program start.
+Even without load-time function permutation, \gls{ASLR} moves function addresses on each program load.
+
+
+\subsection{Implementation on ARM and what it means}
+
+\subsection{Speculative Booby Traps}\label{ss:speculative-booby-traps}%
+Booby traps are an effective measure to deter random probing.
+For booby traps to be effective, two properties must hold:
+\begin{enumerate*}
+    \item they must be indistinguishable from benign code from the attacker's perspective and
+    \item triggering them must have negative consequences for the attacker.
+\end{enumerate*}
+Code-layout randomization in combination with execute-only memory ensures the first property.
+The negative consequences for the attacker depend on the booby trap used, but can range from simply crashing the program over raising an alarm to launching a counter-attack~\cite{Crane2013}.
+These observations hold true, however, only in the non-speculative domain.
+
+Over the last 8 years, transient-execution attacks have opened another battleground besides the classic \glspl{CRA}.
+In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code.
+Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods.\fbetodo{cite cache side channels}
+Apart from using this principle to directly leak sensitive information, attackers can also lift \glspl{CRA} into the speculative domain.
+
+The Blindside attack, for example, employs the same principles as Blind ROP to speculatively locate gadgets with a technique called \emph{gadget probing}.
+The idea behind gadget probing is that gadgets can be identified by their cache behavior during speculative execution.
+Similarly, SpecROP~\cite{Bhattacharyya2020} executes entire gadget chains speculatively.
+The speculative execution of gadgets makes these techniques immune to runtime exceptions.
+
+An attacker could use this fault-resistant capability to either leak data or to uncover booby trap addresses.
+Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
+To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
+Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
+Thus, speculative execution poses a threat to boob-trap functions.
+
+Booby traps are vulnerable because
+\begin{enumerate*}
+    \item they exhibit the \emph{same} behavior in both, speculative and non-speculative execution;
+    \item their observable behavior during speculative execution is \emph{different} from benign code.
+\end{enumerate*}
+Protecting booby traps against speculation requires a new approach.
+We call our approach \emph{speculation-aware booby traps}, as it lifts the deceiving properties of booby traps into the speculative domain.
+Although we have prototyped speculation-aware booby traps, we did not include them in the final defense, as we considered them out of scope for \rtwoc.
+We present the idea here to motivate more research in that direction.
+
+Speculation-aware booby traps build on the principle of separating speculative and non-speculative control flow.
+This principle was first demonstrated by retpolines~\cite{Turner2018}, which capture speculative control-flow in a spin loop.
+\cref{lst:retpoline} shows an example of a retpoline protecting an indirect branch to the address in \code{rax} against speculative execution.
+
+Instead of a spin loop, speculation-aware booby traps redirect speculative control-flow to the code an attacker expects behind an address.
+\cref{fig:speculation-aware-boobytrap} shows how speculation-aware booby traps could be used in the context of \rtwoc.
+For example, if \code{0x400530} is a booby trap address and \code{0x40055d} denotes the real return address, a speculation-aware booby trap would redirect the speculative control flow to \code{0x40055d}.
+The cache traces left behind by speculatively executing \code{0x400530} would, thus, reflect those of speculatively executing \code{0x40055d}.
+The only way for an attacker to know for sure what code hides behind \code{0x40055d} would be to execute it non-speculatively, which would trigger the booby trap.
+
+
+\newsavebox{\speculativebt}
+\begin{lrbox}{\speculativebt}
+
+    \begin{lstlisting}[style=asmcode,frame=none,breaklines=false,basicstyle=\scriptsize\ttfamily]
+<boobytrap>: |\Circled{1}|
+ call set_up_target
+|\tikzmark{T-Decoy-Gadget}| jmp F
+
+set_up_target:
+ mov (%rsp), target
+ ret|\tikzmark{T-Ret-Alarm}|
+
+target:
+ call alarm|\tikzmark{T-Call-Alarm}|
+    \end{lstlisting}
+\end{lrbox}
+
+
+\begin{figure}[t!]
+    % --- ROW 1: GRAPHICAL CONTENT ---
+    % This row contains the graphics, aligned at their bottom edges.
+
+    \begin{minipage}[b]{0.25\linewidth}
+        \begin{lstlisting}[style=asmcode,basicstyle=\footnotesize\ttfamily]
+call set_up_target
+
+capture_spec:
+ pause
+ jmp capture_spec
+
+set_up_target:
+ mov (%rsp), %rax
+ ret
+        \end{lstlisting}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.7\linewidth}
+        \resizebox{\linewidth}{!}{
+            \includeDrawioFigure{figures/r2c/r2c-btra-only-stack}[remember picture]{
+                \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
+                \draw[dash pattern=on 4pt off 4pt] (CodeBox.north west) rectangle (CodeBox.south east);
+                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
+                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
+                \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
+                \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
+                \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
+                \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
+                \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
+                \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
+                \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
+            }
+        }
+    \end{minipage}
+
+    % --- ROW 2: CAPTIONS ---
+    % This row contains the captions, aligned at their top edges.
+    % The \subcaption command will work inside the minipage.
+
+    \begin{minipage}[t]{0.3\linewidth}
+        \subcaption{Retpolines control the branch target speculation for indirect branches.}
+        \label{lst:retpoline}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{0.6\linewidth}
+        \subcaption{A speculation aware booby trap that looks like the expected code during speculative execution.}
+        \label{fig:speculation-aware-boobytrap}
+    \end{minipage}
+\end{figure}
+
+
+\begin{figure}[t!]
+
+
+\end{figure}

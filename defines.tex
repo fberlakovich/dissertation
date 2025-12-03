@@ -8,7 +8,7 @@
 \usepackage{subcaption}
 \usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
-\usepackage[disable]{todonotes} % Provides tooltip-like todo notes.
+\usepackage{todonotes} % Provides tooltip-like todo notes.
 \usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
 \usepackage{xspace} % automatic space after user defined commands
 \usepackage[normalem]{ulem}
@@ -31,6 +31,7 @@
 \usepackage{csquotes}
 \usepackage[most]{tcolorbox}
 \usepackage{pifont}
+\usepackage{bookmark}
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \usepackage{array}
 \UseTblrLibrary{booktabs,functional}
@@ -47,7 +48,7 @@
 %\tikzexternalize[prefix=figures/tikz-ext/]
 %\DeclareUnicodeCharacter{2212}{−}
 \usepgfplotslibrary{groupplots,dateplot}
-\usetikzlibrary{patterns,shapes.arrows}
+\usetikzlibrary{patterns,shapes.arrows, arrows.meta, matrix}
 \pgfplotsset{compat=newest}
 
 \pgfplotsset{every axis/.append style={
@@ -123,6 +124,20 @@
 
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
 
+\makeatletter
+\newcommand{\closepart}{%
+    \begingroup
+    % Prevent \part* from forcing a page break
+    \let\clearpage\relax
+    \let\cleardoublepage\relax
+    % Start an unnumbered, empty part:
+    % - no page
+    % - no TOC entry
+    % - but it resets the “current part” state / marks
+    \part*{}%
+    \endgroup
+}
+\makeatother
 
 \newcommand{\sbrtodo}[1]{\todo[inline,color=NavyBlue!80]{\textcolor{white}{sbr: #1}}}
 \newcommand{\fbetodo}[1]{\todo[inline,color=ForestGreen!80]{\textcolor{white}{fbe: #1}}}
@@ -205,7 +220,7 @@
 \newcommand{\Cfs}{Offset-invariant addressing\xspace}
 \newcommand{\code}{\texttt}
 \newcommand{\krx}{kR\^{}X\xspace}
-
+\newcommand{\jacoco}{JaCoCo\xspace}
 \newcommand{\musllib}{\propername{musl}/\propername{libc\plusplus}\xspace}
 \newcommand{\glibclib}{\propername{glibc}/\propername{libstdc\plusplus}\xspace}
 \newcommand*{\figuretitle}[1]{%
@@ -303,7 +318,11 @@
 \newacronym{BTRA}{BTRA}{Booby-trapped return address}
 \newacronym{heapbt}{BTDP}{Booby-trapped data pointer}
 \newacronym{CPU}{CPU}{Central Processing Unit}
-\newacronym{JIT}{JIT}{Just-In-Time compiler}
+\newacronym{JITcomp}{JIT compiler}{Just-In-Time compiler}
+\newacronym{JIT}{JIT}{Just-In-Time}
+\newacronym{AOT}{AOT}{Ahead-Of-Time}
+\newacronym{JVM}{JVM}{Java Virtual Machine}
+\newacronym{SMT}{SMT}{Satisfiability Modulo Theory}
 
 \newglossaryentry{CRA}{
 name={code-reuse attack},
@@ -525,3 +544,15 @@ top=8pt,              % Specific padding on the top
 bottom=8pt,           % Specific padding on the bottom
 %    breakable,            % Allows the box to break across pages
 }
+
+\numberwithin{figure}{section}
+\numberwithin{listing}{section}
+
+% Inline helper: draw a tiny boxed number and mark it with a global node name.
+\newcommand{\numtag}[2]{%
+\tikz[remember picture,baseline=(#1.base)]%
+\node[inner sep=1pt,outer sep=0pt,draw,rounded corners=2pt,%
+font=\footnotesize] (#1) {#2};%
+}
+
+\setminted{fontsize=\footnotesize}

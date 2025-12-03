@@ -9,7 +9,8 @@
 
 \subsection{Performance}\label{ss:discussion-evaluation}
 
-\fbetodo{update with fresh numbers}
+\fbetodo{Add perf counter discussion}
+\fbetodo{Add section about profile-guided optimization}
 \begin{table}[t]
     \sisetup{
         table-alignment-mode=none,
@@ -126,6 +127,7 @@ Even if an attacker achieves a heap leak through a heap pointer or a heap over-r
 \end{enumerate*}
 
 \subsubsection{Exception handling and stack unwinding}
+\fbetodo{extend with example}
 As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary \code{CFI} directives to support exception handling and stack unwinding.
 \code{CFI} directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
 Since the modifications are recorded relative to the beginning of the frame, decoding the \code{.eh\_frame} section could reveal the location of the return address.
@@ -140,6 +142,7 @@ Through function reordering/permutation row-based references become invalid.
 Since exceptions occur infrequently, one could also use a more expensive protection scheme, such as encryption, to protect these meta-data.
 
 \subsubsection{Corrupting code pointers}\label{sss:corrupting-code-pointers}
+\fbetodo{extend section}
 \Glspl{CRA} typically corrupt entire code pointers.
 An attack called \gls{PIROP} generalizes this principle by corrupting only parts of code pointers and, as a result, is immune to ASLR and page-level randomization~\cite{Goktas2018}.
 \rtwoc{} impedes a \gls{PIROP} attack in two ways.
@@ -162,28 +165,3 @@ Although \rtwoc{}'s layout randomization raises the bar for attackers~\cite{Hu20
 A way to strengthen \rtwoc{}'s security would be to combine it with \gls{MVEE}s~\cite{Cox2006,Berger2006,Bruschi2007,Volckaert2016,Voulimeneas2020}.
 \gls{MVEE}s and diversification defenses like \rtwoc{} naturally complement each other.
 Considering that \rtwoc{} diversifies along multiple dimensions, an \gls{MVEE} would detect data corruption or leakage in one of the variants with high probability.
-
-\subsection{Limitations}\label{ss:limitations}
-
-\subsubsection{Coverage}\label{ss:limitations-coverage}
-\rtwoc{} is able to protect only the call-sites and functions it actually compiles.
-\glspl{BTRA} for calls to unprotected functions are disabled by default as these functions would overwrite all the \glspl{BTRA} after the return address.
-Without \glspl{BTRA} after the return address, the return address would always be the last address in the list of addresses.
-Overwritten \glspl{BTRA} are only an issue, however, if the attacker knows which parts of the program have not been compiled by \rtwoc.
-Lacking this information, an attacker does not know where the return address is the last address.
-
-\subsubsection{Support for stack argument calling convention with non-\rtwoc{} compiled code}\label{ss:abi-change}
-At present, our prototype implementation does not support calling functions with stack arguments from code not compiled by \rtwoc.
-This incompatibility is due to such functions expecting the caller to prepare a frame pointer to account for the changed calling convention.
-During our evaluation of \rtwoc{}, we encountered just three such cases (one in the unit tests of WebKit, one in the XML parser callbacks of WebKit, and one in the regular expression implementation of Chromium).
-With three cases in 35 million lines of C/\cpp code, we conclude that this combination is rare in practice and, thus, opted for disabling the emission of \glspl{BTRA} for the affected functions.
-Note that these cases could also be supported by automatically inserting a trampoline for externally visible functions with stack parameters.
-% For ease of implementation we simply deactivated DRAs for the affected functions.
-
-% We verified this insight by comparing nginx' baseline binary with a binary built with NOP insertion and function reordering.
-% As expected, the \code{.eh\_frame} entry for a function in the diversified binary occurs at a different position and has a different length.
-
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../eurosys22"
-%%% End:

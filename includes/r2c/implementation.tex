@@ -1,5 +1,5 @@
-\section{The \rtwoc{} Compiler}\label{sec:r2c:implementation} % maximum 2-3 pages...
-
+\section{The \rtwoc{} Compiler}\label{r2c:s:implementation} % maximum 2-3 pages...
+\fbetodo{more details on the LLVM implementation}
 We implemented \rtwoc using the LLVM compiler framework~\cite{Lattner2004}.
 Our modified compiler supports the compilation of a wide range of systems software for the Linux \code{x86\_64} platform (see \cref{ss:scalability}).
 To support complex applications like Webkit, \rtwoc{} is fully compatible with \gls{PIC} for ASLR, stack unwinding, and exception handling.
@@ -7,11 +7,13 @@ To support complex applications like Webkit, \rtwoc{} is fully compatible with \
 In addition, \rtwoc supports two new diversification techniques that we describe in more detail in the following sections.
 Specifically, our compiler
 \begin{enumerate*}[label=(\roman*)]
-    \item instruments call sites with booby-trapped return addresses (see \cref{ss:impl-rads});
+    \item instruments call sites with booby-trapped return addresses (see \cref{r2c:ss:impl-btras});
     \item instruments functions to insert \glspl{heapbt}, which thwart the statistical analysis of pointers on the stack (see \cref{ss:impl-heap-boobytraps}).
 \end{enumerate*}
 
-\subsection{BTRAs: Booby-Trapped Return Addresses}\label{ss:impl-rads}
+\subsection{BTRAs: Booby-Trapped Return Addresses}\label{r2c:ss:impl-btras}
+\fbetodo{Describe why vzeroupper is needed}
+\fbetodo{Add code examples}
 % To this end, \rtwoc encloses return address with BTRAs.
 To enclose return addresses with \glspl{BTRA}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{fig:rad-insertion} are required.
 First, the caller pushes randomly chosen \glspl{BTRA} together with the return address on the stack \Circled{\code{1}}.
@@ -62,18 +64,52 @@ On x86-64, the stack pointer must be 16 byte aligned, as
 % Keeping this alignment intact is crucial as certain instructions crash when accessing a misaligned stack.
 programs crash when certain instructions access a misaligned stack.
 
-\subsubsection{Stack Arguments}\label{sss:stack-arguments}
+\subsubsection{Stack Arguments}\label{r2c:sss:stack-arguments}
+
+ \begin{figure}[t]
+     \centering
+     \begin{subfigure}[t]{0.45\linewidth}
+         \centering
+         \includegraphics[width=0.9\linewidth]{figures/r2c/r2c-parameter-addressing-plain}
+         \caption{Without \cfs the base pointer points below the spilled base pointer.}
+         \label{r2c:fig:stack-arguments}
+     \end{subfigure}
+     \quad
+     \begin{subfigure}[t]{0.45\linewidth}
+         \centering
+         \includegraphics[width=0.9\linewidth]{figures/r2c/r2c-parameter-addressing-btra}
+         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
+         \label{r2c:fig:stack-arguments-with-btras}
+     \end{subfigure}
+     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
+ \end{figure}
+
 The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
 In particular, the distance increases by the sum of pre- and post-offset.
-This increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
+This increased distance typically does not cause any compatibility issues because most functions do not access stack objects above their return address.
 With one notable exception:
 In the System V ABI a caller must pass arguments that do not fit into parameter registers on the stack, \emph{above} the return address.
+ Consider, for example, the stack arguments in the stack frame in \cref{r2c:fig:stack-arguments}.
+ The argument values \code{0x7} and \code{0x8} are located above the return address in the illustrated stack frame.
+ LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
+ Which pointer is actually used depends on the optimization level and several other factors.
+ Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
+ Without \glspl{BTRA}, the compiler determines the distance between a stack argument and the anchor statically.
+ With \glspl{BTRA}, however, the distance is not known at compile-time.
+ Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
+ As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function but also its caller.
+
 
 To access stack arguments despite the varying distance, we devised a method called \emph{\cfs}.
 \Cfs moves the setup of the frame pointer from the function prologue to the call site.
-In particular, the caller positions the frame pointer \emph{before} the varying pre-offset.
+In particular, the caller positions the frame pointer \emph{before} the varying pre-offset (see \cref{r2c:fig:stack-arguments-with-btras} for an illustration).
 Thus, the distance between the frame pointer and the stack arguments can be computed statically.
 In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
+
+\Cfs is required for all functions using both \glspl{BTRA} and stack arguments.
+As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
+Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
+We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
 
 \subsubsection{Optimization with AVX2}
 Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
@@ -91,62 +127,6 @@ Note that zeroing the upper half of the vector registers directly before a call 
 Since the affected registers are caller saved, the caller has to save and restore them before a call anyway, if they are used by subsequent basic blocks.
 Without \code{vzeroupper} we observed a performance impact of up to 50\%.
 We discuss the overall performance improvements afforded by the AVX2 instructions in \cref{ss:perf}.
-
-
-%    \newsavebox{\speculativebt}
-%    \begin{lrbox}{\speculativebt}
-%
-%        \begin{lstlisting}[style=asmcode,frame=none,basicstyle=\scriptsize\ttfamily,breaklines=false,linewidth=0.35\linewidth]
-%<boobytrap>: |\tikzmark{T-Boobytrap}|
-% call set_up_call
-%|\tikzmark{T-Decoy-Gadget}| jmp Target
-%set_up_call:
-% mov (%rsp), bt_call
-% ret|\tikzmark{T-Ret-Alarm}|
-%bt_call:
-% call alarm|\tikzmark{T-Call-Alarm}|
-%        \end{lstlisting}
-%    \end{lrbox}
-%
-%    \begin{figure}[t!]
-%        % We currently cannot properly generate this figure with pdflatex because we need a custom font in the Tikz
-%        % legend to match the figure font. Unfortunately, including a custom font in pdflatex is terribly cumbersome.
-%        % The figure generates correctly when using XeLatex as the compiler. The current approach is to generate the
-%        % document with XeLatex, take a screenshot of the magnified figure and save it for use with pdflatex. When
-%        % pdflatex is used, the code simply includes an image instead of generating the figure with Tikz. Words fail
-%        % to convey my disgust...
-%        \ifxetex
-%        \begin{minipage}[t]{\columnwidth}
-%            \resizebox{0.6\columnwidth}{!}{
-%                \includegraphics{img/stack-small.pdf}
-%            }
-%            \begin{tikzpicture}[overlay, remember picture]
-%                \node[draw, dash pattern={on 2pt off 2pt}] at (1.7,2.8) {\usebox\speculativebt};
-%                \node at ([shift={(0.1,0.1)}] pic cs:T-Boobytrap) {\Circled{\scriptsize\ttfamily1}};
-%                \draw[dash pattern={on 2pt off 2pt}] (-1.0, 3.70) -- (0.05, 4.05);
-%                \draw[dash pattern={on 2pt off 2pt}] (-1.05, 3.50) -- (0.05, 1.53);
-%                \node at ([shift={(-0.5,0.4)}] pic cs:T-Decoy-Gadget) {\code{\Circled{\scriptsize\ttfamily2}}};
-%                \node at ([shift={(0.5,0.35)}] pic cs:T-Call-Alarm)  {\Circled{\scriptsize\ttfamily3}};
-%                \draw[dash dot,-latex] ([shift={(0,2pt)}] pic cs:T-Decoy-Gadget) -- ([shift={(-15pt,2pt)}] pic cs:T-Decoy-Gadget) |- (-1.7, 2.35);
-%                \draw[-latex] ([shift={(3pt,2pt)}] pic cs:T-Ret-Alarm) -- ([shift={(50pt,2pt)}] pic cs:T-Ret-Alarm) |- ([shift={(3pt,2pt)}] pic cs:T-Call-Alarm);
-%                %\node at (0.5,2.8) {\figurefont{\small Speculative Execution}};
-%                \draw[dash dot,-latex] (0,1) -- (0.8,1);
-%                \draw[-latex] (0,0.52) -- (0.8,0.52);
-%                \node at (1.9,1) {\figurefont{{\tiny \scalebox{.9}{Speculative Execution}}}};
-%                \node at (2.1,0.52) {\figurefont{{\tiny \scalebox{.9}{Non-Speculative Execution}}}};
-%            \end{tikzpicture}
-%            \else
-%            \resizebox{\columnwidth}{!}{%
-%                \includegraphics{img/speculative-boobytrap.png}
-%            }
-%            \fi
-%            \caption{\rtwoc uses speculation-aware booby traps to mitigate speculative probing.}
-%            \label{fig:spec-boobytrap}
-%            \ifxetex
-%        \end{minipage}
-%        \fi
-%
-%    \end{figure}
 
 \newsavebox{\uninstrumented}
 \begin{lrbox}{\uninstrumented}
@@ -235,75 +215,25 @@ code = { %
 %    \end{figure*}
 
 
-% \subsection{Accessing stack arguments}\label{ss:accessing-stack-arguments}
-% \begin{figure}[t]
-%     \centering
-%     \begin{subfigure}[t]{0.45\columnwidth}
-%         \centering
-%         \includegraphics[trim={0 0 5.5cm 0},width=0.9\columnwidth,clip]{img/parameter-addressing.pdf}
-%         \caption{Without \cfs the base pointer points below the spilled base pointer.}
-%         \label{fig:stack-arguments}
-%     \end{subfigure}
-%     \quad
-%     \begin{subfigure}[t]{0.45\columnwidth}
-%         \centering
-%         \includegraphics[trim={5.5cm 0 0 0},width=0.9\columnwidth,clip]{img/parameter-addressing.pdf}
-%         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
-%         \label{fig:stack-arguments-with-rads}
-%     \end{subfigure}
-%     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
-% \end{figure}
-
 \begin{figure}[t]
 \centering
 \vspace{0.3cm}
 \resizebox{0.9\columnwidth}{!}{%
 \includegraphics{figures/r2c/hardened-btdps}
 }
-\begin{tikzpicture}[overlay, remember picture]
-\draw (-1.9,3.6) node {\sffamily{\textbf{\rtwoc{}}}};
-\draw (-6.65,3.6) node {\sffamily{\textbf{naive}}};
-\end{tikzpicture}
 \caption[]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
 In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
 The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{ss:impl-heap-boobytraps}).}
 \label{fig:hardened-data-traps}
 \end{figure}
 
-% The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
-% In particular, the distance increases by the sum of pre-offset and post-offset.
-% The increased distance typically does not cause any compatibility issues, because most functions do not access stack objects above their return address.
-% With one notable exception:
-% In the System V ABI a caller must pass arguments that do not fit into parameter registers on the stack.
-% Stack arguments are written to the stack \emph{above} the return address.
-% Consider, for example, the stack arguments in the stack frame in \cref{fig:stack-arguments}.
-% The argument values \code{0x7} and \code{0x8} are located above the return address in the illustrated stack frame.
-% LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
-% Which pointer is actually used depends on the optimization level and several other factors.
-% Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
-% Without \glspl{BTRA}, the compiler determines the distance between a stack argument and the anchor statically.
-% With \glspl{BTRA}, however, the distance is not known at compile-time.
-% Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
-% As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function, but also its caller.
-
-% To access stack arguments despite the varying distance we devised a method called \emph{\cfs}.
-% \Cfs moves the setup of the frame pointer from the function prologue to the call site.
-% In particular, the caller positions the frame pointer \emph{before} the varying pre-offset (see \cref{fig:stack-arguments-with-rads} for an illustration).
-% Thus, the distance between the frame pointer and the stack arguments can be computed statically.
-% In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
-
-% \Cfs is required for all functions using both \glspl{BTRA} and stack arguments.
-% As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
-% Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
-% We discuss the introduced performance overhead in \cref{s:eval}.
-
 \subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{ss:impl-heap-boobytraps}
-
+\fbetodo{Add code examples}
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
 To maintain the illusion of a benign heap pointer, \glspl{heapbt} must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
 Ideally, \glspl{heapbt} would point to random addresses on the heap that are protected by memory permissions.
-Unfortunately, the Intel architecture currently does not offer sub-page level permissions.
-We therefore simulate the desired effect by letting \glspl{heapbt} point to random offsets in \emph{guard pages} allocated from heap memory.
+Unfortunately, the Intel architecture currently does not offer subpage level permissions.
+We therefore simulate the desired effect by letting \glspl{heapbt} point to random offsets within \emph{guard pages} allocated from heap memory.
 
 Since heap memory is managed by the standard library (e.g. \propername{glibc}), these allocations cannot be performed at compile time.
 Instead, \rtwoc{} registers a \emph{constructor function} that performs the allocations at program start.
@@ -312,31 +242,23 @@ Next, the constructor function frees all but a randomly chosen subset of those a
 The remaining allocations are scattered randomly across the heap, are page aligned, and span an entire page.
 \rtwoc{} stores pointers to random offsets within those allocations in a global pointer array in the data section.
 To protect the newly created heap pointers from dereferencing, the constructor function revokes the read permission from the occupied page.
-Allocating the guard pages with \code{malloc} without freeing them, prevents \propername{glibc} from reusing the protected page for other allocations.
+Allocating the guard pages with \code{malloc} without freeing them prevents \propername{glibc} from reusing the protected page for other allocations.
 
-During compilation, \rtwoc{} instruments functions to write \glspl{heapbt} from the pointer array to the stack.
-How many \glspl{heapbt} are written per function is chosen randomly chosen using compile-time parameters.
-The stack slots for the \glspl{heapbt} are allocated like stack slots for local variables.
+During compilation, \rtwoc{} instruments function prologs to write \glspl{heapbt} from the pointer array to the stack.
+How many \glspl{heapbt} are written per function is chosen randomly using compile-time parameters.
+The stack slots for the \glspl{heapbt} are allocated like stack slots for local variables during compilation.
 As a result, stack slot randomization shuffles \glspl{heapbt} with other stack objects, including benign heap pointers.
-
-%    To write a \heapbt to the stack, the function first loads the \heapbt from a random index in the pointer array into a register.
-%    Second, the function writes the register to the assigned stack slot location.
-%    Thus, when storing the \glspl{heapbt} directly in the data section, \rtwoc requires two instructions to write a single \heapbt to the stack.
-%    If the attacker has access to the data section (\ie knows its location), storing the \glspl{heapbt} in the data section might pose a security risk.
-%    An attacker could compare heap pointers found in the data section with pointers observed on the stack (see \cref{fig:hardened-data-traps}).
-%    Pointers observed in both locations could potentially be \glspl{heapbt}.
-%    To avoid the risk of triggering a \heapbt, an attacker could limit himself to pointers occurring on the stack only.
 
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
 If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{fig:hardened-data-traps}).
-Pointers observed in both locations could potentially be \glspl{heapbt}.
+Pointers observed in both locations could potentially\footnote{Points in both locations do not have to be \glspl{heapbt} because benign pointers can occur in both locations as well.} be \glspl{heapbt}.
 To avoid the risk of triggering a \gls{heapbt}, an attacker could limit himself to pointers occurring on the stack only.
-To protect \glspl{heapbt} against such an attack scenario, \rtwoc{} applies \rtwoc{}'s principle also to the array holding the \glspl{heapbt}.
+To protect \glspl{heapbt} against such an attack scenario, \rtwoc{} applies \rtwoc{}'s mimicry principle also to the array holding the \glspl{heapbt}.
 Specifically, \rtwoc allocates the pointer array on the \emph{heap} and stores only a \emph{pointer to the array} in the data section.
 That is, instead of containing the \glspl{heapbt} directly, the data section now contains only a single heap pointer (apart from application specific pointers).
 Since an attacker might still be able to locate the pointer to the pointer array, \rtwoc inserts additional \glspl{heapbt} into the data section.
 Note, that these additional \glspl{heapbt} never occur on the stack and the pointers on the heap are inaccessible to the attacker.
-The attacker thus loses the ability to reliably identify \glspl{heapbt}.
+The attacker thus loses the ability to reliably identify the location of \glspl{heapbt} in the data section.
 See \cref{fig:hardened-data-traps} for a comparison of a naive and a hardened implementation.
 
 As a simple optimization, we omit the instrumentation for all functions without stack allocations.

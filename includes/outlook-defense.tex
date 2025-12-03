@@ -1,0 +1,31 @@
+\section{Combining Defense Strategies}
+In \cref{ch:code-reuse-coevolution} we gave a brief overview of the defensive strategies against \glspl{CRA} that have emerged over time.
+The description in \cref{ch:code-reuse-coevolution} already hints at the fact that none of these strategies are a silver bullet.
+Each strategy is effectively a compromise between different security, performance and compatibility.
+\rtwoc is no exception to this conundrum.
+
+When looking at years of research on \gls{CRA} defenses, it becomes clear that each defense category has different strengths and weaknesses.
+Software diversity, for example, needs to go to great lengths to avert highly specialized attacks that target a specific instance of a program.
+That is not a coincidence, considering that one of the primary goals of software diversity is to avoid a \emph{widespread} attack across program instances even if an attacker found an exploitable vulnerability.
+In other words, software diversity aims to break the assumption that because an exploit works on once target instance, it also works on another.
+If, however, an attacker targets only one particular instance in the first place, an attacker might be willing to accept higher reconnaissance costs and even manual target reconnaissance.
+On the other hand, software diversity has proven to be effective even against --- at the time the defense was conceived --- unknown attack vectors.
+For example, fine-grained code randomization is not only an effective antidote against \glspl{CRA}, but also against certain transient-execution attacks.
+In contrast, \gls{CFI} gives non-probabilistic guarantees about the protection afforded.
+This principle goes both ways, however.
+A weak spot in a program's \gls{CFI} policy, \eg caused by an imprecise \gls{CFG} analysis, affects \emph{all} instances of that program alike.
+Similarly, strict memory-safety enforcement, while prohibitively expensive when applied to the whole program, might be necessary only at certain places not covered by cheaper defenses.
+
+Given these mutually exclusive strengths and weaknesses, it is surprising that there is little research on the compositionality of different defense strategies.
+While defenses in one category occasionally \enquote{borrow} concepts from another category, \eg \propername{OCFI}, the effectiveness of combining techniques remains unclear.
+That is, what are the security guarantees of drawing multiple lines of defense?
+A combination of \gls{CFI} and software diversity, for example, could provide the dependable guarantees of \gls{CFI}, while various forms of randomization could plug the holes left by an imprecise \gls{CFI} policy.
+Although combined defenses certainly have desirable properties, they are likely to also pose new challenges.
+Is the performance overhead of multiple defenses additive, or even worse?
+How to combine defenses that are built on different assumptions?
+Various forms of \gls{CFI}, for example, read a target marker from an indirect branch target, thus assuming that the code section is readable.
+At the same time, a readable code section is an achilles heel for a randomized code layout, which is why leakage resilient diversity aims to prevent reads from the code section.
+To answer these and other questions, research into the composition of defensive techniques is necessary.
+
+
+\section{Perspectives on Diversity}
