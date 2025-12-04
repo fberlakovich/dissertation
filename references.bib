@@ -2825,3 +2825,21 @@ kopien haben gadgets an unterschiedlichen stellen},
     keywords = {notion},
     file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Jang et al. - 2014 - SAFEDISPATCH Securing C ++ Virtual Calls from Memory Corruption Attacks.pdf}
 }
+
+@inproceedings{lu2019,
+    title = {Where {{Does It Go}}? {{Refining Indirect-Call Targets}} with {{Multi-Layer Type Analysis}}},
+    shorttitle = {Where {{Does It Go}}?},
+    booktitle = {Proceedings of the 2019 {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Lu, Kangjie and Hu, Hong},
+    date = {2019-11-06},
+    series = {{{CCS}} '19},
+    pages = {1867--1881},
+    publisher = {Association for Computing Machinery},
+    location = {New York, NY, USA},
+    doi = {10.1145/3319535.3354244},
+    url = {https://dl.acm.org/doi/10.1145/3319535.3354244},
+    urldate = {2024-05-14},
+    abstract = {System software commonly uses indirect calls to realize dynamic program behaviors. However, indirect-calls also bring challenges to constructing a precise control-flow graph that is a standard pre-requisite for many static program-analysis and system-hardening techniques. Unfortunately, identifying indirect-call targets is a hard problem. In particular, modern compilers do not recognize indirect-call targets by default. Existing approaches identify indirect-call targets based on type analysis that matches the types of function pointers and the ones of address-taken functions. Such approaches, however, suffer from a high false-positive rate as many irrelevant functions may share the same types. In this paper, we propose a new approach, namely Multi-Layer Type Analysis (MLTA), to effectively refine indirect-call targets for C/C++ programs. MLTA relies on an observation that function pointers are commonly stored into objects whose types have a multi-layer type hierarchy; before indirect calls, function pointers will be loaded from objects with the same type hierarchy "layer by layer". By matching the multi-layer types of function pointers and functions, MLTA can dramatically refine indirect-call targets. MLTA is effective because multi-layer types are more restrictive than single-layer types. It does not introduce false negatives by conservatively tracking targets propagation between multi-layer types, and the layered design allows MLTA to safely fall back whenever the analysis for a layer becomes infeasible. We have implemented MLTA in a system, namely TypeDive, based on LLVM and extensively evaluated it with the Linux kernel, the FreeBSD kernel, and the Firefox browser. Evaluation results show that TypeDive can eliminate 86\% to 98\% more indirect-call targets than existing approaches do, without introducing new false negatives. We also demonstrate that TypeDive not only improves the scalability of static analysis but also benefits semantic-bug detection. With TypeDive, we have found 35 new deep semantic bugs in the Linux kernel.},
+    isbn = {978-1-4503-6747-9},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Lu and Hu - 2019 - Where Does It Go Refining Indirect-Call Targets with Multi-Layer Type Analysis.pdf}
+}

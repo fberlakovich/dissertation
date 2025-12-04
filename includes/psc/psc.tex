@@ -1,0 +1,250 @@
+\section{Program State Convolution}
+In \cref{psc:sec:motivation} we discussed how \aflpp relies on edge coverage instrumentation to guide the fuzzing process.
+We have also introduced one of the blind spots of compiler-based code coverage instrumentation---indirect calls.
+A closer look reveals that this particular blind spot is an instance of a more general issue.
+
+Data dependencies that do not manifest as explicit control flow transitions are invisible to the fuzzer.
+A critical variable might determine which implementation of a function is executed, but if that variable resides solely in data memory, the coverage bitmap remains unchanged.
+Previous work augmented code coverage with additional data dependency~\cite{Mantovani2022} or dataflow coverage~\cite{herrera2022}.
+\fbetodo{expand a little what they did}
+
+Here we present an alternative solution to the problem, which we call \emph{Program State Convolution} or \glsshortkey{PSC} for short.
+The core idea of \gls{PSC} is to project parts of the program's hidden data state onto the explicit control-flow graph.
+By transforming data dependencies into control dependencies, we force the previously invisible variations in program state to trigger new edges in the coverage instrumentation.
+This allows the fuzzer to distinguish between states that were previously conflated, providing the necessary stepping stones to explore deeper into the state space.
+In the following sections, we present two concrete instantiations of this principle.
+First, we discuss \emph{Dynamic Call Unfolding}, which exposes the hidden targets of indirect calls.
+Second, we introduce \emph{Value Range Partitioning}, which projects possible partitions of a variable's value range onto the control flow.
+
+\section{Unfolding Dynamic Calls}
+Our first application of \gls{PSC} addresses the information loss occurring at indirect call sites.
+In \cref{psc:sec:motivation} we discussed how \aflpp's compiler instrumentation for code coverage loses information at indirect call sites.
+The reason is that code coverage instrumentation cannot differentiate the dynamic edges of a indirect call site.
+An analysis called \emph{points-to} analysis can, however, determine these edges at compile time.
+Compilers use this analysis for both security and performance transformations.
+Various \gls{CFI} variants, for example, use static points-to analysis to determine the possible target set for indirect calls (see \cref{ch:code-reuse-coevolution} for a discussion of \gls{CFI}).
+Likewise, when a compiler can statically prove that in a given program an indirect call site can only ever have a single target, the compiler can transform the indirect call into a direct call.
+Such a conversion enables additional optimizations later in the optimization pipeline, such as inlining.
+
+\glspl{JITcomp} perform a similar optimization called \emph{polymorphic inlining} (see \cref{psc:subsec:polymorphic-inlining}), typically based on profiling information.
+For \gls{AOT} compilers, this transformation is more challenging because of the lack of runtime profiling information.
+Nonetheless, \gls{AOT} compilers can apply the transformation either heuristically or because they can prove based on dataflow that only certain types can reach a polymorphic call site.
+The fallback option that performs an indirect call guarantees that the program remains correct even if the analysis or the profiling information is incomplete.
+
+The afforded performance improvement depends on the quality of the heuristics or the available profiling information.
+SafeDispatch, a defense against vtable hijacking, uses the same technique to harden \cpp programs~\cite{jang2014}.
+Performance aside, we observe that this type of transformation has another important property: it projects a data dependency---which concrete object reaches a call site---onto the control-flow graph.
+In other words, possible variations in data, at least some of them, are now represented in the \gls{CFG}.
+A representation as control-flow allows \aflpp's coverage instrumentation to instrument the previously invisible dynamic edges.
+We call this principle \emph{Program State Convolution} or \glsshortkey{PSC} for short, because it combines control flow with parts of the program's hidden state.
+
+\begin{listing}
+    \begin{minted}{cpp}
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+class Shape { public: virtual void draw(int scale) = 0; };
+class ShapeParser { public: virtual Shape *parse(std::string pattern) = 0; };
+
+class Rectangle : public Shape {
+public:
+  void draw(int scale) override {
+    std::cout << "[Rectangle] scaled size: " << 10 / (scale + 1) << std::endl;
+  }
+};
+
+class Circle : public Shape {
+public:
+  void draw(int scale) override {
+    // BUG when scale == 0
+    std::cout << "[Circle] scaled size: " << 10 / scale << std::endl;
+  }
+};
+
+class CircleParser : public ShapeParser {
+public:
+  Shape *parse(std::string pattern) override {
+    return pattern == "circle" ? new Circle() : nullptr;
+  }
+};
+
+class RectangleParser : public ShapeParser {
+public:
+  Shape *parse(std::string pattern) override {
+    return pattern == "rectangle" ? new Rectangle() : nullptr;
+  }
+};
+
+int main(int argc, char *argv[]) {
+  std::vector<ShapeParser *> shapeParsers = {new RectangleParser(), new CircleParser()};
+  std::vector<Shape *> parsedShapes;
+  std::string filename1 = argv[1];
+  std::ifstream stream(filename);
+  for (std::string line; std::getline(stream, line);)
+    for (auto parser : shapeParsers)
+      if (Shape *parsed = parser->parse(line)) parsedShapes.push_back(parsed);
+
+  for (auto shape : parsedShapes) shape->draw(5);
+
+  // filter parsedShapes somehow
+
+  for (auto shape : parsedShapes) shape->draw(0); $\label{psc:line:broken-draw-call}
+}
+    \end{minted}
+    \label{psc:lst:vcall-dependence}
+\end{listing}
+
+\cref{psc:lst:vcall-dependence} shows a simple polymorphic call example in \cpp.
+The code consists of parser objects that populate a list of shapes depending on the strings found in an input file.
+After initially drawing the shapes with a scale of $5$, the code filters the list of shapes.
+In a second loop, the code draws the shapes with a scale of $0$, which works for rectangles but crashes for circles.
+Whether the bug is hit depends on the filtering logic and whether circle objects reach the call site at \cref{psc:line:broken-draw-call}.
+Since the first loop might have called the \code{draw} method of both types already, compiler-based code coverage considers both methods as covered.
+
+In contrast, \gls{PSC} would transform \cref{psc:line:broken-draw-call} conceptually as shown in \cref{psc:lst:broken-draw-call-unfolded}.
+\begin{listing}
+    \begin{minted}{cpp}
+if (dynamic_cast<Rectangle *>(*iter))
+  // call Rectangle::draw without dynamic dispatch
+if (dynamic_cast<Circle *>(*iter))
+  // call Circle::draw without dynamic dispatch
+(*iter)->draw(5);
+    \end{minted}
+\end{listing}
+Each added control-flow branch provides the fuzzer with a potential stepping stone to build a new seed.
+
+\section{Value Range Partitioning}
+Control-flow in programs typically depends on the value of, \eg variables.
+An \code{if} might check whether a variable \code{x} is above a certain bound or a loop starts at a particular value and iterates until the index variable reaches a limit.
+Conventional edge coverage already covers these types of control-flow decisions.
+From the perspective of edge-coverage, each control-flow point partitions the value range of the compared variable depending on the comparison operator.
+For example, consider the C condition in \cref{psc:lst:c-value-range}.
+\begin{listing}
+    \begin{minted}{C}
+        void target(int16_t param) {
+          if (param < 0) {
+            deal_with_negative(param);
+          } else {
+            deal_with_positive(param);
+          }
+        }
+    \end{minted}
+    \label{psc:lst:c-value-range}
+\end{listing}
+The function \code{target} has different logic depeonding on whether \code{param} is positive or negative.
+A \code{uint16\_t}, however, has a value in the range $[-32768, 32767]$, meaning that from the perspective of edge coverage all values in the ranges $[-32767, -1]$ and $[0, 32767]$ are treated uniformly.
+Whichever value in one of those ranges the fuzzer explores, it will not trigger new coverage in \code{target}.
+This blindspot can lead to cases where a fuzzer might struggle to find certain interesting data points because there is no direct control dependency on them.
+
+Similar to the case of indirect call unfolding, we observe that a compiler already contains elaborate analyses to reason about such value ranges.
+For example, compilers use such analyses to eliminate redundant conditions like in \cref{psc:line:redundant-condition} in \cref{psc:lst:redundant-condition}.
+\begin{listing}
+    \begin{minted}[mathescape]{C}
+        void target(int16_t param) {
+          if (param < 0) {
+
+            // redundant condition
+            if (param == 0) { $\label{psc:line:redundant-condition}$
+              // deal with zero param
+            }
+            deal_with_negative(param);
+          } else {
+            deal_with_positive(param);
+          }
+        }
+    \end{minted}
+    \label{psc:lst:redundant-condition}
+\end{listing}
+Assuming that \code{param} is not, \eg \code{volatile}, the compiler can prove that at the time control-flow reaches the condition at \cref{psc:line:redundant-condition}, \code{param} can never be $0$.
+
+We can use this compiler knowledge to map these hidden dataspace boundaries onto the control-flow, again making them available for edge-coverage instrumentation.
+For example, a simple compiler transformation can transform \cref{psc:lst:c-value-range} into \cref{psc:lst:c-value-range-transformed}.
+From the perspective of edge coverage, the transformation effectively partitions the data space into four partitions instead of two.
+The semantics of the program remain unchanged because the bodies in the artificially introduced control-flow split are identical.
+\begin{listing}
+    \begin{minted}{C}
+        void target(int16_t param) {
+          if (param < 0) {
+            if (param > -16384) {
+                deal_with_negative(param);
+            } else {
+                deal_with_negative(param);
+            }
+          } else {
+            if (param < 16384) {
+                deal_with_positive(param);
+            } else {
+                deal_with_positive(param);
+            }
+          }
+        }
+    \end{minted}
+    \label{psc:lst:c-value-range}
+\end{listing}
+It is possible that some of these value ranges are in fact unreachable due to constraints not known at compile time.
+
+How exactly the transformation should partition the value range and how many partitions it should create can be either configurable or chosen heuristically.
+For example, the following three are simple heuristics for splitting the value range
+\begin{description}
+    \item[midpoint-splitting] The heuristic described above simply splits value ranges in the middle, creating two roughly equally sized partitions.
+    This heuristic makes sense if nothing is known about the value range in question.
+    \item[edge-splitting] This heuristic splits slivers off the ends of the value range.
+    The reasoning behind focusing on the value range boundaries is that bugs often hide behind extreme values (\eg off-by-one errors).
+    \item[lookahead-splitting] The goal of value range partitioning is to make implicit dependencies on data values explicit in the control flow.
+    Apart from values at the range's border, which values in a range are interesting also depends on the type of operation a value occurs in.
+    For example, certain values in an \code{add} instruction might cause an overflow, which in turn the program might not correctly handle.
+    Another example are special floating point values such as \code{NaN} and \code{Inf}.
+    With the lookahead-splitting heuristic, the compiler looks for operations with known special behavior (such as overflows) in all basic blocks dominated by the comparison in question.
+    \Cref{psc:lst:lookahead-splitting-example} shows an example of a program that potentially profits from the lookahead-splitting heuristic.
+    The branch dominated by \code{x < 250} contains an addition that can produce an overflow.
+    Lookahead-splitting transforms the program into the program shown in \cref{psc:lst:lookahead-splitting-example-transformed}.
+\end{description}
+
+\begin{listing}
+    \begin{minted}{C}
+void process_data(uint8_t x) {
+    if (x < 250) {
+        // other code
+        // This operation is dominated by the 'if'.
+        // If x > 235, (x + 20) overflows 8-bit int (255).
+        uint8_t result = x + 20;
+
+        if (result < 5) {
+            // Bug triggered only by overflow
+            crash_program();
+        }
+    }
+    \end{minted}
+    \label{psc:lst:lookahead-splitting-example}
+\end{listing}
+
+\begin{listing}
+    \begin{minted}{C}
+void process_data(uint8_t x) {
+    if (x < 250) {
+        // Artificial split injected by the heuristic
+        if (x > 235) {
+            // other code
+            uint8_t result = x + 20;
+            if (result < 5) crash_program();
+        } else {
+            // Path B: Safe values (e.g., 10)
+            uint8_t result = x + 20;
+            if (result < 5) crash_program();
+        }
+    }
+}
+    \end{minted}
+    \label{psc:lst:lookahead-splitting-example-transformed}
+\end{listing}
+
+The added artificial control flow acts as guideposts for the fuzzer along the way to potentially interesting program states.
+To profit from these guideposts, however, the fuzzer must be able to reach the guideposts in the first place.
+The fuzzer's ability to reach them is, again, determined by the quality of preceding guideposts.
+We can extend the reach of these artificial control splits by replicating them along the control-flow path.
+
+\fbetodo{give an example of hoisting a condition, maybe even out of a function into the callers}
+
+The downside of all these transformations is code duplication and, as a result, potential runtime performance degradation.
+Thus, the heuristics need to strike a balance between code size bloat and utility for the fuzzer.

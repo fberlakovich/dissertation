@@ -1,0 +1,94 @@
+\section{Implementation}
+In this section we describe the relevant implementation details of \glsfirst{PSC}.
+Our implementation is based on \propername{LLVM} 16 and consists of \XXX.
+The following subsections describe the implementation of indirect call unfolding and value range partitioning.
+
+\subsection{Indirect Call Unfolding}
+Determining the possible call targets for an indirect call site requires a points-to analysis.
+We note that the principal concept of indirect call unfolding is independent of which concrete points-to analysis is used.
+A less precise analysis only means that the compiler can insert fewer coverage stepping stones for the fuzzer.
+
+In general, static points-to analysis faces theoretical limits (one of the achilles heels of \gls{CFI}), but additional context can help to improve the analysis precision.\fbetodo{add citation}
+In case of \cpp, or more generally object-oriented languages, the program's type hierarchy (if available) provides such context.
+An analysis called \emph{class hierarchy analysis} computes this type hierarchy and provides an upper bound on which call targets are possible at a call site based on the object's static type.
+A polymorphic call site with static type \propername{A} that calls a method \propername{M} can only reach implementations of \propername{M} within \propername{A}'s type hierarchy.\fbetodo{figure}
+
+Class-hierarchy analysis is most precise at the source level, as the notion of classes is lost during the translation to LLVM IR.
+To implement \gls{CFI} and features like devirtualization, LLVM already provides a class-hierarchy analysis.
+The analysis encodes the relevant information as metadata in the IR.
+We piggyback our indirect call unfolding for \cpp virtual calls on this implementation and consume the recorded metadata.
+LLVM's existing implementation allowed us to implement the unfolding for \cpp calls in only 58 lines of code.
+
+In the case of generic indirect calls (\eg from C), we need to rely on other types of context to improve the precision of the points-to analysis.
+We initially tried a few analyses from the SVF framework but were unsatisfied with the results.\fbetodo{citation}
+The purpose of such analyses it to restrict the possible targets at indirect call sites, the so called \emph{target set}.
+Naive analyses quickly lead to large target sets, where in reality most targets are not actually possible at the call site in question.
+For example, even in a medium-sized program, a function pointer with type \code{void (*)()} can point to potentially many functions.
+Thus, restricting the target set merely based on the function's type is insufficient.
+
+Instead, we built our prototype based on \gls{MLTA}~\cite{lu2019}.
+The basic idea behind \gls{MLTA} is to match a function pointer's type not only against possible function types in the program, but to also consider the function pointer's dataflow.
+More specifically, \gls{MLTA} analyzes \emph{into} which types prior program code has stored the pointer.
+As an example consider the program in \cref{psc:lst:mlta-example}.
+A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psc:line:mlta-call-1} and \cref{psc:line:mlta-call-2}.
+In contrast, \gls{MLTA} builds up a model of typed structures and function pointers assigned to these structures.
+Based on this model, \gls{MLTA} records that, \eg \code{handle\_positive} is only ever stored into a struct of type \code{HandlerContext} within a struct of type \code{HandlerA}.
+When the program retrieves the function pointer before \cref{psc:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer cal only lead to \code{handle\_positive}.
+
+\begin{listing}
+    \begin{minted}[mathescape]{C}
+#include <stdio.h>
+
+typedef void (*handler_t)(int);
+
+void handle_positive(int x) {
+    printf("positive: %d\n", x);
+}
+
+void handle_negative(int x) {
+    printf("negative: %d\n", x);
+}
+
+struct HandlerContext {
+    handler_t exec;
+    // some other fields
+};
+
+struct HandlerA {
+    struct HandlerContext context;
+    // some other fields
+};
+
+struct HandlerB {
+    struct HandlerContext context;
+    // some other fields
+};
+
+void test() {
+    struct HandlerA A = { .context = { .exec = handle_positive } };
+    struct HandlerB B = { .context = { .exec = handle_negative } };
+
+    // Load and invoke the handler through WrapperA
+    handler_t f1 = A.context.exec;
+    f1(10);    // Only handle_positive is possible $\label{psc:line:mlta-call-1}$
+
+    // Load and invoke the handler through WrapperB
+    handler_t f2 = B.context.exec;
+    f2(-3);    // Only handle_negative is possible $\label{psc:line:mlta-call-2}$
+}
+
+int main() {
+    test();
+    return 0;
+}
+
+    \end{minted}
+    \label{psc:lst:mlta-example}
+\end{listing}
+
+We integrated and extended the analysis implementation from \citeauthor{lu2019} and use the analysis results to unfold indirect calls.
+
+\subsection{Value Range Partitioning}
+\fbetodo{Describe Value Range Partitioning implementation}
+- Implements heuristics from before
+- Uses LLVM infrastructure to reason about value ranges
