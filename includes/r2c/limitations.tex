@@ -157,3 +157,13 @@ set_up_target:
 
 
 \end{figure}
+
+\section{Summary}
+
+\rtwoc demonstrates that compiler-driven data randomization can effectively complement existing code randomization techniques.
+By disguising return addresses and heap pointers among booby-trapped decoys, \rtwoc raises the cost of reconnaissance attacks while maintaining practical performance overhead.
+
+The defense is not without limitations: coverage depends on compilation scope, and the probabilistic guarantees diminish against attackers with unlimited observations.
+Nonetheless, \rtwoc illustrates a broader principle: the compiler's detailed knowledge of program structure---in this case, stack frame geometry---enables security transformations that would be difficult to achieve through post-hoc instrumentation.
+
+The following chapter discusses broader questions about the future of diversity-based defenses and their potential composition with other defense strategies.

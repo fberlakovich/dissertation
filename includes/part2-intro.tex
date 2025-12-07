@@ -1,0 +1,12 @@
+% Part II Introduction - Improving Fuzzer-Guidance with Compiler Assistance
+
+While the first part of this thesis focused on hardening deployed programs against exploitation, this part addresses the complementary goal of finding bugs before deployment.
+Fuzzing has emerged as one of the most effective techniques for discovering vulnerabilities in complex software, but its effectiveness depends critically on the feedback mechanisms that guide input generation.
+
+The compiler is uniquely positioned to provide rich feedback signals.
+Beyond the code coverage metrics that most fuzzers rely on, the compiler has access to semantic information about program structure, optimization decisions, and data dependencies.
+This part explores two ways to leverage this information.
+
+\Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
+We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
+Finally, we introduce \emph{Program State Convolution} (PSC), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.

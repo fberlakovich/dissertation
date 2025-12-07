@@ -19,7 +19,7 @@ Catastrophic security breaches like Heartbleed (a simple buffer over-read in a c
 Likewise, reliability failures such as silent miscompilations have plagued even widespread production compilers like GCC and LLVM~\cite{yang2011,wang2012}.
 \citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
 Subsequent longitudinal analyses of hundreds of LLVM and GCC bug reports find that miscompilations continue to account for a large fraction of confirmed issues and often remain latent for months before being diagnosed~\cite{chen2016}.
-Recent work also showed that bugs in the compiler not only threaten the reliability of the compiled software, but can also introduce security bugs~\cite{xu2023a,Xu2023}
+Recent work also showed that bugs in the compiler not only threaten the reliability of the compiled software, but can also introduce security bugs~\cite{xu2023a,Xu2023}.
 
 These data points underline that both the software we deploy and the toolchains we depend on remain fragile in practice.
 Thus, security and reliability form two sides of the broader struggle for software \emph{trustworthiness}: the ability to rely on software to uphold its specification under \emph{both} benign and adversarial conditions.
@@ -34,14 +34,14 @@ The potential for high performance\footnote{Not every program written in C or \c
 However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and, more broadly, for the pitfalls of undefined behavior.
 
 These pitfalls regularly lead to dangerous vulnerabilities.
-These vulnerabilities—which include both spatial (\eg buffer and heap overflows) and temporal memory safety (\eg use after free) issues,are the vector for a majority of remote code execution exploits.
+These vulnerabilities---which include both spatial (\eg buffer and heap overflows) and temporal memory safety (\eg use-after-free) issues---are the vector for a majority of remote code execution exploits.
 Industry telemetry highlights the breadth of the problem.
 In 2019, Microsoft’s Security Response Center reported that roughly 70\% of the critical vulnerabilities it handled over the past decade were due to memory-safety errors, despite major investments in defensive coding practices~\cite{msrcreport2019}.
 Google’s annual Android security review reaches similar conclusions, attributing more than three quarters of high-severity platform bugs between 2019 and 2022 to memory-safety violations, many rooted in native code dependencies\cite{projectzeroandroid2022}.
 Google's Project Zero also notes that the majority of the 2023 zero-days they investigated ultimately stemmed from memory corruption~\cite{projectzerointhewild2024}.
 
 The rise in security-awareness and with it the increasing adoption of memory-safe languages also for system-related tasks is a welcome development.
-Nonetheless, despite the rise of languages like , C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices. \todo{Cite TIOBE index}
+Nonetheless, despite the rise of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices. \todo{Cite TIOBE index}
 Furthermore, even new, memory-safe code is often integrated into legacy systems.
 A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it. \todo{Cite paper on Rust/C FFI vulnerabilities}
 Even if from now no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise costing billions of euros.
@@ -69,7 +69,7 @@ Moreover, even when adequate specifications exist, the computational cost and li
 Similarly, static analysis suffers from inherent trade-offs between precision and scalability.
 Finally, unit testing remains the most widespread technique but suffers from a critical blind spot: it is inherently limited by human foresight and can only validate scenarios explicitly anticipated by the developer.
 
-In light of these shortcomings, a long neglected technique named fuzz testing, or fuzzing for short, has become increasingly important over the past 10--15 years.
+In light of these shortcomings, a long-neglected technique named fuzz testing, or fuzzing for short, has become increasingly important over the past 10--15 years.
 This rise in popularity happened partly because of \propername{AFL}, a practical and fast fuzzer that combines code coverage feedback with carefully engineered heuristics.
 Early fuzzers mostly relied on simple, random input generation and were often dismissed as crude or ad hoc.
 Modern fuzzing, by contrast, combines feedback-guided input mutation and scheduling, constraint solving, and domain-specific generators to explore program behaviors more systematically.
@@ -79,7 +79,7 @@ Most popular fuzzers like \aflpp and \propername{libfuzzer} rely on code coverag
 Despite its widespread use, code coverage is an imperfect proxy for test effectiveness, particularly for state-rich systems such as compilers.
 Code coverage metrics---statement, branch, or edge coverage---abstract away the program’s internal state and treat all executions that follow the same control-flow paths as equivalent.
 As a result, fuzzers can quickly saturate coverage while still failing to explore nuanced interactions within the same control-flow.
-To find these deeper bugs, the fuzzer needs a better guide—--one that considers more of the target program's internal state space.
+To find these deeper bugs, the fuzzer needs a better guide---one that considers more of the target program's internal state space.
 
 %Meanwhile, the tools we use to build everything else—modern compilers, linkers, and virtual machines—have themselves grown complexity.
 %Each new optimization pass, hardware backend, or language front-end enlarges the space of subtle interactions that manual review or unit tests rarely exercise, so bugs continue to slip through release pipelines.
@@ -103,11 +103,22 @@ Similarly, compilers have detailed knowledge about the compilation process itsel
 In this thesis I explore how to tap these sources of information for security hardening and improved fuzzing feedback.
 
 \section{Contributions}
-In the first part, I present \rtwoc, a novel, compiler-driven software diversity defense that addresses the challenge of layout inference through information leaks.
-It combines fine-grained code randomization with targeted randomization of program data structures.
-By diversifying not just the code but also the data layout that recent attacks rely on for reconnaissance, \rtwoc renders such attacks ineffective while incurring a moderate performance overhead.
 
-In the second part, I present \lool, a compiler-assisted fuzzing framework based on a new type of coverage feedback.
-Instead of relying on simple code coverage, this \enquote{optimization-aware} method leverages the compiler’s own internal transformation records as a feedback signal.
-A genetic algorithm uses this feedback to systematically steer testcase generation towards rare and complex optimization interactions that are difficult to trigger otherwise.
+This thesis presents three contributions that demonstrate the compiler's potential to improve software security and reliability.
+The common thread is the compiler's unique vantage point: it possesses semantic knowledge about program structure that can be leveraged for purposes beyond optimization.
+
+\paragraph{R2C: Compiler-Driven Data Diversity}
+In Part~\ref{part:defense}, I present \rtwoc, a novel software diversity defense that addresses the challenge of layout inference through information leaks.
+Unlike prior work that focused primarily on code randomization, \rtwoc leverages the compiler's knowledge of stack frame geometry to randomize observable data layouts.
+By disguising sensitive pointers among booby-trapped decoys, \rtwoc renders reconnaissance-based attacks ineffective while incurring moderate performance overhead.
+
+\paragraph{LOOL: Optimization-Aware Compiler Fuzzing}
+In Part~\ref{part:fuzzing}, I present \lool, a compiler fuzzing framework based on a new type of coverage feedback.
+Instead of relying on code coverage, \lool leverages the compiler's own optimization log as a domain-specific feedback signal.
+A genetic algorithm uses this feedback to steer test-case generation toward rare optimization interactions that are difficult to trigger otherwise.
+
+\paragraph{Program State Convolution}
+Finally, I present \emph{Program State Convolution} (PSC), a technique that uses compiler analyses to expose hidden data dependencies to coverage-guided fuzzers.
+By transforming indirect calls into explicit control-flow branches and partitioning value ranges, PSC provides stepping stones that help fuzzers explore program states that conventional coverage metrics would conflate.
+This contribution includes preliminary results that demonstrate the approach's potential.
 

@@ -1,0 +1,68 @@
+\section{Motivation}\label{psc:sec:motivation}
+
+The previous chapter presented \lool, a domain-specific approach to compiler fuzzing that leverages optimization logs.
+This chapter presents a complementary technique called \emph{Program State Convolution} (PSC) that addresses a more general problem: the blindness of code coverage to data dependencies.
+
+While \lool is tailored to compiler testing, PSC aims to improve fuzzer guidance for arbitrary programs.
+The core insight is that compilers already perform sophisticated analyses to reason about data dependencies---for optimization, for devirtualization, and for security hardening.
+By repurposing these analyses, we can project hidden data-state variations onto the control-flow graph, making them visible to standard coverage instrumentation.
+
+In \cref{ch:fuzzer-guidance} we discussed various forms of fuzzer feedback that turn a mere random walk into a guided exploration.
+We also showed how the increasing integration of coverage instrumentation into the compiler improved both the instrumentation's performance and precision.
+In particular, critical-edge splitting allows the compiler to unambiguously identify edges between basic blocks at compile time.
+Compile-time identification of edges is limited, however, to edges between basic blocks in the same function.
+Edges between a call and a function, both static and dynamic, are not explicitly recorded.
+For static calls, the call-site's basic block counter indirectly encodes the information.
+Since each execution of the call-site's basic block also executes the call and since the call constitutes only a single edge in the \gls{CFG}, no information is lost.
+The situation is different, however, for indirect call sites, which represent multiple edges in the \gls{CFG}.
+To better understand this problem, consider the program in \cref{psc:lst:dynamic-dispatch-c}.
+
+\begin{listing}
+    \begin{minted}[mathescape]{C}
+#include <stdio.h>
+#include <stdlib.h>
+
+void handler1(char *param) {
+    // block A
+    printf("Handler1 %s\n", param);
+}
+
+void handler2(char *param) {
+    // block B
+    handler1(param);
+    printf("Handler2 %s\n", param);
+}
+
+void (*handlers[2])(char *) = {handler1, handler2};
+
+int main(int argc, char **argv) {
+    // block C
+    handler1(argv[2]); $\label{psc:line:handler1-call}$
+    handler2(argv[2]);
+    handlers[atoi(argv[1])](argv[2]);
+}
+    \end{minted}
+    \label{psc:lst:dynamic-dispatch-c}
+\end{listing}
+
+After a single execution, all edge IDs identified by \aflpp's instrumentation have been hit.
+Specifically, the basic blocks in \code{handler1} and \code{handler2} as well as the single basic block in \code{main}.
+For example, calling the program with \code{./program 0 test} would lead to the following hit counts:
+\begin{enumerate}
+    \item $C$ \rightarrow $A$: 2
+    \item $C$ \rightarrow $B$: 1
+    \item $start$ \rightarrow $C$: 1
+\end{enumerate}
+In this simple example, calling the program with index 0 or 1 would still lead to a coverage change noticeable by the fuzzer due to varying edge frequencies.
+In general, however, where the indirect call targets have multiple callers as well, the information is lost.
+The reason is that \aflpp's compiler instrumentation does not assign IDs to edges between calls and functions.
+
+\aflpp's classic instrumentation \enquote{solves} this problem because the edge ID is always a combination of the previous block ID and the current one, regardless of the block's function.
+An important observation, however, is that the instrumentation does not reset the current block ID after a call, \eg after the call to \code{handler1} in \cref{psc:line:handler1-call}.
+This means that strictly speaking the instrumentation would record an edge $A$ \rightarrow $B$.
+Alternatively, call-context combines the edge ID with a representation of the calling context (either the entire call trace or just a single ID per calling function).
+All these variants rely on runtime hash computation, however, and are thus susceptible to collisions.
+
+To summarize, \aflpp's compiler-based instrumentation creates an ambiguity of edge IDs for indirect calls.
+In the following sections we explore an alternative way of implementing call-site specific coverage for indirect calls.
+We leverage the insight that compilers already use static analysis to optimize indirect call sites and transform the code to project the analysis information onto edge coverage.

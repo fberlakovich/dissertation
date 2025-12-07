@@ -1,0 +1,211 @@
+\chapter{Fuzzer Guidance}\label{ch:fuzzer-guidance}
+
+Before presenting our contributions to compiler-assisted fuzzing, this chapter establishes the necessary background on fuzzer feedback mechanisms.
+We examine how coverage-guided fuzzers work, how the compiler enables efficient coverage instrumentation, and where current approaches fall short.
+These limitations motivate the techniques presented in the following chapters.
+
+At its core, fuzzing is an automated testing technique that repeatedly executes a target program with generated inputs to discover faults.
+To maximize the efficiency of this search, modern fuzzers rely on feedback mechanisms that distinguish interesting inputs from redundant ones.
+In this chapter we will examine different types of coverage feedback with a particular focus on how the compiler enables them.
+
+Code-coverage feedback---an umbrella term for code coverage variants---is a popular form of fuzzer feedback.
+The idea of code coverage was first introduced as part of Microsoft's SAGE fuzzer, a whitebox fuzzer combining symbolic execution with coverage feedback.
+It was AFL, however, which popularized the approach for greybox fuzzing by allowing code-coverage to guide the seed selection and mutation process without the overhead of program analysis~\cite{Zalewski2016}.
+The tremendous success of AFL in bug finding also seemed to confirm this strategy.
+
+The particular flavor of code coverage used by AFL and many of its descendants is \emph{edge coverage}.
+Unlike basic block coverage, which only tracks visited locations, edge coverage records the frequency and direction of \emph{transitions} between basic blocks.
+For example, consider three basic blocks $A$, $B$, and $C$.
+A valid execution might traverse them in the order $A \rightarrow B \rightarrow C$, while another might execute $A \rightarrow C \rightarrow B$.
+A simple basic block coverage metric would register both executions identically, as the set of visited blocks $\{A, B, C\}$ is the same in both cases.
+Edge coverage, however, records the specific transitions: tuples $(A, B)$ and $(B, C)$ for the first path, versus $(A, C)$ and $(C, B)$ for the second.
+This inclusion of directionality provides a more granular view of the execution flow, allowing the fuzzer to distinguish between differing traversals of the same code regions.
+
+Despite its widespread use and success, edge coverage, and more general code coverage, suffers from conceptual and from implementation issues.
+An analysis by \citeauthor{Bohme2022} even suggests that code coverage alone is insufficient to judge a fuzzer's bug-finding performance~\cite{Bohme2022}.
+
+On the implementation side, early inefficiencies present in, \eg, AFL were largely solved or at least mitigated with increasingly refined code coverage implementations.
+For instance, the initial coverage implementation in AFL modified the assembler to instrument targets.
+The instrumentation assigns a pseudorandom ID to each basic block and computes edge IDs at runtime by combining the ID of the previous block with the ID of the current block.\fbetodo{Show AFL hash functions}
+While the implementation in the assembler is conceptually simple, it is prone to hash collisions and prevents the compiler's optimization passes from optimizing the inserted code.
+CollAFL reduces AFL's hash collisions by parameterizing the hash function with additional parameters chosen at link time~\cite{Gan2018}.
+Other implementations, such as \aflpp, improve on these issues with a full-fledged compiler pass that builds on LLVM's sanitizer instrumentation infrastructure.
+
+The compiler pass allows \aflpp to replace the collision-prone hash function with a single counter-increment per edge location.
+An edge location is a location in a basic block that uniquely identifies an edge.
+For so-called \emph{critical edges} there is no such unambiguous location.
+A critical edge is an edge \emph{from} a basic block with more than one successor \emph{to} a basic block with more than one successor.
+For example, consider the critical edge on the left side of \cref{lool:fig:critical-edges}.
+The traditional AFL instrumentation would have to identify this edge by combining the edge IDs of BB\textsubscript{0} and BB\textsubscript{3}.
+The reason is that no single location in the graph (neither BB\textsubscript{0} nor BB\textsubscript{3}) uniquely identifies the edge BB\textsubscript{0}\rightarrow{}BB\textsubscript{3}.
+A counter in BB\textsubscript{0} would trigger also if the edge BB\textsubscript{0}\rightarrow{}BB\textsubscript{2} is visited and a counter in BB\textsubscript{3} when the edge BB\textsubscript{1}\rightarrow{}BB\textsubscript{3} is visited.
+While in principle the edge's trip count could be calculated post-hoc, \eg by using Kirchhoff's law, this requires a computationally expensive post-processing step.
+Instead, critical-edge splitting allows the compiler to insert a counter into BB\textsubscript{split} that uniquely identifies the edge BB\textsubscript{0}\rightarrow{}BB\textsubscript{3}.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.45\linewidth}
+        \begin{tikzpicture}[
+        % Define the style for the basic blocks
+            block/.style={
+                rectangle,
+                draw=black,
+                text width=1cm,
+                minimum height=1cm,
+                align=center,
+                rounded corners=8pt,
+                font=\sffamily
+            },
+            arrow/.style={->, >=Latex},
+            critical/.style={red}
+        ]
+
+            \matrix (m) [
+                matrix of nodes,
+                nodes={block, anchor=center}, % Apply block style to all nodes
+                column sep=2cm, % Horizontal gap between columns
+                row sep=3cm     % Vertical gap between rows
+            ] {
+            % First Row
+                BB\textsubscript{0} & BB\textsubscript{1} \\
+                % Second Row
+                BB\textsubscript{2} & BB\textsubscript{3} \\
+            };
+
+            \draw [arrow] (m-1-1.south) -- (m-2-1.north); % BB0 -> BB2
+            \draw [arrow] (m-1-2.south) -- (m-2-2.north); % BB1 -> BB3
+
+            \draw [arrow,critical] (m-1-1.south) -- (m-2-2.north); % BB0 -> BB3
+
+        \end{tikzpicture}
+
+    \end{subfigure}
+    \begin{subfigure}[t]{0.45\linewidth}
+% --- FIGURE 2: CFG with the Critical Edge SPLIT ---
+        \begin{tikzpicture}[
+            block/.style={
+                rectangle,
+                draw=black,
+                text width=1cm,
+                minimum height=1cm,
+                align=center,
+                rounded corners=8pt,
+                font=\sffamily
+            },
+        % Style for the new split block
+            splitblock/.style={
+                block,
+                fill=red!20, % Different color to highlight it's new
+                text width=1cm,
+                font=\sffamily\normalsize % Smaller font to fit text
+            },
+            arrow/.style={->, >=Latex},
+            critical/.style={->, >=Latex}
+        ]
+            \matrix (m) [
+                matrix of nodes,
+                nodes={block, anchor=center},
+                column sep=3cm, % Increased spacing for the new block
+                row sep=3cm,
+                yshift=-2cm
+            ] {
+                BB\textsubscript{0} & BB\textsubscript{1} \\
+                BB\textsubscript{2} & BB\textsubscript{3} \\
+            };
+
+            % Place the new split block between BB0 and BB3
+            % We position it relative to the matrix nodes
+            \node[splitblock] (split) at ($(m-1-1.south)!0.5!(m-2-2.north)$) {BB\textsubscript{split}};
+
+
+            % Normal Edges
+            \draw [arrow] (m-1-1.south) -- (m-2-1.north);
+            \draw [arrow] (m-1-2.south) -- (m-2-2.north);
+
+            % New Edges forming the split path (in red)
+            \draw [critical] (m-1-1.south) to[out=-70, in=110] (split.north);
+
+            % Similar angles for the second part to maintain symmetry.
+            \draw [critical] (split.south) to[out=-70, in=110] (m-2-2.north);
+
+        \end{tikzpicture}
+
+    \end{subfigure}
+    \label{lool:fig:critical-edges}
+    \caption{Splitting of a critical edge (red edge between BB\textsubscript{0} and BB\textsubscript{3}) by inserting a new basic block BB\textsubscript{split}.}
+\end{figure}
+
+The compiler instrumentation loads the counter through an additional indirection.
+This indirection enables the instrumentation to assign a unique sequential ID to each edge at program startup, \ie, at runtime.
+A further refinement of coverage instrumentation, based on \gls{LTO}, removes the indirection and assigns collision-free IDs at compile time.
+Compile-time ID assignment is possible because with \gls{LTO} the compiler regains a holistic view of the target program.
+Knowing the total number of edge IDs at compile time also allows eliminating the counter-load indirection, thus reducing the performance overhead.
+The primary downside of this code-coverage implementation compared to earlier implementations is that not all programs compile with \gls{LTO} enabled.
+The refinement of coverage implementations through tighter compiler integration further exemplifies the compiler's role in enhancing fuzzing.
+
+Despite these refinements, code coverage instrumentation has a non-negligible overhead that directly impacts fuzzing throughput.
+While there are no published detailed analyses of the overhead incurred by different compiler instrumentation techniques, \citeauthor{Nagy2019} reports an overhead ranging between 30\% and 70\%.
+This observation is in line with other work that reports speedups of 4\% to 78\% by reducing the amount of instrumentation needed~\cite{hsu2018}.
+These numbers refer to compiler instrumentation without \gls{LTO} and can vary for different techniques and runtime environments.
+For example, the overhead of dynamic binary instrumentation or instrumenting Java class files is significantly higher, whereas \gls{LTO}-based instrumentation is likely to incur less overhead.
+We will return to the issue of code-coverage overhead in \cref{lool:s:evaluation}.
+
+Distinct from the method of instrumentation is the representation of the coverage map itself.
+Fuzzer feedback must strike a delicate balance between precision and throughput.
+To avoid frequent cache misses, fuzzers typically limit the size of the coverage bitmap to ensure it fits within the \gls{CPU}'s L2 cache.
+This hardware-imposed limitation implies that the map can represent only a finite number of counters, and each counter possesses a limited value range.
+The standard coverage map size in AFL, for example, is 64KB, with each byte serving as a counter from 0 to 255.
+Previous work has demonstrated that the size of the coverage map significantly impacts fuzzing throughput \fbetodo{cite collafl and survey from 2019}.
+However, the exact relationship between fuzzing throughput, map size, hardware cache specifics, and counter precision remains a subject of further research \fbetodo{cite vasil AFL paper}.
+
+Beyond implementation constraints, edge coverage suffers from conceptual limitations.
+The fundamental issue is that it compresses complex program states into a single, flat metric.
+By tracking edges individually, the fuzzer may fail to capture the context or the specific sequence of edges that led to a program state, thereby identifying two semantically different executions as identical.
+A natural extension to this principle is to track paths containing more than one edge, sometimes called \emph{n-gram}~\cite{Wang2019}.
+With growing $n$, n-grams approximate full program traces.
+Another refinement of code coverage is to include caller contexts in the coverage information~\cite{Chen2018a,Wang2019}.
+As edge-coverage instrumentation happens only within a function, information about who called the function is lost.
+For instance, consider the C code in \cref{cov:lst:caller-context-example}.
+The function \texttt{init\_session} executes the exact same control-flow path (and thus generates the exact same edge coverage features) regardless of whether it is called by \texttt{admin\_login} or \texttt{guest\_login}.
+However, these two executions represent fundamentally different program states.
+If a fuzzer discovers the path through \texttt{admin\_login} first, it may mark the edges inside \texttt{init\_session} as covered and deprioritize exploring the same path via \texttt{guest\_login}, potentially missing bugs that only manifest in the guest context.
+
+\begin{listing}[ht]
+    \centering
+    \begin{minted}{C}
+static bool admin = false;
+void init_session(char *input) {
+  // The control flow here is identical for both callers.
+  if (input[0] == 'A') {
+      setup_memory(input);
+  }
+}
+
+void admin_login() {
+  admin = true;
+  init_session("A...");
+}
+
+void guest_login() {
+  admin = false;
+  init_session("A...");
+}
+    \end{minted}
+    \caption{Example illustrating the loss of caller context.
+    The internal edges of \texttt{init\_session} are identical for both callers, masking the difference between admin and guest states.}
+    \label{cov:lst:caller-context-example}
+\end{listing}
+Angora, for example, addresses this issue by augmenting edge-coverage with a call context hash.
+The call context hash is the result of XORing unique call-site IDs at runtime.
+In \XXX we explore an alternative way to incorporate caller context by projecting the context onto code coverage with a compiler transformation.
+
+Researchers have also proposed alternative types of coverage feedback that are not based on code coverage.
+The goal of these coverage metrics is to improve the fuzzer's ability to differentiate program states.
+\citeauthor{Wang2019} tried to formalize this notion with a metric called \emph{sensitivity}, offering a theoretical framework to evaluate the descriptive power of different coverage variants~\cite{Wang2019}.
+The authors also propose an early form of dataflow coverage based on the memory access patterns caused by a particular input.
+Unfortunately, later proposed coverage metrics have not been evaluated within the same theoretical framework, making a direct comparison difficult.
+DDFuzz~\cite{Mantovani2022} and DAFL~\cite{Kim2023}, for instance, use data-dependency information as coverage feedback.
+Similarly, \citeauthor{herrera2023} investigate fuzzer guidance by different granularities of dataflow information~\cite{herrera2023}.
+
+In \XXX we introduce a new form of coverage feedback for compiler fuzzing that incurs less overhead than code coverage, while allowing for more context sensitivity.
+

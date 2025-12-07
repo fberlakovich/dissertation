@@ -1,5 +1,13 @@
 \section{Motivation}
 
+The previous chapter traced the arms race between code-reuse attacks and defenses.
+A recurring theme in this history is that each new defense closes one avenue of attack, only for attackers to find another.
+Leakage-resilient code randomization, for example, effectively prevents direct code disclosure, but as \gls{AOCR} demonstrated, predictable \emph{data} layouts---particularly on the stack---still leak enough information to mount successful attacks.
+
+This observation motivates \rtwoc: a defense that extends the principle of randomization from code to observable data.
+The key insight is that the compiler possesses precise knowledge of stack frame geometry, including the positions of return addresses, spilled registers, and local variables.
+By leveraging this knowledge, the compiler can transform stack layouts to disguise sensitive pointers among indistinguishable decoys---a technique we call \emph{mimicry}.
+
 \begin{figure}[t]
     \centering
     \includeDrawioFigure{figures/r2c/r2c-overview}{
@@ -22,6 +30,3 @@
     \vspace*{-1em}
     \label{fig:overview-unprotected}
 \end{figure}
-
-
-\fbetodo{Short r2c specific introduction}

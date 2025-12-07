@@ -24,7 +24,7 @@ The \gls{ROP} was later generalized to other architectures~\cite{roemer2012,cloo
 
 \gls{ROP} attacks, or slight variations thereof, have since posed a significant challenge for the security research community.
 The unit of execution as well as the necessary primitives can vary from attack to attack.
-For example, \gls{CHOP} abuses exception handlers to execute malicious code~\cite{duta2023}, whereas \gls{AOCR} returned to the principle of while-function reuse~\cite{Rudd2017}.
+For example, \gls{CHOP} abuses exception handlers to execute malicious code~\cite{duta2023}, whereas \gls{AOCR} returned to the principle of whole-function reuse~\cite{Rudd2017}.
 
 Several defenses against \gls{ROP} attacks have been proposed.
 Among the defenses, three broad categories have emerged:
@@ -37,7 +37,7 @@ Each of these categories aims to prevent a different phase of a \gls{ROP} or mor
 The following sections describe these categories in more detail, along with example defenses belonging to the category.
 
 \section{Memory-Safety Enforcement}
-Memory-safety techniques try to solve the problem at the root many attack classes, including \glspl{CRA}: memory corruption.
+Memory-safety techniques try to solve the problem at the root of many attack classes, including \glspl{CRA}: memory corruption.
 Control-flow hijacking as well as data-only attacks typically rely on memory corruption to corrupt sensitive (control) data~\cite{Szekeres}.
 By preventing memory corruption itself, memory-safety techniques thus rob an attacker of a crucial primitive for a large number of attacks.
 
@@ -46,16 +46,16 @@ For example, data-flow integrity~\cite{castro2006} and WIT~\cite{Akritidis2008} 
 Both use static dataflow analysis to establish relations between instructions and allowed memory targets.
 Neither defense deals with temporal safety.
 
-Other approaches treat \emph{pointers} as access control subjects associate metadata with memory objects~\cite{Nagarakatte2009,orthen2024}.
+Other approaches treat \emph{pointers} as access control subjects and associate metadata with memory objects~\cite{Nagarakatte2009,orthen2024}.
 The associated metadata can include the memory object bounds, type and liveness information.
 Upon accessing a memory object via a pointer, the enforcement techniques check the intended access against the valid object's metadata.
-To improve performance, later work tried to relax certain aspects of the enforcement by trading precision for performance~\cite{kwon2013,kroes2017,Kroes2018}
+To improve performance, later work tried to relax certain aspects of the enforcement by trading precision for performance~\cite{kwon2013,kroes2017,Kroes2018}.
 Other techniques sidestep the question of \enquote{what} entirely and instead focus on the temporal aspect~\cite{dang2017a,vanderkouwe2017,lee2015}.
 
 Techniques like \propername{StackArmor}~\cite{Chen2015c} and \gls{CPI}~\cite{Kuznetsov2014} aim to establish memory safety by separating \enquote{safe} from \enquote{unsafe} data.
-\gls{CPI}, for example, separates sensitive data like control-flow data or pointers from \eg potentially overflowing buffers
+\gls{CPI}, for example, separates sensitive data like control-flow data or pointers from \eg potentially overflowing buffers.
 However, the security of this separation approach critically hinges on the protection of the isolated data against corruption and disclosure.
-An initial attempt of protecting such a sensitive area in a performance-friendly way was hiding it in the vast address space of 64bit systems.
+An initial attempt at protecting such a sensitive area in a performance-friendly way was hiding it in the vast address space of 64-bit systems.
 This technique of hiding a safe area by randomizing its base address is known as \emph{information hiding}.
 For example, the \gls{CPI} paper suggested the use of information hiding to protect the isolated stack.
 
@@ -127,7 +127,7 @@ Another challenge for shadow stacks is non-linear control-flow, such as C-style 
 When a \cpp function, for example, throws an exception, \cpp's stack-unwinding machinery unwinds the stack to the stack frame of a catching function (if any).
 Thus, instead of continuing in the direct caller of the throwing function, control-flow continues several levels up in the caller/callee hierarchy.
 \citeauthor{duta2023} showed that attackers can use this non-linear control-transfer to bypass various forms of shadow stacks with an attack called CHOP~\cite{duta2023}.
-In general, enforcing a legit control-flow is particularly difficult for \gls{CFI} when control-flow transfers depend on more complex interactions than a typical indirect jump.
+In general, enforcing a legitimate control-flow is particularly difficult for \gls{CFI} when control-flow transfers depend on more complex interactions than a typical indirect jump.
 For example, in the case of \cpp, control-flow transfers depend on an object's vtable pointer and the vtable involved.
 In the case of CHOP, control-flow transfers are governed by the abstract stack unwinding machine.
 
@@ -145,7 +145,7 @@ In summary, \gls{CFI} defenses tolerate the initial memory corruption but try to
 
 Randomization-based defenses leverage the observation that code reuse attacks depend crucially on the software monoculture~\cite{Larsen2014}.
 For example, a \gls{ROP} attack requires the exact memory addresses of the gadgets used in an attack.
-In a non-diversified binary, an attacker can assume/expect that all gadget locations are identical to her own installation of the target software.~\cite{Cohen1993,Franz2010,Pappas2012a,Hiser2012,Larsen2014,Homescu2013a,Koo2018}
+In a non-diversified binary, an attacker can assume that all gadget locations are identical to their own installation of the target software~\cite{Cohen1993,Franz2010,Pappas2012a,Hiser2012,Larsen2014,Homescu2013a,Koo2018}.
 In other words, an attacker knows \emph{a-priori} where to find gadgets in the target process.
 Code-layout randomization techniques invalidate this a-priori adversarial knowledge.
 While randomization-based defenses tolerate memory corruptions and control-flow hijacks, they limit what an attacker can do with those capabilities.

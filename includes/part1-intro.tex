@@ -1,0 +1,10 @@
+% Part I Introduction - Defending Against Code-Reuse with Compiler Assistance
+
+Memory-unsafe languages like C and \cpp remain the foundation of critical infrastructure, and with them, the threat of memory corruption vulnerabilities persists.
+Among the most dangerous exploitation techniques are \glspl{CRA}, which hijack a program's control flow to execute attacker-chosen code sequences.
+
+This part of the thesis explores how compiler-driven software diversity can defend against such attacks.
+The compiler's intimate knowledge of program structure---stack layouts, function boundaries, and data dependencies---enables transformations that would be difficult or impossible to achieve through post-hoc binary rewriting or runtime instrumentation.
+
+\Cref{ch:code-reuse-coevolution} traces the co-evolution of \glspl{CRA} and their defenses, establishing the context for our contribution.
+The subsequent chapter then presents \rtwoc, a defense that leverages compiler knowledge to randomize not only code but also the observable data layouts that recent attacks exploit for reconnaissance.

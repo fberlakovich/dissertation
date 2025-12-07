@@ -53,18 +53,18 @@ To illustrate the challenges of protecting the stack, consider the unprotected s
 \cref{fig:overview-stack-unprotected} shows the stack frame of a function when called \emph{from} function \code{F} on the x86\_64 platform with the System V ABI calling convention.
 When locating pointers on the stack, an attacker can tap two sources of information.
 First, an attacker can leverage the predictable location of pointers relative to other stack objects.
-If the adversary has information pertaining to some of these stack objects (\eg the value \code{0xaaaa} of a local variable \code{A} in function \code{F}), he can use this information as anchor to locate the pointer.
+If the adversary has information pertaining to some of these stack objects (\eg the value \code{0xaaaa} of a local variable \code{A} in function \code{F}), they can use this information as an anchor to locate the pointer.
 For example, in \cref{fig:overview-stack-unprotected} the return address is one machine word below function variable \code{A} and adjacent to the spilled base pointer (\texttt{rbp}).
 Second, an attacker can locate pointers based on their value ranges.
 The heap pointer in \cref{fig:overview-stack-unprotected}, for example, has a different address range than code pointers or the spilled base pointer.
 If both of these methods fail, an attacker can still resort to guessing.
 Under specific circumstances, such brute-force attacks are a reasonable option; some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
 
-The core idea behind \rtwoc's techniques is \emph{mimicry}: deliberately disguising sensitive information by surrounding it with similar looking data, so that the real object cannot be distinguished using either spatial or semantic cues.
-In practice this means creating decoys that match the appearance and behavioral characteristics of the protected object.
+The core idea behind \rtwoc's techniques is \emph{mimicry}: deliberately disguising sensitive information by surrounding it with similar-looking data, so that the real object cannot be distinguished using either spatial or semantic cues.
+In practice, this means creating decoys that match the appearance and behavioral characteristics of the protected object.
 For example, addresses that have the same alignment, size, and value-range properties as genuine return or heap pointers, and that are positioned unpredictably relative to other stack objects.
 By making decoys and real pointers statistically and structurally similar, mimicry removes the usual anchors an attacker uses (predictable offsets, value ranges, and layout patterns) and forces an adversary to guess.
-\rtwoc further penalizes guessing attempts with booby traps, which afford an attacker at most incorrect guess.
+\rtwoc further penalizes guessing attempts with booby traps, which afford an attacker at most one incorrect guess.
 Mimicry therefore raises the cost and risk of disclosure attacks while preserving normal program semantics for non-adversarial execution.
 
 We instantiate this principle for return addresses and for heap pointers as follows:

@@ -1,0 +1,70 @@
+% Conclusion Chapter
+
+This thesis explored the compiler's role \emph{beyond} optimization: as a tool for improving both the security and the reliability of software.
+The unifying insight is that compilers possess semantic knowledge---about program structure, data layout, optimization decisions, and control-flow dependencies---that is difficult or impossible to recover after compilation.
+By leveraging this knowledge, we can achieve hardening and testing capabilities that post-hoc approaches cannot match.
+
+\section{Summary of Contributions}
+
+\paragraph{R2C: Leakage-Resilient Diversity Through Mimicry}
+In Part~\ref{part:defense}, we presented \rtwoc, a compiler-driven defense against code-reuse attacks that exploits the compiler's knowledge of stack frame geometry.
+Unlike prior randomization defenses that focused primarily on code layout, \rtwoc extends diversity to observable data structures.
+By inserting booby-trapped return addresses that are indistinguishable from real ones, \rtwoc forces attackers to guess among decoys, dramatically increasing the difficulty of reconnaissance-based attacks.
+Our evaluation on large-scale applications including Chromium and WebKit demonstrated that this protection comes at a moderate performance cost, making \rtwoc practical for real-world deployment.
+
+\paragraph{LOOL: Optimization-Aware Compiler Fuzzing}
+In Part~\ref{part:fuzzing}, we presented \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage signal.
+Rather than treating the compiler as a black box and relying on generic code coverage, \lool directly observes which optimizations the compiler performs on each input.
+A genetic algorithm uses this feedback to breed input generators that trigger rare optimization interactions.
+Our evaluation on the GraalVM compiler showed that \lool outperforms both static parameter configurations and AFL-based parametric fuzzing in triggering rare optimizations, while discovering previously unknown bugs.
+
+\paragraph{Program State Convolution}
+Finally, we introduced Program State Convolution (PSC), a technique that leverages compiler analyses to expose hidden program state to coverage-guided fuzzers.
+The key insight is that compilers already perform sophisticated reasoning about data dependencies---for devirtualization, value-range analysis, and other optimizations.
+By repurposing these analyses to transform data dependencies into control dependencies, PSC provides stepping stones that help fuzzers explore deeper into the state space.
+Preliminary results demonstrate the potential of this approach, with further evaluation planned as future work.
+
+\section{The Compiler as a Security and Reliability Choke Point}
+
+A common thread runs through all three contributions: the compiler occupies a unique position in the software development pipeline.
+Every non-trivial program passes through a compiler, making it a natural enforcement point for security policies and a rich source of semantic information for testing.
+
+This position has two important implications.
+First, improvements to the compiler benefit all downstream software.
+A single security transformation, once deployed in a widely-used toolchain, can harden millions of binaries.
+Second, the compiler's internal representations preserve semantic information that is lost after compilation.
+Post-hoc analyses of binaries must laboriously reconstruct what the compiler knew all along---type hierarchies, data-flow dependencies, optimization invariants.
+
+The contributions in this thesis exploit both properties.
+\rtwoc uses the compiler's knowledge of stack layout to insert decoys that would be difficult to place correctly through binary rewriting.
+PSC and \lool use the compiler's internal analyses and transformation logs, respectively, as signals that are simply unavailable at the binary level.
+
+\section{Limitations and Future Work}
+
+Despite the demonstrated benefits, the approaches presented here have limitations that suggest directions for future research.
+
+\paragraph{Coverage and Compatibility}
+\rtwoc's protection is limited to code compiled with our modified toolchain.
+Libraries compiled separately, or code using certain calling conventions, may not benefit from the full protection.
+Extending the defense to cover mixed-toolchain scenarios---perhaps through runtime coordination between protected and unprotected code---remains an open challenge.
+
+\paragraph{Generalization of PSC}
+Program State Convolution, as presented, focuses on specific transformations (indirect call unfolding, value-range partitioning).
+A more general framework that systematically identifies opportunities to project data dependencies onto control flow could broaden its applicability.
+
+\paragraph{Applicability of LOOL to Other Compilers}
+While \lool's principles should apply to any compiler with optimization logging, our implementation targets GraalVM specifically.
+Adapting the approach to compilers with less structured logging (like GCC) or to ahead-of-time compilers with different performance characteristics would require additional engineering and evaluation.
+
+\paragraph{Composition of Defenses}
+The outlook chapters raised the question of composing multiple defense strategies.
+Research into how diversity, CFI, and memory safety techniques can be combined---and whether their overheads are additive---would help practitioners deploy defense-in-depth more effectively.
+
+\section{Closing Remarks}
+
+The quest for trustworthy software is far from complete.
+Memory-unsafe languages remain entrenched in critical infrastructure, and the complexity of modern systems continues to outpace our ability to verify them.
+Yet the compiler---often viewed merely as a translator from source to binary---offers underexploited opportunities to address these challenges.
+
+This thesis has demonstrated three such opportunities: using compiler knowledge to diversify data layouts, to expose hidden state for fuzzing, and to guide fuzzer input generation toward interesting compiler behaviors.
+Each contribution reinforces the central argument: compilers are not just optimizers, but potential allies in the broader effort to build secure and reliable software.
