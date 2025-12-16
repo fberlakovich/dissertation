@@ -2,10 +2,6 @@
 
 \chapter{\label{ch:1-intro}Introduction}
 
-\minitoc
-
-\section{Motivation}
-
 The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
 Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
 A modern web browser, for example, now consists of over 30 million lines of code. \todo{Add reference, e.g., Chromium line count}
@@ -28,7 +24,7 @@ Despite decades of academic research and industrial mitigation efforts, however,
 The following sections analyze in more detail why security and reliability are no \enquote{solved problems} yet.
 
 
-\subsection{Security}
+\section{Security}
 The tradeoff between abstraction and performance explains, in part, why languages like C or \cpp still form the foundation of critical infrastructure.
 The potential for high performance\footnote{Not every program written in C or \cpp is automatically fast.} and direct control of machine internals make C and \cpp popular choices for operating systems, browsers, and embedded systems.
 However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and, more broadly, for the pitfalls of undefined behavior.
@@ -61,7 +57,7 @@ Recent work shows that even when code is perfectly hidden, predictable data stru
 The consequence is that although, judging by the publication counts, the security community's interest in code-reuse mitigations has declined, unsolved problems remain.
 \fbetodo{provide concrete numbers}
 
-\subsection{Reliability}
+\section{Reliability}
 Traditional approaches to software reliability—static analysis, unit testing, and formal verification—serve as the foundation of quality assurance.
 While formal verification offers the strongest theoretical guarantees, it faces significant practical hurdles.
 A primary obstacle is the \emph{specification bottleneck}: verification requires properties to be formally defined, yet formulating such specifications is often non-trivial.
@@ -89,7 +85,7 @@ To find these deeper bugs, the fuzzer needs a better guide---one that considers 
 %As such, the correctness of \glspl{JIT} has an important security dimension as well.
 %
 
-\subsection{The Compiler's Role Beyond Optimization}
+\section{The Compiler's Role Beyond Optimization}
 In this thesis I argue that compilers are uniquely positioned to help improve both software reliability and security.
 Every non-trivial program passes through a compiler at some point, either ahead of time or just in time\footnote{Interpreted programs are an exception, but the interpreter itself has passed through a compiler as well.}.
 This \enquote{choke point} turns the compiler into a linchpin for software trustworthiness: a single transformation deployed in the toolchain can harden millions of downstream binaries.

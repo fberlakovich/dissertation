@@ -1,10 +1,10 @@
-\section{Optimization-Driven Mutation}\label{s:lool:design}
+\section{Optimization-Driven Mutation}\label{lool:s:design}
 
 In \cref{lool:ss:graalvm-fuzzing} we described how our GraalVM fuzzer solves three of the five challenges described in \cref{lool:ss:jit-compiler-fuzzing} (\cref{lool:prob:inputs,lool:prob:compile,lool:prob:miscompilations}).
 For the remaining challenges (\cref{lool:prob:coverage,lool:prob:steer}), we propose a new, domain-specific approach.
 \lool{} uses the compiler's optimization log (see \cref{lool:sss:graalvm-optimization-log}) to select among suitable parameter vectors.
 The selection process is driven by a genetic algorithm that tries to breed more desirable parameter vectors over time.
-\cref{fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
+\cref{lool:fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
 
 \begin{figure}
     \centering
@@ -13,11 +13,11 @@ The selection process is driven by a genetic algorithm that tries to breed more 
         \includegraphics{figures/lool/feedback-loop-noicons}%
     }
     \caption{The complete fuzzing loop with genetic mutation of input programs based on optimization-log coverage.
-    The differently shaded areas differentiate the GraalVM fuzzing framework (see \cref{lool:ss:graalvm-fuzzing}) from \lool's components (see \cref{s:lool:design}).}
-    \label{fig:lool-overview}
+    The differently shaded areas differentiate the GraalVM fuzzing framework (see \cref{lool:ss:graalvm-fuzzing}) from \lool's components (see \cref{lool:s:design}).}
+    \label{lool:fig:lool-overview}
 \end{figure}
 
-\subsection{Overview}\label{ss:design-overview}
+\subsection{Overview}\label{lool:ss:design-overview}
 The idea of using an evolutionary algorithm in (compiler) fuzzing is not new.
 In fact, producing new inputs with an evolutionary algorithm is at the core of the popular fuzzer AFL and its descendants~\cite{Zalewski2016}.
 Some fuzzers even use genetic algorithms, a subbranch of evolutionary algorithms that includes crossover, to generate inputs~\cite{Veggalam2016,Hough2024}.
@@ -45,11 +45,11 @@ We will compare both approaches to input mutation as part of our evaluation (see
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/lool/lool-workflow}
-    \caption{Workflow of the genetic algorithm loop (see \cref{ss:fitness} and \cref{ss:building-generations}).}\label{fig:workflow}
+    \caption{Workflow of the genetic algorithm loop (see \cref{lool:ss:fitness} and \cref{lool:ss:building-generations}).}\label{lool:fig:workflow}
 \end{figure}
 
 \subsection{Shrinking the Search Space}
-\label{sec:search_space}
+\label{lool:ss:shrinking-the-search-space}
 Even with a relatively small number of tunable probabilities in a parameter vector, the search space is large.
 A large search space increases the time until the genetic algorithm discovers more interesting parameter vectors and thus slows down the fuzzing effort.
 Our code generator has more than~120 parameters, so we restrict the parameter vectors to a subset of these.
@@ -62,7 +62,7 @@ We consider all parameters that show a non-negligible absolute correlation coeff
 More specifically, during our preliminary experiments, we restricted the genetic algorithm to consider the probabilities for five of the ten possible statement types: \texttt{if} statements; fold-style \texttt{for} loops; map-style \texttt{for} loops; \texttt{while} loops; and \texttt{synchronized} blocks.
 Similarly, we limited the optimization of expression probabilities to six of ten: local variable initialization; local variable usage; parameter usage; binary (arithmetic or logic) expression; call of a generated method; and ternary (conditional) expression.
 
-\subsection{Fitness}\label{ss:fitness}
+\subsection{Fitness}\label{lool:ss:fitness}
 After fuzzing with each parameter vector in a generation, the genetic algorithm assesses the fitness of each vector.
 Our desired outcome is a population of diverse parameter vectors, each of which either triggers different optimizations with a greater likelihood than its siblings or even triggers bugs.
 For this scoring we compare the parameter vectors' fitness along multiple dimensions.
@@ -80,7 +80,7 @@ Before calculating the individual fitness, the genetic algorithm bucketizes the 
 The bucketization accounts for the fact that a change in execution frequency from 1 to 2 is likely more interesting than from 100 to 101.
 The algorithm's fitness function then awards points for newly discovered edges and for changed execution frequencies, whereas new edges receive more points than a mere change in frequencies.
 
-\subsubsection{Optimization Counter Fitness}\label{sss:opt-counter-fitness}
+\subsubsection{Optimization Counter Fitness}\label{lool:sss:opt-counter-fitness}
 
 \paragraph{Weighting of Global Counters}\label{p:old-weighting-scheme}
 In the preliminary experiments, which used only global optimization counters (\ie context-blind coverage), we used a simple weighting scheme to calculate the fitness based on the counters.
@@ -144,8 +144,8 @@ In this case, the $IIF$ expression is greater than $1$, thus boosting the indivi
 If $F$ is the set of all features, the total score of an individual $i$ is given by
 \[ score(i) = \sum_{f \in F}{FF(i, f) * IIF(G, f)} \]
 
-\subsection{Building Generations}\label{ss:building-generations}
-As shown in \cref{fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
+\subsection{Building Generations}\label{lool:ss:building-generations}
+As shown in \cref{lool:fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
 During mutation the genetic algorithm adjusts the parameters in a parameter vector.
 Most of these parameters are independent of each other.
 For example, parameters such as \texttt{InitInStaticBlock} (probability that a variable is initialized in a static initializer block) describe probabilities that guide binary decisions in the generation process.
@@ -155,7 +155,7 @@ Similarly, for discrete parameters, such as \texttt{StatementDepth} (the maximum
 Statement and expression distributions form probability distributions, where each statement or expression type has some probability.
 We mutate distributions by selecting an entry that \enquote{steals} from another entry's probability by increasing itself and decreasing the other.
 This balancing of probabilities ensures that the total sum of probabilities in a distribution stays constant.
-As we only include a subset of the distribution in the parameter vectors (see \cref{sec:search_space}), we equally distribute the difference to 1 among the excluded probabilities.
+As we only include a subset of the distribution in the parameter vectors (see \cref{lool:ss:shrinking-the-search-space}), we equally distribute the difference to 1 among the excluded probabilities.
 With a low probability, currently 5\%, we perform an extreme mutation where the property steals from \emph{every} other probability, biasing the distribution towards the chosen property.
 \cref{lool:tbl:generation-parameters} shows an abbreviated example of a parameter vector before and after mutation.
 Before mutation, the parameter vector had probabilities 0.0767 and 0.1761 for \texttt{MapFor} and \texttt{While}, respectively.

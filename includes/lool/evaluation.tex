@@ -19,7 +19,7 @@ Our evaluation aims to confirm or refute the following hypotheses, which we form
         \item achieving code coverage.
     \end{itemize}
 \end{hypotheses}
-In this section we present the results of our experiments and then discuss the hypotheses in \cref{s:discussion}.
+In this section we present the results of our experiments and then discuss the hypotheses in \cref{lool:s:discussion}.
 
 \subsection{Experimental Setup}\label{lool:ss:experimental-setup}
 We performed all experiments on GraalVM 25.0 running on 3 identical machines with Debian 12.11.
@@ -47,7 +47,7 @@ This separate measurement step guarantees that experiments without code coverage
 \subsection{Experiment Evaluation}\label{lool:ss:experiment-evaluation}
 \fbetodo{Add table with configurations}
 We evaluated the following 8 different configurations:
-\aflpp configurations, by default, are fully parametric (see \cref{sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{ss:afl-parameter-mutation}).
+\aflpp configurations, by default, are fully parametric (see \cref{lool:sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{lool:ss:afl-parameter-mutation}).
 For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
 Configurations with \propername{memory} accumulate counters over time, whereas \propername{generation} in the name means genetic algorithm measures fitness relative only to other individuals in the same generation.
 \begin{configurations}
@@ -62,15 +62,15 @@ Configurations with \propername{memory} accumulate counters over time, whereas \
     The optimization log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
     \configuration{\aflpp Context-Aware}\label{config:aflcontextaware} a configuration where we use \aflpp for parametric input mutation together with per-method optimization pairs as coverage.
     Instead of aggregating the optimization counters, we record them for each method individually to identify pairs of optimizations that occurred together.
-    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{s:lool:design}) with code coverage as feedback.
+    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{lool:s:design}) with code coverage as feedback.
     \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization log counters as coverage.
-    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{s:lool:design}).
+    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{lool:s:design}).
     During each run, this configuration tries to breed as many generations as possible.
     Each generation consists of 16 parameter vectors, and the fuzzer creates a new generation when each vector has generated 40 tests or after one hour, whichever happens first.
 \end{configurations}
 
 \cref{config:static,config:no-feedback,config:aflcodecov} serve as baselines to gauge the effectiveness of the other configurations.
-We deliberately chose an \aflpp baseline that uses parametric fuzzing instead of raw mutation of input programs as discussed in \cref{ss:design-overview}.
+We deliberately chose an \aflpp baseline that uses parametric fuzzing instead of raw mutation of input programs as discussed in \cref{lool:ss:design-overview}.
 \cref{config:static,config:no-feedback} allow us to separate the effect of varying generation parameters, but in an undirected way.
 \cref{config:aflcontextblind,config:aflcontextaware} measure the effectiveness of using optimization log information as coverage, but with an existing, popular mutation engine.
 These configurations essentially use \aflpp's algorithms but replace code-coverage with two different forms of optimization log counter coverage.
@@ -81,8 +81,8 @@ Like in \cref{config:aflcodecov}, we let \aflpp operate on a proxy binary to bri
 We evaluated the different configurations according to the following criteria:
 \begin{itemize}
     \item amount of code coverage, measured as edge coverage (see \cref{lool:sss:eval-code-coverage})
-    \item number of rare optimizations performed (see \cref{ss:eval-rare-opts})
-    \item number of rare optimization pairs performed (see \cref{ss:eval-rare-opts})
+    \item number of rare optimizations performed (see \cref{lool:ss:eval-rare-opts})
+    \item number of rare optimization pairs performed (see \cref{lool:ss:eval-rare-opts})
 \end{itemize}
 
 We also provide the number of unique bugs found by each configuration.
@@ -105,7 +105,7 @@ We note, however, that without a ground truth the number of bugs found is unsuit
 \cref{lool:tbl:test-overview} gives an overview of the total number of tests (sum of all runs) in each experiment.
 In total, the different fuzzing experiments found 4 new bugs.
 In the \aflpp configurations the program generator occasionally has to skip tests because the seed provided by \aflpp is too short.
-We discuss this phenomenon in more detail in \cref{ss:aflpp-vs-genetic}.
+We discuss this phenomenon in more detail in \cref{lool:ss:aflpp-vs-genetic}.
 
 \subsection{Overhead of Feedback Mechanisms}
 \begin{table}{}
@@ -166,7 +166,7 @@ Using no coverage mechanism forms the baseline.
 
 %\begin{table}[!t]
 %
-%    \caption{Cumulative coverage development over time for the better performing half of configurations (see \cref{fig:cumulative-coverage-upper}).}
+%    \caption{Cumulative coverage development over time for the better performing half of configurations (see \cref{lool:fig:cumulative-coverage-upper}).}
 %    \label{tbl:coverage-development}
 %    \rowcolors{1}{white}{rowgray}
 %    \begin{tabular}{>{\nextrow}l E E E E E E E E E }
@@ -198,7 +198,7 @@ To better distinguish the densely packed upper group, \cref{lool:fig:cumulative-
 In the upper group, there is primarily a difference between configurations that vary generation parameters and the single configuration (\propername{static}) that does not.
 %\cref{tbl:coverage-development} shows the same data in table form with a 30 minute resolution.
 
-\subsection{Triggering Rare Optimizations}\label{ss:eval-rare-opts}
+\subsection{Triggering Rare Optimizations}\label{lool:ss:eval-rare-opts}
 \begin{figure}[t]
     \centering
     \begingroup
@@ -213,8 +213,8 @@ In the upper group, there is primarily a difference between configurations that 
     \input{figures/lool/optimization-rareness-boxplot}%
     \endgroup
     \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimizations.
-    \label{fig:rare-opts}
-    See \cref{ss:eval-rare-opts} for details.}
+    \label{lool:fig:rare-opts}
+    See \cref{lool:ss:eval-rare-opts} for details.}
 \end{figure}
 
 \begin{figure}[t]
@@ -233,8 +233,8 @@ In the upper group, there is primarily a difference between configurations that 
     \input{figures/lool/optimization-pairs-rareness-boxplot}%
     \endgroup
     \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimization pairs.
-    \label{fig:rare-pairs}
-    See \cref{ss:eval-rare-opts} for details.}
+    \label{lool:fig:rare-pairs}
+    See \cref{lool:ss:eval-rare-opts} for details.}
 \end{figure}
 
 
@@ -251,6 +251,6 @@ We found that due to the very high counts of these features, they would dispropo
 
 Based on this definition we calculate a score for each run in a configuration that rates how many rare optimizations or optimization pairs the configuration triggered.
 The score for a run is simply the sum of all individual feature scores in that run.
-The boxplots in \cref{fig:rare-opts,fig:rare-pairs} illustrate statistics based on the rareness scores of the runs in a configuration.
-The boxplot in \cref{fig:rare-opts} is based on optimization rareness scores and the boxplot in \cref{fig:rare-pairs} is based on optimization-pair rareness scores.
+The boxplots in \cref{lool:fig:rare-opts,fig:rare-pairs} illustrate statistics based on the rareness scores of the runs in a configuration.
+The boxplot in \cref{lool:fig:rare-opts} is based on optimization rareness scores and the boxplot in \cref{fig:rare-pairs} is based on optimization-pair rareness scores.
 Note that the scores for optimizations and optimization pairs are not directly comparable.

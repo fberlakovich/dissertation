@@ -1,0 +1,346 @@
+{
+  "baseline": {
+    "16": {
+      "cpu:mean": 67.98,
+      "avg_latency:mean": 0.17118,
+      "throughput:mean": 183170.148
+    },
+    "32": {
+      "cpu:mean": 83.12,
+      "avg_latency:mean": 0.169348,
+      "throughput:mean": 207804.626
+    },
+    "48": {
+      "cpu:mean": 87.72,
+      "avg_latency:mean": 0.22768,
+      "throughput:mean": 216870.574
+    },
+    "64": {
+      "cpu:mean": 89.78,
+      "avg_latency:mean": 0.293278,
+      "throughput:mean": 220755.942
+    },
+    "80": {
+      "cpu:mean": 90.9,
+      "avg_latency:mean": 0.361286,
+      "throughput:mean": 222902.39
+    },
+    "96": {
+      "cpu:mean": 91.42,
+      "avg_latency:mean": 0.434134,
+      "throughput:mean": 223599.114
+    },
+    "112": {
+      "cpu:mean": 91.46000000000001,
+      "avg_latency:mean": 0.513744,
+      "throughput:mean": 223612.636
+    },
+    "128": {
+      "cpu:mean": 91.22,
+      "avg_latency:mean": 0.596836,
+      "throughput:mean": 223202.99599999998
+    },
+    "144": {
+      "cpu:mean": 90.72,
+      "avg_latency:mean": 0.686006,
+      "throughput:mean": 222849.454
+    },
+    "160": {
+      "cpu:mean": 90.13,
+      "avg_latency:mean": 0.773584,
+      "throughput:mean": 222064.472
+    },
+    "176": {
+      "cpu:mean": 89.58,
+      "avg_latency:mean": 0.862,
+      "throughput:mean": 221354.164
+    },
+    "192": {
+      "cpu:mean": 89.35,
+      "avg_latency:mean": 0.948,
+      "throughput:mean": 221176.048
+    },
+    "208": {
+      "cpu:mean": 90.24,
+      "avg_latency:mean": 1.008,
+      "throughput:mean": 215655.212
+    },
+    "224": {
+      "cpu:mean": 91.78,
+      "avg_latency:mean": 1.03,
+      "throughput:mean": 206687.394
+    },
+    "240": {
+      "cpu:mean": 92.53,
+      "avg_latency:mean": 1.052,
+      "throughput:mean": 199308.584
+    },
+    "256": {
+      "cpu:mean": 93.03,
+      "avg_latency:mean": 1.08,
+      "throughput:mean": 193335.992
+    },
+    "384": {
+      "cpu:mean": 94.4,
+      "avg_latency:mean": 1.43,
+      "throughput:mean": 169538.558
+    },
+    "512": {
+      "cpu:mean": 94.71,
+      "avg_latency:mean": 1.864,
+      "throughput:mean": 159157.624
+    },
+    "640": {
+      "cpu:mean": 94.76,
+      "avg_latency:mean": 2.318,
+      "throughput:mean": 153461.492
+    },
+    "768": {
+      "cpu:mean": 94.82,
+      "avg_latency:mean": 3.226,
+      "throughput:mean": 149956.32
+    },
+    "896": {
+      "cpu:mean": 94.77,
+      "avg_latency:mean": 5.442,
+      "throughput:mean": 148706.096
+    },
+    "1024": {
+      "cpu:mean": 94.75,
+      "avg_latency:mean": 7.316,
+      "throughput:mean": 147244.156
+    },
+    "1280": {
+      "cpu:mean": 94.28,
+      "avg_latency:mean": 9.706,
+      "throughput:mean": 146062.60199999998
+    },
+    "1536": {
+      "cpu:mean": 93.38,
+      "avg_latency:mean": 11.976,
+      "throughput:mean": 146141.11000000002
+    },
+    "1792": {
+      "cpu:mean": 92.67999999999999,
+      "avg_latency:mean": 14.78,
+      "throughput:mean": 146370.758
+    },
+    "2048": {
+      "cpu:mean": 92.31,
+      "avg_latency:mean": 16.336,
+      "throughput:mean": 145677.59
+    },
+    "2304": {
+      "cpu:mean": 91.95,
+      "avg_latency:mean": 17.034,
+      "throughput:mean": 144797.85
+    },
+    "2560": {
+      "cpu:mean": 91.77,
+      "avg_latency:mean": 16.942,
+      "throughput:mean": 144173.628
+    },
+    "2816": {
+      "cpu:mean": 91.77,
+      "avg_latency:mean": 16.804,
+      "throughput:mean": 143852.21
+    },
+    "3072": {
+      "cpu:mean": 91.64,
+      "avg_latency:mean": 16.676,
+      "throughput:mean": 143584.838
+    },
+    "3328": {
+      "cpu:mean": 91.46000000000001,
+      "avg_latency:mean": 17.058,
+      "throughput:mean": 143392.89
+    },
+    "3584": {
+      "cpu:mean": 91.37,
+      "avg_latency:mean": 16.49,
+      "throughput:mean": 143131.176
+    },
+    "3840": {
+      "cpu:mean": 91.25,
+      "avg_latency:mean": 17.186,
+      "throughput:mean": 142800.236
+    },
+    "4096": {
+      "cpu:mean": 91.28,
+      "avg_latency:mean": 16.37,
+      "throughput:mean": 142546.762
+    }
+  },
+  "full-r2c": {
+    "16": {
+      "cpu:mean": 66.48,
+      "avg_latency:mean": 0.225746,
+      "throughput:mean": 167649.97400000002
+    },
+    "32": {
+      "cpu:mean": 81.78,
+      "avg_latency:mean": 0.209244,
+      "throughput:mean": 186121.996
+    },
+    "48": {
+      "cpu:mean": 87.34,
+      "avg_latency:mean": 0.258506,
+      "throughput:mean": 194158.486
+    },
+    "64": {
+      "cpu:mean": 89.45,
+      "avg_latency:mean": 0.331528,
+      "throughput:mean": 197186.544
+    },
+    "80": {
+      "cpu:mean": 90.61999999999999,
+      "avg_latency:mean": 0.408566,
+      "throughput:mean": 198844.06399999998
+    },
+    "96": {
+      "cpu:mean": 91.16,
+      "avg_latency:mean": 0.491464,
+      "throughput:mean": 199597.86800000002
+    },
+    "112": {
+      "cpu:mean": 91.38,
+      "avg_latency:mean": 0.585326,
+      "throughput:mean": 199695.248
+    },
+    "128": {
+      "cpu:mean": 91.82,
+      "avg_latency:mean": 0.692888,
+      "throughput:mean": 200340.398
+    },
+    "144": {
+      "cpu:mean": 92.14,
+      "avg_latency:mean": 0.7895099999999999,
+      "throughput:mean": 200594.906
+    },
+    "160": {
+      "cpu:mean": 92.03,
+      "avg_latency:mean": 0.84839,
+      "throughput:mean": 202547.53
+    },
+    "176": {
+      "cpu:mean": 90.76,
+      "avg_latency:mean": 0.91,
+      "throughput:mean": 202970.124
+    },
+    "192": {
+      "cpu:mean": 88.78,
+      "avg_latency:mean": 1.066,
+      "throughput:mean": 197984.576
+    },
+    "208": {
+      "cpu:mean": 90.03,
+      "avg_latency:mean": 1.1079999999999999,
+      "throughput:mean": 195545.09600000002
+    },
+    "224": {
+      "cpu:mean": 91.71,
+      "avg_latency:mean": 1.1199999999999999,
+      "throughput:mean": 188299.646
+    },
+    "240": {
+      "cpu:mean": 92.31,
+      "avg_latency:mean": 1.18,
+      "throughput:mean": 178912.13
+    },
+    "256": {
+      "cpu:mean": 92.7,
+      "avg_latency:mean": 1.214,
+      "throughput:mean": 173341.2
+    },
+    "384": {
+      "cpu:mean": 94.28,
+      "avg_latency:mean": 1.616,
+      "throughput:mean": 152885.624
+    },
+    "512": {
+      "cpu:mean": 94.61,
+      "avg_latency:mean": 2.116,
+      "throughput:mean": 144319.502
+    },
+    "640": {
+      "cpu:mean": 94.73,
+      "avg_latency:mean": 2.648,
+      "throughput:mean": 139867.338
+    },
+    "768": {
+      "cpu:mean": 94.78999999999999,
+      "avg_latency:mean": 4.0040000000000004,
+      "throughput:mean": 137428.402
+    },
+    "896": {
+      "cpu:mean": 94.8,
+      "avg_latency:mean": 6.72,
+      "throughput:mean": 136554.50999999998
+    },
+    "1024": {
+      "cpu:mean": 94.77,
+      "avg_latency:mean": 9.17,
+      "throughput:mean": 136171.19
+    },
+    "1280": {
+      "cpu:mean": 94.58999999999999,
+      "avg_latency:mean": 12.072,
+      "throughput:mean": 135102.378
+    },
+    "1536": {
+      "cpu:mean": 93.84,
+      "avg_latency:mean": 12.828,
+      "throughput:mean": 133677.97
+    },
+    "1792": {
+      "cpu:mean": 93.03,
+      "avg_latency:mean": 15.466,
+      "throughput:mean": 133627.532
+    },
+    "2048": {
+      "cpu:mean": 92.63,
+      "avg_latency:mean": 17.406,
+      "throughput:mean": 132874.592
+    },
+    "2304": {
+      "cpu:mean": 92.31,
+      "avg_latency:mean": 17.428,
+      "throughput:mean": 132365.382
+    },
+    "2560": {
+      "cpu:mean": 92.09,
+      "avg_latency:mean": 17.709999999999997,
+      "throughput:mean": 131738.99
+    },
+    "2816": {
+      "cpu:mean": 91.99000000000001,
+      "avg_latency:mean": 17.568,
+      "throughput:mean": 131421.948
+    },
+    "3072": {
+      "cpu:mean": 91.86,
+      "avg_latency:mean": 17.567999999999998,
+      "throughput:mean": 131117.5
+    },
+    "3328": {
+      "cpu:mean": 91.79,
+      "avg_latency:mean": 17.794,
+      "throughput:mean": 130989.048
+    },
+    "3584": {
+      "cpu:mean": 91.48,
+      "avg_latency:mean": 17.894,
+      "throughput:mean": 130522.4
+    },
+    "3840": {
+      "cpu:mean": 91.34,
+      "avg_latency:mean": 18.332,
+      "throughput:mean": 130390.474
+    },
+    "4096": {
+      "cpu:mean": 91.37,
+      "avg_latency:mean": 17.92,
+      "throughput:mean": 130123.81599999999
+    }
+  }
+}

@@ -1,0 +1,203 @@
+% This file was created with matplot2tikz v0.4.2.
+\begin{tikzpicture}
+
+\definecolor{cornflowerblue86180233}{RGB}{86,180,233}
+\definecolor{darkcyan1115178}{RGB}{1,115,178}
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{darkorange2221435}{RGB}{222,143,5}
+\definecolor{gainsboro}{RGB}{220,220,220}
+\definecolor{lightgray204}{RGB}{204,204,204}
+\definecolor{lightslategray148}{RGB}{148,148,148}
+\definecolor{palevioletred204121167}{RGB}{204,121,167}
+
+\begin{axis}[
+legend cell align={left},
+legend style={fill opacity=0.8, draw opacity=1, text opacity=1, draw=lightgray204},
+tick align=outside,
+tick pos=left,
+x grid style={gainsboro},
+xlabel={Performance Impact (\%)},
+xmajorgrids,
+xmin=0, xmax=24.6524209115605,
+xminorgrids,
+xtick style={color=black},
+y dir=reverse,
+y grid style={darkgray176},
+ymin=-5.7, ymax=153.9,
+ytick style={color=black},
+ytick={0,11.4,22.8,34.2,45.6,57,68.4,79.8,91.2,102.6,114,125.4,136.8,148.2},
+yticklabels={
+  perlbench,
+  gcc,
+  mcf,
+  lbm,
+  omnetpp,
+  xalancbmk,
+  x264,
+  deepsjeng,
+  imagick,
+  leela,
+  nab,
+  xz,
+  Geomean int,
+  Geomean all
+}
+]
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,-4.95) rectangle (axis cs:10.5228359849995,-3.15);
+\addlegendimage{ybar,ybar legend,draw=none,fill=darkcyan1115178,line width=0.32pt}
+\addlegendentry{BTRA Push}
+
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,-3.33) rectangle (axis cs:8.09050512054441,-1.53);
+\addlegendimage{ybar,ybar legend,draw=none,fill=cornflowerblue86180233,line width=0.32pt}
+\addlegendentry{BTRA AVX}
+
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,-1.71) rectangle (axis cs:0.102948929324365,0.0900000000000001);
+\addlegendimage{ybar,ybar legend,draw=none,fill=lightslategray148,line width=0.32pt}
+\addlegendentry{Randomization}
+
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,-0.0900000000000001) rectangle (axis cs:2.97203800961976,1.71);
+\addlegendimage{ybar,ybar legend,draw=none,fill=darkorange2221435,line width=0.32pt}
+\addlegendentry{BTDP}
+
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,1.53) rectangle (axis cs:5.35259283761467,3.33);
+\addlegendimage{ybar,ybar legend,draw=none,fill=palevioletred204121167,line width=0.32pt}
+\addlegendentry{Prolog}
+
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,6.45) rectangle (axis cs:7.96325776259705,8.25);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,8.07) rectangle (axis cs:6.6939967341326,9.87);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,9.69) rectangle (axis cs:0.351202653711336,11.49);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,11.31) rectangle (axis cs:2.18395916562102,13.11);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,12.93) rectangle (axis cs:2.57369055410064,14.73);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,17.85) rectangle (axis cs:8.92510353542455,19.65);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,19.47) rectangle (axis cs:5.20708257351787,21.27);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,21.09) rectangle (axis cs:0.359103405511307,22.89);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,22.71) rectangle (axis cs:0.522618429165012,24.51);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,24.33) rectangle (axis cs:1.56491259628919,26.13);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,29.25) rectangle (axis cs:-0.029786244163843,31.05);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,30.87) rectangle (axis cs:0.0947903644594739,32.67);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,32.49) rectangle (axis cs:0.335593269580903,34.29);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,34.11) rectangle (axis cs:0.464828414673724,35.91);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,35.73) rectangle (axis cs:0.0925057204712143,37.53);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,40.65) rectangle (axis cs:21.4138493018017,42.45);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,42.27) rectangle (axis cs:8.01729948053602,44.07);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,43.89) rectangle (axis cs:-0.209019693539614,45.69);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,45.51) rectangle (axis cs:3.21835816884466,47.31);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,47.13) rectangle (axis cs:1.89522858312223,48.93);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,52.05) rectangle (axis cs:9.00508911401532,53.85);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,53.67) rectangle (axis cs:10.49317376399,55.47);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,55.29) rectangle (axis cs:2.28980619204311,57.09);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,56.91) rectangle (axis cs:4.56331535447239,58.71);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,58.53) rectangle (axis cs:5.96277351252923,60.33);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,63.45) rectangle (axis cs:5.41545402201973,65.25);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,65.07) rectangle (axis cs:3.97756917088872,66.87);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,66.69) rectangle (axis cs:0.565285394890669,68.49);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,68.31) rectangle (axis cs:1.68927877348599,70.11);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,69.93) rectangle (axis cs:1.06726179670065,71.73);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,74.85) rectangle (axis cs:3.3807587361665,76.65);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,76.47) rectangle (axis cs:3.17651406668027,78.27);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,78.09) rectangle (axis cs:1.08337644580789,79.89);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,79.71) rectangle (axis cs:2.20518620932224,81.51);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,81.33) rectangle (axis cs:1.03922921057276,83.13);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,86.25) rectangle (axis cs:0.717652291506909,88.05);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,87.87) rectangle (axis cs:0.454007645698473,89.67);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,89.49) rectangle (axis cs:-0.203708396187241,91.29);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,91.11) rectangle (axis cs:-0.141228659231896,92.91);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,92.73) rectangle (axis cs:-0.0950377439369876,94.53);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,97.65) rectangle (axis cs:5.70082551677271,99.45);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,99.27) rectangle (axis cs:4.56437763209439,101.07);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,100.89) rectangle (axis cs:-0.0296745319571246,102.69);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,102.51) rectangle (axis cs:2.18982625143276,104.31);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,104.13) rectangle (axis cs:1.13982237991437,105.93);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,109.05) rectangle (axis cs:-0.154809113573207,110.85);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,110.67) rectangle (axis cs:-1.41000248078363,112.47);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,112.29) rectangle (axis cs:-1.19893496389152,114.09);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,113.91) rectangle (axis cs:-0.075675477496373,115.71);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,115.53) rectangle (axis cs:-0.369623953580034,117.33);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,120.45) rectangle (axis cs:-1.32542977772879,122.25);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,122.07) rectangle (axis cs:-0.677246285628041,123.87);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,123.69) rectangle (axis cs:-1.24670274020657,125.49);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,125.31) rectangle (axis cs:-0.790459791184694,127.11);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,126.93) rectangle (axis cs:-0.843564130461361,128.73);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,131.85) rectangle (axis cs:7.73464891307656,133.65);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,133.47) rectangle (axis cs:5.45903915480244,135.27);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,135.09) rectangle (axis cs:0.358832719572444,136.89);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,136.71) rectangle (axis cs:2.07335004102422,138.51);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,138.33) rectangle (axis cs:2.17431708343636,140.13);
+\draw[draw=none,fill=darkcyan1115178,line width=0.32pt] (axis cs:0,143.25) rectangle (axis cs:5.79338123351549,145.05);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,144.87) rectangle (axis cs:3.99133592496594,146.67);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0,146.49) rectangle (axis cs:0.179214493335755,148.29);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0,148.11) rectangle (axis cs:1.57189777483309,149.91);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0,149.73) rectangle (axis cs:1.59476739358766,151.53);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,3.15) rectangle (axis cs:8.09050512054441,4.95);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:8.09050512054441,3.15) rectangle (axis cs:8.19345404986877,4.95);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:8.19345404986877,3.15) rectangle (axis cs:11.1654920594885,4.95);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:11.1654920594885,3.15) rectangle (axis cs:16.5180848971032,4.95);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,14.55) rectangle (axis cs:6.6939967341326,16.35);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:6.6939967341326,14.55) rectangle (axis cs:7.04519938784394,16.35);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:7.04519938784394,14.55) rectangle (axis cs:9.22915855346496,16.35);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:9.22915855346496,14.55) rectangle (axis cs:11.8028491075656,16.35);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,25.95) rectangle (axis cs:5.20708257351787,27.75);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:5.20708257351787,25.95) rectangle (axis cs:5.56618597902918,27.75);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:5.56618597902918,25.95) rectangle (axis cs:6.08880440819419,27.75);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:6.08880440819419,25.95) rectangle (axis cs:7.65371700448338,27.75);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,37.35) rectangle (axis cs:0.0947903644594739,39.15);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0.0947903644594739,37.35) rectangle (axis cs:0.430383634040377,39.15);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0.430383634040377,37.35) rectangle (axis cs:0.8952120487141,39.15);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0.8952120487141,37.35) rectangle (axis cs:0.987717769185315,39.15);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,48.75) rectangle (axis cs:8.01729948053602,50.55);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:8.01729948053602,48.75) rectangle (axis cs:7.80827978699641,50.55);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:7.80827978699641,48.75) rectangle (axis cs:11.0266379558411,50.55);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:11.0266379558411,48.75) rectangle (axis cs:12.9218665389633,50.55);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,60.15) rectangle (axis cs:10.49317376399,61.95);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:10.49317376399,60.15) rectangle (axis cs:12.7829799560331,61.95);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:12.7829799560331,60.15) rectangle (axis cs:17.3462953105055,61.95);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:17.3462953105055,60.15) rectangle (axis cs:23.3090688230348,61.95);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,71.55) rectangle (axis cs:3.97756917088872,73.35);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:3.97756917088872,71.55) rectangle (axis cs:4.54285456577939,73.35);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:4.54285456577939,71.55) rectangle (axis cs:6.23213333926538,73.35);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:6.23213333926538,71.55) rectangle (axis cs:7.29939513596602,73.35);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,82.95) rectangle (axis cs:3.17651406668027,84.75);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:3.17651406668027,82.95) rectangle (axis cs:4.25989051248816,84.75);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:4.25989051248816,82.95) rectangle (axis cs:6.4650767218104,84.75);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:6.4650767218104,82.95) rectangle (axis cs:7.50430593238316,84.75);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,94.35) rectangle (axis cs:0.454007645698473,96.15);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:0.454007645698473,94.35) rectangle (axis cs:0.250299249511232,96.15);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:0.250299249511232,94.35) rectangle (axis cs:0.109070590279337,96.15);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:0.109070590279337,94.35) rectangle (axis cs:0.0140328463423489,96.15);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,105.75) rectangle (axis cs:4.56437763209439,107.55);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:4.56437763209439,105.75) rectangle (axis cs:4.53470310013726,107.55);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:4.53470310013726,105.75) rectangle (axis cs:6.72452935157002,107.55);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:6.72452935157002,105.75) rectangle (axis cs:7.86435173148439,107.55);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,117.15) rectangle (axis cs:-1.41000248078363,118.95);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:-1.41000248078363,117.15) rectangle (axis cs:-2.60893744467515,118.95);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:-2.60893744467515,117.15) rectangle (axis cs:-2.68461292217153,118.95);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:-2.68461292217153,117.15) rectangle (axis cs:-3.05423687575156,118.95);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,128.55) rectangle (axis cs:-0.677246285628041,130.35);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:-0.677246285628041,128.55) rectangle (axis cs:-1.92394902583461,130.35);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:-1.92394902583461,128.55) rectangle (axis cs:-2.71440881701931,130.35);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:-2.71440881701931,128.55) rectangle (axis cs:-3.55797294748067,130.35);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,139.95) rectangle (axis cs:5.45903915480244,141.75);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:5.45903915480244,139.95) rectangle (axis cs:5.81787187437488,141.75);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:5.81787187437488,139.95) rectangle (axis cs:7.8912219153991,141.75);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:7.8912219153991,139.95) rectangle (axis cs:10.0655389988355,141.75);
+\draw[draw=none,fill=cornflowerblue86180233,line width=0.32pt] (axis cs:0,151.35) rectangle (axis cs:3.99133592496594,153.15);
+\draw[draw=none,fill=lightslategray148,line width=0.32pt] (axis cs:3.99133592496594,151.35) rectangle (axis cs:4.1705504183017,153.15);
+\draw[draw=none,fill=darkorange2221435,line width=0.32pt] (axis cs:4.1705504183017,151.35) rectangle (axis cs:5.74244819313479,153.15);
+\draw[draw=none,fill=palevioletred204121167,line width=0.32pt] (axis cs:5.74244819313479,151.35) rectangle (axis cs:7.33721558672245,153.15);
+\draw[draw=black,dashed] (axis cs:0,3.24) rectangle (axis cs:16.7569149267538,4.86);
+\draw[draw=black,dashed] (axis cs:0,14.64) rectangle (axis cs:11.2952207585287,16.26);
+\draw[draw=black,dashed] (axis cs:0,26.04) rectangle (axis cs:9.86311885819027,27.66);
+\draw[draw=black,dashed] (axis cs:0,37.44) rectangle (axis cs:0.227547204198286,39.06);
+\draw[draw=black,dashed] (axis cs:0,48.84) rectangle (axis cs:15.5682312732366,50.46);
+\draw[draw=black,dashed] (axis cs:0,60.24) rectangle (axis cs:16.6303425352307,61.86);
+\draw[draw=black,dashed] (axis cs:0,71.64) rectangle (axis cs:6.88269310214402,73.26);
+\draw[draw=black,dashed] (axis cs:0,83.04) rectangle (axis cs:6.30077796906123,84.66);
+\draw[draw=black,dashed] (axis cs:0,94.44) rectangle (axis cs:0.327088091908423,96.06);
+\draw[draw=black,dashed] (axis cs:0,105.84) rectangle (axis cs:8.15781053170261,107.46);
+\draw[draw=black,dashed] (axis cs:0,117.24) rectangle (axis cs:-0.62458622352014,118.86);
+\draw[draw=black,dashed] (axis cs:0,128.64) rectangle (axis cs:-0.379151137889988,130.26);
+\draw[draw=black,dashed] (axis cs:0,140.04) rectangle (axis cs:9.98814855472583,141.66);
+\draw[draw=black,dashed] (axis cs:0,151.44) rectangle (axis cs:7.39476375402615,153.06);
+\end{axis}
+
+\end{tikzpicture}

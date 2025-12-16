@@ -1,0 +1,694 @@
+{
+  "baseline": {
+    "128": {
+      "cpu:mean": 11.46,
+      "50p_latency:median": 0.6755,
+      "75p_latency:median": 1.16,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.775,
+      "throughput:median": 209273.21000000002
+    },
+    "144": {
+      "cpu:mean": 11.405,
+      "50p_latency:median": 0.639,
+      "75p_latency:median": 1.16,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.775,
+      "throughput:median": 207345.97
+    },
+    "160": {
+      "cpu:mean": 11.425,
+      "50p_latency:median": 0.4215,
+      "75p_latency:median": 1.16,
+      "90p_latency:median": 1.7349999999999999,
+      "99p_latency:median": 2.795,
+      "throughput:median": 207110.53
+    },
+    "176": {
+      "cpu:mean": 11.48,
+      "50p_latency:median": 0.252,
+      "75p_latency:median": 1.145,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.79,
+      "throughput:median": 209001.985
+    },
+    "192": {
+      "cpu:mean": 11.45,
+      "50p_latency:median": 0.1945,
+      "75p_latency:median": 1.14,
+      "90p_latency:median": 1.7149999999999999,
+      "99p_latency:median": 2.78,
+      "throughput:median": 208867.47499999998
+    },
+    "208": {
+      "cpu:mean": 11.465,
+      "50p_latency:median": 0.1705,
+      "75p_latency:median": 1.12,
+      "90p_latency:median": 1.7,
+      "99p_latency:median": 2.77,
+      "throughput:median": 209782.51
+    },
+    "224": {
+      "cpu:mean": 11.505,
+      "50p_latency:median": 0.1585,
+      "75p_latency:median": 1.12,
+      "90p_latency:median": 1.7,
+      "99p_latency:median": 2.77,
+      "throughput:median": 209427.97499999998
+    },
+    "240": {
+      "cpu:mean": 11.49,
+      "50p_latency:median": 0.1545,
+      "75p_latency:median": 1.1,
+      "90p_latency:median": 1.7,
+      "99p_latency:median": 2.79,
+      "throughput:median": 208285.09499999997
+    },
+    "256": {
+      "cpu:mean": 14.635,
+      "50p_latency:median": 1.39,
+      "75p_latency:median": 2.085,
+      "90p_latency:median": 2.875,
+      "99p_latency:median": 4.425000000000001,
+      "throughput:median": 193935.615
+    },
+    "384": {
+      "cpu:mean": 17.53,
+      "50p_latency:median": 2.075,
+      "75p_latency:median": 3.22,
+      "90p_latency:median": 4.115,
+      "99p_latency:median": 6.44,
+      "throughput:median": 182474.21500000003
+    },
+    "512": {
+      "cpu:mean": 20.615,
+      "50p_latency:median": 2.95,
+      "75p_latency:median": 4.3,
+      "90p_latency:median": 5.3,
+      "99p_latency:median": 8.21,
+      "throughput:median": 177755.70500000002
+    },
+    "640": {
+      "cpu:mean": 23.57,
+      "50p_latency:median": 4.055,
+      "75p_latency:median": 5.38,
+      "90p_latency:median": 6.609999999999999,
+      "99p_latency:median": 10.26,
+      "throughput:median": 171903.83000000002
+    },
+    "768": {
+      "cpu:mean": 26.455,
+      "50p_latency:median": 5.05,
+      "75p_latency:median": 6.47,
+      "90p_latency:median": 7.904999999999999,
+      "99p_latency:median": 12.575,
+      "throughput:median": 168794.16999999998
+    },
+    "896": {
+      "cpu:mean": 29.725,
+      "50p_latency:median": 6.015,
+      "75p_latency:median": 7.715,
+      "90p_latency:median": 9.399999999999999,
+      "99p_latency:median": 15.100000000000001,
+      "throughput:median": 166166.06
+    },
+    "1024": {
+      "cpu:mean": 32.7,
+      "50p_latency:median": 6.985,
+      "75p_latency:median": 8.885000000000002,
+      "90p_latency:median": 10.92,
+      "99p_latency:median": 17.86,
+      "throughput:median": 163006.97999999998
+    },
+    "1280": {
+      "cpu:mean": 37.805,
+      "50p_latency:median": 8.795,
+      "75p_latency:median": 11.129999999999999,
+      "90p_latency:median": 13.809999999999999,
+      "99p_latency:median": 22.47,
+      "throughput:median": 159545.145
+    },
+    "1536": {
+      "cpu:mean": 41.68,
+      "50p_latency:median": 10.71,
+      "75p_latency:median": 13.415,
+      "90p_latency:median": 16.490000000000002,
+      "99p_latency:median": 26.229999999999997,
+      "throughput:median": 156670.34
+    },
+    "1792": {
+      "cpu:mean": 44.02,
+      "50p_latency:median": 12.74,
+      "75p_latency:median": 16.009999999999998,
+      "90p_latency:median": 19.76,
+      "99p_latency:median": 29.759999999999998,
+      "throughput:median": 152799.305
+    },
+    "2048": {
+      "cpu:mean": 45.415,
+      "50p_latency:median": 14.44,
+      "75p_latency:median": 18.595,
+      "90p_latency:median": 23.32,
+      "99p_latency:median": 34.58,
+      "throughput:median": 151505.07
+    },
+    "2304": {
+      "cpu:mean": 46.89,
+      "50p_latency:median": 16.015,
+      "75p_latency:median": 21.085,
+      "90p_latency:median": 26.689999999999998,
+      "99p_latency:median": 39.45,
+      "throughput:median": 150552.925
+    },
+    "2560": {
+      "cpu:mean": 49.025,
+      "50p_latency:median": 17.79,
+      "75p_latency:median": 23.814999999999998,
+      "90p_latency:median": 30.295,
+      "99p_latency:median": 44.54,
+      "throughput:median": 149470.89
+    },
+    "2816": {
+      "cpu:mean": 50.83,
+      "50p_latency:median": 19.65,
+      "75p_latency:median": 26.28,
+      "90p_latency:median": 33.489999999999995,
+      "99p_latency:median": 48.915,
+      "throughput:median": 147862.135
+    },
+    "3072": {
+      "cpu:mean": 51.71,
+      "50p_latency:median": 21.36,
+      "75p_latency:median": 28.490000000000002,
+      "90p_latency:median": 36.155,
+      "99p_latency:median": 52.39,
+      "throughput:median": 147744.60499999998
+    },
+    "3328": {
+      "cpu:mean": 50.655,
+      "50p_latency:median": 22.66,
+      "75p_latency:median": 30.775,
+      "90p_latency:median": 40.790000000000006,
+      "99p_latency:median": 648.34,
+      "throughput:median": 147778.045
+    },
+    "3584": {
+      "cpu:mean": 50.575,
+      "50p_latency:median": 22.355,
+      "75p_latency:median": 30.63,
+      "90p_latency:median": 40.30500000000001,
+      "99p_latency:median": 479.03,
+      "throughput:median": 147618.29
+    },
+    "3840": {
+      "cpu:mean": 50.685,
+      "50p_latency:median": 22.27,
+      "75p_latency:median": 30.605,
+      "90p_latency:median": 40.095,
+      "99p_latency:median": 469.65,
+      "throughput:median": 147059.64500000002
+    },
+    "4096": {
+      "cpu:mean": 50.845,
+      "50p_latency:median": 22.27,
+      "75p_latency:median": 30.57,
+      "90p_latency:median": 39.875,
+      "99p_latency:median": 405.39,
+      "throughput:median": 147147.595
+    },
+    "4352": {
+      "cpu:mean": 50.985,
+      "50p_latency:median": 22.1,
+      "75p_latency:median": 30.435000000000002,
+      "90p_latency:median": 39.71,
+      "99p_latency:median": 412.16999999999996,
+      "throughput:median": 147886.825
+    },
+    "4608": {
+      "cpu:mean": 51.06,
+      "50p_latency:median": 21.93,
+      "75p_latency:median": 30.174999999999997,
+      "90p_latency:median": 39.405,
+      "99p_latency:median": 395.505,
+      "throughput:median": 148304.83500000002
+    },
+    "4864": {
+      "cpu:mean": 51.105000000000004,
+      "50p_latency:median": 21.935000000000002,
+      "75p_latency:median": 30.09,
+      "90p_latency:median": 39.22,
+      "99p_latency:median": 367.835,
+      "throughput:median": 148510.45500000002
+    },
+    "5120": {
+      "cpu:mean": 51.215,
+      "50p_latency:median": 21.98,
+      "75p_latency:median": 30.045,
+      "90p_latency:median": 39.11,
+      "99p_latency:median": 371.845,
+      "throughput:median": 148104.325
+    },
+    "5376": {
+      "cpu:mean": 51.225,
+      "50p_latency:median": 21.905,
+      "75p_latency:median": 29.985,
+      "90p_latency:median": 38.989999999999995,
+      "99p_latency:median": 368.21500000000003,
+      "throughput:median": 147972.585
+    },
+    "5632": {
+      "cpu:mean": 51.245,
+      "50p_latency:median": 21.924999999999997,
+      "75p_latency:median": 29.96,
+      "90p_latency:median": 38.845,
+      "99p_latency:median": 332.015,
+      "throughput:median": 147981.005
+    },
+    "5888": {
+      "cpu:mean": 51.21,
+      "50p_latency:median": 21.8,
+      "75p_latency:median": 29.85,
+      "90p_latency:median": 38.805,
+      "99p_latency:median": 334.21,
+      "throughput:median": 148735.63
+    },
+    "6144": {
+      "cpu:mean": 51.215,
+      "50p_latency:median": 21.965,
+      "75p_latency:median": 29.955,
+      "90p_latency:median": 38.715,
+      "99p_latency:median": 318.575,
+      "throughput:median": 147792.985
+    },
+    "6400": {
+      "cpu:mean": 51.24,
+      "50p_latency:median": 21.85,
+      "75p_latency:median": 29.77,
+      "90p_latency:median": 38.56,
+      "99p_latency:median": 288.48,
+      "throughput:median": 148408.545
+    },
+    "6656": {
+      "cpu:mean": 51.255,
+      "50p_latency:median": 21.810000000000002,
+      "75p_latency:median": 29.795,
+      "90p_latency:median": 38.56,
+      "99p_latency:median": 278.5,
+      "throughput:median": 148535.175
+    },
+    "6912": {
+      "cpu:mean": 51.195,
+      "50p_latency:median": 21.880000000000003,
+      "75p_latency:median": 29.84,
+      "90p_latency:median": 38.53,
+      "99p_latency:median": 253.125,
+      "throughput:median": 148125.015
+    },
+    "7168": {
+      "cpu:mean": 51.21,
+      "50p_latency:median": 21.869999999999997,
+      "75p_latency:median": 29.8,
+      "90p_latency:median": 38.425,
+      "99p_latency:median": 236.555,
+      "throughput:median": 148104.20500000002
+    },
+    "7424": {
+      "cpu:mean": 51.205,
+      "50p_latency:median": 21.82,
+      "75p_latency:median": 29.770000000000003,
+      "90p_latency:median": 38.480000000000004,
+      "99p_latency:median": 239.04500000000002,
+      "throughput:median": 148165.90500000003
+    },
+    "7680": {
+      "cpu:mean": 51.29,
+      "50p_latency:median": 21.785,
+      "75p_latency:median": 29.75,
+      "90p_latency:median": 38.3,
+      "99p_latency:median": 206.015,
+      "throughput:median": 148464.36
+    },
+    "7936": {
+      "cpu:mean": 51.33,
+      "50p_latency:median": 21.82,
+      "75p_latency:median": 29.735,
+      "90p_latency:median": 38.34,
+      "99p_latency:median": 191.195,
+      "throughput:median": 148313.825
+    },
+    "8192": {
+      "cpu:mean": 51.315,
+      "50p_latency:median": 21.86,
+      "75p_latency:median": 29.685000000000002,
+      "90p_latency:median": 38.26,
+      "99p_latency:median": 191.58499999999998,
+      "throughput:median": 148552.87
+    }
+  },
+  "full-r2c": {
+    "128": {
+      "cpu:mean": 11.75,
+      "50p_latency:median": 0.6924999999999999,
+      "75p_latency:median": 1.165,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.77,
+      "throughput:median": 204295.91
+    },
+    "144": {
+      "cpu:mean": 11.77,
+      "50p_latency:median": 0.6505000000000001,
+      "75p_latency:median": 1.165,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.7649999999999997,
+      "throughput:median": 204667.455
+    },
+    "160": {
+      "cpu:mean": 11.695,
+      "50p_latency:median": 0.451,
+      "75p_latency:median": 1.1549999999999998,
+      "90p_latency:median": 1.7149999999999999,
+      "99p_latency:median": 2.7649999999999997,
+      "throughput:median": 204778.245
+    },
+    "176": {
+      "cpu:mean": 11.735,
+      "50p_latency:median": 0.3015,
+      "75p_latency:median": 1.15,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.77,
+      "throughput:median": 205464.49
+    },
+    "192": {
+      "cpu:mean": 11.765,
+      "50p_latency:median": 0.231,
+      "75p_latency:median": 1.15,
+      "90p_latency:median": 1.725,
+      "99p_latency:median": 2.785,
+      "throughput:median": 204895.70500000002
+    },
+    "208": {
+      "cpu:mean": 11.745000000000001,
+      "50p_latency:median": 0.1915,
+      "75p_latency:median": 1.1349999999999998,
+      "90p_latency:median": 1.72,
+      "99p_latency:median": 2.775,
+      "throughput:median": 204747.62
+    },
+    "224": {
+      "cpu:mean": 11.785,
+      "50p_latency:median": 0.1775,
+      "75p_latency:median": 1.125,
+      "90p_latency:median": 1.71,
+      "99p_latency:median": 2.7649999999999997,
+      "throughput:median": 205681.755
+    },
+    "240": {
+      "cpu:mean": 11.75,
+      "50p_latency:median": 0.1705,
+      "75p_latency:median": 1.105,
+      "90p_latency:median": 1.7,
+      "99p_latency:median": 2.7800000000000002,
+      "throughput:median": 205948.68
+    },
+    "256": {
+      "cpu:mean": 14.87,
+      "50p_latency:median": 1.4,
+      "75p_latency:median": 2.0999999999999996,
+      "90p_latency:median": 2.9,
+      "99p_latency:median": 4.455,
+      "throughput:median": 190632.29
+    },
+    "384": {
+      "cpu:mean": 17.59,
+      "50p_latency:median": 2.11,
+      "75p_latency:median": 3.255,
+      "90p_latency:median": 4.175,
+      "99p_latency:median": 6.5,
+      "throughput:median": 179182.555
+    },
+    "512": {
+      "cpu:mean": 20.64,
+      "50p_latency:median": 3.005,
+      "75p_latency:median": 4.390000000000001,
+      "90p_latency:median": 5.390000000000001,
+      "99p_latency:median": 8.235,
+      "throughput:median": 172183.7
+    },
+    "640": {
+      "cpu:mean": 23.665,
+      "50p_latency:median": 4.07,
+      "75p_latency:median": 5.425,
+      "90p_latency:median": 6.64,
+      "99p_latency:median": 10.405000000000001,
+      "throughput:median": 170448.34
+    },
+    "768": {
+      "cpu:mean": 26.47,
+      "50p_latency:median": 5.15,
+      "75p_latency:median": 6.58,
+      "90p_latency:median": 7.98,
+      "99p_latency:median": 12.685,
+      "throughput:median": 165976.615
+    },
+    "896": {
+      "cpu:mean": 29.815,
+      "50p_latency:median": 6.12,
+      "75p_latency:median": 7.800000000000001,
+      "90p_latency:median": 9.55,
+      "99p_latency:median": 15.184999999999999,
+      "throughput:median": 163360.19
+    },
+    "1024": {
+      "cpu:mean": 32.815,
+      "50p_latency:median": 7.02,
+      "75p_latency:median": 8.895,
+      "90p_latency:median": 10.91,
+      "99p_latency:median": 17.615000000000002,
+      "throughput:median": 162471.135
+    },
+    "1280": {
+      "cpu:mean": 37.89,
+      "50p_latency:median": 8.84,
+      "75p_latency:median": 11.184999999999999,
+      "90p_latency:median": 13.870000000000001,
+      "99p_latency:median": 22.45,
+      "throughput:median": 158560.28499999997
+    },
+    "1536": {
+      "cpu:mean": 41.61,
+      "50p_latency:median": 10.865,
+      "75p_latency:median": 13.615,
+      "90p_latency:median": 16.73,
+      "99p_latency:median": 26.08,
+      "throughput:median": 154524.365
+    },
+    "1792": {
+      "cpu:mean": 43.98,
+      "50p_latency:median": 12.77,
+      "75p_latency:median": 16.064999999999998,
+      "90p_latency:median": 19.865000000000002,
+      "99p_latency:median": 29.869999999999997,
+      "throughput:median": 152239.46000000002
+    },
+    "2048": {
+      "cpu:mean": 45.22,
+      "50p_latency:median": 14.575,
+      "75p_latency:median": 18.725,
+      "90p_latency:median": 23.44,
+      "99p_latency:median": 34.7,
+      "throughput:median": 150089.38
+    },
+    "2304": {
+      "cpu:mean": 46.765,
+      "50p_latency:median": 16.060000000000002,
+      "75p_latency:median": 21.16,
+      "90p_latency:median": 26.805,
+      "99p_latency:median": 39.724999999999994,
+      "throughput:median": 149964.25
+    },
+    "2560": {
+      "cpu:mean": 48.99,
+      "50p_latency:median": 17.83,
+      "75p_latency:median": 23.814999999999998,
+      "90p_latency:median": 30.325,
+      "99p_latency:median": 44.58,
+      "throughput:median": 148735.81
+    },
+    "2816": {
+      "cpu:mean": 50.58,
+      "50p_latency:median": 19.64,
+      "75p_latency:median": 26.275,
+      "90p_latency:median": 33.5,
+      "99p_latency:median": 48.875,
+      "throughput:median": 147753.065
+    },
+    "3072": {
+      "cpu:mean": 51.68,
+      "50p_latency:median": 21.485,
+      "75p_latency:median": 28.68,
+      "90p_latency:median": 36.394999999999996,
+      "99p_latency:median": 52.655,
+      "throughput:median": 146069.90000000002
+    },
+    "3328": {
+      "cpu:mean": 50.455,
+      "50p_latency:median": 22.814999999999998,
+      "75p_latency:median": 30.975,
+      "90p_latency:median": 41.1,
+      "99p_latency:median": 672.84,
+      "throughput:median": 145941.16
+    },
+    "3584": {
+      "cpu:mean": 50.575,
+      "50p_latency:median": 22.535,
+      "75p_latency:median": 30.855,
+      "90p_latency:median": 40.510000000000005,
+      "99p_latency:median": 472.64,
+      "throughput:median": 146292.375
+    },
+    "3840": {
+      "cpu:mean": 50.685,
+      "50p_latency:median": 22.39,
+      "75p_latency:median": 30.78,
+      "90p_latency:median": 40.495000000000005,
+      "99p_latency:median": 476.315,
+      "throughput:median": 146412.22999999998
+    },
+    "4096": {
+      "cpu:mean": 50.825,
+      "50p_latency:median": 22.265,
+      "75p_latency:median": 30.68,
+      "90p_latency:median": 40.144999999999996,
+      "99p_latency:median": 439.81,
+      "throughput:median": 146815.45500000002
+    },
+    "4352": {
+      "cpu:mean": 50.935,
+      "50p_latency:median": 22.235,
+      "75p_latency:median": 30.545,
+      "90p_latency:median": 39.915,
+      "99p_latency:median": 435.315,
+      "throughput:median": 146948.71000000002
+    },
+    "4608": {
+      "cpu:mean": 51.02,
+      "50p_latency:median": 22.105,
+      "75p_latency:median": 30.4,
+      "90p_latency:median": 39.724999999999994,
+      "99p_latency:median": 393.91999999999996,
+      "throughput:median": 147621.765
+    },
+    "4864": {
+      "cpu:mean": 51.005,
+      "50p_latency:median": 22.075000000000003,
+      "75p_latency:median": 30.28,
+      "90p_latency:median": 39.46,
+      "99p_latency:median": 386.985,
+      "throughput:median": 147695.8
+    },
+    "5120": {
+      "cpu:mean": 51.25,
+      "50p_latency:median": 22.04,
+      "75p_latency:median": 30.22,
+      "90p_latency:median": 39.405,
+      "99p_latency:median": 394.695,
+      "throughput:median": 147287.28499999997
+    },
+    "5376": {
+      "cpu:mean": 51.22,
+      "50p_latency:median": 22.075000000000003,
+      "75p_latency:median": 30.18,
+      "90p_latency:median": 39.269999999999996,
+      "99p_latency:median": 325.22,
+      "throughput:median": 147240.08500000002
+    },
+    "5632": {
+      "cpu:mean": 51.150000000000006,
+      "50p_latency:median": 22.035,
+      "75p_latency:median": 30.1,
+      "90p_latency:median": 39.05,
+      "99p_latency:median": 336.74,
+      "throughput:median": 147122.45
+    },
+    "5888": {
+      "cpu:mean": 51.29,
+      "50p_latency:median": 22.025,
+      "75p_latency:median": 30.035,
+      "90p_latency:median": 39.06,
+      "99p_latency:median": 342.965,
+      "throughput:median": 147537.39500000002
+    },
+    "6144": {
+      "cpu:mean": 51.265,
+      "50p_latency:median": 21.979999999999997,
+      "75p_latency:median": 30.005,
+      "90p_latency:median": 38.885000000000005,
+      "99p_latency:median": 299.33000000000004,
+      "throughput:median": 147660.19
+    },
+    "6400": {
+      "cpu:mean": 51.29,
+      "50p_latency:median": 22.03,
+      "75p_latency:median": 30.020000000000003,
+      "90p_latency:median": 38.95,
+      "99p_latency:median": 266.14,
+      "throughput:median": 147146.7
+    },
+    "6656": {
+      "cpu:mean": 51.105000000000004,
+      "50p_latency:median": 21.979999999999997,
+      "75p_latency:median": 29.97,
+      "90p_latency:median": 38.805,
+      "99p_latency:median": 279.36,
+      "throughput:median": 147174.595
+    },
+    "6912": {
+      "cpu:mean": 51.29,
+      "50p_latency:median": 21.985,
+      "75p_latency:median": 29.975,
+      "90p_latency:median": 38.71,
+      "99p_latency:median": 262.93,
+      "throughput:median": 147259.715
+    },
+    "7168": {
+      "cpu:mean": 51.16,
+      "50p_latency:median": 22.0,
+      "75p_latency:median": 29.955,
+      "90p_latency:median": 38.68,
+      "99p_latency:median": 246.60500000000002,
+      "throughput:median": 147119.16
+    },
+    "7424": {
+      "cpu:mean": 51.235,
+      "50p_latency:median": 21.97,
+      "75p_latency:median": 29.94,
+      "90p_latency:median": 38.75,
+      "99p_latency:median": 213.055,
+      "throughput:median": 147338.08500000002
+    },
+    "7680": {
+      "cpu:mean": 51.31,
+      "50p_latency:median": 22.015,
+      "75p_latency:median": 29.975,
+      "90p_latency:median": 38.655,
+      "99p_latency:median": 201.125,
+      "throughput:median": 146761.1
+    },
+    "7936": {
+      "cpu:mean": 51.32,
+      "50p_latency:median": 22.02,
+      "75p_latency:median": 29.97,
+      "90p_latency:median": 38.61,
+      "99p_latency:median": 205.415,
+      "throughput:median": 146624.57
+    },
+    "8192": {
+      "cpu:mean": 51.230000000000004,
+      "50p_latency:median": 22.0,
+      "75p_latency:median": 29.945,
+      "90p_latency:median": 38.575,
+      "99p_latency:median": 180.17000000000002,
+      "throughput:median": 146924.885
+    }
+  }
+}

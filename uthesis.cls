@@ -390,9 +390,9 @@
 \newcommand{\mccorrect}[1]{\ifcorrections\hl{#1}\else#1\fi}
 
 
-% JEM: adjust start-of-chapter spacing
-\renewcommand{\chapterheadstartvskip}{\vspace*{40pt}}
-\renewcommand{\chapterheadendvskip}{\vspace{30pt}}
+% Reduced chapter spacing for more compact layout
+\renewcommand{\chapterheadstartvskip}{\vspace*{10pt}}
+\renewcommand{\chapterheadendvskip}{\vspace{15pt}}
 
 
 % JEM: combine all of the commands you run before appendices start

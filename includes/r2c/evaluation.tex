@@ -1,5 +1,5 @@
 \section{Evaluation}\label{sec:r2c:evaluation}
-\begin{figure}[t!]
+\begin{figure}[t]
     \centering
     \begingroup
     \pgfplotsset{
@@ -12,13 +12,36 @@
             },
         },
     }
-    \input{figures/r2c/r2c-exec-time}%
-    \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{sss:full-overhead}).}
+    \input{figures/r2c/exec-time}%
+    \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{r2c:sss:full-overhead}).}
     % \propername{Geomean int} shows the geometric mean overhead of the SPEC CPU 2017 integer benchmarks only and \propername{geomean all} of the entire benchmark suite.}
-    \label{fig:perf-full}
+    \label{r2c:fig:perf-full}
 \end{figure}
 
-\subsection{System Configuration}\label{ss:eval-cfg} % about quarter of a page
+
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{
+        every axis/.append style={
+            yticklabel style={font=\propernamedecl\footnotesize},
+            execute at begin axis={
+                \pgfplotsset{
+                    width=\textwidth,
+                    height=0.8\linewidth}
+            },
+        },
+    }
+    \input{figures/r2c/comp-full}%
+    \endgroup    \caption{The component-wise overhead of of \rtwoc{}'s components.
+    See \cref{r2c:sss:eval-btra}, \cref{r2c:sss:eval-heapbt} and \cref{r2c:sss:eval-layout} for details.
+    The overhead is relative to the baseline without \rtwoc{}.
+    Measurements were performed on \propername{EPYC}.}
+    \label{r2c:fig:perf-components}
+\end{figure}
+
+
+\subsection{System Configuration}\label{r2c:ss:eval-cfg} % about quarter of a page
 % We performed the evaluation of the total overhead on four different machines.
 We evaluate \rtwoc{} on four different machines.
 Machine \propername{EPYC Rome} is equipped with an AMD EPYC Rome 7H12 CPU running at 3.2 GHz, 1TB DDR4 RAM running at 3200 MHz, and Debian 11.
@@ -31,7 +54,7 @@ On each machine we used the bundled GCC and gold linker version to compile LLVM.
 Our LLVM modifications are based on LLVM 11 and we compiled the benchmarks against the bundled \propername{glibc} and \propername{libstdc\plusplus} versions.
 %    For \propername{musl} we used version 1.2.2 and the \propername{libc\plusplus} included with LLVM 11.
 
-\subsection{Performance}\label{ss:perf}
+\subsection{Performance}\label{r2c:ss:perf}
 
 To evaluate the performance impact of \rtwoc, we built and ran the SPEC CPU 2017 benchmark suite using our \rtwoc{} compiler.
 The SPEC CPU 2017 suite is a collection of CPU-intensive C and \cpp benchmark programs.
@@ -40,10 +63,10 @@ To allow for direct comparison with prior work, we included the floating point b
 
 We compiled all benchmarks with the \code{-O3} optimization level and link-time optimization---LLVM's ThinLTO model in our case---enabled.
 As LLVM does not yet support the compilation of \propername{glibc}, we compiled the benchmarks against the unprotected system version of \propername{glibc} and \propername{libstdc\plusplus}.
-To measure the worst-case overhead, we also enabled \glspl{BTRA} for call sites to unprotected code (see \cref{ss:limitations-coverage}).
+To measure the worst-case overhead, we also enabled \glspl{BTRA} for call sites to unprotected code (see \cref{r2c:ss:limitations-coverage}).
 For the evaluation of full \rtwoc{} we took the median execution time of 20 runs.
 For the analysis of \rtwoc{}'s components we used \propername{EPYC Rome} and took the median execution time of 12 runs.
-%\rtwoc{} inserts between one and five traps into each function prolog and each pair of \btra AVX setup instructions contains one to three NOPs (see \cref{ss:strengthening}).
+%\rtwoc{} inserts between one and five traps into each function prolog and each pair of \btra AVX setup instructions contains one to three NOPs (see \cref{r2c:ss:strengthening}).
 Since the location of return addresses and the distribution of \glspl{heapbt} is random, we recompiled the benchmarks with a different seed for each of the executions.
 To guarantee a fair comparison, we compiled the baseline with the same compiler version and flags but with \rtwoc disabled.
 
@@ -62,17 +85,17 @@ We compared the median throughput of five runs at the previously determined satu
 %    and to ensure comparability with prior work, we report only the results of the \propername{glibc} based benchmarks here.
 %    The performance results of the benchmarks compiled with the \musllib toolchain can be found in~\cref{apx:additional-benchmarks}.
 
-\subsubsection{\glspl{BTRA}}\label{sss:eval-btra}
+\subsubsection{\glspl{BTRA}}\label{r2c:sss:eval-btra}
 We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with our optimized AVX2 setup sequence respectively.
 To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
-We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{ss:strengthening}).
+We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{r2c:ss:strengthening}).
 
 For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{r2c:ss:impl-btras}).
-\cref{tab:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
+\cref{r2c:fig:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
 
 In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-btras}).
 \fbetodo{adjust to new numbers}
-\cref{tab:perf-components} shows that the optimization improves the overall performance by 2\%.
+\cref{r2c:fig:perf-components} shows that the optimization improves the overall performance by 2\%.
 Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 13 absolute percent points, down to 8\%.
 In this configuration, the maximum overhead of 10\% is caused by \propername{xalancbmk}.
 
@@ -82,9 +105,9 @@ We found that the resulting geometric mean performance overhead is \geomeancfs w
 These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
 
 %\subsubsection{\glspl{BTRA} with vector instructions}
-%We built a configuration that uses our optimized AVX2 instruction setup sequence (see \propername{AVX2} in \cref{fig:perf-components}).
-%In contrast to the \code{push} instructions, setting up ten \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{ss:impl-rads}).
-%\cref{fig:perf-components} shows that the performance increase afforded by the optimization varies per benchmark.
+%We built a configuration that uses our optimized AVX2 instruction setup sequence (see \propername{AVX2} in \cref{r2c:fig:perf-components}).
+%In contrast to the \code{push} instructions, setting up ten \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-rads}).
+%\cref{r2c:fig:perf-components} shows that the performance increase afforded by the optimization varies per benchmark.
 %\fbetodo{adjust to new numbers}
 %Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 16\% absolute percent points, to 6.82\%.
 
@@ -125,30 +148,37 @@ These numbers suggest that the majority of the overhead is caused by writing the
 %        \vspace*{-2em}
 %    \end{table}
 
-\subsubsection{\glspl{heapbt}}\label{sss:eval-heapbt}
+\subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
 \fbetodo{adjust to new numbers}
-\cref{tab:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
+\cref{r2c:fig:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
 The optimization to insert \glspl{heapbt} only in functions that write to their stack frame improves performance by 1\%.
 
-\subsubsection{Prolog \& Layout Randomization}\label{sss:eval-layout}
+\subsubsection{Prolog \& Layout Randomization}\label{r2c:sss:eval-layout}
 We also isolated the performance impact of prolog trap insertion, and code- and data-layout randomization techniques---i.e., stack slot shuffling, global variable shuffling, and register-allocation randomization.
 The prolog insertion randomly inserts between one and five traps into each function prolog, causing a geometric mean overhead of 2\%, with \propername{xalancbmk} being most affected at 6\%.
 The combination of layout randomization techniques generally caused negligible overhead.
 
 % \vspace*{-1em}
 
-\subsubsection{Full \rtwoc}\label{sss:full-overhead}
-We built a configuration with all \rtwoc{} protections enabled (see \cref{fig:perf-full}).
+\subsubsection{Full \rtwoc}\label{r2c:sss:full-overhead}
+We built a configuration with all \rtwoc{} protections enabled (see \cref{r2c:fig:perf-full}).
 % would be nice to reiterate, but space is precious
 This configuration
 \begin{enumerate*}[label={(\roman*)}]
     \item protects return addresses with \glspl{BTRA} (see \cref{r2c:ss:impl-btras});
-    \item injects \glspl{heapbt} (see \cref{ss:impl-heap-boobytraps});
+    \item injects \glspl{heapbt} (see \cref{r2c:ss:impl-heap-boobytraps});
     \item performs stack slot shuffling, global variable shuffling and register-allocation randomization;
-    \item and inserts traps into function prologs and NOPs at call sites (see \cref{ss:strengthening}).
+    \item and inserts traps into function prologs and NOPs at call sites (see \cref{r2c:ss:strengthening}).
 \end{enumerate*}
 The geometric mean overhead is similar on all systems, with the \propername{Xeon} machine showing the highest overhead at 8.5\% for the full benchmark suite.
+In \cref{r2c:fig:perf-components} the stacked bars (bars with differently colored sections) show the summed component overhead.
+To contrast this artificially summed overhead with the actual overhead of all components working together, the dashed bars in \cref{r2c:fig:perf-components} show the real overhead for full \rtwoc on \propername{EPYC}.
+For most benchmarks, the sum of component overheads accurately predicts the actual total overhead.
+For \propername{mcf} and \propername{omnetpp}, however, the actual overhead is higher than the sum of components and for \propername{xalancbmk} it is lower.
+One possible explanation is the inherent randomness in the compilations.
+
+
 Some benchmarks show diverging results on different machines.
 On \propername{i9-9900K}, \propername{perlbench} has a significantly higher overhead than on the other machines.
 For \propername{omnetpp}, the \propername{Xeon} machine has the highest overhead at 21\%.
@@ -157,16 +187,16 @@ Conversely, \propername{xalancbmk} shows better results on \propername{i9-9900K}
 On \propername{i9-9900K}, we found the webserver throughput \emph{decrease} to be 13\% for \propername{nginx} and 12\% for \propername{Apache}.
 On the AMD machines, the throughput decrease was between 3 and 4 percent for both \propername{nginx} and \propername{Apache}.
 
-%    \subsubsection{Adaptive parameter selection}\label{sss:adaptive}
+%    \subsubsection{Adaptive parameter selection}\label{r2c:sss:adaptive}
 %    To demonstrate the advantages of adaptive security, we built two configurations with adaptive parameter selection based on performance profiles.
 %    Note that the performance profiles also influence LLVM's optimization decisions.
 %    For that reason we compared the configurations with adaptive parameter selection to a (faster) profile-enabled baseline.
 %    The configuration \propername{Adaptive-PR1} uses the parameter range $[0,2]$ for the lower bound, and the range $[2,5]$ for the upper bound of the subsequent random trial.
-%    As a result, the random trial for the coolest call site samples from $[2,5]$ and for the hottest call sites from $[0,2]$ (see \cref{ss:impl-pgo} for the details).
+%    As a result, the random trial for the coolest call site samples from $[2,5]$ and for the hottest call sites from $[0,2]$ (see \cref{r2c:ss:impl-pgo} for the details).
 %    The configuration \propername{Adaptive-PR2} provides better probabilistic security by using larger parameter ranges.
 %    Specifically, \propername{Adaptive-PR2} uses a range of $[1,5]$ for the lower bound, and a range of $[2,10]$ for the upper bound.
 %    The resulting random trial range for the coolest call sites is $[5,10]$ and for the hottest call sites $[1,2]$.
-%    \propername{Adaptive-PR2} differs from \propername{Adaptive-PR1} by allowing twice as many BTRAs in the cold call sites, and protecting even hot call sites with at least \emph{two} BTRAs (also see~\Cref{fig:average-decoy-counts} for BTRA distribution).
+%    \propername{Adaptive-PR2} differs from \propername{Adaptive-PR1} by allowing twice as many BTRAs in the cold call sites, and protecting even hot call sites with at least \emph{two} BTRAs (also see~\Cref{r2c:fig:average-decoy-counts} for BTRA distribution).
 %
 %    \rtwoc's use of performance profiles positively influences performance in two ways.
 %    First, performance profiles allow for more aggressive inlining:
@@ -175,24 +205,6 @@ On the AMD machines, the throughput decrease was between 3 and 4 percent for bot
 %    To evaluate these two effects separately, we built a configuration that uses a fixed number of ten BTRAs in total \emph{despite} the availability of performance profiles, thus cancelling out the effect of adaptive parameter selection.
 %    From the comparison we can see that adaptive parameter selection still increases performance over the \propername{Fixed} configuration already optimized with inlining.
 
-\begin{table}[t]
-    \begin{tabular}{lrr}
-        \toprule
-        {}                        & max  & geomean \\
-        \midrule
-        \propername{Push}         & 1.21 & 1.06    \\
-        \propername{AVX}          & 1.10 & 1.04    \\
-        \propername{\gls{heapbt}} & 1.05 & 1.02    \\
-        \propername{Prolog}       & 1.06 & 1.02    \\
-        \propername{Layout}       & 1.02 & 1.00    \\
-        \bottomrule
-    \end{tabular}
-    \caption{The maximum and geometric mean overhead of \rtwoc{}'s components.
-    See \cref{sss:eval-btra}, \cref{sss:eval-heapbt} and \cref{sss:eval-layout} for details.
-    The overhead is relative to the baseline without \rtwoc{}.
-    }
-    \label{tab:perf-components}
-\end{table}
 
 \subsubsection{Memory overhead}
 To evaluate \rtwoc{}'s memory overhead we linked the benchmark programs from the SPEC CPU 2017 suite to a static library that prints the \propername{maxrss rusage} metric once the program ends.
@@ -207,7 +219,7 @@ With this methodology, we found the memory overhead of the webserver benchmarks 
 We verified experimentally that about 55\% of the memory overhead is caused by the page allocations for \glspl{heapbt}.
 The rest is caused by \glspl{BTRA} and the increased binary size.
 
-\subsection{Scalability}\label{ss:scalability}
+\subsection{Scalability}\label{r2c:ss:scalability}
 Although the SPEC benchmark suite covers a wide variety of test programs, we also compiled real-world software with \rtwoc.
 Apart from Apache and nginx, we also compiled the GTK version of WebKit~\cite{Webkit} and Chromium~\cite{Chromium}.
 We built both browsers with a fixed total number of 10 \glspl{BTRA} per call site.
@@ -217,7 +229,7 @@ WebKit and Chromium are massive \cpp projects with more than 4.5 million lines a
 To verify that \rtwoc does not introduce errors into the browser, we ran the included tests as well as the Speedometer browser benchmark.
 To pass the tests, we had to modify a single source file in Chromium, and three source files in Webkit to deactivate \rtwoc for a few functions.
 In both cases, unprotected code called an \rtwoc compiled function with stack arguments.
-We discuss this implementation limitation in \cref{ss:abi-change}.
+We discuss this implementation limitation in \cref{r2c:ss:abi-change}.
 We did not include the Speedometer performance results in the performance evaluation since Speedometer's results showed a variation of more than 20\% even in the baseline.
 In daily browsing we did not notice any difference.
 

@@ -1,5 +1,5 @@
 \section{Background}
-\subsection{Address-Oblivious Code Reuse}\label{ss:aocr}
+\subsection{Address-Oblivious Code Reuse}\label{r2c:ss:aocr}
 \gls{AOCR} bypasses even leakage-resilient diversity in the form of Readactor and \gls{CPH}.
 While indirect JIT-ROP focuses on the discovery of gadgets, address-oblivious code reuse changes the reuse granularity from sub-function-level reuse to whole-function reuse.
 As a result of this granularity change, defenses focusing on a lower granularity become ineffective.
@@ -7,9 +7,9 @@ Counterfeit object-oriented programming followed a similar strategy, making it i
 
 A closer look at the anatomy of \gls{AOCR} reveals that it comprises two stages, a profiling stage to harvest valuable code pointers, followed by mounting the actual whole-function reuse attack.
 \gls{AOCR} rests on the fact that existing defenses primarily diversify code but leave the layout of observable \emph{data} intact.
-\cref{fig:overview-unprotected} shows the information available to an attacker from an unprotected system.
+\cref{r2c:fig:overview-unprotected} shows the information available to an attacker from an unprotected system.
 Without protection, the global variables, the heap, and the stack remain predictable and contain enough information to mount a whole-function reuse attack.
-Specifically, the attacks in the \gls{AOCR} paper demonstrate how an attacker can \Circled{\code{A}} profile pointer locations on the stack, \Circled{\code{B}} leak heap data to reach the data section, and \Circled{\code{C}} use the predictable data section layout to corrupt function default parameters (see \cref{fig:overview-stack-unprotected}).
+Specifically, the attacks in the \gls{AOCR} paper demonstrate how an attacker can \Circled{\code{A}} profile pointer locations on the stack, \Circled{\code{B}} leak heap data to reach the data section, and \Circled{\code{C}} use the predictable data section layout to corrupt function default parameters (see \cref{r2c:fig:overview-stack-unprotected}).
 
 Among the observable data areas, the stack is particularly vulnerable.
 The stack contains a large number of code pointers (return addresses and function pointers) as well as pointers to the heap and thus serves as a stepping stone to reach other data areas.

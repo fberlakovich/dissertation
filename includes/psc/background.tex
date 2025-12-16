@@ -25,7 +25,7 @@ A polymorphic method call consists of
 
 This process of dynamic dispatch is sometimes emulated in languages such as C, which lack builtin support for polymorphic method calls.
 
-\subsection{Polymorphic Inlining}\label{psc:subsec:polymorphic-inlining}
+\subsection{Polymorphic Inlining}\label{psc:ss:polymorphic-inlining}
 While dynamic binding is a powerful feature, the indirect calls required for vtable lookups can introduce performance overhead and hinder other compiler optimizations.
 To mitigate this overhead, in particular \glspl{JITcomp} use techniques to devirtualize these calls when possible.
 In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite polymorphic call sites to exploit the usually high type stability of call sites.

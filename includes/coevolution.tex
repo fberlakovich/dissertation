@@ -1,4 +1,3 @@
-\section{From Code Injection To Code Reuse}
 \fbetodo{Add timeline and give historical context}
 Before \glspl{CRA}, the most straightforward way for an attacker to execute arbitrary code was to inject code into the target process via a memory corruption.
 The introduction of the hardware feature \gls{DEP} made it practical, however, to prevent memory regions from being writable and executable at the same time.
@@ -165,7 +164,7 @@ A similar attack, called \gls{BROP}, exploits the behavior of certain server sof
 \gls{BROP} probes for valid gadget addresses by trying different addresses with brute force.
 As the process respawning does not penalize an attacker for crashing the target process, the attacker has almost unlimited attempts to find the right addresses.
 
-As a response to \gls{JITROP} and \gls{BROP}, researchers upgraded their defenses to provide \emph{leakage-resilience} in combination with booby traps~\cite{Crane2015}.
+As a response to \gls{JITROP} and \gls{BROP}, researchers also upgraded their defenses to provide \emph{leakage-resilience} in combination with booby traps~\cite{Crane2015}.
 A key component in these defenses is to protect the randomized code with execute-only memory, thereby preventing an attacker from leaking a process' code section.
 Execute-only memory comes in different variants, based on hardware support~\cite{Crane2015,luo2025}\todo{more citations}, with destructive code reads~\cite{Tang2015,Werner2016} or with compartmentalization~\cite{Braden2016}.
 The other crucial component is booby traps~\cite{Crane2013}.
@@ -177,6 +176,10 @@ In response to such an attack, the target program could
     \item create a dump and shutdown,
 \end{enumerate*}
 to name just a few.
+
+An alternative response to \gls{JITROP} is \emph{continuous re-randomization}.
+\propername{Shuffler} , for example, re-randomizes code layout at short intervals (50\,ms), introducing a tight deadline for disclosure~\cite{WilliamsKing2016}.
+The idea behind re-randomization is that knowledge about the code layout becomes stale before an attacker can exploit it.
 
 Unable to disclose the code layout directly, a more sophisticated version of \gls{JITROP}---\emph{indirect} \gls{JITROP}---demonstrated the feasibility of inferring gadget locations from code pointers found on the stack~\cite{Davi2015,Crane2015}, which is commonly referred to as \emph{indirect information disclosure}.
 In response to indirect information disclosure, \citeauthor{Crane2015} proposed \gls{CPH}~\cite{Crane2015}.

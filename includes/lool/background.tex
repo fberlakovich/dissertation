@@ -113,7 +113,7 @@ Unlike any of the previous examples, DPGen4JIT focuses not on \emph{finding} bug
 Based on an initial bug-triggering test, DPGen4JIT finds passing tests that are similar to the initial test and failing tests that are dissimilar to the initial test.
 
 \subsection{GraalVM}
-\label{sec:graalvm}
+\label{lool:s:graalvm}
 
 We built our prototype for \lool in the context of GraalVM, a family of technologies for high-performance execution of programs written in various programming languages.\footnote{\url{https://www.graalvm.org}}
 
@@ -129,7 +129,7 @@ Thus, bugs in the compiler affect \emph{all} GraalVM languages, and the compiler
 The GraalVM compiler can generate an optimization log during compilation.
 This log includes entries for every optimizing code transformation the compiler performs.
 Full log entries include the compiler phase performing the optimization, the name of the optimization performed, and the source code location of the program position where the optimization was performed.
-\Cref{fig:optimization_log} shows an example optimization log entry.
+\Cref{lool:fig:optimization_log} shows an example optimization log entry.
 The log data is used by various debug tooling and can be exported as a text file in JSON format.
 
 \begin{figure}
@@ -144,7 +144,7 @@ The log data is used by various debug tooling and can be exported as a text file
   } ]
     \end{minted}
     \caption{Example GraalVM compiler optimization log entry, describing the elimination of an explicit \texttt{null} check.}
-    \label{fig:optimization_log}
+    \label{lool:fig:optimization_log}
 \end{figure}
 
 An abridged form of the optimization log only increments a counter for each optimization performed.
@@ -155,14 +155,14 @@ Future extensions could incorporate more information from the log, such as in wh
 \subsection{GraalVM Compiler Fuzzing}
 \label{lool:ss:graalvm-fuzzing}
 
-The goal of later sections is to demonstrate the principle of optimization-log coverage (see \cref{s:lool:design}).
+The goal of later sections is to demonstrate the principle of optimization-log coverage (see \cref{lool:s:design}).
 As the GraalVM compiler already provides such an optimization-log, we illustrate the \lool principle on the example of the GraalVM compiler.
 We discuss the applicability to other compilers in \cref{lool:ss:other-opt-logs}.
 
 To solve \cref{lool:prob:inputs,lool:prob:miscompilations,lool:prob:compile} discussed in \cref{lool:ss:jit-compiler-fuzzing}, we built a new fuzzer that specifically targets the GraalVM compiler.
 Since our fuzzer differs in certain aspects from existing Java fuzzers, we describe the relevant details in the following sections.
 
-\subsubsection{Input Program Generation}\label{ss:input-program-generation}
+\subsubsection{Input Program Generation}\label{lool:ss:input-program-generation}
 Our fuzzer generates Java source code with a custom Java source-code generator.
 This generator is based on the liveness-driven random code generation approach~\cite{barany2017livenessdriven}.
 In this approach, all values computed by the program are guaranteed to be used by later statements in the program.
@@ -266,12 +266,12 @@ static class Class1 {
         \includegraphics{figures/lool/architecture-noicons}%
     }
     \caption{Overview of the GraalVM fuzzing framework (see \cref{lool:ss:graalvm-fuzzing})}
-    \label{fig:fuzzing-framework-overview}
+    \label{lool:fig:fuzzing-framework-overview}
 \end{figure}
 
 Our fuzzer tests the generated programs using a test harness that compiles the Java source code to bytecode with \propername{javac} and loads the bytecode classes.
-\cref{fig:fuzzing-framework-overview} gives an overview of the test execution.
-First, the harness receives the generated program from the input generator \Circled{\texttt{1}} (see \cref{ss:input-program-generation}).
+\cref{lool:fig:fuzzing-framework-overview} gives an overview of the test execution.
+First, the harness receives the generated program from the input generator \Circled{\texttt{1}} (see \cref{lool:ss:input-program-generation}).
 The harness executes the program's \texttt{main} method in the Java bytecode interpreter and records its output as the reference output \Circled{\texttt{2}}.
 Running the interpreter prior to the compilation, but within the same VM instance, has two advantages:
 \begin{enumerate}
@@ -308,13 +308,13 @@ public static void main(String[] args) {
 }
     \end{minted}
     \caption{Example bug after test case reduction. The GraalVM compiler crashed while compiling this method.}
-    \label{fig:example_bug}
+    \label{lool:fig:example_bug}
 \end{figure}
 
 This fuzzing framework has been in regular use within the GraalVM project for four years.
 It has been effective at finding both miscompilations and bugs that crash the compiler with failed assertions or unexpected exceptions being thrown.
 
 We use the existing source code reducers Perses~\cite{Sun2018} and C-Reduce~\cite{regehr2012} to reduce programs that provoke errors to minimal versions for easier debugging.
-\cref{fig:example_bug} shows an example of a reduced, crashing compiler bug found by the GraalVM fuzzer without optimization log coverage.
+\cref{lool:fig:example_bug} shows an example of a reduced, crashing compiler bug found by the GraalVM fuzzer without optimization log coverage.
 During reduction, we ensure that the reducer does not remove methods such as \code{hashcode} and \code{equals}.
 Removing these methods causes the code to fall back to the default implementation that produces non-deterministic results in certain cases.

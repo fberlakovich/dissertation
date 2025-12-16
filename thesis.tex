@@ -1,125 +1,46 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% OXFORD THESIS TEMPLATE
+%% MASTERS/DOCTORAL THESIS TEMPLATE
+%% Adapted for Universität der Bundeswehr München
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Use this template to produce a standard thesis that meets the Oxford University requirements for DPhil submission
-%
-% Originally by Keith A. Gillow (gillow@maths.ox.ac.uk), 1997
-% Modified by Sam Evans (sam@samuelevansresearch.org), 2007
-% Modified by John McManigle (john@oxfordechoes.com), 2015
-%
-% This version Copyright (c) 2015-2023 John McManigle
-%
-% Broad permissions are granted to use, modify, and distribute this software
-% as specified in the MIT License included in this distribution's LICENSE file.
-%
+\documentclass[a4paper,twoside,11pt]{MastersDoctoralThesis}
 
-% I've (John) tried to comment this file extensively, so read through it to see how to use the various options.  Remember
-% that in LaTeX, any line starting with a % is NOT executed.  Several places below, you have a choice of which line to use
-% out of multiple options (eg draft vs final, for PDF vs for binding, etc.)  When you pick one, add a % to the beginning of
-% the lines you don't want.
-
-
-
-\begin{filecontents*}[overwrite]{mytimer.lua}
-
-    -- table to hold time performance
-    M = M or {}
-    local socket = require('socket')
-    local time_stat = time_stat or {}
-    local gettime = socket.gettime
-
-    -- start time measurement
-    time_stat["total"] = 0
-
-    -- @param done indicates timer was stopped
-    function start_time_measure(field)
-    time_stat[field] = {start = gettime(), done = false}
-    end
-
-    -- stop time measurement
-    -- if two calls to stop will return wrong value
-    function stop_time_measure(field)
-    if not time_stat[field].done then
-    time_stat[field] = {total = gettime() - time_stat[field].start, done=true}
-    end
-    end
-
-
-    M.start = start_time_measure
-    M.stop  = stop_time_measure
-    M.statistics = function(name) return time_stat[name].total end
-
-    -- M.start("document")
-    -- local s = 0
-    -- for i=1, 1 do s=s+1 end
-    -- M.stop("document")
-
-    -- print(M.statistics("document"))
-    -- print(M.statistics("document"))
-    return M
-\end{filecontents*}
-
-\directlua{timer = require("mytimer")}
-\def\timerstart#1{\directlua{timer.start("#1")}}
-\def\timerstop#1{\directlua{timer.stop("#1")}}
-\def\timerprint#1{
-    \directlua{
-timer.stop("#1")
-print("elapsed time (#1):", timer.statistics("#1").." s")
-}}
-
-%%%%% CHOOSE PAGE LAYOUT
-% The most common choices should be below.  You can also do other things, like replacing "a4paper" with "letterpaper", etc.
-
-\timerstart{document}
-% This one will format for two-sided binding (ie left and right pages have mirror margins; blank pages inserted where needed):
-\documentclass[a4paper,twoside]{uthesis}
-% This one will format for one-sided binding (ie left margin > right margin; no extra blank pages):
-%\documentclass[a4paper]{µthesis}
-% This one will format for PDF output (ie equal margins, no extra blank pages):
-%\documentclass[a4paper,nobind]{µthesis} 
-
-% Use Noto fonts - comment out to use default LaTeX fonts
-
-\timerstart{defines}
+% Load custom packages and definitions
 \input{defines}
-\timerprint{defines}
 
+%%%%% THESIS INFORMATION
+\thesistitle{Beyond Optimization - Compiler-assisted Program Hardening and Fuzzing}
+\author{Felix Berlakovich}
+\degree{Doktor der Naturwissenschaften (Dr. rer. nat.)}
+\university{Universität der Bundeswehr München}
+\faculty{Fakultät für Informatik}
+\department{Informatik}
+\supervisor{Prof. A}
+\examiner{Prof. B}
+\crest{\includegraphics[width=4cm]{figures/unibw.pdf}}
 
-%%%%% SELECT YOUR DRAFT OPTIONS
-% Three options going on here; use in any combination.  But remember to turn the first two off before
-% generating a PDF to send to the printer!
-
-% This adds a "DRAFT" footer to every normal page.  (The first page of each chapter is not a "normal" page.)
+%%%%% DRAFT OPTIONS
 \fancyfoot[C]{\emph{DRAFT Printed on \today}}
 
-% This highlights (in blue) corrections marked with (for words) \mccorrect{blah} or (for whole
-% paragraphs) \begin{mccorrection} . . . \end{mccorrection}.  This can be useful for sending a PDF of
-% your corrected thesis to your examiners for review.  Turn it off, and the blue disappears.
-\correctionstrue
-
-
 %%%%% BIBLIOGRAPHY SETUP
-
 \usepackage[style=ieee, sortcites=true, backend=bibtex, doi=true, isbn=false,
     maxnames=1, minnames=1, maxbibnames=99, citestyle=numeric-comp]{biblatex}
 \newcommand*{\bibtitle}{References}
 
-% Environment for the Puplications page
+% Environment for the Publications page
 \defbibenvironment{nolabelspaced}
 {\list{}{\leftmargin=0pt
 \itemindent=0pt
 \labelwidth=0pt
 \labelsep=0pt
-\setlength{\itemsep}{4ex} % space between items
+\setlength{\itemsep}{4ex}
 \setlength{\parsep}{0pt}
 }
 \renewcommand*{\makelabel}[1]{}}%
 {\endlist}
 {\item}
 
-% You can use the following snippet to select your publications, just replace "Patton" with your name.
-% Alternatively, you can set "keywords={own}" for bib entries your dissertation is based on.
+% Select your publications by author name
 \DeclareSourcemap{
     \maps[datatype=bibtex]{
         \map{
@@ -129,228 +50,146 @@ print("elapsed time (#1):", timer.statistics("#1").." s")
     }
 }
 
-% This makes the bibliography use a slightly smaller font.
 \renewcommand*{\bibfont}{\small}
-
-% Suppress warnings...
 \DeclareLanguageMapping{latin}{english}
 \BiblatexSplitbibDefernumbersWarningOff
-
-% Change this to the name of your .bib file (usually exported from a citation manager like Zotero or EndNote).
 \addbibresource{references.bib}
 
-
-% Uncomment this if you want equation numbers per section (2.3.12), instead of per chapter (2.18):
-%\numberwithin{equation}{subsection}
-
-
-%%%%% THESIS / TITLE PAGE INFORMATION
-\title{Beyond Optimization - Compiler-assisted Program Hardening and Fuzzing}
-\author{Felix Berlakovich}
-\department{Informatik}
-% Your full degree name.
-\degree{Doktor der Naturwissenschaften (Dr. rer. nat.)}
-% Your examiners/supervisors.
-\firstexaminer{Prof. A}
-\secondexaminer{Prof. B}
-% You don't need these dates for your initial submission, they must be set for the final submission.
-% \submissiondate{01.01.2026}
-% \acceptancedate{01.02.2026}
-% \examinationdate{01.03.2026}
-
-
-%%%%% YOUR OWN PERSONAL MACROS
-% This is a good place to dump your own LaTeX macros as they come up.
-
-% To make text superscripts shortcuts
-\renewcommand{\th}{\textsuperscript{th}} % ex: I won 4\th place
+%%%%% PERSONAL MACROS
+\renewcommand{\th}{\textsuperscript{th}}
 \newcommand{\nd}{\textsuperscript{nd}}
+\providecommand{\st}{}% ensure \st exists before renewing
 \renewcommand{\st}{\textsuperscript{st}}
 \newcommand{\rd}{\textsuperscript{rd}}
 
-%%%%% BOXED ENVIRONMENTS
-% Some suggestions for boxed environments, see a usage example in Chapter 2.
-\newboxenv{excursus}{Excursus}{Excursuses}{unibwgraylight}
-\newboxenv{definition}{Definition}{Definitions}{unibwbluelight}
-\newboxenv{observation}{Observation}{Observations}{unibworangelight}
-
 \input{preface/abbreviations}
+\makeglossaries
 
 %%%%% THE ACTUAL DOCUMENT STARTS HERE
 \begin{document}
 
-%%%%% CHOOSE YOUR LINE SPACING HERE
-\setlength{\textbaselineskip}{15pt plus2pt minus1pt}
-
-% You can set the spacing here for the roman-numbered pages (acknowledgements, table of contents, etc.)
-\setlength{\frontmatterbaselineskip}{15pt plus2pt minus1pt}
-
-% Leave this line alone; it gets things started for the real document.
-\setlength{\baselineskip}{\textbaselineskip}
-
-
-%%%%% CHOOSE YOUR SECTION NUMBERING DEPTH HERE
-% You have two choices.  First, how far down are sections numbered?  (Below that, they're named but
-% don't get numbers.)  Second, what level of section appears in the table of contents?  These don't have
-% to match: you can have numbered sections that don't show up in the ToC, or unnumbered sections that
-% do.  Throughout, 0 = chapter; 1 = section; 2 = subsection; 3 = subsubsection, 4 = paragraph...
-
-% The level that gets a number:
 \setcounter{secnumdepth}{2}
-% The level that shows up in the ToC:
 \setcounter{tocdepth}{2}
 
+%%%%% FRONT MATTER
+\frontmatter
 
-% JEM: Pages are roman numbered from here, though page numbers are invisible until ToC.  This is in
-% keeping with most typesetting conventions.
-\begin{romanpages}
+% Title page
+\maketitle
 
-% JEM: By default, this template uses the traditional Oxford "Belt Crest". Un-comment the following
-% line to use the newer, "Blue Square" logo:
-% \renewcommand{\crest}{{\includegraphics[width=4.2cm, height=4.2cm]{figures/newlogo.pdf}}}
+%%%%% ACKNOWLEDGEMENTS
+\begin{acknowledgements}
+    \input{preface/acknowledgements}
+\end{acknowledgements}
 
-% Title page is created here
-    \maketitle
+%%%%% KURZFASSUNG (German Abstract)
+\begin{kurzfassung}
+    \input{preface/kurzfassung}
+\end{kurzfassung}
 
-%%%%% DEDICATION -- If you'd like one, un-comment the following.
-%\begin{dedication}
-%This thesis is dedicated to\\
-%someone\\
-%for some special reason\\
-%\end{dedication}
+%%%%% ABSTRACT
+\begin{abstract}
+    \input{preface/abstract}
+\end{abstract}
 
-%%%%% ACKNOWLEDGEMENTS -- Nothing to do here except comment out if you don't want it.
-    \begin{acknowledgements}
-        \input{preface/acknowledgements}
-    \end{acknowledgements}
+%%%%% TABLE OF CONTENTS
+\tableofcontents
 
-%%%%% ABSTRACT -- Nothing to do here except comment out if you don't want it.
-    \renewcommand{\abstractname}{Kurzfassung}
-    \begin{abstract}
-        \input{preface/kurzfassung}
-    \end{abstract}
-    \cleardoublepage
-
-    \renewcommand{\abstractname}{Abstract}
-    \begin{abstract}
-        \input{preface/abstract}
-    \end{abstract}
-    \cleardoublepage
-
-%%%%% MINI TABLES
-% This lays the groundwork for per-chapter, mini tables of contents.  Comment the following line
-% (and remove \minitoc from the chapter files) if you don't want this.  Un-comment either of the
-% next two lines if you want a per-chapter list of figures or tables.
-    \dominitoc % include a mini table of contents
-%\dominilof  % include a mini list of figures
-%\dominilot  % include a mini list of tables
-
-% This aligns the bottom of the text of each page.  It generally makes things look better.
-    \flushbottom
-
-% This is where the whole-document ToC appears:
-    \tableofcontents
-
-    \listof{excursus}
-    \mtcaddchapter
-% \mtcaddchapter is needed when adding a non-chapter (but chapter-like) entity to avoid confusing minitoc
-
-    \listoffigures
-    \mtcaddchapter
-
-% Uncomment to generate a list of tables:
-% \listoftables
-% 	\mtcaddchapter
+%%%%% LIST OF FIGURES
+\listoffigures
+\addcontentsline{toc}{chapter}{\listfigurename}
 
 %%%%% LIST OF ABBREVIATIONS
-% This example includes a list of abbreviations.  Look at preface/abbreviations.tex to see how that file is formatted.
-    \printacronyms[name=List of Abbreviations]
-    \mtcaddchapter[List of Abbreviations]
+\printglossary[type=\acronymtype,title=List of Abbreviations]
+\addcontentsline{toc}{chapter}{List of Abbreviations}
 
 %%%%% LIST OF PUBLICATIONS
-% Generates a list of all publications in references.bib with the keyword "own".
+\chapter*{Publications}
+\addcontentsline{toc}{chapter}{Publications}
+This dissertation is based in part on the following publications:
+\vspace{2ex}
+\newrefcontext[sorting=ddnt]
+\printbibliography[keyword=own, nottype=unpublished, heading=none, env=nolabelspaced]
 
+We deliberately did not include Cross-Module Quickening~\cite{berlakovich2024} in this thesis.
+While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
 
-    \chapter*{Publications}
-    \mtcaddchapter[Publications]
-    This dissertation is based in part on the following publications:
-    \vspace{2ex}
-    \newrefcontext[sorting=ddnt] % most recent first
-    \printbibliography[keyword=own, nottype=unpublished, heading=none, env=nolabelspaced]
+%%%%% MAIN MATTER
+\mainmatter
 
-    We deliberately did not include Cross-Module Quickening~\cite{berlakovich2024} in this thesis.
-    While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
-
-% Uncomment if you have unpublished papers, articles etc.:
-% \vspace{4ex}
-% \noindent The following manuscripts are currently under review:
-% \vspace{2ex}
-% \printbibliography[keyword=own, type=unpublished, heading=none, env=nolabelspaced]
-
-% The Roman pages, like the Roman Empire, must come to its inevitable close.
-\end{romanpages}
-
-
-%%%%% CHAPTERS
-% Add or remove any includes you'd like here, by file name (excluding '.tex'):
-\flushbottom
 \include{includes/introduction}\label{ch:introduction}
 
+\partintro{%
+Memory-unsafe languages like C and \cpp remain the foundation of critical infrastructure, and with them, the threat of memory corruption vulnerabilities persists.
+Among the most dangerous exploitation techniques are \glspl{CRA}, which hijack a program's control flow to execute attacker-chosen code sequences.
 
+This part of the thesis explores how compiler-driven software diversity can defend against such attacks.
+The compiler's intimate knowledge of program structure---stack layouts, function boundaries, and data dependencies---enables transformations that would be difficult or impossible to achieve through post-hoc binary rewriting or runtime instrumentation.
+
+\Cref{ch:code-reuse-coevolution} traces the co-evolution of \glspl{CRA} and their defenses, establishing the context for our contribution.
+The subsequent chapter then presents \rtwoc, a defense that leverages compiler knowledge to randomize not only code but also the observable data layouts that recent attacks exploit for reconnaissance.
+}
 \part{Defending Against Code-Reuse with Compiler Assistance}\label{part:defense}
-\input{includes/part1-intro}
 \chapter{The Co-Evolution of Code-Reuse Attacks and Defenses}\label{ch:code-reuse-coevolution}
-\include{includes/coevolution}
+\input{includes/coevolution}
 \chapter{Plugging Information Leaks With Mimicry}\label{ch:r2c}
-\include{includes/r2c/motivation}
-\include{includes/r2c/background}
-\include{includes/r2c/threat-model}
-\include{includes/r2c/design}
-\include{includes/r2c/implementation}
-\include{includes/r2c/evaluation}
-\include{includes/r2c/discussion}
-\include{includes/r2c/limitations}
+\input{includes/r2c/motivation}
+\input{includes/r2c/background}
+\input{includes/r2c/threat-model}
+\input{includes/r2c/design}
+\input{includes/r2c/implementation}
+\input{includes/r2c/evaluation}
+\input{includes/r2c/discussion}
+\input{includes/r2c/limitations}
+\input{includes/r2c/possible-extensions}
+\input{includes/r2c/summary}
 \chapter{Outlook}\label{ch:outlook-defense}
-\include{includes/outlook-defense}
+\input{includes/outlook-defense}
 
+\partintro{%
+While the first part of this thesis focused on hardening deployed programs against exploitation, this part addresses the complementary goal of finding bugs before deployment.
+Fuzzing has emerged as one of the most effective techniques for discovering vulnerabilities in complex software, but its effectiveness depends critically on the feedback mechanisms that guide input generation.
+
+The compiler is uniquely positioned to provide rich feedback signals.
+Beyond the code coverage metrics that most fuzzers rely on, the compiler has access to semantic information about program structure, optimization decisions, and data dependencies.
+This part explores two ways to leverage this information.
+
+\Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
+We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
+Finally, we introduce \emph{Program State Convolution} (PSC), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
+}
 \part{Improving Fuzzer-Guidance with Compiler Assistance}\label{part:fuzzing}
-\input{includes/part2-intro}
-\include{includes/fuzzer-guidance}
+\input{includes/fuzzer-guidance}
 \chapter{Fuzzer-Guidance with Optimization-Log Counters}\label{ch:lool}
-\include{includes/lool/introduction}
-\include{includes/lool/background}
-\include{includes/lool/design}
-\include{includes/lool/implementation}
-\include{includes/lool/evaluation}
-\include{includes/lool/discussion}
-\include{includes/lool/future-work}
+\input{includes/lool/introduction}
+\input{includes/lool/background}
+\input{includes/lool/design}
+\input{includes/lool/implementation}
+\input{includes/lool/evaluation}
+\input{includes/lool/discussion}
+\input{includes/lool/future-work}
 \chapter{Program-State Convolution}\label{ch:psc}
-\include{includes/psc/motivation}
-\include{includes/psc/background}
-\include{includes/psc/psc}
-\include{includes/psc/implementation}
-\include{includes/psc/evaluation}
+\input{includes/psc/motivation}
+\input{includes/psc/background}
+\input{includes/psc/psc}
+\input{includes/psc/implementation}
+\input{includes/psc/evaluation}
 \chapter{Outlook}\label{ch:outlook-fuzzing}
-\include{includes/outlook-fuzzing}
+\input{includes/outlook-fuzzing}
+
 \bookmarksetup{startatroot}
 \chapter{Conclusion}
 \input{includes/conclusion}
 
-%% APPENDICES %% 
-% Starts lettered appendices, adds a heading in table of contents, and adds a
-%    page that just says "Appendices" to signal the end of your main text.
-\startappendices
-% Add or remove any appendices you'd like here:
-\include{appendices/appendix-1}
+%%%%% APPENDICES
+\appendix
+\chapter{Appendix}
+\input{appendices/appendix-1}
 
-
-%%%%% REFERENCES
-
-\setlength{\baselineskip}{0pt} % JEM: Single-space References
-
+%%%%% BIBLIOGRAPHY
+\backmatter
 {\renewcommand*\MakeUppercase[1]{#1}%
 \newrefcontext[sorting=none]%
 \printbibliography[heading=bibintoc,title={\bibtitle}]}
 
-\timerprint{document}
 \end{document}

@@ -25,7 +25,7 @@ Various \gls{CFI} variants, for example, use static points-to analysis to determ
 Likewise, when a compiler can statically prove that in a given program an indirect call site can only ever have a single target, the compiler can transform the indirect call into a direct call.
 Such a conversion enables additional optimizations later in the optimization pipeline, such as inlining.
 
-\glspl{JITcomp} perform a similar optimization called \emph{polymorphic inlining} (see \cref{psc:subsec:polymorphic-inlining}), typically based on profiling information.
+\glspl{JITcomp} perform a similar optimization called \emph{polymorphic inlining} (see \cref{psc:ss:polymorphic-inlining}), typically based on profiling information.
 For \gls{AOT} compilers, this transformation is more challenging because of the lack of runtime profiling information.
 Nonetheless, \gls{AOT} compilers can apply the transformation either heuristically or because they can prove based on dataflow that only certain types can reach a polymorphic call site.
 The fallback option that performs an indirect call guarantees that the program remains correct even if the analysis or the profiling information is incomplete.

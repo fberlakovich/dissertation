@@ -1,7 +1,6 @@
-\timerstart{packages}
+% Font setup for LuaLaTeX - Palatino with Noto Mono for code
 \usepackage{fontspec}
-\usepackage{noto-mono}
-\usepackage{notomath}
+\usepackage{unicode-math}
 \usepackage{tabularray}
 \usepackage{fp}
 \usepackage{mathtools}
@@ -9,7 +8,7 @@
 \usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
 \usepackage{todonotes} % Provides tooltip-like todo notes.
-\usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
+\usepackage[acronym,toc]{glossaries} % Enables acronyms
 \usepackage{xspace} % automatic space after user defined commands
 \usepackage[normalem]{ulem}
 \usepackage{listings} % source code listings
@@ -31,7 +30,9 @@
 \usepackage{csquotes}
 \usepackage[most]{tcolorbox}
 \usepackage{pifont}
+\usepackage[pdfpagelabels,hidelinks,pdfusetitle]{hyperref}
 \usepackage{bookmark}
+\usepackage{multirow}
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \usepackage{array}
 \UseTblrLibrary{booktabs,functional}
@@ -39,7 +40,28 @@
 \usepackage[htt]{hyphenat}
 \usepackage{collcell}   % To capture cell content
 \usepackage{makecell}
-\timerprint{packages}
+
+% --- FLOAT TUNING START ---
+% Encourage floats to be placed on the page where they are defined
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{5}
+\setcounter{bottomnumber}{5}
+\setcounter{totalnumber}{10}
+% --- FLOAT TUNING END ---
+
+% Cleveref - must be loaded after hyperref
+\usepackage[capitalize,noabbrev,nameinlink]{cleveref}
+
+% Enumitem for inline lists
+\usepackage[inline]{enumitem}
+
+\setmainfont{TeX Gyre Pagella}
+\setmathfont{TeX Gyre Pagella Math}
+\setmonofont{Noto Sans Mono}[Scale=0.9]
+
 
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \UseTblrLibrary{booktabs,functional}
@@ -93,7 +115,8 @@
 
 \lstdefinestyle{asmcode}{
     language={[x86masm]Assembler},
-    escapechar=|,
+    escapechar=|
+,
     frame=none,
     keywordstyle={\bfseries\color{RoyalBlue}},
     basicstyle=\small\ttfamily,
@@ -125,7 +148,7 @@
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
 
 \makeatletter
-\newcommand{\closepart}{%
+\newcommand{\closepart}{
     \begingroup
     % Prevent \part* from forcing a page break
     \let\clearpage\relax
@@ -134,7 +157,7 @@
     % - no page
     % - no TOC entry
     % - but it resets the “current part” state / marks
-    \part*{}%
+    \part*{}
     \endgroup
 }
 \makeatother
@@ -144,7 +167,7 @@
 
 
 
-\newcommand{\includetimed}[1]{%
+\newcommand{\includetimed}[1]{
     \timerstart{#1}%
     \include{#1}%
     \timerprint{#1}%
@@ -157,7 +180,7 @@
 
 % --- main macro (Lua-driven) ---
 \makeatletter
-\DeclareDocumentCommand{\includeDrawioFigure}{ O{\textwidth} m O{} +m }{%
+\DeclareDocumentCommand{\includeDrawioFigure}{ O{\textwidth} m O{} +m }{
 % #1 target width (TeX dimen, default \textwidth)
 % #2 base name (expects #2.pdf, #2-defs.tex, #2-coords.tex)
 % #3 tikz options
@@ -205,8 +228,8 @@
 \newcommand{\geomeannobt}{2.44\%\xspace} % geometric mean overhead when moving only the stack pointer
 \newcommand{\avxomnetppimprov}{14\%\xspace} % improvvement in absolute percent points of omnetpp with AVX2
 \newcommand{\hardenedheapbtsoverhead}{2\%\xspace} % overhead in absolute percent points of hardened heap booby traps compared to regular heap booby traps
-\newcommand{\meanpercentcodepointers}{97\%\xspace}
-\newcommand{\protectedcodepointers}{93\%\xspace}
+\newcommand{\meanpercentcodepointers}{97\%}
+\newcommand{\protectedcodepointers}{93\%}
 \newcommand{\heapbtgeomean}{1.59\%\xspace}
 \newcommand{\allprotectionsgeomean}{7.48\%\xspace}
 \newcommand{\allprotectionspushgeomean}{12.47\%\xspace}
@@ -223,14 +246,14 @@
 \newcommand{\jacoco}{JaCoCo\xspace}
 \newcommand{\musllib}{\propername{musl}/\propername{libc\plusplus}\xspace}
 \newcommand{\glibclib}{\propername{glibc}/\propername{libstdc\plusplus}\xspace}
-\newcommand*{\figuretitle}[1]{%
+\newcommand*{\figuretitle}[1]{
 {\centering%   <--------  will only affect the title because of the grouping (by the
 \sffamily{\textbf{#1}}%              braces before \centering and behind \medskip). If you remove
 \par\medskip}%            these braces the whole body of a {figure} env will be centered.
 }
 
 
-\newcommand{\propernamedecl}{\ttfamily\hyphenchar\the\font=`-\relax}
+\newcommand{\propernamedecl}{\ttfamily\hyphenchar\font=`-\relax}
 \newcommand{\propername}[1]{{\propernamedecl#1}}
 \newcommand{\afl}{AFL}
 \newcommand{\aflpp}{AFL\plusplus}
@@ -251,20 +274,20 @@
 \fi\arraybackslash}l}
 
 \definecolor{rowgray}{gray}{0.95} % A very light gray
-\newcommand{\conditionalcell}[1]{%
+\newcommand{\conditionalcell}[1]{
     \ifnum
         \value{rowcounter}=1
         % Row 1: Apply rotation
-        \rotatebox[origin=bc]{45}{%
+        \rotatebox[origin=bc]{45}{
         % Use [b] for bottom alignment
         % Use the new \rotHeadWidth
-            \parbox[b]{3cm}{%
+            \parbox[b]{3cm}{
                 \propernamedecl
                 \smaller
                 \centering % Add this for clean line breaks
                 #1%
-            }%
-        }%
+            }
+        }
     \else
     % Other rows: Just output the content
         #1%
@@ -282,7 +305,7 @@
     \collectcell\conditionalcell % Collect the cell content
     }%
     X% Base column type
-        <{\endcollectcell}% End collection
+        <{\endcollectcell}%
 }
 % @formatter:on
 
@@ -325,6 +348,8 @@
 \newacronym{SMT}{SMT}{Satisfiability Modulo Theory}
 \newacronym{PSC}{PSC}{Program State Convolution}
 \newacronym{MLTA}{MLTA}{Multi-Level Type Analysis}
+\newacronym{AIR}{AIR}{Average Indirect-target Reduction}
+
 
 \newglossaryentry{CRA}{
 name={code-reuse attack},
@@ -337,12 +362,12 @@ description={An attack that reuses code already present in the target process}
 % Definition copied from /usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf-via-dvi.def
 % Compare https://tex.stackexchange.com/q/229500 and comments!
 \makeatletter
-\def\pgfsys@hboxsynced#1{%
-{%
+\def\pgfsys@hboxsynced#1+{
+{% 
 \pgfsys@beginscope%
-\setbox\pgf@hbox=\hbox{%
+\setbox\pgf@hbox=\hbox+{
 \hskip\pgf@pt@x%
-\raise\pgf@pt@y\hbox{%
+\raise\pgf@pt@y\hbox+{
 \pgf@pt@x=0pt%
 \pgf@pt@y=0pt%
 \special{pdf: content q}%
@@ -355,15 +380,15 @@ description={An attack that reuses code already present in the target process}
 \dp#1=0pt%
 \box#1%
 \pgfsys@invoke{n Q Q Q}%
-}%
+}
 \hss%
-}%
+}
 \wd\pgf@hbox=0pt%
 \ht\pgf@hbox=0pt%
 \dp\pgf@hbox=0pt%
 \pgfsys@hbox\pgf@hbox%
 \pgfsys@endscope%
-}%
+}
 }
 \makeatother
 
@@ -427,7 +452,7 @@ Extension = .ttf,
 
 
 
-\DeclareRobustCommand{\rtwoc}{%
+\DeclareRobustCommand{\rtwoc}{
 \ifdefined\pdfstringdefPreHook
 % This branch is executed for PDF bookmarks and the Table of Contents.
 \texorpdfstring{R\textsuperscript{2}C}{R²C}%
@@ -439,7 +464,7 @@ Extension = .ttf,
 }
 
 
-\DeclareRobustCommand{\lool}{%
+\DeclareRobustCommand{\lool}{
 \ifdefined\pdfstringdefPreHook
 % This branch is executed for PDF bookmarks and the Table of Contents.
 \texorpdfstring{LOOL}{LOOL}%
@@ -457,10 +482,10 @@ Extension = .ttf,
 
 \newlist{configurations}{enumerate}{1}
 \setlist[configurations,1]{
-label=\textbf{\Alph*)},      % Bold + uppercase letter + closing parenthesis
+label=\textbf{\Alph*)}      % Bold + uppercase letter + closing parenthesis
 ref=\Alph*,                  % For cleveref referencing (gives "A", "B", etc.)
 }
-\newcommand{\configuration}[1]{%
+\newcommand{\configuration}[1]{
 \item \textbf{#1}
 }
 \crefname{configurationsi}{Configuration}{Configurations}
@@ -512,9 +537,7 @@ style=nextline
 
 
 
-\newcommand*{\threeapprox}{%
-\mathrel{\vcenter{\offinterlineskip
-\hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}}}}
+\newcommand*{\threeapprox}{\approx}
 
 \newcommand{\speccpu}{SPEC CPU 2017\xspace}
 
@@ -532,7 +555,7 @@ style=nextline
 \DeclareFloatingEnvironment[placement={!ht},name=List]{enumfigure}
 
 \newlist{inline}{enumerate*}{1}
-\setlist[inline]{label={(\roman*)}}
+\setlist[inline]{label=(\roman*)}
 
 \newtcolorbox{infobox}{
 colback=black!5,      % Background color (5% black, 95% white)
@@ -551,10 +574,10 @@ bottom=8pt,           % Specific padding on the bottom
 \numberwithin{listing}{section}
 
 % Inline helper: draw a tiny boxed number and mark it with a global node name.
-\newcommand{\numtag}[2]{%
+\newcommand{\numtag}[2]{
 \tikz[remember picture,baseline=(#1.base)]%
 \node[inner sep=1pt,outer sep=0pt,draw,rounded corners=2pt,%
-font=\footnotesize] (#1) {#2};%
+font=\footnotesize] (#1) {#2};
 }
 
 \setminted{fontsize=\footnotesize}

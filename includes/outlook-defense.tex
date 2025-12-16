@@ -5,12 +5,13 @@ Each strategy is effectively a compromise between security, performance, and com
 \rtwoc is no exception to this conundrum.
 
 When looking at years of research on \gls{CRA} defenses, it becomes clear that each defense category has different strengths and weaknesses.
-Software diversity, for example, needs to go to great lengths to avert highly specialized attacks that target a specific instance of a program.
-That is not a coincidence, considering that one of the primary goals of software diversity is to avoid a \emph{widespread} attack across program instances even if an attacker found an exploitable vulnerability.
+The aim of software diversity, for example, is to avoid a \emph{widespread} attack across program instances even if an attacker found an exploitable vulnerability.
 In other words, software diversity aims to break the assumption that because an exploit works on one target instance, it also works on another.
 If, however, an attacker targets only one particular instance in the first place, an attacker might be willing to accept higher reconnaissance costs and even manual target reconnaissance.
+Defending against these types of targeted attacks with software diversity alone becomes increasingly difficult.
 On the other hand, software diversity has proven to be effective even against --- at the time the defense was conceived --- unknown attack vectors.
 For example, fine-grained code randomization is not only an effective antidote against \glspl{CRA}, but also against certain transient-execution attacks.
+
 In contrast, \gls{CFI} gives non-probabilistic guarantees about the protection afforded.
 This principle goes both ways, however.
 A weak spot in a program's \gls{CFI} policy, \eg caused by an imprecise \gls{CFG} analysis, affects \emph{all} instances of that program alike.
@@ -27,18 +28,20 @@ Various forms of \gls{CFI}, for example, read a target marker from an indirect b
 At the same time, a readable code section is an Achilles heel for a randomized code layout, which is why leakage-resilient diversity aims to prevent reads from the code section.
 To answer these and other questions, research into the composition of defensive techniques is necessary.
 
+\section{Evaluating Attacks and Defenses}
+A crucial aspect of scientific publications is the underpinning of claims with evidence.
+Publications about attack techniques typically provide evidence by showing that the attack can successfully bypass certain defenses.
+Successful exploitation of a \emph{particular} software package with a \emph{particular} implementation of a defense is no guarantee, however, that the attack's principle is generalizable.
+The \gls{AOCR} paper, for example, claims that \gls{AOCR} can bypass several types of pointer hiding and redirection schemes, not just \gls{CPH}.
+While this claim might be true in principle, two of the example exploits rely on the ability to reliably infer forward pointers from leaked return addresses.
+Such an inference is only possible (at least reliably), however, due to the specific layout of the \gls{CPH} table.
 
-\section{Perspectives on Diversity}
-
-\todo{This section is a placeholder for discussion of future directions in software diversity research.}
-
-\section{From Protection to Detection}
-
-The defenses discussed in this part share a common characteristic: they are reactive.
-Diversity, \gls{CFI}, and memory safety all aim to \emph{mitigate} the consequences of vulnerabilities that already exist in the code.
-A complementary approach is to find and eliminate these vulnerabilities before deployment.
-
-This observation leads to the second part of this thesis.
-Just as the compiler's semantic insight enables effective hardening transformations, it can also improve the effectiveness of automated testing techniques like fuzzing.
-The compiler knows which optimizations were applied, which code paths are reachable, and which data dependencies govern control flow.
-In Part~\ref{part:fuzzing}, we explore how to leverage this knowledge to guide fuzzers toward bugs that conventional coverage metrics would miss.
+On the defense side, a sound security evaluation is equally challenging.
+Many \gls{CFI} techniques, for example, did not take into account that programs using \code{printf} essentially embed a hard-to-restrict interpreter with powerful capabilities.
+Similarly, the Readactor authors speculated about the possibility of a whole-function-reuse attack, but without \gls{AOCR}'s malicious thread blocking and pointer profiling, such an attack was infeasible.
+Another issue is the lack of metrics describing security capabilities of a defense.
+While metrics such as \gls{AIR}~\cite{zhang2013} and newer variants such as BlockInsulation and CFGInsulation~\cite{frassetto2022} provide a foundation for \gls{CFI}, similar metrics for software diversity are missing.
+The \propername{Survivor} algorithm provided a comparable metric for early variants of software diversity focusing on reducing the risk of \gls{ROP} gadgets.
+In light of new challenges such as \gls{JITROP} and new diversification techniques that reach far beyond the gadget level, however, a new metric is needed.
+Although transformations like function permutation or stack layout randomization allow for localized probability-theoretic arguments, their effect on real attacks remains hard to predict.
+Thus, we hope that future researchers take up the challenging of formulating a theory of software diversity

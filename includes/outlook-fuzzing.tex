@@ -1,29 +1,5 @@
 % Outlook for Part II (Fuzzing)
 
-\section{Generalizing Compiler-Assisted Fuzzing}
-
 The techniques presented in this part---optimization-log guided fuzzing and Program State Convolution---demonstrate two ways to leverage compiler knowledge for improved fuzzer guidance.
 Several directions for future work emerge from these contributions.
 
-\subsection{Applying LOOL to Other Compilers}
-
-As discussed in \cref{lool:ss:other-opt-logs}, optimization logs exist in various forms across different compilers.
-Adapting \lool to LLVM's optimization remarks or V8's TurboFan traces would test whether the approach generalizes beyond GraalVM.
-The challenge lies in mapping each compiler's logging format to a coverage signal that meaningfully guides input generation.
-
-\subsection{Extending PSC to Other Analyses}
-
-Program State Convolution currently focuses on indirect call targets and value ranges.
-However, compilers perform many other analyses that could expose hidden state:
-\begin{itemize}
-    \item \emph{Alias analysis} could distinguish executions where pointers alias from those where they do not.
-    \item \emph{Escape analysis} could partition executions based on whether objects escape their allocating scope.
-    \item \emph{Loop invariant detection} could expose whether values remain constant across loop iterations.
-\end{itemize}
-A systematic framework for identifying which compiler analyses are most valuable for fuzzing remains an open research question.
-
-\subsection{Combining the Approaches}
-
-\lool and PSC address different aspects of the coverage problem.
-\lool provides domain-specific feedback for compiler testing, while PSC aims to improve coverage granularity for general programs.
-An interesting direction would be to combine both: using PSC-style transformations to expose data dependencies in the \emph{generated test programs} that \lool feeds to the compiler, potentially revealing optimization interactions that depend on specific data-flow patterns in the input.

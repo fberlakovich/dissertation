@@ -1,0 +1,838 @@
+{
+  "baseline": {
+    "128": {
+      "cpu:mean": 36.160000000000004,
+      "cpu:all": [
+        36.0,
+        36.650000000000006,
+        35.75,
+        36.2,
+        36.2
+      ],
+      "avg_latency:mean": 0.109406,
+      "throughput:mean": 1212597.172,
+      "transferrate:mean": 355241.984
+    },
+    "144": {
+      "cpu:mean": 36.0,
+      "cpu:all": [
+        36.1,
+        36.3,
+        35.849999999999994,
+        36.1,
+        35.650000000000006
+      ],
+      "avg_latency:mean": 0.109476,
+      "throughput:mean": 1202350.972,
+      "transferrate:mean": 352239.616
+    },
+    "160": {
+      "cpu:mean": 35.43,
+      "cpu:all": [
+        35.0,
+        35.849999999999994,
+        35.9,
+        35.2,
+        35.2
+      ],
+      "avg_latency:mean": 0.111388,
+      "throughput:mean": 1171843.058,
+      "transferrate:mean": 343302.144
+    },
+    "176": {
+      "cpu:mean": 35.35,
+      "cpu:all": [
+        34.9,
+        35.7,
+        35.8,
+        35.1,
+        35.25
+      ],
+      "avg_latency:mean": 0.111276,
+      "throughput:mean": 1167868.97,
+      "transferrate:mean": 342138.88
+    },
+    "192": {
+      "cpu:mean": 35.35,
+      "cpu:all": [
+        34.9,
+        35.5,
+        35.75,
+        35.2,
+        35.4
+      ],
+      "avg_latency:mean": 0.110972,
+      "throughput:mean": 1165179.506,
+      "transferrate:mean": 341352.448
+    },
+    "208": {
+      "cpu:mean": 35.33,
+      "cpu:all": [
+        34.9,
+        35.7,
+        35.8,
+        35.150000000000006,
+        35.1
+      ],
+      "avg_latency:mean": 0.110832,
+      "throughput:mean": 1165371.238,
+      "transferrate:mean": 341405.696
+    },
+    "224": {
+      "cpu:mean": 35.5,
+      "cpu:all": [
+        35.349999999999994,
+        35.7,
+        35.849999999999994,
+        35.3,
+        35.3
+      ],
+      "avg_latency:mean": 0.110076,
+      "throughput:mean": 1169227.364,
+      "transferrate:mean": 342536.192
+    },
+    "240": {
+      "cpu:mean": 35.44,
+      "cpu:all": [
+        35.0,
+        35.7,
+        36.0,
+        35.2,
+        35.3
+      ],
+      "avg_latency:mean": 0.11025800000000001,
+      "throughput:mean": 1167204.838,
+      "transferrate:mean": 341944.32
+    },
+    "256": {
+      "cpu:mean": 51.12,
+      "cpu:all": [
+        51.3,
+        50.9,
+        50.7,
+        51.25,
+        51.45
+      ],
+      "avg_latency:mean": 0.225576,
+      "throughput:mean": 1158829.362,
+      "transferrate:mean": 339490.816
+    },
+    "512": {
+      "cpu:mean": 69.28,
+      "cpu:all": [
+        69.75,
+        69.1,
+        69.05,
+        69.2,
+        69.3
+      ],
+      "avg_latency:mean": 0.446406,
+      "throughput:mean": 1185466.59,
+      "transferrate:mean": 347295.744
+    },
+    "768": {
+      "cpu:mean": 70.06,
+      "cpu:all": [
+        70.6,
+        70.3,
+        70.0,
+        69.5,
+        69.9
+      ],
+      "avg_latency:mean": 0.65503,
+      "throughput:mean": 1195954.304,
+      "transferrate:mean": 350365.696
+    },
+    "1024": {
+      "cpu:mean": 69.94,
+      "cpu:all": [
+        70.5,
+        70.2,
+        69.9,
+        69.6,
+        69.5
+      ],
+      "avg_latency:mean": 0.859472,
+      "throughput:mean": 1215134.6060000001,
+      "transferrate:mean": 355985.408
+    },
+    "1280": {
+      "cpu:mean": 70.02,
+      "cpu:all": [
+        70.5,
+        70.2,
+        70.2,
+        69.7,
+        69.5
+      ],
+      "avg_latency:mean": 1.062,
+      "throughput:mean": 1217819.114,
+      "transferrate:mean": 356771.84
+    },
+    "1536": {
+      "cpu:mean": 69.94,
+      "cpu:all": [
+        70.3,
+        70.1,
+        70.0,
+        69.7,
+        69.6
+      ],
+      "avg_latency:mean": 1.266,
+      "throughput:mean": 1223633.66,
+      "transferrate:mean": 358475.776
+    },
+    "1792": {
+      "cpu:mean": 69.77,
+      "cpu:all": [
+        70.0,
+        70.1,
+        70.05,
+        69.2,
+        69.5
+      ],
+      "avg_latency:mean": 1.476,
+      "throughput:mean": 1217966.622,
+      "transferrate:mean": 356810.752
+    },
+    "2048": {
+      "cpu:mean": 69.92,
+      "cpu:all": [
+        70.3,
+        70.1,
+        69.9,
+        69.5,
+        69.8
+      ],
+      "avg_latency:mean": 1.688,
+      "throughput:mean": 1215838.182,
+      "transferrate:mean": 356192.256
+    },
+    "2304": {
+      "cpu:mean": 69.92,
+      "cpu:all": [
+        70.4,
+        70.0,
+        69.9,
+        69.7,
+        69.6
+      ],
+      "avg_latency:mean": 1.906,
+      "throughput:mean": 1217003.048,
+      "transferrate:mean": 356530.176
+    },
+    "2560": {
+      "cpu:mean": 69.84,
+      "cpu:all": [
+        70.5,
+        69.9,
+        69.8,
+        69.6,
+        69.4
+      ],
+      "avg_latency:mean": 2.11,
+      "throughput:mean": 1226342.98,
+      "transferrate:mean": 359268.352
+    },
+    "2816": {
+      "cpu:mean": 69.86,
+      "cpu:all": [
+        70.6,
+        70.0,
+        70.1,
+        69.3,
+        69.3
+      ],
+      "avg_latency:mean": 2.32,
+      "throughput:mean": 1224604.17,
+      "transferrate:mean": 358760.44800000003
+    },
+    "3072": {
+      "cpu:mean": 69.88,
+      "cpu:all": [
+        70.6,
+        70.2,
+        69.8,
+        69.4,
+        69.4
+      ],
+      "avg_latency:mean": 2.5340000000000003,
+      "throughput:mean": 1219637.572,
+      "transferrate:mean": 357306.368
+    },
+    "3328": {
+      "cpu:mean": 69.9,
+      "cpu:all": [
+        70.5,
+        69.9,
+        70.2,
+        69.5,
+        69.4
+      ],
+      "avg_latency:mean": 2.744,
+      "throughput:mean": 1221136.718,
+      "transferrate:mean": 357742.592
+    },
+    "3584": {
+      "cpu:mean": 69.94,
+      "cpu:all": [
+        70.4,
+        70.2,
+        70.1,
+        69.5,
+        69.5
+      ],
+      "avg_latency:mean": 2.956,
+      "throughput:mean": 1224210.498,
+      "transferrate:mean": 358643.712
+    },
+    "3840": {
+      "cpu:mean": 70.03,
+      "cpu:all": [
+        70.3,
+        70.15,
+        70.2,
+        69.7,
+        69.8
+      ],
+      "avg_latency:mean": 3.166,
+      "throughput:mean": 1222418.562,
+      "transferrate:mean": 358119.424
+    },
+    "4096": {
+      "cpu:mean": 70.14,
+      "cpu:all": [
+        70.6,
+        70.4,
+        70.3,
+        69.7,
+        69.7
+      ],
+      "avg_latency:mean": 3.37,
+      "throughput:mean": 1218595.584,
+      "transferrate:mean": 356999.168
+    },
+    "4608": {
+      "cpu:mean": 70.18,
+      "cpu:all": [
+        70.7,
+        70.4,
+        70.3,
+        69.8,
+        69.7
+      ],
+      "avg_latency:mean": 3.81,
+      "throughput:mean": 1210301.644,
+      "transferrate:mean": 354568.192
+    },
+    "5120": {
+      "cpu:mean": 70.05,
+      "cpu:all": [
+        70.5,
+        70.2,
+        70.15,
+        69.8,
+        69.6
+      ],
+      "avg_latency:mean": 4.208,
+      "throughput:mean": 1217961.888,
+      "transferrate:mean": 356814.848
+    },
+    "5632": {
+      "cpu:mean": 70.31,
+      "cpu:all": [
+        70.7,
+        70.6,
+        70.4,
+        69.95,
+        69.9
+      ],
+      "avg_latency:mean": 4.6339999999999995,
+      "throughput:mean": 1212410.538,
+      "transferrate:mean": 355188.73600000003
+    },
+    "6144": {
+      "cpu:mean": 70.21,
+      "cpu:all": [
+        70.5,
+        70.3,
+        70.3,
+        70.0,
+        69.95
+      ],
+      "avg_latency:mean": 5.062,
+      "throughput:mean": 1211341.386,
+      "transferrate:mean": 354873.344
+    },
+    "6656": {
+      "cpu:mean": 70.24,
+      "cpu:all": [
+        70.8,
+        70.3,
+        70.4,
+        69.8,
+        69.9
+      ],
+      "avg_latency:mean": 5.484,
+      "throughput:mean": 1217621.406,
+      "transferrate:mean": 356712.448
+    },
+    "7168": {
+      "cpu:mean": 70.23,
+      "cpu:all": [
+        70.85,
+        70.5,
+        70.2,
+        69.7,
+        69.9
+      ],
+      "avg_latency:mean": 5.924,
+      "throughput:mean": 1211297.314,
+      "transferrate:mean": 354863.104
+    },
+    "7680": {
+      "cpu:mean": 70.14,
+      "cpu:all": [
+        70.6,
+        70.3,
+        70.0,
+        69.7,
+        70.1
+      ],
+      "avg_latency:mean": 6.354,
+      "throughput:mean": 1210040.526,
+      "transferrate:mean": 354492.41599999997
+    },
+    "8192": {
+      "cpu:mean": 70.44,
+      "cpu:all": [
+        71.0,
+        70.9,
+        70.6,
+        69.9,
+        69.8
+      ],
+      "avg_latency:mean": 6.782,
+      "throughput:mean": 1208851.172,
+      "transferrate:mean": 354144.256
+    }
+  },
+  "full-r2c": {
+    "128": {
+      "cpu:mean": 36.53,
+      "cpu:all": [
+        36.7,
+        36.3,
+        36.8,
+        36.349999999999994,
+        36.5
+      ],
+      "avg_latency:mean": 0.10448,
+      "throughput:mean": 1275133.8159999999,
+      "transferrate:mean": 373561.344
+    },
+    "144": {
+      "cpu:mean": 36.489999999999995,
+      "cpu:all": [
+        36.3,
+        36.6,
+        36.849999999999994,
+        36.3,
+        36.4
+      ],
+      "avg_latency:mean": 0.10552,
+      "throughput:mean": 1257398.386,
+      "transferrate:mean": 368365.568
+    },
+    "160": {
+      "cpu:mean": 35.94,
+      "cpu:all": [
+        35.9,
+        35.9,
+        36.0,
+        35.6,
+        36.3
+      ],
+      "avg_latency:mean": 0.10845199999999999,
+      "throughput:mean": 1207297.736,
+      "transferrate:mean": 353689.6
+    },
+    "176": {
+      "cpu:mean": 35.9,
+      "cpu:all": [
+        35.8,
+        36.05,
+        35.9,
+        35.55,
+        36.2
+      ],
+      "avg_latency:mean": 0.107562,
+      "throughput:mean": 1210860.21,
+      "transferrate:mean": 354732.032
+    },
+    "192": {
+      "cpu:mean": 35.95,
+      "cpu:all": [
+        35.9,
+        36.0,
+        36.0,
+        35.6,
+        36.25
+      ],
+      "avg_latency:mean": 0.107176,
+      "throughput:mean": 1209984.052,
+      "transferrate:mean": 354478.08
+    },
+    "208": {
+      "cpu:mean": 35.86,
+      "cpu:all": [
+        35.75,
+        35.95,
+        36.0,
+        35.5,
+        36.1
+      ],
+      "avg_latency:mean": 0.10739800000000001,
+      "throughput:mean": 1202328.122,
+      "transferrate:mean": 352233.472
+    },
+    "224": {
+      "cpu:mean": 35.95,
+      "cpu:all": [
+        35.9,
+        36.1,
+        36.0,
+        35.7,
+        36.05
+      ],
+      "avg_latency:mean": 0.10639,
+      "throughput:mean": 1213627.798,
+      "transferrate:mean": 355543.04
+    },
+    "240": {
+      "cpu:mean": 35.93,
+      "cpu:all": [
+        36.05,
+        36.05,
+        35.95,
+        35.650000000000006,
+        35.95
+      ],
+      "avg_latency:mean": 0.106872,
+      "throughput:mean": 1204835.588,
+      "transferrate:mean": 352968.70399999997
+    },
+    "256": {
+      "cpu:mean": 51.61,
+      "cpu:all": [
+        51.25,
+        51.7,
+        51.650000000000006,
+        51.9,
+        51.55
+      ],
+      "avg_latency:mean": 0.22548400000000002,
+      "throughput:mean": 1159681.924,
+      "transferrate:mean": 339742.72
+    },
+    "512": {
+      "cpu:mean": 69.76,
+      "cpu:all": [
+        69.7,
+        70.25,
+        69.85,
+        69.4,
+        69.6
+      ],
+      "avg_latency:mean": 0.443272,
+      "throughput:mean": 1186587.0320000001,
+      "transferrate:mean": 347623.424
+    },
+    "768": {
+      "cpu:mean": 70.24,
+      "cpu:all": [
+        70.4,
+        70.5,
+        70.2,
+        69.6,
+        70.5
+      ],
+      "avg_latency:mean": 0.65036,
+      "throughput:mean": 1199676.372,
+      "transferrate:mean": 351457.27999999997
+    },
+    "1024": {
+      "cpu:mean": 70.12,
+      "cpu:all": [
+        70.3,
+        70.5,
+        69.9,
+        69.8,
+        70.1
+      ],
+      "avg_latency:mean": 0.856024,
+      "throughput:mean": 1213496.9340000001,
+      "transferrate:mean": 355506.17600000004
+    },
+    "1280": {
+      "cpu:mean": 70.01,
+      "cpu:all": [
+        70.1,
+        70.0,
+        70.15,
+        69.7,
+        70.1
+      ],
+      "avg_latency:mean": 1.068,
+      "throughput:mean": 1210592.034,
+      "transferrate:mean": 354656.256
+    },
+    "1536": {
+      "cpu:mean": 70.09,
+      "cpu:all": [
+        70.3,
+        70.3,
+        70.35,
+        69.5,
+        70.0
+      ],
+      "avg_latency:mean": 1.278,
+      "throughput:mean": 1213472.092,
+      "transferrate:mean": 355500.032
+    },
+    "1792": {
+      "cpu:mean": 70.08,
+      "cpu:all": [
+        70.3,
+        70.15,
+        70.25,
+        69.5,
+        70.2
+      ],
+      "avg_latency:mean": 1.478,
+      "throughput:mean": 1219099.424,
+      "transferrate:mean": 357146.624
+    },
+    "2048": {
+      "cpu:mean": 70.1,
+      "cpu:all": [
+        70.5,
+        70.3,
+        70.1,
+        69.6,
+        70.0
+      ],
+      "avg_latency:mean": 1.688,
+      "throughput:mean": 1217018.522,
+      "transferrate:mean": 356536.32
+    },
+    "2304": {
+      "cpu:mean": 70.06,
+      "cpu:all": [
+        70.4,
+        70.3,
+        70.1,
+        69.5,
+        70.0
+      ],
+      "avg_latency:mean": 1.9,
+      "throughput:mean": 1220608.59,
+      "transferrate:mean": 357588.992
+    },
+    "2560": {
+      "cpu:mean": 70.21,
+      "cpu:all": [
+        70.3,
+        70.6,
+        70.4,
+        69.45,
+        70.3
+      ],
+      "avg_latency:mean": 2.108,
+      "throughput:mean": 1226032.8059999999,
+      "transferrate:mean": 359178.24
+    },
+    "2816": {
+      "cpu:mean": 70.07000000000001,
+      "cpu:all": [
+        70.3,
+        70.45,
+        70.3,
+        69.4,
+        69.9
+      ],
+      "avg_latency:mean": 2.324,
+      "throughput:mean": 1221661.904,
+      "transferrate:mean": 357898.24
+    },
+    "3072": {
+      "cpu:mean": 70.0,
+      "cpu:all": [
+        70.2,
+        70.4,
+        70.0,
+        69.5,
+        69.9
+      ],
+      "avg_latency:mean": 2.5100000000000002,
+      "throughput:mean": 1228421.46,
+      "transferrate:mean": 359874.56
+    },
+    "3328": {
+      "cpu:mean": 70.08,
+      "cpu:all": [
+        70.3,
+        70.3,
+        70.2,
+        69.6,
+        70.0
+      ],
+      "avg_latency:mean": 2.734,
+      "throughput:mean": 1224052.014,
+      "transferrate:mean": 358596.608
+    },
+    "3584": {
+      "cpu:mean": 70.09,
+      "cpu:all": [
+        70.2,
+        70.4,
+        70.25,
+        69.5,
+        70.1
+      ],
+      "avg_latency:mean": 2.962,
+      "throughput:mean": 1219106.516,
+      "transferrate:mean": 357148.672
+    },
+    "3840": {
+      "cpu:mean": 70.24,
+      "cpu:all": [
+        70.4,
+        70.5,
+        70.5,
+        69.7,
+        70.1
+      ],
+      "avg_latency:mean": 3.158,
+      "throughput:mean": 1219851.7040000001,
+      "transferrate:mean": 357365.76
+    },
+    "4096": {
+      "cpu:mean": 70.29,
+      "cpu:all": [
+        70.5,
+        70.6,
+        70.5,
+        69.65,
+        70.2
+      ],
+      "avg_latency:mean": 3.36,
+      "throughput:mean": 1222051.85,
+      "transferrate:mean": 358012.928
+    },
+    "4608": {
+      "cpu:mean": 70.28999999999999,
+      "cpu:all": [
+        70.7,
+        70.1,
+        70.6,
+        69.85,
+        70.2
+      ],
+      "avg_latency:mean": 3.786,
+      "throughput:mean": 1219541.27,
+      "transferrate:mean": 357273.60000000003
+    },
+    "5120": {
+      "cpu:mean": 70.28,
+      "cpu:all": [
+        70.5,
+        70.6,
+        70.3,
+        69.8,
+        70.2
+      ],
+      "avg_latency:mean": 4.192,
+      "throughput:mean": 1219139.906,
+      "transferrate:mean": 357158.912
+    },
+    "5632": {
+      "cpu:mean": 70.44,
+      "cpu:all": [
+        70.6,
+        70.8,
+        70.4,
+        70.0,
+        70.4
+      ],
+      "avg_latency:mean": 4.644,
+      "throughput:mean": 1208695.306,
+      "transferrate:mean": 354097.152
+    },
+    "6144": {
+      "cpu:mean": 70.3,
+      "cpu:all": [
+        70.5,
+        70.6,
+        70.0,
+        69.8,
+        70.6
+      ],
+      "avg_latency:mean": 5.082,
+      "throughput:mean": 1211830.782,
+      "transferrate:mean": 355018.752
+    },
+    "6656": {
+      "cpu:mean": 70.46,
+      "cpu:all": [
+        70.4,
+        70.8,
+        70.8,
+        69.8,
+        70.5
+      ],
+      "avg_latency:mean": 5.462,
+      "throughput:mean": 1218334.072,
+      "transferrate:mean": 356921.344
+    },
+    "7168": {
+      "cpu:mean": 70.37,
+      "cpu:all": [
+        70.5,
+        70.7,
+        70.65,
+        69.7,
+        70.3
+      ],
+      "avg_latency:mean": 5.9239999999999995,
+      "throughput:mean": 1212976.134,
+      "transferrate:mean": 355354.624
+    },
+    "7680": {
+      "cpu:mean": 70.62,
+      "cpu:all": [
+        70.9,
+        70.8,
+        70.6,
+        70.1,
+        70.7
+      ],
+      "avg_latency:mean": 6.33,
+      "throughput:mean": 1214121.19,
+      "transferrate:mean": 355690.496
+    },
+    "8192": {
+      "cpu:mean": 70.5,
+      "cpu:all": [
+        70.5,
+        70.6,
+        70.9,
+        69.8,
+        70.7
+      ],
+      "avg_latency:mean": 6.744,
+      "throughput:mean": 1214736.508,
+      "transferrate:mean": 355870.72000000003
+    }
+  }
+}

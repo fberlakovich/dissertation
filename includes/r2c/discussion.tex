@@ -3,11 +3,10 @@
 %  \centering
 %  \input{stats/20220519-boxplot-variance-diff-horizontal.pgf}
 %  \caption{Performance impact variance of differently diversified variants on selected benchmarks on our \textsf{TR 3970X} A system.}
-%  \label{fig:intra-variant-difference}
+%  \label{r2c:fig:intra-variant-difference}
 %\end{figure}
 
-
-\subsection{Performance}\label{ss:discussion-evaluation}
+\subsection{Performance}\label{r2c:ss:discussion-evaluation}
 
 \fbetodo{Add perf counter discussion}
 \fbetodo{Add section about profile-guided optimization}
@@ -39,7 +38,7 @@
 \end{table}
 
 
-As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{tab:perf-components}).
+As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
 For CPU's without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
 We ran our benchmarks also on a machine with AVX512 and found that the performance is roughly identical with the same number of vector moves.
@@ -47,7 +46,7 @@ On such machines, we could either half the BTRA performance impact, or use twice
 % We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
 % We could not evaluate this effect due to the lack of compatible hardware.
 
-\Cref{fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \rtwoc{}.
+\Cref{r2c:fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \rtwoc{}.
 \rtwoc{} adds \glspl{BTRA} \emph{per call site}, explaining the overhead for function heavy benchmarks.
 To test this correlation with call frequency, we instrumented the SPEC CPU benchmark programs to count the number of executed call instructions.
 Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
@@ -56,7 +55,7 @@ For each benchmark we took the median call frequencies across all inputs.
 The data suggests that there is a correlation with the overhead, but this correlation is insufficient to predict the overhead:
 \propername{Perlbench}, for example, has less than half the number of calls as \propername{omnetpp}, but shows a similar overhead.
 
-The difference between the \code{push} and AVX2 setup sequence (see \cref{tab:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
+The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
 Similarly, prolog trap insertion also contributes to the increased instruction cache pressure.
 
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
@@ -70,61 +69,228 @@ Further research is necessary to substantiate these suspicions.
 %The overhead of \glspl{heapbt} varies less per benchmark, whereas \glspl{BTRA} affect different benchmarks to different degrees.
 %These changes in overhead can be attributed to the fact that \glspl{BTRA} are inserted \emph{per call site}.
 %As a result, benchmarks with a large number of function calls are affected more by \glspl{BTRA}.
-% Interestingly, despite using the hardened pointer array (see~\ref{ss:impl-heap-boobytraps}), the variant \propername{AVX2+H\heapbt} shows a slightly improved performance on three benchmarks compared to \propername{AVX2+\heapbt}.
+% Interestingly, despite using the hardened pointer array (see~\ref{r2c:ss:impl-heap-boobytraps}), the variant \propername{AVX2+H\heapbt} shows a slightly improved performance on three benchmarks compared to \propername{AVX2+\heapbt}.
 % We suspect an improved cache locality of the pointer array with other data to be responsible for the improvement.
 
-%The performance difference on our benchmark environment illustrated in \Cref{fig:perf-full} warranted further investigation.
+%The performance difference on our benchmark environment illustrated in \Cref{r2c:fig:perf-full} warranted further investigation.
 %To account for the randomness invariably introduced by the diversification of the individual benchmark programs, we generated 25 variants of each program and measured their runtime performance impact.
-%\Cref{fig:intra-variant-difference} shows these data and indicates that the performance can depend significantly on the diversification process.
+%\Cref{r2c:fig:intra-variant-difference} shows these data and indicates that the performance can depend significantly on the diversification process.
 %If users require peak performance, compiling multiple variants and selecting the one with the lowest performance impact is a viable option.
 
-\subsection{Security}\label{ss:discussion-security}
+\subsection{Security}\label{r2c:ss:discussion-security}
+
+\begin{table}[t]
+    \centering
+    \caption{Empirical distribution of function pointers per stack frame.}
+    \label{r2c:tab:func-ptr-dist}
+    \begin{tabular}{c rr rr rr}
+        \toprule
+        & \multicolumn{2}{c}{\propername{nginx}} & \multicolumn{2}{c}{\propername{Apache}} & \multicolumn{2}{c}{\propername{Lighttpd}} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+        Count & Frames & \%   & Frames & \%   & Frames & \%   \\
+        \midrule
+        0     & 74     & 18.5 & 266    & 54.4 & 96     & 25.3 \\
+        1     & 174    & 43.5 & 193    & 39.5 & 99     & 26.1 \\
+        2     & 122    & 30.5 & 22     & 4.5  & 48     & 12.6 \\
+        3     & 23     & 5.8  & 3      & 0.6  & 27     & 7.1  \\
+        4     & 5      & 1.3  & 2      & 0.4  & 18     & 4.7  \\
+        5     & 2      & 0.5  & 2      & 0.4  & 12     & 3.2  \\
+        6     & 0      & 0.0  & 1      & 0.2  & 6      & 1.6  \\
+        7     & 0      & 0.0  & 0      & 0.0  & 9      & 2.4  \\
+        8     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
+        9     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
+        10    & 0      & 0.0  & 0      & 0.0  & 3      & 0.8  \\
+        11+   & 0      & 0.0  & 0      & 0.0  & 50     & 13.2 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[t]
+    \centering
+    \caption{\gls{heapbt} single-guess success probabilities for a random stack snapshot.
+    Each stack frame contains three \glspl{heapbt} on average.}
+    \label{r2c:tab:heap-ptr-probabilities}
+    \begin{tabular}{ll rrr r}
+        \toprule
+        \textbf{Server} & \textbf{Case} & Depth & Heap Ptr. & \glspl{heapbt} & $P_{Success}$ \\
+        \midrule
+        \multirow{4}{*}{\propername{nginx}}
+        & Worst         & 12    & 40        & 36             & 52.6\%        \\
+        & Average       & 22    & 100       & 66             & 60.2\%        \\
+        & Median        & 22    & 102       & 66             & 60.7\%        \\
+        & Best          & 15    & 74        & 45             & 62.2\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Apache}}
+        & Worst         & 174   & 194       & 522            & 27.1\%        \\
+        & Average       & 140   & 269       & 420            & 39.1\%        \\
+        & Median        & 140   & 273       & 420            & 39.4\%        \\
+        & Best          & 4     & 29        & 12             & 70.7\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Lighttpd}}
+        & Worst         & 4     & 4         & 12             & 25.0\%        \\
+        & Average       & 5     & 48        & 15             & 71.8\%        \\
+        & Median        & 8     & 87        & 24             & 78.4\%        \\
+        & Best          & 7     & 116       & 21             & 84.7\%        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[t]
+    \centering
+    \caption{Function pointer single-guess success probabilities for a random stack frame.
+    Each stack frame contains three fake function pointers.}
+    \label{r2c:tab:func-ptr-probabilities}
+    \begin{tabular}{ll rr r}
+        \toprule
+        \textbf{Server} & \textbf{Case} & Real Func. Ptr. & Total Func. Ptr. & $P_{Success}$ \\
+        \midrule
+        \multirow{4}{*}{\propername{nginx}}
+        & Worst         & 24         & 27    & 3.7\%         \\
+        & Average       & 2.8        & 5.8   & 17.3\%        \\
+        & Median        & 1          & 4     & 25.0\%        \\
+        & Best          & 1          & 4     & 25.0\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Apache}}
+        & Worst         & 18         & 21    & 4.8\%         \\
+        & Average       & 1.5        & 4.5   & 22.0\%        \\
+        & Median        & 1          & 4     & 25.0\%        \\
+        & Best          & 1          & 4     & 25.0\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Lighttpd}}
+        & Worst         & 72         & 75    & 1.3\%         \\
+        & Average       & 19.9       & 22.9  & 4.4\%         \\
+        & Median        & 2          & 5     & 20.0\%        \\
+        & Best          & 1          & 4     & 25.0\%        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 While execute-only memory and function shuffling defeat classic ROP and JIT-ROP attacks, indirect JIT-ROP and \gls{AOCR} remain an issue.
 For an indirect JIT-ROP attack, an attacker needs to locate valid code pointers, such as return addresses, in readable memory and infer gadget locations based on the found pointers.
-For an \gls{AOCR} attack an attacker needs to locate function pointers or infer them from other code pointers (\eg return addresses), as well as manipulate function parameters.
+For an \gls{AOCR} attack, an attacker needs to locate function pointers or infer them from other code pointers (\eg return addresses), as well as manipulate function parameters.
 In the following subsections we discuss how \rtwoc{} counters each of these attack vectors.
 We also discuss the security of stack unwinding tables and the possibility of an attacker corrupting entire or partial code pointers.
 
-\subsubsection{Return Addresses}
+\subsubsection{Leaking Return Addresses}\label{r2c:sss:leaking-return-addresses}
 \rtwoc protects return addresses with \glspl{BTRA}.
-As detailed in \cref{ss:decoy-mimicry}, the only way for an attacker to identify a return address among the \glspl{BTRA} is by applying brute force.
+As detailed in \cref{r2c:ss:decoy-mimicry}, the only way for an attacker to identify a return address among the \glspl{BTRA} is by applying brute force.
 An attacker's chance to correctly guess the return address depends on the number of \glspl{BTRA} used.
-If $R$ is the number of \glspl{BTRA} for a call site, the probability of correctly guessing the return address is given by $\frac{1}{R+1}$.
-\rtwoc{}'s additional code randomization (see \cref{ss:strengthening}) means that an attacker cannot reliably infer the address of the \emph{calling} function based on a leaked return address.
-As a result, leaked return addresses are only useful to locate gadgets for a ROP chain.
-When using $n$ return addresses to construct a ROP chain, the success probability for locating all $n$ return addresses decreases to $(\frac{1}{R+1})^n$.
-For example, with ten \glspl{BTRA} the probability of successfully finding four return addresses is $(\frac{1}{11})^4 \approx 0.00007$.
+If $B$ is the number of \glspl{BTRA} for a call site, the probability of correctly guessing the return address is given by
+\[ P(\mathrm{return address})=\frac{1}{B+1}. \]
+Specifically, with 11 \glspl{BTRA} per return address $P(\mathrm{return address})\approx0.09$.
+Since return addresses on their own are of limited use, they form only a building block for further inferences.
 
-\subsubsection{Function Pointers}\label{sss:security-function-pointers}
-\rtwoc protects function pointers on the stack and in the data section with stack slot shuffling and global variable shuffling, respectively.
-\rtwoc{}'s additional code randomization (see \cref{ss:strengthening}) ensures that such pointers cannot be used to locate gadgets, effectively forcing the attacker into a more constrained whole-function reuse setting.
-An attacker can learn function pointers from either the stack, the heap, or the data section.
-Due to ASLR the location of the data section is unknown to the attacker a priori.
+\subsubsection{Leaking Function Pointers}\label{r2c:sss:leaking-function-pointers}
+For an \gls{AOCR}-style whole-function-reuse attack, an attacker needs to locate \emph{specific} function pointers.
+That is, the attacker must locate a function pointer with manipulatable parameters and desired functionality.
+There are three ways for an attacker to locate function pointers:
+\begin{enumerate*}
+    \item from the data section;
+    \item via the stack, either from function pointers on the stack or indirectly from return addresses
+    \item from the heap.
+\end{enumerate*}
+
+\rtwoc does not directly protect the heap against information leakage, but aims to prevent an attacker from reaching the heap via the stack via \glspl{heapbt}.
+We discuss their respective security properties in \cref{r2c:sss:heap-data}.
+\gls{ASLR} randomizes the address of the data section and global-variable shuffling randomizes the order of elements in the data section.
 Leaking a function pointer from the data section, therefore, requires a leaked data section pointer first.
-Even if an attacker manages to disclose a function pointer that satisfies the criteria for whole-function reuse, global variable shuffling frustrates efforts to locate and manipulate \gls{AOCR}'s default function parameters.
+Within the data section, an attacker must then locate the desired function pointer.
+Exact localization is challenging because of function permutation and boobytrap pointers in the data section.
 
-\subsubsection{Leaking Heap Data}
-The attacker can try to leak data from the heap to either learn function pointers or pointers leading to the data section.
-As ASLR randomizes the heap's location, leaking data requires either a heap pointer or a heap over-read vulnerability.
-Although \rtwoc{} does not protect against leaks from a heap over-read, it does, however, impede the disclosure of heap pointers with \glspl{heapbt}.
-The probability of correctly guessing a benign heap pointer among all heap pointers depends on the number of benign heap pointers $H$, and the number of \glspl{heapbt} $B$ per function.
-The probability of randomly picking a benign pointer is $\frac{H}{B+H}$.
-The exact number for $H$ is application specific and depends, for example, on the number of registers containing heap pointers that are spilled to the stack.
-$B$ on the other hand is a random variable with a uniform distribution that depends on \rtwoc{}'s parameters (see \cref{ss:impl-heap-boobytraps}).
-With an expected value of $E(B)$, each stack frame will contain $E(B)$ \glspl{heapbt} on average.
-A leak of $S$ stack frames, thus, contains $B=E(X)*S$ \glspl{heapbt}.
-\glspl{heapbt} also increase the risk of detection for attackers trying to locate the heap through random memory probes.
+Leaking a function pointer from the stack can happen either directly or indirectly via a previously leaked return address.
+We start with the probability of a direct leak.
+Estimating the success probability of locating function pointers on the stack depends on the number of function pointers per stack frame.
+Assuming that an attacker can leak arbitrary stack snapshots (see \cref{r2c:s:threat-model}) and can differentiate stack frames within a stack snapshot, stack slot shuffling is currently the only protection.
+An attacker can reasonably differentiate function pointers from the return address and \glspl{BTRA} because these occur only at the top of a frame.
+With value range analysis an attacker can further differentiate function pointers from other stack slots, such as variables values or heap pointers.
+Thus, guessing a function pointer's location means choosing an element from a permutation of all function pointers in the stack frame.
+To measure the probability empirically, we have collected stack snapshots from benchmarking workloads on \propername{Apache}, \propername{nginx,} and \propername{lighttp}.
+\cref{r2c:tab:func-ptr-dist} shows the function pointer distribution in these snapshots.
+About 25\% to 26\% of stack frames (depending on the software) contain no function pointer at all.
+In \propername{nginx}, 45\% of all stack frames contain only one function pointer, in \propername{Apache} 35\% and in \propername{lighttp} 14\%.
+These cases are troublesome because they mean that an attacker can immediately identify the desired pointer.
+Even with two function pointers per frame (between 4.5\% and 30.5\%) the probability of guessing correctly is still 50\%.
+We note, however, that only very select function pointers are suitable for \gls{AOCR}'s variant of whole-function-reuse attack and that global variable shuffling further frustrates efforts to locate and manipulate default function parameters.
 
-Alternatively, an attacker could try to identify events where \glspl{heapbt} do not mimic their benign counterparts accurately.
+Leaking a function pointer from a return address requires more guessing.
+Let us assume that an attacker has successfully leaked a return address $\mathcal{A}$.
+Let us further assume that the attacker \emph{knows} that $\mathcal{A}$ points into a function $\mathcal{F}$.
+The attacker can then try to guess the entrypoint of $\mathcal{F}$ for a whole-function-reuse attack.
+The function's entrypoint is guaranteed to be before $\mathcal{A}$.
+Assuming an average function size of $S$, there are on average $\frac{S}{2}$ addresses before a random return site within $\mathcal{F}$.
+With a function alignment of $A$ (typically 16), there are, therefore, on average $\frac{S}{2A}$ possible entry points.
+\rtwoc{}'s additional code randomization (see \cref{r2c:ss:strengthening}) decreases the success probability further.
+With inserted traps, the function's start address does not coincide with the function's entrypoint.
+With $T$ inserted trap instructions, an attacker must guess $\frac{S}{2*A} * T$ possible entrypoints.
+The probability of correctly guessing the function's entrypoint thus becomes
+\[ P(\mathrm{entrypoint})=\frac{2*A}{S*T}. \]
+The average function size $S$ depends on the program, the alignment is typically 16, and the average number of traps depends on a configurable parameter in \rtwoc.
+For an alignment $A=16$, a median function size of $S=258$ bytes in a protected \propername{nginx} and an average number of prolog traps $T=3$, this means $P(\mathrm{entrypoint})\approx0.04$.
+Estimating based on the median function size is conservative, as the average function size in \propername{nginx} is 789 bytes.
+The probability for leaking a single function pointer based on a leaked return address is
+\[ P(\mathrm{retaddr\rightarrow{}func}) = P(\mathrm{return address}) * P(\mathrm{entrypoint}). \]
+With the concrete numbers from above $P(\mathrm{retaddr\rightarrow{}func})\approx0.0038$.
+
+\subsubsection{Leaking Gadget Addresses}
+Instead of mounting a whole-function-reuse attack, an attacker can try to leak enough gadget addresses for a \gls{ROP} attack.
+Except for completely blind guessing, an attacker can guess gadget addresses relative to an anchor point.
+Such an anchor point can either be a leaked function address (see \cref{r2c:sss:leaking-function-pointers}) or a leaked return address (see \cref{r2c:sss:leaking-return-addresses}).
+In either case, the attacker knows the number of call sites between the anchor and the gadget of choice, since \rtwoc does not change the number of call sites.
+Each call site has $R_{B}$ \glspl{BTRA} and for each \gls{BTRA}, \rtwoc adds a \code{NOP} with a probability of $P_{NOP}$.
+The number of \glspl{BTRA} and the probability of inserted \code{NOP}s are configurable parameters in \rtwoc.
+Let $C$ be the average number of call sites within a function in the target program.
+We can then estimate the number of call sites between the anchor and a gadget address as $C_{between}=\frac{C}{2}$ on average.
+$C_{between}$ is, of course, only a rough estimate that highly depends on $C$.
+For \propername{nginx}, we found $C$ to be 4 (median) and 7.3 (average).
+Based on these variables, we derive that between the anchor and the gadget, there are $C_{between} * R_{B} * P_{NOP}$ \code{NOP}s on average.
+The probability of guessing a gadget address thus becomes
+\[ P(\mathrm{gadget})=\frac{1}{C_{between}*B*P_{NOP}}. \]
+With 11 \glspl{BTRA} per return address, a probability of $P_{NOP}=0.35$ and $C_{between}=2$, which we used for full \rtwoc, we get $P(\mathrm{gadget})\approx13.9$.
+Estimating based on the median number of call sites is conservative, as the average number of call sites per function in \propername{nginx} is 7.
+Gadget-based attacks are further impeded by register-allocation randomization.
+
+An attacker typically needs more than one gadget, further decreasing the chance of successfully guessing \emph{all} locations.
+For example, the probability of leaking two return addresses and within each function two gadgets is
+\[ P\left(\mathrm{2retaddrs\rightarrow{}4gadgets}\right) = P(\mathrm{return address})^2 * P(\mathrm{gadget})^4. \]
+With the concrete numbers from above this means $P\left(\mathrm{2retaddrs\rightarrow{}4gadgets}\right)\approx0,00017$.
+
+\subsubsection{Leaking Heap Data}\label{r2c:sss:heap-data}
+An attacker can try to leak data from the heap to either learn function pointers or pointers leading to the data section.
+As \gls{ASLR} randomizes the heap's location, leaking data requires either a heap over-read vulnerability or a heap pointer.
+Such a heap pointer can come either from the data section or the stack.
+Unlike with function pointers, the attacker can pick an arbitrary heap pointer to reach the heap.
+Heap pointers in the data section are rare, which is why we focus our analysis on the stack.
+
+The probability of correctly guessing a benign heap pointer among all heap pointers depends on the number of benign heap pointers $H$, and the number of \glspl{heapbt} $H_{B}$ in a stack dump.
+The number of $H_{B}$ in turn depends on the number of stack frames in the dump because \rtwoc inserts \glspl{heapbt} into each stack frame, depending on a configuration parameter (see \cref{r2c:ss:impl-heap-boobytraps}).
+The probability of randomly picking a benign pointer is $\frac{H}{H_{B}+H}$.
+The exact number for $H$ is application-specific and depends, for example, on the number of registers containing heap pointers that are spilled to the stack.
+\cref{r2c:tab:heap-ptr-probabilities} shows the empirical distribution of heap pointers in stack snapshots taken from \propername{Apache}, \propername{nginx}, and \propername{lighttp} during benchmark workloads.
+The table also shows the success probability of randomly guessing a heap pointer among all heap pointers found in a randomly chosen stack snapshot.
+As the success probability depends on the concrete composition of the stack snapshot, the table shows the worst, average, and best case for the attacker.
+Assuming that an attacker can dump arbitrary many stack snapshots (see \cref{r2c:s:threat-model}), the attacker can repeat the leak until he finds a best-case snapshot.
+Generally, snapshots with few stack frames but many heap pointers in those frames constitute the best case for the attacker.
+Since \rtwoc inserts a configurable number of \glspl{heapbt} \emph{per frame}, stack snapshots with fewer frames contain also fewer \glspl{heapbt}.
+\cref{r2c:tab:heap-ptr-probabilities} also shows, however, that even in the worst case (for the attacker), the success probability still ranges between 25\% and 52.6\%.
+
+The numbers above suggest that \glspl{heapbt} offer only limited protection against heap-based attacks.
+We discuss a possible extension of the mimicry principle \emph{onto} the heap in \cref{r2c:ss:heap-mimicry}.
+
+Alternatively to guessing a heap pointer, an attacker could try to identify events where \glspl{heapbt} do not mimic their benign counterparts accurately.
 For example, by performing heap feng shui an attacker might be able to identify benign heap pointers with a known distance to each other~\cite{Sotirov2007}.
 Note, however, that such an attack requires specific prerequisites and goes significantly beyond the analysis steps of the demonstrated \gls{AOCR} attacks.
 
-Even if an attacker achieves a heap leak through a heap pointer or a heap over-read, we believe that \emph{leveraging} a heap leak is challenging, considering that
-\begin{enumerate*}[label=(\roman*)]
-    \item scanning large contiguous areas of the heap might hit one of the guard pages used for \glspl{heapbt} (see \cref{ss:impl-heap-boobytraps});
-    \item finding suitable function pointers for a whole-function reuse attack within the leaked window is difficult (see \cref{sss:security-function-pointers}).
-\end{enumerate*}
+Given that \glspl{heapbt} incur overhead but affords only limited protection, an alternative use of the underlying implementation could be to write fake code pointers instead.
+\glspl{BTRA} already provide the means for code pointers pointing to booby traps and the \glspl{heapbt} implementation way of writing pointers to random stack slots.
+The expected overhead would remain the same or be less because the heap is no longer fragmented by guard pages.
+In a function-pointer-guessing scenario, however, the afforded security of pointer mimicry is better.
+Recall from \cref{r2c:sss:leaking-function-pointers} that when leaking a function pointer, the attacker needs a \emph{specific} pointer within a \emph{specific} stack frame.
+Pointer mimicry could thus help in cases where there are only few function pointers in a stack frame and, as a result, stack slot randomization does not sufficiently protect them (see \cref{r2c:tab:func-ptr-dist}).
+Analogous to \cref{r2c:tab:heap-ptr-probabilities}, \cref{r2c:tab:func-ptr-probabilities} contains empirical data together with success probabilities for guessing a function pointer, assuming three fake function pointers per frame on average.
+Note that unlike \cref{r2c:tab:heap-ptr-probabilities}, \cref{r2c:tab:func-ptr-probabilities} shows data \emph{per frame}.
+Whereas without fake function pointers the best case success probability for the attacker was 100\%, the probability with fake pointers drops to 25\%.
+Care must be taken, however, not to write fake code pointers into stack frames without real function pointers.
+Since an attacker knows which stack frames contain function pointers in the non-randomized binary, the attacker could identify fake pointers in frames that previously did not contain any function pointers.
 
 \subsubsection{Exception handling and stack unwinding}
 \fbetodo{extend with example}
@@ -141,16 +307,16 @@ Each entry in the table, reflects the position of a function in a compilation un
 Through function reordering/permutation row-based references become invalid.
 Since exceptions occur infrequently, one could also use a more expensive protection scheme, such as encryption, to protect these meta-data.
 
-\subsubsection{Corrupting code pointers}\label{sss:corrupting-code-pointers}
+\subsubsection{Corrupting code pointers}\label{r2c:sss:corrupting-code-pointers}
 \fbetodo{extend section}
 \Glspl{CRA} typically corrupt entire code pointers.
 An attack called \gls{PIROP} generalizes this principle by corrupting only parts of code pointers and, as a result, is immune to ASLR and page-level randomization~\cite{Goktas2018}.
 \rtwoc{} impedes a \gls{PIROP} attack in two ways.
-First, \rtwoc{} shuffles functions and randomizes at the sub-function level (see \cref{ss:strengthening}), thus increasing the entropy for \gls{PIROP}.
+First, \rtwoc{} shuffles functions and randomizes at the sub-function level (see \cref{r2c:ss:strengthening}), thus increasing the entropy for \gls{PIROP}.
 Second, \glspl{BTRA} constrain candidate \gls{PIROP} gadgets that manipulate (partial) return addresses:
 In the presence of \glspl{BTRA} a \gls{PIROP} attack needs to corrupt \emph{all} return addresses, requiring either iterative gadget execution or more complex gadgets.
 
-\subsection{Remaining attack surface}\label{ss:remaining-attack-surface}
+\subsection{Remaining attack surface}\label{r2c:ss:remaining-attack-surface}
 At present, \rtwoc{} remains susceptible to two types of brute force attacks.
 In a Blind ROP scenario with restarting worker processes, an attacker could use \gls{PIROP} to brute force the entropy resulting from \rtwoc{} randomization techniques.
 Similarly, an attacker could use the corruption of potential return addresses as a side channel.

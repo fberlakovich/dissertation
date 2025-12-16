@@ -1,0 +1,888 @@
+{
+  "baseline": {
+    "256": {
+      "cpu:mean": 5.9,
+      "throughput:median": 575822.725,
+      "throughput:stdev_percent": 10.2280168657451,
+      "50p_latency:median": 0.38,
+      "75p_latency:median": 0.6025,
+      "90p_latency:median": 0.8614999999999999,
+      "99p_latency:median": 1.42
+    },
+    "272": {
+      "cpu:mean": 6.065,
+      "throughput:median": 593382.51,
+      "throughput:stdev_percent": 6.103203851540701,
+      "50p_latency:median": 0.3795,
+      "75p_latency:median": 0.569,
+      "90p_latency:median": 0.8195,
+      "99p_latency:median": 1.37
+    },
+    "288": {
+      "cpu:mean": 6.075,
+      "throughput:median": 591588.83,
+      "throughput:stdev_percent": 6.486752495859194,
+      "50p_latency:median": 0.386,
+      "75p_latency:median": 0.567,
+      "90p_latency:median": 0.7905,
+      "99p_latency:median": 1.43
+    },
+    "304": {
+      "cpu:mean": 6.1,
+      "throughput:median": 601813.35,
+      "throughput:stdev_percent": 6.941345359657321,
+      "50p_latency:median": 0.372,
+      "75p_latency:median": 0.558,
+      "90p_latency:median": 0.782,
+      "99p_latency:median": 1.395
+    },
+    "320": {
+      "cpu:mean": 6.1049999999999995,
+      "throughput:median": 607972.88,
+      "throughput:stdev_percent": 6.451841805164596,
+      "50p_latency:median": 0.3695,
+      "75p_latency:median": 0.5435000000000001,
+      "90p_latency:median": 0.779,
+      "99p_latency:median": 1.4249999999999998
+    },
+    "336": {
+      "cpu:mean": 6.005,
+      "throughput:median": 598810.61,
+      "throughput:stdev_percent": 9.848155163546071,
+      "50p_latency:median": 0.355,
+      "75p_latency:median": 0.558,
+      "90p_latency:median": 0.8235,
+      "99p_latency:median": 1.51
+    },
+    "352": {
+      "cpu:mean": 6.04,
+      "throughput:median": 596334.425,
+      "throughput:stdev_percent": 7.822136728886022,
+      "50p_latency:median": 0.362,
+      "75p_latency:median": 0.5485,
+      "90p_latency:median": 0.808,
+      "99p_latency:median": 1.44
+    },
+    "368": {
+      "cpu:mean": 5.96,
+      "throughput:median": 599548.27,
+      "throughput:stdev_percent": 10.916385870847426,
+      "50p_latency:median": 0.369,
+      "75p_latency:median": 0.549,
+      "90p_latency:median": 0.8055,
+      "99p_latency:median": 1.4
+    },
+    "384": {
+      "cpu:mean": 5.96,
+      "throughput:median": 597893.9450000001,
+      "throughput:stdev_percent": 10.382317067990297,
+      "50p_latency:median": 0.356,
+      "75p_latency:median": 0.5605,
+      "90p_latency:median": 0.8235,
+      "99p_latency:median": 1.475
+    },
+    "400": {
+      "cpu:mean": 6.0600000000000005,
+      "throughput:median": 603895.76,
+      "throughput:stdev_percent": 8.94984461012919,
+      "50p_latency:median": 0.361,
+      "75p_latency:median": 0.54,
+      "90p_latency:median": 0.776,
+      "99p_latency:median": 1.37
+    },
+    "416": {
+      "cpu:mean": 5.95,
+      "throughput:median": 608774.89,
+      "throughput:stdev_percent": 11.94991443088458,
+      "50p_latency:median": 0.3495,
+      "75p_latency:median": 0.531,
+      "90p_latency:median": 0.762,
+      "99p_latency:median": 1.37
+    },
+    "432": {
+      "cpu:mean": 5.94,
+      "throughput:median": 602909.5800000001,
+      "throughput:stdev_percent": 11.403842872114193,
+      "50p_latency:median": 0.351,
+      "75p_latency:median": 0.543,
+      "90p_latency:median": 0.8185,
+      "99p_latency:median": 1.395
+    },
+    "448": {
+      "cpu:mean": 5.96,
+      "throughput:median": 595054.44,
+      "throughput:stdev_percent": 10.528668938972643,
+      "50p_latency:median": 0.3585,
+      "75p_latency:median": 0.544,
+      "90p_latency:median": 0.8145,
+      "99p_latency:median": 1.405
+    },
+    "464": {
+      "cpu:mean": 5.97,
+      "throughput:median": 596851.715,
+      "throughput:stdev_percent": 9.771141211836122,
+      "50p_latency:median": 0.358,
+      "75p_latency:median": 0.551,
+      "90p_latency:median": 0.7615000000000001,
+      "99p_latency:median": 1.315
+    },
+    "480": {
+      "cpu:mean": 5.945,
+      "throughput:median": 595702.6599999999,
+      "throughput:stdev_percent": 10.396022750007297,
+      "50p_latency:median": 0.3405,
+      "75p_latency:median": 0.531,
+      "90p_latency:median": 0.855,
+      "99p_latency:median": 1.415
+    },
+    "496": {
+      "cpu:mean": 5.9,
+      "throughput:median": 592962.1599999999,
+      "throughput:stdev_percent": 10.131394319031,
+      "50p_latency:median": 0.3415,
+      "75p_latency:median": 0.547,
+      "90p_latency:median": 0.8115,
+      "99p_latency:median": 1.43
+    },
+    "512": {
+      "cpu:mean": 6.27,
+      "throughput:median": 632593.4450000001,
+      "throughput:stdev_percent": 8.542922340248394,
+      "50p_latency:median": 0.7035,
+      "75p_latency:median": 1.2349999999999999,
+      "90p_latency:median": 1.835,
+      "99p_latency:median": 2.99
+    },
+    "640": {
+      "cpu:mean": 6.345,
+      "throughput:median": 621761.59,
+      "throughput:stdev_percent": 5.58659479990712,
+      "50p_latency:median": 0.6695,
+      "75p_latency:median": 1.205,
+      "90p_latency:median": 1.825,
+      "99p_latency:median": 2.965
+    },
+    "768": {
+      "cpu:mean": 6.305,
+      "throughput:median": 624259.22,
+      "throughput:stdev_percent": 7.228892392190841,
+      "50p_latency:median": 1.12,
+      "75p_latency:median": 1.8250000000000002,
+      "90p_latency:median": 2.7649999999999997,
+      "99p_latency:median": 59.055
+    },
+    "896": {
+      "cpu:mean": 6.295,
+      "throughput:median": 621049.365,
+      "throughput:stdev_percent": 7.82528598438212,
+      "50p_latency:median": 1.105,
+      "75p_latency:median": 1.79,
+      "90p_latency:median": 2.8,
+      "99p_latency:median": 49.394999999999996
+    },
+    "1024": {
+      "cpu:mean": 6.445,
+      "throughput:median": 635147.99,
+      "throughput:stdev_percent": 6.1325688735634625,
+      "50p_latency:median": 1.55,
+      "75p_latency:median": 2.5,
+      "90p_latency:median": 3.05,
+      "99p_latency:median": 144.20999999999998
+    },
+    "1280": {
+      "cpu:mean": 6.335,
+      "throughput:median": 619430.965,
+      "throughput:stdev_percent": 7.481800043966846,
+      "50p_latency:median": 2.085,
+      "75p_latency:median": 2.915,
+      "90p_latency:median": 3.4,
+      "99p_latency:median": 189.96
+    },
+    "1536": {
+      "cpu:mean": 6.36,
+      "throughput:median": 622951.79,
+      "throughput:stdev_percent": 8.318808406843646,
+      "50p_latency:median": 2.59,
+      "75p_latency:median": 2.98,
+      "90p_latency:median": 3.815,
+      "99p_latency:median": 192.315
+    },
+    "1792": {
+      "cpu:mean": 6.495,
+      "throughput:median": 627462.3200000001,
+      "throughput:stdev_percent": 8.247915014404748,
+      "50p_latency:median": 2.8099999999999996,
+      "75p_latency:median": 3.045,
+      "90p_latency:median": 9.66,
+      "99p_latency:median": 214.46499999999997
+    },
+    "2048": {
+      "cpu:mean": 6.55,
+      "throughput:median": 630743.86,
+      "throughput:stdev_percent": 7.552010229223747,
+      "50p_latency:median": 2.9000000000000004,
+      "75p_latency:median": 3.105,
+      "90p_latency:median": 15.0,
+      "99p_latency:median": 222.26
+    },
+    "2304": {
+      "cpu:mean": 6.47,
+      "throughput:median": 620320.595,
+      "throughput:stdev_percent": 7.772107374999894,
+      "50p_latency:median": 3.0,
+      "75p_latency:median": 3.3099999999999996,
+      "90p_latency:median": 19.465,
+      "99p_latency:median": 229.365
+    },
+    "2560": {
+      "cpu:mean": 6.515000000000001,
+      "throughput:median": 624005.635,
+      "throughput:stdev_percent": 7.512773758343129,
+      "50p_latency:median": 3.0149999999999997,
+      "75p_latency:median": 3.8449999999999998,
+      "90p_latency:median": 29.395,
+      "99p_latency:median": 239.185
+    },
+    "2816": {
+      "cpu:mean": 6.53,
+      "throughput:median": 634287.5700000001,
+      "throughput:stdev_percent": 8.277274358180911,
+      "50p_latency:median": 3.005,
+      "75p_latency:median": 5.545,
+      "90p_latency:median": 76.435,
+      "99p_latency:median": 248.805
+    },
+    "3072": {
+      "cpu:mean": 6.38,
+      "throughput:median": 605626.58,
+      "throughput:stdev_percent": 7.946266696897439,
+      "50p_latency:median": 3.215,
+      "75p_latency:median": 9.785,
+      "90p_latency:median": 107.35499999999999,
+      "99p_latency:median": 257.065
+    },
+    "3328": {
+      "cpu:mean": 6.42,
+      "throughput:median": 612837.0149999999,
+      "throughput:stdev_percent": 8.547918934868488,
+      "50p_latency:median": 3.15,
+      "75p_latency:median": 13.66,
+      "90p_latency:median": 125.63,
+      "99p_latency:median": 263.92999999999995
+    },
+    "3584": {
+      "cpu:mean": 6.404999999999999,
+      "throughput:median": 626585.54,
+      "throughput:stdev_percent": 8.80735948992217,
+      "50p_latency:median": 3.125,
+      "75p_latency:median": 16.119999999999997,
+      "90p_latency:median": 137.78,
+      "99p_latency:median": 273.70500000000004
+    },
+    "3840": {
+      "cpu:mean": 6.4350000000000005,
+      "throughput:median": 623799.8,
+      "throughput:stdev_percent": 8.375501314888098,
+      "50p_latency:median": 3.255,
+      "75p_latency:median": 19.07,
+      "90p_latency:median": 148.18,
+      "99p_latency:median": 308.08500000000004
+    },
+    "4096": {
+      "cpu:mean": 6.39,
+      "throughput:median": 611734.8049999999,
+      "throughput:stdev_percent": 7.570030009757906,
+      "50p_latency:median": 3.24,
+      "75p_latency:median": 21.585,
+      "90p_latency:median": 157.765,
+      "99p_latency:median": 344.95000000000005
+    },
+    "4352": {
+      "cpu:mean": 6.4,
+      "throughput:median": 629595.925,
+      "throughput:stdev_percent": 8.325944118915453,
+      "50p_latency:median": 3.2800000000000002,
+      "75p_latency:median": 22.91,
+      "90p_latency:median": 163.57,
+      "99p_latency:median": 364.895
+    },
+    "4608": {
+      "cpu:mean": 6.325,
+      "throughput:median": 608742.6950000001,
+      "throughput:stdev_percent": 8.067307630269415,
+      "50p_latency:median": 3.33,
+      "75p_latency:median": 27.2,
+      "90p_latency:median": 171.14999999999998,
+      "99p_latency:median": 393.895
+    },
+    "4864": {
+      "cpu:mean": 6.34,
+      "throughput:median": 612393.0449999999,
+      "throughput:stdev_percent": 7.866421718780767,
+      "50p_latency:median": 3.3600000000000003,
+      "75p_latency:median": 34.019999999999996,
+      "90p_latency:median": 176.405,
+      "99p_latency:median": 401.3
+    },
+    "5120": {
+      "cpu:mean": 6.36,
+      "throughput:median": 597845.505,
+      "throughput:stdev_percent": 8.134838398460134,
+      "50p_latency:median": 3.425,
+      "75p_latency:median": 42.195,
+      "90p_latency:median": 181.615,
+      "99p_latency:median": 418.56
+    },
+    "5376": {
+      "cpu:mean": 6.315,
+      "throughput:median": 600737.265,
+      "throughput:stdev_percent": 7.625265751956354,
+      "50p_latency:median": 3.475,
+      "75p_latency:median": 51.18,
+      "90p_latency:median": 185.39,
+      "99p_latency:median": 430.65
+    },
+    "5632": {
+      "cpu:mean": 6.234999999999999,
+      "throughput:median": 596001.8500000001,
+      "throughput:stdev_percent": 8.035969784976878,
+      "50p_latency:median": 3.505,
+      "75p_latency:median": 59.705,
+      "90p_latency:median": 190.245,
+      "99p_latency:median": 443.96500000000003
+    },
+    "5888": {
+      "cpu:mean": 6.27,
+      "throughput:median": 587236.5900000001,
+      "throughput:stdev_percent": 6.8969239060268785,
+      "50p_latency:median": 3.74,
+      "75p_latency:median": 66.82,
+      "90p_latency:median": 195.04000000000002,
+      "99p_latency:median": 451.685
+    },
+    "6144": {
+      "cpu:mean": 6.25,
+      "throughput:median": 588590.8300000001,
+      "throughput:stdev_percent": 7.603533817595155,
+      "50p_latency:median": 3.615,
+      "75p_latency:median": 72.055,
+      "90p_latency:median": 198.09,
+      "99p_latency:median": 457.455
+    },
+    "6400": {
+      "cpu:mean": 6.175,
+      "throughput:median": 578573.835,
+      "throughput:stdev_percent": 7.8035994062238,
+      "50p_latency:median": 3.815,
+      "75p_latency:median": 79.805,
+      "90p_latency:median": 203.53,
+      "99p_latency:median": 469.53
+    },
+    "6656": {
+      "cpu:mean": 6.245,
+      "throughput:median": 581693.63,
+      "throughput:stdev_percent": 8.3666264510753,
+      "50p_latency:median": 3.8200000000000003,
+      "75p_latency:median": 83.235,
+      "90p_latency:median": 204.695,
+      "99p_latency:median": 469.86
+    },
+    "6912": {
+      "cpu:mean": 6.255,
+      "throughput:median": 589633.8,
+      "throughput:stdev_percent": 7.974907141784542,
+      "50p_latency:median": 4.265,
+      "75p_latency:median": 86.85,
+      "90p_latency:median": 205.995,
+      "99p_latency:median": 470.40999999999997
+    },
+    "7168": {
+      "cpu:mean": 6.37,
+      "throughput:median": 590375.82,
+      "throughput:stdev_percent": 6.140211790029494,
+      "50p_latency:median": 4.72,
+      "75p_latency:median": 80.175,
+      "90p_latency:median": 203.065,
+      "99p_latency:median": 466.97
+    },
+    "7424": {
+      "cpu:mean": 6.38,
+      "throughput:median": 580860.22,
+      "throughput:stdev_percent": 5.638574383977155,
+      "50p_latency:median": 4.105,
+      "75p_latency:median": 93.25999999999999,
+      "90p_latency:median": 209.73000000000002,
+      "99p_latency:median": 478.03499999999997
+    },
+    "7680": {
+      "cpu:mean": 6.36,
+      "throughput:median": 594492.235,
+      "throughput:stdev_percent": 6.243591344608821,
+      "50p_latency:median": 4.369999999999999,
+      "75p_latency:median": 91.05,
+      "90p_latency:median": 208.085,
+      "99p_latency:median": 475.82
+    },
+    "7936": {
+      "cpu:mean": 6.315,
+      "throughput:median": 592832.3200000001,
+      "throughput:stdev_percent": 6.76296402897464,
+      "50p_latency:median": 4.79,
+      "75p_latency:median": 90.00999999999999,
+      "90p_latency:median": 208.36,
+      "99p_latency:median": 477.29499999999996
+    },
+    "8192": {
+      "cpu:mean": 6.335,
+      "throughput:median": 577559.87,
+      "throughput:stdev_percent": 5.777139242783827,
+      "50p_latency:median": 4.54,
+      "75p_latency:median": 97.8,
+      "90p_latency:median": 214.01999999999998,
+      "99p_latency:median": 487.275
+    }
+  },
+  "full-r2c": {
+    "256": {
+      "cpu:mean": 5.8100000000000005,
+      "throughput:median": 540705.2450000001,
+      "throughput:stdev_percent": 4.989986189282079,
+      "50p_latency:median": 0.4265,
+      "75p_latency:median": 0.632,
+      "90p_latency:median": 0.875,
+      "99p_latency:median": 1.34
+    },
+    "272": {
+      "cpu:mean": 5.9,
+      "throughput:median": 543136.155,
+      "throughput:stdev_percent": 6.050843748817244,
+      "50p_latency:median": 0.405,
+      "75p_latency:median": 0.6375,
+      "90p_latency:median": 0.89,
+      "99p_latency:median": 1.435
+    },
+    "288": {
+      "cpu:mean": 5.855,
+      "throughput:median": 540316.04,
+      "throughput:stdev_percent": 5.9796834485720245,
+      "50p_latency:median": 0.4045,
+      "75p_latency:median": 0.638,
+      "90p_latency:median": 0.905,
+      "99p_latency:median": 1.4449999999999998
+    },
+    "304": {
+      "cpu:mean": 5.875,
+      "throughput:median": 544437.9099999999,
+      "throughput:stdev_percent": 4.5886163484701195,
+      "50p_latency:median": 0.397,
+      "75p_latency:median": 0.625,
+      "90p_latency:median": 0.91,
+      "99p_latency:median": 1.375
+    },
+    "320": {
+      "cpu:mean": 5.795,
+      "throughput:median": 541095.125,
+      "throughput:stdev_percent": 7.784363523646801,
+      "50p_latency:median": 0.3925,
+      "75p_latency:median": 0.633,
+      "90p_latency:median": 0.895,
+      "99p_latency:median": 1.39
+    },
+    "336": {
+      "cpu:mean": 5.775,
+      "throughput:median": 542228.415,
+      "throughput:stdev_percent": 9.015336377065427,
+      "50p_latency:median": 0.3895,
+      "75p_latency:median": 0.629,
+      "90p_latency:median": 0.915,
+      "99p_latency:median": 1.53
+    },
+    "352": {
+      "cpu:mean": 5.8,
+      "throughput:median": 541121.715,
+      "throughput:stdev_percent": 7.3312203406815994,
+      "50p_latency:median": 0.379,
+      "75p_latency:median": 0.63,
+      "90p_latency:median": 0.875,
+      "99p_latency:median": 1.45
+    },
+    "368": {
+      "cpu:mean": 5.81,
+      "throughput:median": 544402.1100000001,
+      "throughput:stdev_percent": 7.294896969418442,
+      "50p_latency:median": 0.3875,
+      "75p_latency:median": 0.6114999999999999,
+      "90p_latency:median": 0.89,
+      "99p_latency:median": 1.56
+    },
+    "384": {
+      "cpu:mean": 5.8950000000000005,
+      "throughput:median": 542446.745,
+      "throughput:stdev_percent": 6.111670111022341,
+      "50p_latency:median": 0.3925,
+      "75p_latency:median": 0.6074999999999999,
+      "90p_latency:median": 0.88,
+      "99p_latency:median": 1.365
+    },
+    "400": {
+      "cpu:mean": 5.7700000000000005,
+      "throughput:median": 540715.9650000001,
+      "throughput:stdev_percent": 9.472754267474272,
+      "50p_latency:median": 0.383,
+      "75p_latency:median": 0.6134999999999999,
+      "90p_latency:median": 0.9,
+      "99p_latency:median": 1.4649999999999999
+    },
+    "416": {
+      "cpu:mean": 5.895,
+      "throughput:median": 545236.29,
+      "throughput:stdev_percent": 5.395684264137884,
+      "50p_latency:median": 0.398,
+      "75p_latency:median": 0.607,
+      "90p_latency:median": 0.847,
+      "99p_latency:median": 1.38
+    },
+    "432": {
+      "cpu:mean": 5.89,
+      "throughput:median": 543573.015,
+      "throughput:stdev_percent": 5.9439802516331115,
+      "50p_latency:median": 0.3805,
+      "75p_latency:median": 0.6045,
+      "90p_latency:median": 0.88,
+      "99p_latency:median": 1.3900000000000001
+    },
+    "448": {
+      "cpu:mean": 5.87,
+      "throughput:median": 539680.405,
+      "throughput:stdev_percent": 6.254141126929481,
+      "50p_latency:median": 0.397,
+      "75p_latency:median": 0.597,
+      "90p_latency:median": 0.855,
+      "99p_latency:median": 1.415
+    },
+    "464": {
+      "cpu:mean": 5.8950000000000005,
+      "throughput:median": 542240.935,
+      "throughput:stdev_percent": 6.0474711108852786,
+      "50p_latency:median": 0.3725,
+      "75p_latency:median": 0.5994999999999999,
+      "90p_latency:median": 0.875,
+      "99p_latency:median": 1.47
+    },
+    "480": {
+      "cpu:mean": 5.9350000000000005,
+      "throughput:median": 547644.45,
+      "throughput:stdev_percent": 5.641641143476329,
+      "50p_latency:median": 0.3935,
+      "75p_latency:median": 0.5985,
+      "90p_latency:median": 0.8534999999999999,
+      "99p_latency:median": 1.38
+    },
+    "496": {
+      "cpu:mean": 5.925,
+      "throughput:median": 544781.745,
+      "throughput:stdev_percent": 5.553749247346766,
+      "50p_latency:median": 0.393,
+      "75p_latency:median": 0.5994999999999999,
+      "90p_latency:median": 0.875,
+      "99p_latency:median": 1.355
+    },
+    "512": {
+      "cpu:mean": 5.95,
+      "throughput:median": 546958.685,
+      "throughput:stdev_percent": 6.14674484118509,
+      "50p_latency:median": 0.8314999999999999,
+      "75p_latency:median": 1.42,
+      "90p_latency:median": 2.12,
+      "99p_latency:median": 3.1799999999999997
+    },
+    "640": {
+      "cpu:mean": 5.945,
+      "throughput:median": 550441.135,
+      "throughput:stdev_percent": 5.846582978133256,
+      "50p_latency:median": 0.7595000000000001,
+      "75p_latency:median": 1.355,
+      "90p_latency:median": 2.0549999999999997,
+      "99p_latency:median": 3.2
+    },
+    "768": {
+      "cpu:mean": 5.955,
+      "throughput:median": 546525.345,
+      "throughput:stdev_percent": 7.520228064149672,
+      "50p_latency:median": 1.37,
+      "75p_latency:median": 1.97,
+      "90p_latency:median": 2.815,
+      "99p_latency:median": 3.9349999999999996
+    },
+    "896": {
+      "cpu:mean": 5.86,
+      "throughput:median": 548828.05,
+      "throughput:stdev_percent": 6.7673737719094,
+      "50p_latency:median": 1.32,
+      "75p_latency:median": 1.94,
+      "90p_latency:median": 2.93,
+      "99p_latency:median": 14.955
+    },
+    "1024": {
+      "cpu:mean": 5.895,
+      "throughput:median": 547641.34,
+      "throughput:stdev_percent": 6.698905651620065,
+      "50p_latency:median": 1.855,
+      "75p_latency:median": 2.705,
+      "90p_latency:median": 3.35,
+      "99p_latency:median": 135.375
+    },
+    "1280": {
+      "cpu:mean": 5.995,
+      "throughput:median": 544744.175,
+      "throughput:stdev_percent": 8.104574136078577,
+      "50p_latency:median": 2.295,
+      "75p_latency:median": 2.9850000000000003,
+      "90p_latency:median": 3.41,
+      "99p_latency:median": 146.535
+    },
+    "1536": {
+      "cpu:mean": 5.895,
+      "throughput:median": 540968.405,
+      "throughput:stdev_percent": 8.28361807702607,
+      "50p_latency:median": 2.855,
+      "75p_latency:median": 3.42,
+      "90p_latency:median": 3.8449999999999998,
+      "99p_latency:median": 192.54000000000002
+    },
+    "1792": {
+      "cpu:mean": 5.94,
+      "throughput:median": 542169.4550000001,
+      "throughput:stdev_percent": 8.397090058843915,
+      "50p_latency:median": 3.32,
+      "75p_latency:median": 3.54,
+      "90p_latency:median": 8.485,
+      "99p_latency:median": 214.14
+    },
+    "2048": {
+      "cpu:mean": 5.985,
+      "throughput:median": 545983.16,
+      "throughput:stdev_percent": 9.071784416327374,
+      "50p_latency:median": 3.37,
+      "75p_latency:median": 3.575,
+      "90p_latency:median": 14.795,
+      "99p_latency:median": 224.10500000000002
+    },
+    "2304": {
+      "cpu:mean": 6.02,
+      "throughput:median": 544701.855,
+      "throughput:stdev_percent": 8.52236587526332,
+      "50p_latency:median": 3.4050000000000002,
+      "75p_latency:median": 3.6950000000000003,
+      "90p_latency:median": 19.715,
+      "99p_latency:median": 233.71499999999997
+    },
+    "2560": {
+      "cpu:mean": 6.14,
+      "throughput:median": 580573.5700000001,
+      "throughput:stdev_percent": 8.359774938746957,
+      "50p_latency:median": 3.25,
+      "75p_latency:median": 3.945,
+      "90p_latency:median": 32.855000000000004,
+      "99p_latency:median": 245.775
+    },
+    "2816": {
+      "cpu:mean": 6.035,
+      "throughput:median": 555835.6699999999,
+      "throughput:stdev_percent": 9.511473739533544,
+      "50p_latency:median": 3.415,
+      "75p_latency:median": 6.18,
+      "90p_latency:median": 83.41,
+      "99p_latency:median": 257.63
+    },
+    "3072": {
+      "cpu:mean": 6.14,
+      "throughput:median": 574345.4550000001,
+      "throughput:stdev_percent": 10.146301390273827,
+      "50p_latency:median": 3.33,
+      "75p_latency:median": 10.4,
+      "90p_latency:median": 107.91499999999999,
+      "99p_latency:median": 263.135
+    },
+    "3328": {
+      "cpu:mean": 6.1,
+      "throughput:median": 564005.5900000001,
+      "throughput:stdev_percent": 10.73063897047784,
+      "50p_latency:median": 3.415,
+      "75p_latency:median": 14.809999999999999,
+      "90p_latency:median": 131.87,
+      "99p_latency:median": 299.96500000000003
+    },
+    "3584": {
+      "cpu:mean": 6.205,
+      "throughput:median": 576460.27,
+      "throughput:stdev_percent": 9.358562200373544,
+      "50p_latency:median": 3.4299999999999997,
+      "75p_latency:median": 17.235,
+      "90p_latency:median": 141.82,
+      "99p_latency:median": 315.005
+    },
+    "3840": {
+      "cpu:mean": 6.35,
+      "throughput:median": 598573.02,
+      "throughput:stdev_percent": 7.941433315847006,
+      "50p_latency:median": 3.26,
+      "75p_latency:median": 19.59,
+      "90p_latency:median": 151.615,
+      "99p_latency:median": 326.615
+    },
+    "4096": {
+      "cpu:mean": 6.315,
+      "throughput:median": 602550.9750000001,
+      "throughput:stdev_percent": 8.193092856669201,
+      "50p_latency:median": 3.3099999999999996,
+      "75p_latency:median": 21.875,
+      "90p_latency:median": 160.405,
+      "99p_latency:median": 352.3
+    },
+    "4352": {
+      "cpu:mean": 6.359999999999999,
+      "throughput:median": 607227.615,
+      "throughput:stdev_percent": 8.345581357589035,
+      "50p_latency:median": 3.295,
+      "75p_latency:median": 23.555,
+      "90p_latency:median": 166.635,
+      "99p_latency:median": 372.605
+    },
+    "4608": {
+      "cpu:mean": 6.405,
+      "throughput:median": 605809.5049999999,
+      "throughput:stdev_percent": 8.175126998207334,
+      "50p_latency:median": 3.325,
+      "75p_latency:median": 27.225,
+      "90p_latency:median": 172.95499999999998,
+      "99p_latency:median": 389.83000000000004
+    },
+    "4864": {
+      "cpu:mean": 6.46,
+      "throughput:median": 608738.045,
+      "throughput:stdev_percent": 7.720918416542602,
+      "50p_latency:median": 3.295,
+      "75p_latency:median": 33.855000000000004,
+      "90p_latency:median": 177.39499999999998,
+      "99p_latency:median": 402.865
+    },
+    "5120": {
+      "cpu:mean": 6.41,
+      "throughput:median": 603811.645,
+      "throughput:stdev_percent": 7.727946622534738,
+      "50p_latency:median": 3.395,
+      "75p_latency:median": 41.55,
+      "90p_latency:median": 181.86,
+      "99p_latency:median": 416.67
+    },
+    "5376": {
+      "cpu:mean": 6.455,
+      "throughput:median": 610257.1100000001,
+      "throughput:stdev_percent": 7.949412572564056,
+      "50p_latency:median": 3.625,
+      "75p_latency:median": 49.63,
+      "90p_latency:median": 185.65,
+      "99p_latency:median": 424.685
+    },
+    "5632": {
+      "cpu:mean": 6.4350000000000005,
+      "throughput:median": 597712.915,
+      "throughput:stdev_percent": 7.840935815077331,
+      "50p_latency:median": 3.4450000000000003,
+      "75p_latency:median": 58.065,
+      "90p_latency:median": 191.605,
+      "99p_latency:median": 442.955
+    },
+    "5888": {
+      "cpu:mean": 6.445,
+      "throughput:median": 601244.21,
+      "throughput:stdev_percent": 8.062415018127721,
+      "50p_latency:median": 3.4699999999999998,
+      "75p_latency:median": 64.06,
+      "90p_latency:median": 194.97500000000002,
+      "99p_latency:median": 446.645
+    },
+    "6144": {
+      "cpu:mean": 6.41,
+      "throughput:median": 597321.5549999999,
+      "throughput:stdev_percent": 8.150985361485137,
+      "50p_latency:median": 3.52,
+      "75p_latency:median": 70.64500000000001,
+      "90p_latency:median": 198.085,
+      "99p_latency:median": 454.89
+    },
+    "6400": {
+      "cpu:mean": 6.49,
+      "throughput:median": 601010.61,
+      "throughput:stdev_percent": 6.7787689890899125,
+      "50p_latency:median": 3.565,
+      "75p_latency:median": 74.755,
+      "90p_latency:median": 199.085,
+      "99p_latency:median": 459.0
+    },
+    "6656": {
+      "cpu:mean": 6.5649999999999995,
+      "throughput:median": 602159.7350000001,
+      "throughput:stdev_percent": 7.063082596153186,
+      "50p_latency:median": 3.85,
+      "75p_latency:median": 78.32,
+      "90p_latency:median": 201.99,
+      "99p_latency:median": 460.18
+    },
+    "6912": {
+      "cpu:mean": 6.475,
+      "throughput:median": 593921.97,
+      "throughput:stdev_percent": 6.700670938317592,
+      "50p_latency:median": 4.505,
+      "75p_latency:median": 73.61,
+      "90p_latency:median": 198.44,
+      "99p_latency:median": 456.62
+    },
+    "7168": {
+      "cpu:mean": 6.53,
+      "throughput:median": 594882.25,
+      "throughput:stdev_percent": 6.822166174622558,
+      "50p_latency:median": 3.665,
+      "75p_latency:median": 87.21,
+      "90p_latency:median": 206.43,
+      "99p_latency:median": 468.12
+    },
+    "7424": {
+      "cpu:mean": 6.44,
+      "throughput:median": 589673.745,
+      "throughput:stdev_percent": 6.933623663420484,
+      "50p_latency:median": 4.775,
+      "75p_latency:median": 79.595,
+      "90p_latency:median": 202.24,
+      "99p_latency:median": 459.25
+    },
+    "7680": {
+      "cpu:mean": 6.4399999999999995,
+      "throughput:median": 591397.44,
+      "throughput:stdev_percent": 6.7919748955866295,
+      "50p_latency:median": 5.225,
+      "75p_latency:median": 78.46000000000001,
+      "90p_latency:median": 201.395,
+      "99p_latency:median": 461.75
+    },
+    "7936": {
+      "cpu:mean": 6.38,
+      "throughput:median": 585237.2849999999,
+      "throughput:stdev_percent": 6.581800441954745,
+      "50p_latency:median": 5.27,
+      "75p_latency:median": 82.365,
+      "90p_latency:median": 203.3,
+      "99p_latency:median": 465.31
+    },
+    "8192": {
+      "cpu:mean": 6.525,
+      "throughput:median": 590399.985,
+      "throughput:stdev_percent": 6.635335619790051,
+      "50p_latency:median": 4.85,
+      "75p_latency:median": 91.06,
+      "90p_latency:median": 208.31,
+      "99p_latency:median": 474.96500000000003
+    }
+  }
+}

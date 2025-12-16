@@ -49,7 +49,7 @@ if (bytes[0] == 'b') {
 \end{listing}
 
 
-\begin{figure}[htbp]
+\begin{figure}[t]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \begin{minted}[fontsize=\footnotesize]{javabytecode}
@@ -217,7 +217,7 @@ As the method index is based on the method name's hash code, this approach likel
 Specifically, the index range assigned to a method is likely to overlap with another method's index range.
 We note, however, that the problem of hash collisions is not specific to using optimization-counter coverage, but also occurs \eg when using \aflpp code coverage instrumentation without \gls{LTO}.
 
-\subsection{Parameter Mutation by \aflpp}\label{ss:afl-parameter-mutation}
+\subsection{Parameter Mutation by \aflpp}\label{lool:ss:afl-parameter-mutation}
 \fbetodo{Add figure}
 In our evaluation (see \cref{lool:s:evaluation}), various configurations use \aflpp as the mutation engine.
 In these configurations the program generator needs to generate test cases based on an input provided by \aflpp.
@@ -230,7 +230,7 @@ For example, while generating a program the generator might have to decide wheth
 Even if the statement distribution dictates a 90\% probability for \code{If} statements, the concrete random outcome at this particular point might still be a \code{While} statement.
 We have implemented and evaluated two ways in the program generator to derive generation parameters and concrete random decisions from \aflpp generated input files.
 
-\subsubsection{Fully Parametric}\label{sss:afl-fully-parametric}
+\subsubsection{Fully Parametric}\label{lool:sss:afl-fully-parametric}
 The program generator reads \emph{both} the generation parameters and the values driving concrete random decisions directly from the input file.
 The header of the seed file determines the generation parameters, and each concrete random decision is based on a certain byte sequence in the seed file.
 If the generator runs out of randomness, \ie the input is too short to generate a valid live program, tries again with reduced structural parameters.
@@ -249,9 +249,9 @@ Although we optimized the random consumption during backtracking to use only 4 b
 In principle, the generator could just skip too short seeds entirely, but skipping seeds gives \aflpp only a coarse signal.
 A skipped seed does not produce any coverage feedback but tells \aflpp only that the seed is invalid.
 In contrast, a smaller program generated from a smaller seed does produce coverage, although less than a larger program generated from a larger seed would.
-We discuss the problems with the fully parametric mutation approach in \cref{ss:aflpp-vs-genetic}.
+We discuss the problems with the fully parametric mutation approach in \cref{lool:ss:aflpp-vs-genetic}.
 
-\subsubsection{Generation Parameters Only}\label{sss:afl-hyperonly}
+\subsubsection{Generation Parameters Only}\label{lool:sss:afl-hyperonly}
 The program generator reads only the generation parameters and a single integer directly from the file.
 All later bytes in the seed file are ignored.
 The integer serves as a random seed for a new, in-memory random instance that drives the concrete random decisions.

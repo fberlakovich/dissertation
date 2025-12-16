@@ -1,21 +1,83 @@
 \section{The \rtwoc{} Compiler}\label{r2c:s:implementation} % maximum 2-3 pages...
-\fbetodo{more details on the LLVM implementation}
 We implemented \rtwoc using the LLVM compiler framework~\cite{Lattner2004}.
-Our modified compiler supports the compilation of a wide range of systems software for the Linux \code{x86\_64} platform (see \cref{ss:scalability}).
+Our modified compiler supports the compilation of a wide range of systems software for the Linux \code{x86\_64} platform (see \cref{r2c:ss:scalability}).
 To support complex applications like Webkit, \rtwoc{} is fully compatible with \gls{PIC} for ASLR, stack unwinding, and exception handling.
-\rtwoc combines a multitude of different diversification techniques, including function shuffling, global variable shuffling, and NOP insertion.
+\rtwoc combines a multitude of different diversification techniques, including function shuffling, global variable shuffling, register-allocation randomization and NOP insertion.
 In addition, \rtwoc supports two new diversification techniques that we describe in more detail in the following sections.
 Specifically, our compiler
 \begin{enumerate*}[label=(\roman*)]
     \item instruments call sites with booby-trapped return addresses (see \cref{r2c:ss:impl-btras});
-    \item instruments functions to insert \glspl{heapbt}, which thwart the statistical analysis of pointers on the stack (see \cref{ss:impl-heap-boobytraps}).
+    \item instruments functions to insert \glspl{heapbt}, which thwart the statistical analysis of pointers on the stack (see \cref{r2c:ss:impl-heap-boobytraps}).
 \end{enumerate*}
 
 \subsection{BTRAs: Booby-Trapped Return Addresses}\label{r2c:ss:impl-btras}
-\fbetodo{Describe why vzeroupper is needed}
+
+\newsavebox{\btrasetup}
+\begin{lrbox}{\btrasetup}
+    \begin{lstlisting}[style=asmcode,style=coloredrads]
+push BTRA1
+push BTRA2
+push RA
+push BTRA3 |\circledtikz{1}|
+add %rsp, 0x10 |\circledtikz{2}|
+call F|\tikzmark{T-Call-Setup}| |\circledtikz{3}|
+add %rsp,0x10|\tikzmark{T-Add-Cleanup}| |\circleddashedtikz{7}|
+    \end{lstlisting}
+\end{lrbox}
+
+\newsavebox{\btrateardown}
+\begin{lrbox}{\btrateardown}
+    \begin{lstlisting}[style=asmcode]
+|\tikzmark{T-Function}|<F>:
+sub %rsp,0x8 |\circledtikz{4}|
+
+    |\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
+
+add %rsp,0x8 |\circleddashedtikz{5}|
+|\tikzmark{T-Ret-Setup}|ret |\circleddashedtikz{6}|
+    \end{lstlisting}
+\end{lrbox}
+
+\begin{figure}[t]
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \makebox[\linewidth][c]{%
+            \begin{subfigure}[t]{0.48\linewidth}
+                \usebox\btrasetup
+            \end{subfigure}
+            \begin{subfigure}[t]{0.48\linewidth}
+                \usebox\btrateardown
+            \end{subfigure}
+        }
+        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{BTRA}.}
+        \label{r2c:fig:rad-insertion-code}
+    \end{subfigure}
+    \begin{tikzpicture}[overlay, remember picture]
+        \draw[-Latex] ([shift={(18pt,2pt)}] pic cs:T-Call-Setup) -- +(1.6,0) |- ([shift={(-7pt,2pt)}] pic cs:T-Function);
+        \draw[-Latex] ([shift={(-10pt,1pt)}] pic cs:T-Ret-Setup) -- ([shift={(18pt,2pt)}] pic cs:T-Add-Cleanup);
+    \end{tikzpicture}
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includeDrawioFigure[\linewidth]{figures/r2c/btra-setup}{
+            \draw ([yshift=-10pt] Arrow1) node {\circledtikz{\code{1}}};
+            \draw ([yshift=-10pt] Arrow2) node {\circledtikz{\code{2}}};
+            \draw ([yshift=-10pt] Arrow3) node {\circledtikz{\code{3}}};
+            \draw ([yshift=-10pt] Arrow4) node {\circledtikz{\code{4}}};
+            \draw ([yshift=-10pt] Arrow5) node {\circleddashedtikz{\code{5}}};
+            \draw ([yshift=-10pt] Arrow6) node {\circleddashedtikz{\code{6}}};
+            \draw ([yshift=-10pt] Arrow7) node {\circleddashedtikz{\code{7}}};
+        }
+        \caption{Stack view of the booby-trapped return address setup and teardown process.\phantom{Latex is a piece of crap}}
+        \label{r2c:fig:rad-insertion-stack}
+    \end{subfigure}%
+    \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{r2c:fig:rad-insertion-code}), and effect on the stack (\Cref{r2c:fig:rad-insertion-stack}).
+    For brevity the figure uses only two \glspl{BTRA} before (\texttt{\gls{BTRA}1}) and \texttt{\gls{BTRA}2}) and one \gls{BTRA} after (\texttt{\gls{BTRA}3}) the return address.}
+    \label{r2c:fig:btra-insertion}
+\end{figure}
+
 \fbetodo{Add code examples}
 % To this end, \rtwoc encloses return address with BTRAs.
-To enclose return addresses with \glspl{BTRA}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{fig:rad-insertion} are required.
+To enclose return addresses with \glspl{BTRA}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{r2c:fig:btra-insertion} are required.
 First, the caller pushes randomly chosen \glspl{BTRA} together with the return address on the stack \Circled{\code{1}}.
 Note that the position of the return address within the sequence of \glspl{BTRA} is chosen randomly at compile time.
 Second, the caller positions the stack pointer above the return address \Circled{\code{2}}.
@@ -43,7 +105,7 @@ The succeeding \glspl{BTRA} create an offset between the return address and call
 This resulting offset is called a \emph{post-offset}.
 
 After adjusting the stack pointer, the callee executes the regular function prologue.
-When reaching the epilogue of the callee, the setup process is reversed as shown in \cref{fig:rad-insertion}, steps \circleddashedtikz{\code{5}} to \circleddashedtikz{\code{7}}.
+When reaching the epilogue of the callee, the setup process is reversed as shown in \cref{r2c:fig:btra-insertion}, steps \circleddashedtikz{\code{5}} to \circleddashedtikz{\code{7}}.
 First, to identify the correct return address, the callee reverts the post-offset \circleddashedtikz{\code{1}} before executing the return instruction.
 Next, the return instruction pops the return address from the stack \circleddashedtikz{\code{2}} and transfers control back to the caller.
 Finally, the caller reverts the pre-offset \circleddashedtikz{\code{3}}, which is required to perform stack-relative operations, such as referencing spilled local variables or function parameters.
@@ -54,50 +116,53 @@ For indirect call sites, no synchronization between the caller and the callee is
 Instead, we tolerate that the caller potentially overwrites \glspl{BTRA} after the return address.
 Per default, \rtwoc does not add \glspl{BTRA} to call sites that call unprotected code.
 While adding \glspl{BTRA} would not harm functionality, unprotected callees would overwrite \emph{all} \glspl{BTRA} after the return address.
-We discuss the security implications in \cref{ss:limitations-coverage}.
+We discuss the security implications in \cref{r2c:ss:limitations-coverage}.
+Our \glspl{BTRA} implementation cooperates with ThinLTO to match as many caller-callee pairs at compile time as possible.
 
-Depending on the relocation model, the addresses are either embedded in the \code{push} instructions or read from the \gls{GOT}.
+Emitting the setup code for \glspl{BTRA} happens in a target-specific pass.
+This pass is also responsible for inserting the boobytrap functions to which the \glspl{BTRA} point.
+In the current implementation, a boobytrap function simply jumps to a notification routine.
+A refined implementation could let the \glspl{BTRA} point to boobytrap regions \emph{within} the caller function.
+Depending on the relocation model and the setup instructions, the \glspl{BTRA} are either embedded in the \code{push} instructions or read from the data section.
 Since an attacker cannot predictably identify the return address among the \glspl{BTRA}, storing the addresses in the data section does not compromise security.
 
 If the randomly chosen number of \glspl{BTRA} before the return address is odd, \rtwoc{} inserts an additional \gls{BTRA} to keep the stack aligned.
-On x86-64, the stack pointer must be 16 byte aligned, as
-% Keeping this alignment intact is crucial as certain instructions crash when accessing a misaligned stack.
-programs crash when certain instructions access a misaligned stack.
+On x86-64, the stack pointer must be 16 byte aligned, as programs crash when certain instructions access a misaligned stack.
 
 \subsubsection{Stack Arguments}\label{r2c:sss:stack-arguments}
 
- \begin{figure}[t]
-     \centering
-     \begin{subfigure}[t]{0.45\linewidth}
-         \centering
-         \includegraphics[width=0.9\linewidth]{figures/r2c/r2c-parameter-addressing-plain}
-         \caption{Without \cfs the base pointer points below the spilled base pointer.}
-         \label{r2c:fig:stack-arguments}
-     \end{subfigure}
-     \quad
-     \begin{subfigure}[t]{0.45\linewidth}
-         \centering
-         \includegraphics[width=0.9\linewidth]{figures/r2c/r2c-parameter-addressing-btra}
-         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
-         \label{r2c:fig:stack-arguments-with-btras}
-     \end{subfigure}
-     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
- \end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-plain}
+        \caption{Without \cfs the base pointer points below the spilled base pointer.}
+        \label{r2c:fig:stack-arguments}
+    \end{subfigure}
+    \quad
+    \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-btra}
+        \caption{With \cfs the caller positions the base pointer below the first stack argument.}
+        \label{r2c:fig:stack-arguments-with-btras}
+    \end{subfigure}
+    \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
+\end{figure}
 
 The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
 In particular, the distance increases by the sum of pre- and post-offset.
 This increased distance typically does not cause any compatibility issues because most functions do not access stack objects above their return address.
 With one notable exception:
 In the System V ABI a caller must pass arguments that do not fit into parameter registers on the stack, \emph{above} the return address.
- Consider, for example, the stack arguments in the stack frame in \cref{r2c:fig:stack-arguments}.
- The argument values \code{0x7} and \code{0x8} are located above the return address in the illustrated stack frame.
- LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
- Which pointer is actually used depends on the optimization level and several other factors.
- Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
- Without \glspl{BTRA}, the compiler determines the distance between a stack argument and the anchor statically.
- With \glspl{BTRA}, however, the distance is not known at compile-time.
- Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
- As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function but also its caller.
+Consider, for example, the stack arguments in the stack frame in \cref{r2c:fig:stack-arguments}.
+The argument values \code{0x7} and \code{0x8} are located above the return address in the illustrated stack frame.
+LLVM uses either the frame pointer, or the stack pointer as an anchor to access stack arguments.
+Which pointer is actually used depends on the optimization level and several other factors.
+Functions that need stack realignment, for example, cannot use the stack pointer for addressing stack arguments.
+Without \glspl{BTRA}, the compiler determines the distance between a stack argument and the anchor statically.
+With \glspl{BTRA}, however, the distance is not known at compile-time.
+Although pre-offset and post-offset are chosen at compile-time, the pre-offset can be different for each call site.
+As a result, the distance---i.e., the sum of pre-offset and post-offset---depends not only on the function but also its caller.
 
 
 To access stack arguments despite the varying distance, we devised a method called \emph{\cfs}.
@@ -115,35 +180,37 @@ We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
 Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
 %    During the performance evaluation we noticed a performance impact particularly on call intensive benchmarks.
 %    We speculate that the large number of instructions puts pressure on the instruction cache.
-To improve \rtwoc{}'s performance, we built an optimized variant that sets up the \glspl{BTRA} and the return address with AVX2 vector instructions (see \cref{fig:avx2-setup})~\cite{IntelAVX}.
+To improve \rtwoc{}'s performance, we built an optimized variant that sets up the \glspl{BTRA} and the return address with AVX2 vector instructions (see \cref{r2c:fig:avx2-setup})~\cite{IntelAVX}.
 
 Before each call site, we initialize a vector register with \glspl{BTRA} and the return address and write them to the stack.
 The addresses are read from a call-site specific array in the data section, prepared at compile time.
 Regarding the security of reading the addresses from the data section, the same reason as for the \gls{GOT} holds.
 After the \glspl{BTRA} and the return address are written to the stack, \rtwoc{} positions the stack pointer before the return address.
 The \code{vmovdqa} instructions load the addresses from the data section into an AVX2 register.
+
 The \code{vzeroupper} instruction is needed to eliminate a penalty when switching between SSE and AVX2 instructions.
 Note that zeroing the upper half of the vector registers directly before a call does not affect program correctness.
-Since the affected registers are caller saved, the caller has to save and restore them before a call anyway, if they are used by subsequent basic blocks.
+Since the affected registers are caller saved, the caller has to save and restore them before a call anyway if they are used by subsequent basic blocks.
 Without \code{vzeroupper} we observed a performance impact of up to 50\%.
-We discuss the overall performance improvements afforded by the AVX2 instructions in \cref{ss:perf}.
+
+We discuss the overall performance improvements afforded by the AVX2 instructions in \cref{r2c:ss:perf}.
 
 \newsavebox{\uninstrumented}
 \begin{lrbox}{\uninstrumented}
 
-\begin{lstlisting}[style=asmcode,breaklines=false]
+    \begin{lstlisting}[style=asmcode,breaklines=false]
 |\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
 
 call F|\tikzmark{T-Right-Start}|
 
 |\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
-\end{lstlisting}
+    \end{lstlisting}
 \end{lrbox}
 
 \newsavebox{\instrumented}
 \begin{lrbox}{\instrumented}
 
-\begin{lstlisting}[style=asmcode,breaklines=false,xleftmargin=2em]
+    \begin{lstlisting}[style=asmcode,breaklines=false,xleftmargin=2em]
 |\tikzmark{T-Before-Begin}|push BTRA1
 push BTRA2
 |\tikzmark{T-Before-End}|push BTRA3
@@ -154,22 +221,22 @@ add %rsp, |$(\beta+1)*8$|
 call F
 add %rsp, |$\alpha*8$|
 
-\end{lstlisting}
+    \end{lstlisting}
 \end{lrbox}
 \tikzset{
-pics/numberline/.style n args={4}{
-code = { %
-\coordinate (#3) at (0,0);
-\coordinate (#4) at (0,1);
-\draw (0,0) -- (0,1) ; %edit here for the axis
-\foreach \x in  {0.2,0.4,0.6,0.8} % edit here for the vertical lines
-\draw[shift={(0,\x)},color=black] (0,0) -- (0.05,0);
-\draw[color=black] (#3) -- (0.15,0);
-\draw[color=black] (#4) -- (0.15,1);
-\node at (0.4,0) {#1};
-\node at (0.4,1) {#2};
-}
-}
+    pics/numberline/.style n args={4}{
+        code = { %
+            \coordinate (#3) at (0,0);
+            \coordinate (#4) at (0,1);
+            \draw (0,0) -- (0,1) ; %edit here for the axis
+            \foreach \x in  {0.2,0.4,0.6,0.8} % edit here for the vertical lines
+            \draw[shift={(0,\x)},color=black] (0,0) -- (0.05,0);
+            \draw[color=black] (#3) -- (0.15,0);
+            \draw[color=black] (#4) -- (0.15,1);
+            \node at (0.4,0) {#1};
+            \node at (0.4,1) {#2};
+        }
+    }
 }
 %    \begin{figure*}[t!]
 %        \begin{subfigure}[b]{0.2\textwidth}
@@ -198,7 +265,7 @@ code = { %
 %                \draw[-latex] ([shift={(-75pt,14pt)}] ltop) to [out=-10,in=170] ([shift={(-3pt,-15pt)}] ltop);
 %                \node at ([shift={(-60pt,-12pt)}] ubottom)  {$\mathcal{C}$};
 %            \end{tikzpicture}
-%            \caption{The selection process for determining the total number of BTRAs for a call site, based on the configurable ranges $[U_u,L_u]$, $[U_l,L_l]$ and the execution count $\mathcal{C}$ (see \cref{ss:impl-pgo} for details).}
+%            \caption{The selection process for determining the total number of BTRAs for a call site, based on the configurable ranges $[U_u,L_u]$, $[U_l,L_l]$ and the execution count $\mathcal{C}$ (see \cref{r2c:ss:impl-pgo} for details).}
 %        \end{subfigure}
 %        \hfill
 %        \begin{subfigure}[b]{0.3\textwidth}
@@ -211,23 +278,23 @@ code = { %
 %            \caption{\rtwoc instruments the call site to insert $\alpha$ BTRAs before and $\beta$ BTRAs after the return address.}
 %        \end{subfigure}
 %        \caption{\rtwoc automatically configures the random trial that determines the number of BTRAs based on the call site's execution count.}
-%        \label{fig:selection-process}
+%        \label{r2c:fig:selection-process}
 %    \end{figure*}
 
 
 \begin{figure}[t]
-\centering
-\vspace{0.3cm}
-\resizebox{0.9\columnwidth}{!}{%
-\includegraphics{figures/r2c/hardened-btdps}
-}
-\caption[]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
-In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
-The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{ss:impl-heap-boobytraps}).}
-\label{fig:hardened-data-traps}
+    \centering
+    \vspace{0.3cm}
+    \resizebox{0.9\columnwidth}{!}{%
+        \includegraphics{figures/r2c/btdp-setup}
+    }
+    \caption[]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
+    In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
+    The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{r2c:ss:impl-heap-boobytraps}).}
+    \label{r2c:fig:hardened-data-traps}
 \end{figure}
 
-\subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{ss:impl-heap-boobytraps}
+\subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
 \fbetodo{Add code examples}
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
 To maintain the illusion of a benign heap pointer, \glspl{heapbt} must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
@@ -250,7 +317,7 @@ The stack slots for the \glspl{heapbt} are allocated like stack slots for local 
 As a result, stack slot randomization shuffles \glspl{heapbt} with other stack objects, including benign heap pointers.
 
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
-If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{fig:hardened-data-traps}).
+If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{r2c:fig:hardened-data-traps}).
 Pointers observed in both locations could potentially\footnote{Points in both locations do not have to be \glspl{heapbt} because benign pointers can occur in both locations as well.} be \glspl{heapbt}.
 To avoid the risk of triggering a \gls{heapbt}, an attacker could limit himself to pointers occurring on the stack only.
 To protect \glspl{heapbt} against such an attack scenario, \rtwoc{} applies \rtwoc{}'s mimicry principle also to the array holding the \glspl{heapbt}.
@@ -259,7 +326,7 @@ That is, instead of containing the \glspl{heapbt} directly, the data section now
 Since an attacker might still be able to locate the pointer to the pointer array, \rtwoc inserts additional \glspl{heapbt} into the data section.
 Note, that these additional \glspl{heapbt} never occur on the stack and the pointers on the heap are inaccessible to the attacker.
 The attacker thus loses the ability to reliably identify the location of \glspl{heapbt} in the data section.
-See \cref{fig:hardened-data-traps} for a comparison of a naive and a hardened implementation.
+See \cref{r2c:fig:hardened-data-traps} for a comparison of a naive and a hardened implementation.
 
 As a simple optimization, we omit the instrumentation for all functions without stack allocations.
 Such functions are guaranteed to not write benign heap pointers to the stack either.

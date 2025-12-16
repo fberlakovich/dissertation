@@ -168,7 +168,7 @@ def create_timeline(data, emit_dot_path=None):
 
         relation = edge.get('label', '')
         # Use colors with transparency (alpha channel) to reduce visual clutter
-        if relation == 'mitigates':
+        if relation == 'motivated':
             color = "#228B22CC"  # green with transparency
             style = "solid"
         elif relation == 'bypasses':
@@ -274,7 +274,7 @@ def create_legend():
 
     # --- Row 2: Relations ---
     relations = [
-        ('mit', '#228B22CC', 'solid', 'mitigates'),
+        ('mot', '#228B22CC', 'solid', 'motivated'),
         ('byp', '#DC143CCC', 'dashed', 'bypasses'),
         ('ext', '#4169E1CC', 'solid', 'extends'),
         ('insp', '#9370DBCC', 'dotted', 'inspired'),
@@ -318,7 +318,7 @@ def create_legend():
             prev_dst = dst
 
     # Connect rows to maintain hierarchy
-    leg.edge('legend_attack', 'mit_src', style='invis')
+    leg.edge('legend_attack', 'mot_src', style='invis')
 
     return leg
 
@@ -348,12 +348,38 @@ def fuse_images(timeline_path, legend_path, output_path, padding=20, spacing=12)
 def merge_svgs_to_pdf(svg1_path, svg2_path, output_pdf_path, padding=20, spacing=12):
     """Merge two SVGs (legend on top, timeline below) and convert to PDF."""
     
+    def parse_length(val: str) -> float:
+        """Parse an SVG length string and return points (pt). Supports pt, px, in, cm, mm.
+        Defaults to pt if unit missing."""
+        val = val.strip()
+        m = re.match(r'^([0-9]+(?:\.[0-9]+)?)\s*(pt|px|in|cm|mm)?$', val)
+        if not m:
+            # Fallback: try plain float
+            try:
+                return float(val)
+            except Exception:
+                return 0.0
+        num = float(m.group(1))
+        unit = (m.group(2) or 'pt').lower()
+        if unit == 'pt':
+            return num
+        if unit == 'px':
+            # Assume 96 px per inch, 72 pt per inch → 1 px = 0.75 pt
+            return num * 0.75
+        if unit == 'in':
+            return num * 72.0
+        if unit == 'cm':
+            return num * 72.0 / 2.54
+        if unit == 'mm':
+            return num * 72.0 / 25.4
+        return num
+
     def get_svg_dims(path):
         with open(path, 'r') as f:
             content = f.read()
         # Parse width and height from <svg ... width="..." height="...">
-        w_match = re.search(r'width="([0-9.]+)pt"', content)
-        h_match = re.search(r'height="([0-9.]+)pt"', content)
+        w_match = re.search(r'<svg[^>]*\bwidth="([^"]+)"', content, re.IGNORECASE)
+        h_match = re.search(r'<svg[^>]*\bheight="([^"]+)"', content, re.IGNORECASE)
         
         if not w_match or not h_match:
             # Fallback: try finding viewBox
@@ -361,8 +387,10 @@ def merge_svgs_to_pdf(svg1_path, svg2_path, output_pdf_path, padding=20, spacing
             if v_match:
                 return float(v_match.group(3)), float(v_match.group(4)), content
             raise ValueError(f"Could not parse dimensions from {path}")
-            
-        return float(w_match.group(1)), float(h_match.group(1)), content
+        
+        width_pt = parse_length(w_match.group(1))
+        height_pt = parse_length(h_match.group(1))
+        return width_pt, height_pt, content
 
     w1, h1, c1 = get_svg_dims(svg1_path) # Legend (top)
     w2, h2, c2 = get_svg_dims(svg2_path) # Timeline (bottom)
@@ -370,11 +398,22 @@ def merge_svgs_to_pdf(svg1_path, svg2_path, output_pdf_path, padding=20, spacing
     total_width = max(w1, w2) + padding * 2
     total_height = h1 + h2 + padding * 3 + spacing
 
-    def extract_content(svg_text):
-        # Find first > after <svg
-        start = svg_text.find('>') + 1
-        end = svg_text.rfind('</svg>')
-        return svg_text[start:end]
+    def extract_content(svg_text: str) -> str:
+        """Extract inner content of the root <svg> element, stripping XML prolog/doctype.
+        We locate the first '<svg' and slice after its closing '>' up to the last '</svg>'."""
+        # Remove XML prolog and DOCTYPE lines to simplify parsing
+        # but we still search structurally for <svg ...>
+        start_tag_idx = svg_text.lower().find('<svg')
+        if start_tag_idx == -1:
+            raise ValueError('No <svg> start tag found')
+        # Find the end of the start tag '>'
+        gt_idx = svg_text.find('>', start_tag_idx)
+        if gt_idx == -1:
+            raise ValueError('Malformed <svg> start tag (no closing ">")')
+        end_idx = svg_text.lower().rfind('</svg>')
+        if end_idx == -1 or end_idx <= gt_idx:
+            raise ValueError('Malformed SVG: missing closing </svg> tag')
+        return svg_text[gt_idx + 1:end_idx]
 
     inner1 = extract_content(c1)
     inner2 = extract_content(c2)
@@ -405,7 +444,7 @@ def merge_svgs_to_pdf(svg1_path, svg2_path, output_pdf_path, padding=20, spacing
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Generate a timeline Graphviz diagram from a YAML description."
+        description="Generate a timeline diagram from a YAML description, as PNG or PDF."
     )
     parser.add_argument(
         "yaml_path",
@@ -424,9 +463,15 @@ if __name__ == "__main__":
         help="Also save the DOT source (.gv file)",
     )
     parser.add_argument(
+        "--format",
+        choices=["png", "pdf"],
+        default=None,
+        help="Output format (png or pdf). If omitted, defaults to png unless --pdf is set.",
+    )
+    parser.add_argument(
         "--pdf",
         action="store_true",
-        help="Also generate a vector PDF output (requires rsvg-convert)",
+        help="Deprecated: generate a vector PDF output (requires rsvg-convert). Prefer --format pdf.",
     )
 
     args = parser.parse_args()
@@ -435,40 +480,45 @@ if __name__ == "__main__":
         data = load_data(args.yaml_path)
         emit_dot_path = f"{args.output}.gv" if args.emit_dot else None
 
-        # Generate timeline without legend to keep layout compact
+        # Resolve desired output format
+        out_format = args.format
+        if out_format is None:
+            out_format = 'pdf' if args.pdf else 'png'
+
+        # Generate timeline and legend graphs
         graph = create_timeline(data, emit_dot_path=emit_dot_path)
-        # Always generate PNG
-        timeline_path = graph.render(f"{args.output}_timeline", cleanup=True)
-
-        # Generate standalone legend and combine
         legend_graph = create_legend()
-        legend_path = legend_graph.render(f"{args.output}_legend", cleanup=True)
 
-        fuse_images(timeline_path, legend_path, f"{args.output}.png")
-        print(f"Generated {args.output}.png")
+        if out_format == 'png':
+            # Render raster parts and compose PNG
+            timeline_path = graph.render(f"{args.output}_timeline", cleanup=True)
+            legend_path = legend_graph.render(f"{args.output}_legend", cleanup=True)
 
-        if args.pdf:
-            # Render SVGs for PDF generation
-            # We need to force format='svg'
+            fuse_images(timeline_path, legend_path, f"{args.output}.png")
+            print(f"Generated {args.output}.png")
+
+            # Cleanup intermediates
+            try:
+                for tmp in (timeline_path, legend_path):
+                    if os.path.exists(tmp):
+                        os.remove(tmp)
+            except OSError:
+                pass
+
+        else:  # pdf
+            # Render vector parts and compose PDF
             graph.format = 'svg'
             legend_graph.format = 'svg'
-            
+
             timeline_svg = graph.render(f"{args.output}_timeline_vec", cleanup=True)
             legend_svg = legend_graph.render(f"{args.output}_legend_vec", cleanup=True)
-            
+
             merge_svgs_to_pdf(legend_svg, timeline_svg, f"{args.output}.pdf")
-            
+
             # Cleanup intermediate SVGs
             for tmp in (timeline_svg, legend_svg):
                 if os.path.exists(tmp):
                     os.remove(tmp)
-
-        try:
-            for tmp in (timeline_path, legend_path):
-                if os.path.exists(tmp):
-                    os.remove(tmp)
-        except OSError:
-            pass
 
     except Exception as e:
         print(f"Error: {e}")

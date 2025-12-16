@@ -1,4 +1,4 @@
-\section{The Design of \rtwoc}\label{sec:r2c:design}
+\section{The Design of \rtwoc}\label{r2c:s:design}
 
 \begin{figure*}[t]
     \centering
@@ -10,7 +10,7 @@
         }
         \captionsetup{margin={0pt,0.3cm},oneside}
         \caption{In an unprotected stack frame the return address is at a predictable location surrounded by known values.}
-        \label{fig:overview-stack-unprotected}
+        \label{r2c:fig:overview-stack-unprotected}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.6\linewidth}
@@ -21,10 +21,10 @@
         }
         \captionsetup{margin={0.3cm,0pt},oneside}
         \caption{\rtwoc inserts Booby-Trapped Return Addresses to conceal the return address and thus protect it from disclosure.}
-        \label{fig:overview-stack-protected}
+        \label{r2c:fig:overview-stack-protected}
     \end{subfigure}
     \caption{The stack layout of an unprotected stack (\emph{top}) and a stack protected by \rtwoc (\emph{bottom}). We assume the System V ABI on the x86\_64 platform.}
-    \label{fig:overview-stack}
+    \label{r2c:fig:overview-stack}
 \end{figure*}
 
 %    We observe that the predictable location of return addresses makes them vulnerable to disclosure.
@@ -49,14 +49,14 @@ Stack data necessarily has to remain readable, which poses the question of how t
 %%% 20210507/0950/sbr/ccs2021.tex#595:
 %%% reordered paragraphs to: highlight overall design, going deep into challenges, and closing how our overall design addresses these challenges!
 
-To illustrate the challenges of protecting the stack, consider the unprotected stack frame in \cref{fig:overview-stack-unprotected}.
-\cref{fig:overview-stack-unprotected} shows the stack frame of a function when called \emph{from} function \code{F} on the x86\_64 platform with the System V ABI calling convention.
+To illustrate the challenges of protecting the stack, consider the unprotected stack frame in \cref{r2c:fig:overview-stack-unprotected}.
+\cref{r2c:fig:overview-stack-unprotected} shows the stack frame of a function when called \emph{from} function \code{F} on the x86\_64 platform with the System V ABI calling convention.
 When locating pointers on the stack, an attacker can tap two sources of information.
 First, an attacker can leverage the predictable location of pointers relative to other stack objects.
 If the adversary has information pertaining to some of these stack objects (\eg the value \code{0xaaaa} of a local variable \code{A} in function \code{F}), they can use this information as an anchor to locate the pointer.
-For example, in \cref{fig:overview-stack-unprotected} the return address is one machine word below function variable \code{A} and adjacent to the spilled base pointer (\texttt{rbp}).
+For example, in \cref{r2c:fig:overview-stack-unprotected} the return address is one machine word below function variable \code{A} and adjacent to the spilled base pointer (\texttt{rbp}).
 Second, an attacker can locate pointers based on their value ranges.
-The heap pointer in \cref{fig:overview-stack-unprotected}, for example, has a different address range than code pointers or the spilled base pointer.
+The heap pointer in \cref{r2c:fig:overview-stack-unprotected}, for example, has a different address range than code pointers or the spilled base pointer.
 If both of these methods fail, an attacker can still resort to guessing.
 Under specific circumstances, such brute-force attacks are a reasonable option; some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
 
@@ -88,76 +88,13 @@ We instantiate this principle for return addresses and for heap pointers as foll
 \end{enumerate}
 
 The following subsections give an in-detail presentation of the relevant design decisions and requirements.
-First, we describe the details on inserting booby-trapped return addresses (see \Cref{ss:decoy-mimicry}).
-Second, we explain how \glspl{heapbt} thwart the localization of heap pointers (see \Cref{ss:heap-boobytraps}).
-Third, we illustrate how additional code randomization strengthens the protection afforded by \glspl{BTRA} and \glspl{heapbt} (see \Cref{ss:strengthening}).
+First, we describe the details on inserting booby-trapped return addresses (see \Cref{r2c:ss:decoy-mimicry}).
+Second, we explain how \glspl{heapbt} thwart the localization of heap pointers (see \Cref{r2c:ss:heap-boobytraps}).
+Third, we illustrate how additional code randomization strengthens the protection afforded by \glspl{BTRA} and \glspl{heapbt} (see \Cref{r2c:ss:strengthening}).
 Both \glspl{BTRA} and \glspl{heapbt} leverage the principle of mimicry, \ie disguising sensitive objects among covert booby traps.
-In \cref{ss:speculative-booby-traps} we discuss an extension of this principle into the speculative domain.
+In \cref{r2c:ss:speculative-booby-traps} we discuss an extension of this principle into the speculative domain.
 
-\newsavebox{\btrasetup}
-\begin{lrbox}{\btrasetup}
-    \begin{lstlisting}[style=asmcode,style=coloredrads]
-push BTRA1
-push BTRA2
-push RA
-push BTRA3 |\circledtikz{1}|
-add %rsp, 0x10 |\circledtikz{2}|
-call F|\tikzmark{T-Call-Setup}| |\circledtikz{3}|
-add %rsp,0x10|\tikzmark{T-Add-Cleanup}| |\circleddashedtikz{7}|
-    \end{lstlisting}
-\end{lrbox}
-
-\newsavebox{\btrateardown}
-\begin{lrbox}{\btrateardown}
-    \begin{lstlisting}[style=asmcode]
-|\tikzmark{T-Function}|<F>:
-sub %rsp,0x8 |\circledtikz{4}|
-
-    |\raisebox{-1pt}[0pt][0pt]{$\vdots$}|
-
-add %rsp,0x8 |\circleddashedtikz{5}|
-|\tikzmark{T-Ret-Setup}|ret |\circleddashedtikz{6}|
-    \end{lstlisting}
-\end{lrbox}
-
-\begin{figure}[t]
-    \begin{subfigure}[t]{\linewidth}
-        \centering
-        \makebox[\linewidth][c]{%
-            \begin{subfigure}[t]{0.48\linewidth}
-                \usebox\btrasetup
-            \end{subfigure}
-            \begin{subfigure}[t]{0.48\linewidth}
-                \usebox\btrateardown
-            \end{subfigure}
-        }
-        \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{BTRA}.}
-        \label{fig:rad-insertion-code}
-    \end{subfigure}
-    \begin{tikzpicture}[overlay, remember picture]
-        \draw[-Latex] ([shift={(18pt,2pt)}] pic cs:T-Call-Setup) -- +(1.6,0) |- ([shift={(-7pt,2pt)}] pic cs:T-Function);
-        \draw[-Latex] ([shift={(-10pt,1pt)}] pic cs:T-Ret-Setup) -- ([shift={(18pt,2pt)}] pic cs:T-Add-Cleanup);
-    \end{tikzpicture}
-    \begin{subfigure}[t]{\linewidth}
-        \centering
-        \includeDrawioFigure[\linewidth]{figures/r2c/r2c-btra-setup}{
-            \draw ([yshift=-10pt] Arrow1) node {\circledtikz{\code{1}}};
-            \draw ([yshift=-10pt] Arrow2) node {\circledtikz{\code{2}}};
-            \draw ([yshift=-10pt] Arrow3) node {\circledtikz{\code{3}}};
-            \draw ([yshift=-10pt] Arrow4) node {\circledtikz{\code{4}}};
-            \draw ([yshift=-10pt] Arrow5) node {\circleddashedtikz{\code{5}}};
-            \draw ([yshift=-10pt] Arrow6) node {\circleddashedtikz{\code{6}}};
-            \draw ([yshift=-10pt] Arrow7) node {\circleddashedtikz{\code{7}}};
-        }
-        \caption{Stack view of the booby-trapped return address setup and teardown process.\phantom{Latex is a piece of crap}}
-        \label{fig:rad-insertion-stack}
-    \end{subfigure}%
-    \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{fig:rad-insertion-code}), and effect on the stack (\Cref{fig:rad-insertion-stack}).
-    For brevity the figure uses only two \glspl{BTRA} before (\texttt{\gls{BTRA}1}) and \texttt{\gls{BTRA}2}) and one \gls{BTRA} after (\texttt{\gls{BTRA}3}) the return address.}
-    \label{fig:rad-insertion}
-\end{figure}
-
-\subsection{Booby-Trapped Return Addresses}\label{ss:decoy-mimicry}
+\subsection{Booby-Trapped Return Addresses}\label{r2c:ss:decoy-mimicry}
 An indispensable prerequisite for effective \glspl{BTRA} is that they must be virtually indistinguishable from actual, benign return addresses.
 For \glspl{BTRA} to masquerade as return addresses, they must:
 \begin{enumerate*}[label={(\roman*)}]
@@ -177,7 +114,7 @@ In the context of \rtwoc, a classic \gls{BROP} attack is infeasible for two reas
     \item execute-only memory prevents \gls{BROP} from disclosing the text section with a found \texttt{read} gadget.
 \end{enumerate*}
 Likewise, brute forcing an attack with all return address candidates is improbable because all but one of the candidates lead to a booby trap function.
-We discuss the combination of Blind ROP with the more powerful PIROP attack in \cref{sss:corrupting-code-pointers}.
+We discuss the combination of Blind ROP with the more powerful PIROP attack in \cref{r2c:sss:corrupting-code-pointers}.
 
 To achieve the second goal, \glspl{BTRA} mimic the runtime behavior of return addresses.
 Since return addresses are part of the control flow of a program, they show a distinct observable runtime behavior.
@@ -206,7 +143,7 @@ To counter this combinatorial effect, we tolerate occasional reuse and parameter
 An attacker would have to leak two specific stack frames reusing the same \glspl{BTRA} to gain valuable information.
 Such a leak is unlikely in practice because the \glspl{BTRA} are distributed randomly over the text section.
 
-\begin{figure}[t!]
+\begin{figure}[t]
     % --- ROW 1: GRAPHICAL CONTENT ---
     % This row contains the graphics, aligned at their bottom edges.
 
@@ -224,7 +161,7 @@ call callee
     \end{minipage}%
     \hfill%
     \begin{minipage}[b]{0.5\linewidth}
-        \includeDrawioFigure[\linewidth]{figures/r2c/r2c-avx-setup}[remember picture]{
+        \includeDrawioFigure[\linewidth]{figures/r2c/avx-setup}[remember picture]{
             \path
             (Point1) coordinate (A)
             ([yshift=5pt] Point2) coordinate (B)
@@ -250,11 +187,11 @@ call callee
     % The \subcaption command will work inside the minipage.
     \caption{\Gls{BTRA} setup with AVX2 instructions.
     The AVX2 instructions load the \glspl{BTRA} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
-    \label{fig:avx2-setup}
+    \label{r2c:fig:avx2-setup}
 
 \end{figure}
 
-\subsection{Booby-Trapped Data Pointers}\label{ss:heap-boobytraps}
+\subsection{Booby-Trapped Data Pointers}\label{r2c:ss:heap-boobytraps}
 Contrary to return addresses, the runtime requirements for non-control-flow related stack objects are not as strict.
 Stack objects like local variables, for example, can be permuted freely within the stack frame.
 Such a reordering invalidates any a priori knowledge an attacker might have regarding the relative position of stack objects to each other.
@@ -270,7 +207,7 @@ Instead, an attacker has to pick and dereference an arbitrary pointer from the c
 A statistical analysis will, thus, sort \glspl{heapbt} and benign heap pointers into a single cluster.
 If an attacker dereferences a \gls{heapbt}, she causes a segmentation fault that can be handled by the program or a monitoring system.
 
-\subsection{Strengthening \rtwoc Through Code Randomization}\label{ss:strengthening}
+\subsection{Strengthening \rtwoc Through Code Randomization}\label{r2c:ss:strengthening}
 To strengthen security, \rtwoc diversifies the code layout at a subfunction granularity.
 To this end, \rtwoc randomly inserts NOP instructions at call sites, traps in function prologs, and randomizes register allocation~\cite{Crane2015, Pappas2012a}.
 By diversifying these function parts, two specific types of inference are impeded:
@@ -297,7 +234,7 @@ Compared with return addresses, function pointers on the stack occur less freque
 
 
 
-%%    \subsection{Adaptive Security}\label{ss:adaptive-security}
+%%    \subsection{Adaptive Security}\label{r2c:ss:adaptive-security}
 %%    \rtwoc provides probabilistic security against the disclosure of return addresses.
 %%    Specifically, each inserted BTRA decreases the success rate of a blind guess, while increasing the necessity for more observations.
 %%    At the same time, however, inserting additional BTRAs impacts the performance and code size.
@@ -311,7 +248,7 @@ Compared with return addresses, function pointers on the stack occur less freque
 %%    The power of adaptive security lies in the ability to control parameter selection with additional information.
 %%    Programs, for example, typically spend most of their execution time in only few regions of the code, called hot regions~\cite{Pettis1990}.
 %%    Adding more BTRAs to call sites in hot regions has a correspondingly bigger impact on performance than increasing BTRAs in cold regions.
-%%    In \cref{ss:impl-pgo} we demonstrate how profiles can change the parameter selection based on the execution frequency of a call site.
+%%    In \cref{r2c:ss:impl-pgo} we demonstrate how profiles can change the parameter selection based on the execution frequency of a call site.
 %
 %%    \fbetodo{Should we move this paragraph to discussion as future work?}
 %%    Another option is to use application specific information.

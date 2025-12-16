@@ -233,7 +233,7 @@ def main_parser(input_file, output_dir):
 
             print(f"Processing page: '{page_name}' (as '{safe_page_name}')...")
 
-            name = str(Path(input_file).stem) + "-" + safe_page_name
+            name = safe_page_name
             output_base = os.path.join(output_dir, name)
             mx_graph_model = page_element.find('./mxGraphModel', ns_map)
             process_page_model(mx_graph_model, output_base, ns_map, page_name)

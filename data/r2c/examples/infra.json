@@ -1,0 +1,38 @@
+{
+  "config1": {
+    "600.perlbench_s": {
+      "runtime:median": 1.1604655368282784,
+      "runtime:all": [
+        383.647808,
+        388.279663
+      ],
+      "status:same": "ok"
+    },
+    "602.gcc_s": {
+      "runtime:median": 1.1141938191881653,
+      "runtime:all": [
+        429.756077,
+        430.5673
+      ],
+      "status:same": "ok"
+    }
+  },
+  "config2": {
+    "600.perlbench_s": {
+      "runtime:median": 1.1604655368282784,
+      "runtime:all": [
+        383.647808,
+        388.279663
+      ],
+      "status:same": "ok"
+    },
+    "602.gcc_s": {
+      "runtime:median": 1.1141938191881653,
+      "runtime:all": [
+        429.756077,
+        430.5673
+      ],
+      "status:same": "ok"
+    }
+  }
+}
