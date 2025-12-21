@@ -90,12 +90,13 @@ We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with ou
 To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
 We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{r2c:ss:strengthening}).
 
-For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 10 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{r2c:ss:impl-btras}).
+For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 11 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{r2c:ss:impl-btras}).
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
 
 In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-btras}).
+Each block of 4 addresses requires one AVX2 instruction to load them into a register and one to write them onto the stack.
 \fbetodo{adjust to new numbers}
-\cref{r2c:fig:perf-components} shows that the optimization improves the overall performance by 2\%.
+\cref{r2c:fig:perf-components} shows that the optimization improves the overhead caused by \glspl{BTRA} over all benchmarks by 2 percent points.
 Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 13 absolute percent points, down to 8\%.
 In this configuration, the maximum overhead of 10\% is caused by \propername{xalancbmk}.
 
@@ -104,49 +105,6 @@ Enabling only \cfs allows us to measure its performance impact, and the missed o
 We found that the resulting geometric mean performance overhead is \geomeancfs with a maximum impact of \maxoverheadcfs.
 These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
 
-%\subsubsection{\glspl{BTRA} with vector instructions}
-%We built a configuration that uses our optimized AVX2 instruction setup sequence (see \propername{AVX2} in \cref{r2c:fig:perf-components}).
-%In contrast to the \code{push} instructions, setting up ten \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-rads}).
-%\cref{r2c:fig:perf-components} shows that the performance increase afforded by the optimization varies per benchmark.
-%\fbetodo{adjust to new numbers}
-%Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 16\% absolute percent points, to 6.82\%.
-
-%    \begin{table}[t!]
-%      \renewcommand{\arraystretch}{1.0}
-%      \centering
-%      {\small
-%        \begin{tabular}{lrrr}
-%            % (median < '(2558   20996  371     301     6856   6548   1899   541     1564   1079   727     424    ))
-%            % (median < '(121 397 10  8   46 38  254 17  14  90  8   161 ))
-%            % (median < '(95 98 97 97 59 99 88 97 99 92 99 72))
-%            \toprule
-%            & \multicolumn{2}{c}{Code Pointers} & \\
-%            \cmidrule{2-3}
-%            {Benchmark}               & RA     & FP    & Pct. RA \\
-%            \midrule
-%            \propername{perlbench} & 2,558  & 120   & 95\%    \\
-%            \propername{gcc}       & 20,996 & 396   & 98\%    \\
-%            \propername{mcf}       & 371    & 9     & 97\%    \\
-%%            \propername{lbm}       & 301    & 7     & 97\%    \\
-%            \propername{omnetpp}   & 6,856  & 4,696 & 59\%    \\
-%            \propername{xalancbmk} & 6,548  & 37    & 99\%    \\
-%            \propername{x264}      & 1,899  & 253   & 88\%    \\
-%            \propername{deepsjeng} & 541    & 16    & 97\%    \\
-%%            \propername{imagick}   & 1,564  & 13    & 99\%    \\
-%            \propername{leela}     & 1,079  & 89    & 92\%    \\
-%%            \propername{nab}       & 727    & 7     & 99\%    \\
-%            \propername{xz}        & 424    & 160   & 72\%    \\
-%            \midrule
-%            \propername{Apache}        & 6443   & 402   & 94\%    \\
-%            \propername{nginx}         & 2976   & 46    & 98\%    \\
-%            \midrule
-%            Median                    & 1731   & 67    & 97\%    \\
-%            \bottomrule
-%        \end{tabular}}
-%        \caption{Code pointer origin analysis: Distinct return addresses (RA) vs distinct function pointers (FP) on the stack in SPEC CPU 2017, Apache and nginx.}
-%        \label{tab:quant-returns-vs-function-ptrs}
-%        \vspace*{-2em}
-%    \end{table}
 
 \subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
@@ -177,7 +135,6 @@ To contrast this artificially summed overhead with the actual overhead of all co
 For most benchmarks, the sum of component overheads accurately predicts the actual total overhead.
 For \propername{mcf} and \propername{omnetpp}, however, the actual overhead is higher than the sum of components and for \propername{xalancbmk} it is lower.
 One possible explanation is the inherent randomness in the compilations.
-
 
 Some benchmarks show diverging results on different machines.
 On \propername{i9-9900K}, \propername{perlbench} has a significantly higher overhead than on the other machines.

@@ -13,17 +13,29 @@ def load_data(filename):
         return yaml.safe_load(f)
 
 
-def create_timeline(data, emit_dot_path=None):
-    # Initialize Digraph with left-to-right layout
+def create_timeline(data, emit_dot_path=None, hide_edges=False, direction='TB'):
+    # Initialize Digraph with specified layout direction
     dot = graphviz.Digraph(comment='Attack Defense Timeline', format='png')
 
-    dot.attr(rankdir='LR',
+    layout = data.get('layout', {})
+    graph_cfg = layout.get('graph', {})
+    edge_cfg = layout.get('edges', {})
+    node_cfg = layout.get('nodes', {})
+    year_cfg = layout.get('year_labels', {})
+    lane_cfg = layout.get('lane_labels', {})
+    lanes = layout.get('lanes', [
+        {'id': 'attack', 'label': 'Attacks'},
+        {'id': 'defense', 'label': 'Defenses'},
+    ])
+    lane_ids = [lane['id'] for lane in lanes]
+
+    dot.attr(rankdir=direction,
              splines='ortho',
-             nodesep='0.6',
-             ranksep='1.0',
+             nodesep=str(graph_cfg.get('nodesep', '0.6')),
+             ranksep=str(graph_cfg.get('ranksep', '1.0')),
              fontname='Helvetica',
              bgcolor='white',
-             pad='0.5',
+             pad=str(graph_cfg.get('pad', '0.5')),
              nslimit='5',
              mclimit='5')
 
@@ -42,121 +54,291 @@ def create_timeline(data, emit_dot_path=None):
 
     sorted_years = sorted(nodes_by_year.keys())
 
-    # Pre-sort nodes within each year (attacks first, then defenses)
+    # Pre-sort nodes within each year (lane order, then id)
     for year in sorted_years:
         nodes_by_year[year] = sorted(
             nodes_by_year[year],
-            key=lambda x: (0 if x['type'] == 'attack' else 1, x['id'])
+            key=lambda x: (lane_ids.index(node_lane(x, lane_ids)) if node_lane(x, lane_ids) in lane_ids else 99, x['id'])
         )
 
-    # For each year, create a subgraph with rank=same
-    # In LR mode, rank=same means nodes are in the same vertical column
-    for year in sorted_years:
-        nodes_in_year = nodes_by_year[year]
+    year_label_ids = []
+    anchor_map = {lane_id: {} for lane_id in lane_ids}
 
-        with dot.subgraph() as s:
-            s.attr(rank='same')
-
-            # Year label node at the top
-            s.node(f'year_{year}',
-                   label=str(year),
-                   shape='plaintext',
-                   fontsize='12',
-                   fontname='Fira Sans Bold',
+    labeled_years = set()
+    # Year label row
+    with dot.subgraph(name='rank_years') as s:
+        s.attr(rank='same')
+        for year in sorted_years:
+            year_id = f'year_{year}'
+            year_label_ids.append(year_id)
+            label_text = str(year) if is_year_labeled(year, sorted_years, year_cfg) else ''
+            if label_text:
+                labeled_years.add(year)
+            s.node(year_id,
+                   label=label_text,
+                   shape='plaintext' if label_text else 'point',
+                   style='invis' if not label_text else '',
+                   group=f'year_{year}',
+                   fontsize=str(year_cfg.get('fontsize', '12')),
+                   fontname=year_cfg.get('fontname', 'Fira Sans Bold'),
                    width='0',
                    height='0')
 
-            # Paper nodes
-            for node in nodes_in_year:
-                clean_label = node['label'].replace('\n', ' ')
-                wrapped_text = "\\n".join(textwrap.wrap(clean_label, width=20))
+    # Lane rows (anchors + labels)
+    for lane in lanes:
+        lane_id = lane['id']
+        lane_label_id = f'lane_label_{lane_id}'
+        with dot.subgraph(name=f'rank_lane_{lane_id}') as s:
+            s.attr(rank='same')
+            s.node(lane_label_id,
+                   label=lane.get('label', lane_id),
+                   shape='plaintext',
+                   fontsize=str(lane_cfg.get('fontsize', '11')),
+                   fontname=lane_cfg.get('fontname', 'Fira Sans Bold'),
+                   width='0',
+                   height='0')
+            for year in sorted_years:
+                anchor_id = f'anchor_{lane_id}_{year}'
+                anchor_map[lane_id][year] = anchor_id
+                s.node(anchor_id,
+                       label='',
+                       shape='point',
+                       group=f'year_{year}',
+                       width='0.01',
+                       height='0.01',
+                       style='invis')
 
-                if node['type'] == 'attack':
-                    fill = "#ffcccc"
-                    stroke = "#cc0000"
-                    s.node(node['id'],
-                           label=wrapped_text,
-                           shape='box',
-                           style='filled,rounded',
-                           fillcolor=fill,
-                           color=stroke,
-                           width='1.4',
-                           height='0.4',
-                           fixedsize='false',
-                           margin='0.2,0.06')
+    # Callouts row (optional)
+    phases = layout.get('phases', [])
+    phase_cfg = layout.get('phase_bands', {})
+
+    # Optionally pin lane labels to the first year column
+    label_year = sorted_years[0] if sorted_years else None
+    if lane_cfg.get('align_to_first_year', False) and label_year is not None:
+        for lane in lanes:
+            lane_id = lane['id']
+            dot.edge(f'lane_label_{lane_id}', anchor_map[lane_id][label_year],
+                     style='invis',
+                     weight='25',
+                     minlen='1')
+
+    # Render nodes per year/lane and tie them to anchors
+    for year in sorted_years:
+        nodes_in_year = nodes_by_year[year]
+
+        # Align anchors and nodes per lane and year
+        for lane_id in lane_ids:
+            with dot.subgraph(name=f'rank_{lane_id}_{year}') as s:
+                s.attr(rank='same')
+                s.node(anchor_map[lane_id][year], label='', shape='point', width='0.01', height='0.01', style='invis')
+                for node in nodes_in_year:
+                    if node_lane(node, lane_ids) == lane_id:
+                        s.node(node['id'])
+
+        for node in nodes_in_year:
+            clean_label = node['label'].replace('\n', ' ')
+            wrap_width = int(node_cfg.get('wrap', 20))
+            wrapped_text = "\\n".join(textwrap.wrap(clean_label, width=wrap_width))
+            highlight = bool(node.get('highlight', False))
+            node_width = str(node_cfg.get('width', '1.4'))
+            node_height = str(node_cfg.get('height', '0.4'))
+            node_margin = str(node_cfg.get('margin', '0.2,0.06'))
+            node_fontsize = str(node_cfg.get('fontsize', '9'))
+
+            if node['type'] == 'attack':
+                fill = "#ffcccc"
+                stroke = "#cc0000"
+                penwidth = '1.6' if highlight else '1.0'
+                dot.node(node['id'],
+                         label=wrapped_text,
+                         shape='box',
+                         style='filled,rounded',
+                         fillcolor=fill,
+                         color=stroke,
+                         penwidth=penwidth,
+                         group=f'year_{year}',
+                         width=node_width,
+                         height=node_height,
+                         fixedsize='false',
+                         margin=node_margin,
+                         fontsize=node_fontsize,
+                         fontname=node_cfg.get('fontname', 'Fira Sans'))
+            else:
+                # Defense node - add category indicator(s)
+                tags = node.get('tags', [])
+
+                # Collect all matching category colors
+                cat_colors = []
+                if 'cfi' in tags:
+                    cat_colors.append('#9370DB')  # purple for CFI
+                if 'enforcement' in tags:
+                    cat_colors.append('#FF8C00')  # orange for enforcement
+                if 'randomization' in tags:
+                    cat_colors.append('#20B2AA')  # teal for randomization
+                if 'XOM' in tags:
+                    cat_colors.append('#708090')  # gray for XOM
+
+                penwidth = '1.6' if highlight else '1.0'
+                if cat_colors:
+                    # Build squares HTML for all categories
+                    squares_html = ''
+                    for cat_color in cat_colors:
+                        squares_html += f'<TD VALIGN="MIDDLE"><TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="0"><TR><TD FIXEDSIZE="TRUE" WIDTH="10" HEIGHT="10" BGCOLOR="{cat_color}"></TD></TR></TABLE></TD><TD WIDTH="2"></TD>'
+
+                    html_label = f'''<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">
+                        <TR>
+                            {squares_html}
+                            <TD WIDTH="2"></TD>
+                            <TD VALIGN="MIDDLE">{wrapped_text.replace(chr(92) + "n", "<BR/>")}</TD>
+                        </TR>
+                    </TABLE>>'''
+                    dot.node(node['id'],
+                             label=html_label,
+                             shape='box',
+                             style='filled,rounded',
+                             fillcolor='#cce5ff',
+                             color='#0066cc',
+                             penwidth=penwidth,
+                             group=f'year_{year}',
+                             width=node_width,
+                             height=node_height,
+                             fixedsize='false',
+                             margin=node_margin,
+                             fontsize=node_fontsize,
+                             fontname=node_cfg.get('fontname', 'Fira Sans'))
                 else:
-                    # Defense node - add category indicator(s)
-                    tags = node.get('tags', [])
+                    dot.node(node['id'],
+                             label=wrapped_text,
+                             shape='box',
+                             style='filled,rounded',
+                             fillcolor='#cce5ff',
+                             color='#0066cc',
+                             penwidth=penwidth,
+                             group=f'year_{year}',
+                             width=node_width,
+                             height=node_height,
+                             fixedsize='false',
+                             margin=node_margin,
+                             fontsize=node_fontsize,
+                             fontname=node_cfg.get('fontname', 'Fira Sans'))
 
-                    # Collect all matching category colors
-                    cat_colors = []
-                    if 'cfi' in tags:
-                        cat_colors.append('#9370DB')  # purple for CFI
-                    if 'enforcement' in tags:
-                        cat_colors.append('#FF8C00')  # orange for enforcement
-                    if 'randomization' in tags:
-                        cat_colors.append('#20B2AA')  # teal for randomization
-                    if 'XOM' in tags:
-                        cat_colors.append('#708090')  # gray for XOM
+            lane_id = node_lane(node, lane_ids)
+            anchor_id = anchor_map.get(lane_id, {}).get(year)
+            if anchor_id:
+                dot.edge(anchor_id, node['id'],
+                         style='invis',
+                         weight='5',
+                         minlen='1')
 
-                    if cat_colors:
-                        # Build squares HTML for all categories
-                        squares_html = ''
-                        for cat_color in cat_colors:
-                            squares_html += f'<TD VALIGN="MIDDLE"><TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="0"><TR><TD FIXEDSIZE="TRUE" WIDTH="10" HEIGHT="10" BGCOLOR="{cat_color}"></TD></TR></TABLE></TD><TD WIDTH="2"></TD>'
+        # Align year labels with attack anchors (if present) or defense anchors
+        primary_lane = 'attack' if 'attack' in lane_ids else lane_ids[0]
+        dot.edge(f'year_{year}', anchor_map[primary_lane][year],
+                 style='invis',
+                 weight='10',
+                 minlen=str(year_cfg.get('anchor_minlen', '1')))
 
-                        html_label = f'''<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">
-                            <TR>
-                                {squares_html}
-                                <TD WIDTH="2"></TD>
-                                <TD VALIGN="MIDDLE">{wrapped_text.replace(chr(92) + "n", "<BR/>")}</TD>
-                            </TR>
-                        </TABLE>>'''
-                        s.node(node['id'],
-                               label=html_label,
-                               shape='box',
-                               style='filled,rounded',
-                               fillcolor='#cce5ff',
-                               color='#0066cc',
-                               width='1.4',
-                               height='0.4',
-                               fixedsize='false',
-                               margin='0.2,0.06')
-                    else:
-                        s.node(node['id'],
-                               label=wrapped_text,
-                               shape='box',
-                               style='filled,rounded',
-                               fillcolor='#cce5ff',
-                               color='#0066cc',
-                               width='1.4',
-                               height='0.4',
-                               fixedsize='false',
-                               margin='0.2,0.06')
+        # Align lanes vertically per year
+        for upper, lower in zip(lane_ids, lane_ids[1:]):
+            dot.edge(anchor_map[upper][year], anchor_map[lower][year],
+                     style='invis',
+                     weight='10',
+                     minlen='1')
 
-    # Create invisible edges to establish:
-    # 1. Year ordering (left to right timeline)
-    # 2. Vertical stacking within each year (year at top, papers below)
+    # Phase bands (single span per phase)
+    if phases:
+        with dot.subgraph(name='rank_phases') as s:
+            s.attr(rank='same')
+            for phase in phases:
+                phase_years = [y for y in sorted_years if phase['start'] <= y <= phase['end']]
+                if not phase_years:
+                    continue
+                phase_id = phase['id']
+                cell_width = float(phase_cfg.get('cell_width', '1.0'))
+                band_width = str(max(cell_width * len(phase_years), cell_width))
+                band_height = str(phase.get('height', phase_cfg.get('height', '0.16')))
+                band_font = phase.get('fontname', phase_cfg.get('fontname', 'Fira Sans Bold'))
+                band_fontsize = str(phase.get('fontsize', phase_cfg.get('fontsize', '8')))
+                phase_label = phase.get('label', '')
 
-    # Link years horizontally
+                band_id = f'phase_{phase_id}'
+                start_year = phase_years[0]
+                end_year = phase_years[-1]
+
+                # Create spacer nodes to anchor band between start and end years
+                start_id = f'phase_{phase_id}_start'
+                end_id = f'phase_{phase_id}_end'
+                s.node(start_id, label='', shape='point', width='0.01', style='invis', group=f'year_{start_year}')
+                s.node(end_id, label='', shape='point', width='0.01', style='invis', group=f'year_{end_year}')
+
+                s.node(band_id,
+                       label=phase_label,
+                       shape='box',
+                       style='filled,rounded',
+                       fillcolor=phase.get('fill', '#f7f7f7'),
+                       color=phase.get('border', '#e6e6e6'),
+                       fontname=band_font,
+                       fontsize=band_fontsize,
+                       width=band_width,
+                       height=band_height,
+                       fixedsize='true',
+                       group=f'year_{start_year}')
+
+                # Pull band between start/end anchors
+                s.edge(start_id, band_id, style='invis', weight='10', minlen='1')
+                s.edge(band_id, end_id, style='invis', weight='10', minlen='1')
+                dot.edge(band_id, f'year_{start_year}', style='invis', weight='5', minlen='1')
+
+    # Create invisible edges to establish ordering
+    # Link years along primary axis
     for i in range(len(sorted_years) - 1):
         dot.edge(f'year_{sorted_years[i]}',
                  f'year_{sorted_years[i + 1]}',
                  style='invis',
                  weight='100')
 
-    # Within each year, stack year label -> papers vertically
-    for year in sorted_years:
-        prev = f'year_{year}'
-        for node in nodes_by_year[year]:
-            dot.edge(prev, node['id'],
+    # Chain anchors per lane to enforce horizontal ordering
+    for lane_id in lane_ids:
+        lane_label_id = f'lane_label_{lane_id}'
+        prev = lane_label_id
+        for year in sorted_years:
+            anchor_id = anchor_map[lane_id][year]
+            dot.edge(prev, anchor_id,
                      style='invis',
-                     weight='5',
+                     weight='30',
                      minlen='1')
-            prev = node['id']
+            prev = anchor_id
+
+    # Optional gridlines per year
+    grid_cfg = layout.get('gridlines', {})
+    if grid_cfg.get('enabled', False):
+        grid_color = grid_cfg.get('color', '#dddddd')
+        grid_style = grid_cfg.get('style', 'dotted')
+        grid_width = grid_cfg.get('penwidth', '0.6')
+        only_labeled = grid_cfg.get('only_labeled', True)
+        for year in sorted_years:
+            if only_labeled and year not in labeled_years:
+                continue
+            top_anchor = f'year_{year}'
+            bottom_anchor = anchor_map[lane_ids[-1]][year]
+            dot.edge(top_anchor, bottom_anchor,
+                     color=grid_color,
+                     style=grid_style,
+                     penwidth=str(grid_width),
+                     arrowhead='none',
+                     constraint='false')
 
     # Draw relationship edges with appropriate styling
     for edge in data['edges']:
+        if hide_edges:
+            continue
+
+        visibility = edge_cfg.get('visibility', 'all')
+        if visibility == 'none':
+            continue
+        if visibility == 'minimal':
+            if not edge.get('primary', False):
+                continue
+
         u = edge['from']
         v = edge['to']
 
@@ -203,7 +385,30 @@ def create_timeline(data, emit_dot_path=None):
     return dot
 
 
-def create_legend():
+def node_lane(node, lane_ids):
+    lane = node.get('lane')
+    if lane and lane in lane_ids:
+        return lane
+    if node.get('type') == 'attack':
+        return 'attack'
+    return 'defense'
+
+
+def is_year_labeled(year, sorted_years, year_cfg):
+    step = int(year_cfg.get('step', 1))
+    show_first = year_cfg.get('show_first', True)
+    show_last = year_cfg.get('show_last', True)
+    if step <= 1:
+        return True
+    idx = sorted_years.index(year)
+    if show_first and idx == 0:
+        return True
+    if show_last and idx == len(sorted_years) - 1:
+        return True
+    return (idx % step) == 0
+
+
+def create_legend(show_edges=True):
     """Create a compact horizontal legend using the same styling as the graph."""
     leg = graphviz.Digraph(comment='Legend', format='png')
 
@@ -272,53 +477,45 @@ def create_legend():
             t.edge(previous_node, name, style='invis', minlen=minlen)
             previous_node = name
 
-    # --- Row 2: Relations ---
-    relations = [
-        ('mot', '#228B22CC', 'solid', 'motivated'),
-        ('byp', '#DC143CCC', 'dashed', 'bypasses'),
-        ('ext', '#4169E1CC', 'solid', 'extends'),
-        ('insp', '#9370DBCC', 'dotted', 'inspired'),
-    ]
-    with leg.subgraph(name='group_rel') as r:
-        r.attr(rank='same')
-        prev_dst = None
-        
-        # To align roughly with the center, we can just chain them
-        # But to make it look good, we might want to offset the start?
-        # For now, just simple left-to-right
-        
-        for prefix, color, style, text in relations:
-            src = f'{prefix}_src'
-            dst = f'{prefix}_dst'
-            
-            r.node(src, label='', shape='point', width='0.01', style='invis')
-            r.node(dst, label='', shape='point', width='0.01', style='invis')
-            
-            r.edge(src, dst,
-                   label=text,
-                   color=color,
-                   style=style,
-                   arrowhead='normal',
-                   arrowsize='0.6',
-                   penwidth='1.0',
-                   len='0.6',
-                   constraint='false', # Don't affect layout rank
-                   minlen='2') # Visual length
-            
-            # Force horizontal layout for these invisible nodes
-            # Note: In rank=same, edges are tricky. 
-            # Usually simpler to chain the nodes: src -> dst -> next_src
-            
-            if prev_dst:
-                 r.edge(prev_dst, src, style='invis', minlen='1')
-            
-            # Ensure src is left of dst
-            r.edge(src, dst, style='invis')
-            
-            prev_dst = dst
+    if show_edges:
+        # --- Row 2: Relations ---
+        relations = [
+            ('mot', '#228B22CC', 'solid', 'motivated'),
+            ('byp', '#DC143CCC', 'dashed', 'bypasses'),
+            ('ext', '#4169E1CC', 'solid', 'extends'),
+            ('insp', '#9370DBCC', 'dotted', 'inspired'),
+        ]
+        with leg.subgraph(name='group_rel') as r:
+            r.attr(rank='same')
+            prev_dst = None
 
-    # Connect rows to maintain hierarchy
-    leg.edge('legend_attack', 'mot_src', style='invis')
+            for prefix, color, style, text in relations:
+                src = f'{prefix}_src'
+                dst = f'{prefix}_dst'
+
+                r.node(src, label='', shape='point', width='0.01', style='invis')
+                r.node(dst, label='', shape='point', width='0.01', style='invis')
+
+                r.edge(src, dst,
+                       label=text,
+                       color=color,
+                       style=style,
+                       arrowhead='normal',
+                       arrowsize='0.6',
+                       penwidth='1.0',
+                       len='0.6',
+                       constraint='false', # Don't affect layout rank
+                       minlen='2') # Visual length
+
+                if prev_dst:
+                    r.edge(prev_dst, src, style='invis', minlen='1')
+
+                r.edge(src, dst, style='invis')
+
+                prev_dst = dst
+
+        # Connect rows to maintain hierarchy
+        leg.edge('legend_attack', 'mot_src', style='invis')
 
     return leg
 
@@ -463,6 +660,17 @@ if __name__ == "__main__":
         help="Also save the DOT source (.gv file)",
     )
     parser.add_argument(
+        "--hide-edges",
+        action="store_true",
+        help="Do not draw relationship edges between nodes.",
+    )
+    parser.add_argument(
+        "--direction",
+        choices=["TB", "LR"],
+        default="TB",
+        help="Layout direction: TB (Top-to-Bottom, vertical) or LR (Left-to-Right, horizontal). Default is TB.",
+    )
+    parser.add_argument(
         "--format",
         choices=["png", "pdf"],
         default=None,
@@ -486,8 +694,15 @@ if __name__ == "__main__":
             out_format = 'pdf' if args.pdf else 'png'
 
         # Generate timeline and legend graphs
-        graph = create_timeline(data, emit_dot_path=emit_dot_path)
-        legend_graph = create_legend()
+        graph = create_timeline(
+            data,
+            emit_dot_path=emit_dot_path,
+            hide_edges=args.hide_edges,
+            direction=args.direction
+        )
+        edge_visibility = data.get('layout', {}).get('edges', {}).get('visibility', 'all')
+        show_edges = not args.hide_edges and edge_visibility != 'none'
+        legend_graph = create_legend(show_edges=show_edges)
 
         if out_format == 'png':
             # Render raster parts and compose PNG

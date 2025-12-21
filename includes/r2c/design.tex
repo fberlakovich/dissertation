@@ -143,54 +143,6 @@ To counter this combinatorial effect, we tolerate occasional reuse and parameter
 An attacker would have to leak two specific stack frames reusing the same \glspl{BTRA} to gain valuable information.
 Such a leak is unlikely in practice because the \glspl{BTRA} are distributed randomly over the text section.
 
-\begin{figure}[t]
-    % --- ROW 1: GRAPHICAL CONTENT ---
-    % This row contains the graphics, aligned at their bottom edges.
-
-    \begin{minipage}[b]{0.4\linewidth}
-        \begin{lstlisting}[style=asmcode,style=coloredrads]
-vmovdqa %ymm13,(arr) |\tikzmark{T-First-Vex-Mov}|
-vmovdqu -0x20(%rsp),%ymm13
-vmovdqa %ymm13,0x20(arr) |\tikzmark{T-Second-Vex-Mov}|
-vmovdqu -0x40(%rsp),%ymm13
-vzeroupper
-sub $0x30,%rsp
-call callee
-        \end{lstlisting}
-        \vspace{1cm}
-    \end{minipage}%
-    \hfill%
-    \begin{minipage}[b]{0.5\linewidth}
-        \includeDrawioFigure[\linewidth]{figures/r2c/avx-setup}[remember picture]{
-            \path
-            (Point1) coordinate (A)
-            ([yshift=5pt] Point2) coordinate (B)
-            (A) -- (B) coordinate[pos=.5] (M1)
-            coordinate (BraceTip1) at ($ (M1)!{7pt+5pt}!-90:(B) $);
-            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}] (A) -- (B);
-            \path
-            ([yshift=5pt] Point2) coordinate (C)
-            ([yshift=5pt] Point3) coordinate (D)
-            (C) -- (D) coordinate[pos=.5] (M2)
-            coordinate (BraceTip2) at ($ (M2)!{7pt+5pt}!-90:(D) $);
-            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}]
-            (C) -- (D);
-        }
-    \end{minipage}
-    \begin{tikzpicture}[remember picture, overlay]
-        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-First-Vex-Mov) -| ($ (pic cs:T-First-Vex-Mov)!0.4!(BraceTip1) $) |- ([xshift=-3pt]BraceTip1);
-        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-Second-Vex-Mov) -| ($ (pic cs:T-Second-Vex-Mov)!0.4!(BraceTip2) $) |- ([xshift=-3pt]BraceTip2);
-    \end{tikzpicture}
-
-    % --- ROW 2: CAPTIONS ---
-    % This row contains the captions, aligned at their top edges.
-    % The \subcaption command will work inside the minipage.
-    \caption{\Gls{BTRA} setup with AVX2 instructions.
-    The AVX2 instructions load the \glspl{BTRA} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
-    \label{r2c:fig:avx2-setup}
-
-\end{figure}
-
 \subsection{Booby-Trapped Data Pointers}\label{r2c:ss:heap-boobytraps}
 Contrary to return addresses, the runtime requirements for non-control-flow related stack objects are not as strict.
 Stack objects like local variables, for example, can be permuted freely within the stack frame.

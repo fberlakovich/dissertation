@@ -37,18 +37,17 @@ add %rsp,0x8 |\circleddashedtikz{5}|
 |\tikzmark{T-Ret-Setup}|ret |\circleddashedtikz{6}|
     \end{lstlisting}
 \end{lrbox}
+\newlength{\btracodegap}
+\setlength{\btracodegap}{6em}
+\newlength{\btracodewidth}
+\setlength{\btracodewidth}{\dimexpr\wd\btrasetup+\wd\btrateardown+\btracodegap\relax}
 
 \begin{figure}[t]
     \begin{subfigure}[t]{\linewidth}
         \centering
-        \makebox[\linewidth][c]{%
-            \begin{subfigure}[t]{0.48\linewidth}
-                \usebox\btrasetup
-            \end{subfigure}
-            \begin{subfigure}[t]{0.48\linewidth}
-                \usebox\btrateardown
-            \end{subfigure}
-        }
+        \begin{minipage}{\btracodewidth}
+            \usebox\btrasetup\hspace{\btracodegap}\usebox\btrateardown
+        \end{minipage}
         \caption{Cooperation between caller (\emph{left}) and callee (\emph{right}) to insert \glspl{BTRA}.}
         \label{r2c:fig:rad-insertion-code}
     \end{subfigure}
@@ -67,7 +66,7 @@ add %rsp,0x8 |\circleddashedtikz{5}|
             \draw ([yshift=-10pt] Arrow6) node {\circleddashedtikz{\code{6}}};
             \draw ([yshift=-10pt] Arrow7) node {\circleddashedtikz{\code{7}}};
         }
-        \caption{Stack view of the booby-trapped return address setup and teardown process.\phantom{Latex is a piece of crap}}
+        \caption{Stack view of the booby-trapped return address setup and teardown process.}
         \label{r2c:fig:rad-insertion-stack}
     \end{subfigure}%
     \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{r2c:fig:rad-insertion-code}), and effect on the stack (\Cref{r2c:fig:rad-insertion-stack}).
@@ -75,7 +74,6 @@ add %rsp,0x8 |\circleddashedtikz{5}|
     \label{r2c:fig:btra-insertion}
 \end{figure}
 
-\fbetodo{Add code examples}
 % To this end, \rtwoc encloses return address with BTRAs.
 To enclose return addresses with \glspl{BTRA}, steps \Circled{\code{1}} to \Circled{\code{4}} in \cref{r2c:fig:btra-insertion} are required.
 First, the caller pushes randomly chosen \glspl{BTRA} together with the return address on the stack \Circled{\code{1}}.
@@ -133,14 +131,14 @@ On x86-64, the stack pointer must be 16 byte aligned, as programs crash when cer
 
 \begin{figure}[t]
     \centering
-    \begin{subfigure}[t]{0.45\linewidth}
+    \begin{subfigure}[t]{0.3\linewidth}
         \centering
         \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-plain}
         \caption{Without \cfs the base pointer points below the spilled base pointer.}
         \label{r2c:fig:stack-arguments}
     \end{subfigure}
     \quad
-    \begin{subfigure}[t]{0.45\linewidth}
+    \begin{subfigure}[t]{0.3\linewidth}
         \centering
         \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-btra}
         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
@@ -177,6 +175,53 @@ Frame-pointer omission re-purposes the frame register as a general purpose regis
 We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
 
 \subsubsection{Optimization with AVX2}
+\begin{figure}[t]
+        % --- ROW 1: GRAPHICAL CONTENT ---
+        % This row contains the graphics, aligned at their bottom edges.
+
+    \begin{minipage}[b]{0.4\linewidth}
+        \begin{lstlisting}[style=asmcode,style=coloredrads]
+vmovdqa %ymm13,(arr) |\tikzmark{T-First-Vex-Mov}|
+vmovdqu -0x20(%rsp),%ymm13
+vmovdqa %ymm13,0x20(arr) |\tikzmark{T-Second-Vex-Mov}|
+vmovdqu -0x40(%rsp),%ymm13
+vzeroupper
+sub $0x30,%rsp
+call callee
+        \end{lstlisting}
+        \vspace{1cm}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.5\linewidth}
+        \includeDrawioFigure[\linewidth]{figures/r2c/avx-setup}[remember picture]{
+            \path
+            (Point1) coordinate (A)
+            ([yshift=5pt] Point2) coordinate (B)
+            (A) -- (B) coordinate[pos=.5] (M1)
+            coordinate (BraceTip1) at ($ (M1)!{7pt+5pt}!-90:(B) $);
+            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}] (A) -- (B);
+            \path
+            ([yshift=5pt] Point2) coordinate (C)
+            ([yshift=5pt] Point3) coordinate (D)
+            (C) -- (D) coordinate[pos=.5] (M2)
+            coordinate (BraceTip2) at ($ (M2)!{7pt+5pt}!-90:(D) $);
+            \draw[decorate,decoration={brace,mirror,amplitude=7pt,raise=5pt}]
+            (C) -- (D);
+        }
+    \end{minipage}
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-First-Vex-Mov) -| ($ (pic cs:T-First-Vex-Mov)!0.4!(BraceTip1) $) |- ([xshift=-3pt]BraceTip1);
+        \draw[Latex-, line width=0.7] ([yshift=3pt]pic cs:T-Second-Vex-Mov) -| ($ (pic cs:T-Second-Vex-Mov)!0.4!(BraceTip2) $) |- ([xshift=-3pt]BraceTip2);
+    \end{tikzpicture}
+
+    % --- ROW 2: CAPTIONS ---
+    % This row contains the captions, aligned at their top edges.
+    % The \subcaption command will work inside the minipage.
+    \caption{\Gls{BTRA} setup with AVX2 instructions.
+    The AVX2 instructions load the \glspl{BTRA} from a call-site specific array in the data section (\code{arr}) and write them to the stack in batch.}
+    \label{r2c:fig:avx2-setup}
+
+\end{figure}
 Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
 %    During the performance evaluation we noticed a performance impact particularly on call intensive benchmarks.
 %    We speculate that the large number of instructions puts pressure on the instruction cache.
@@ -238,56 +283,11 @@ add %rsp, |$\alpha*8$|
         }
     }
 }
-%    \begin{figure*}[t!]
-%        \begin{subfigure}[b]{0.2\textwidth}
-%            \usebox\uninstrumented
-%            \begin{tikzpicture}[overlay, remember picture]
-%            \end{tikzpicture}
-%            \vspace*{4.5em}
-%            \caption{A call site with execution count $\mathcal{C}$.
-%            \newline
-%            }
-%        \end{subfigure}
-%        \hfill
-%        \begin{subfigure}[b]{0.4\textwidth}
-%            \begin{tikzpicture}[overlay, remember picture]
-%                \pic at (0,0.5) {numberline={$L_l$}{$U_l$}{lbottom}{ltop}};
-%                \pic at (0,2.5) {numberline={$L_u$}{$U_u$}{ubottom}{utop}};
-%                \pic at (3,1.5) {numberline={$l$}{$u$}{bottom}{top}};
-%                \node[inner sep=0pt] (dice) at (5,2.0) {\includegraphics[width=50pt]{img/dice.png}};
-%                \draw [-latex,out=10,in=180] ([shift={(6pt,-10pt)}] utop) to node[midway,above] {$\Pi$} ([shift={(-3pt,0pt)}] top);
-%                \draw [-latex,out=-10,in=180] ([shift={(6pt,-14pt)}] ltop) to node[midway,above] {$\Pi$} ([shift={(-3pt,0pt)}] bottom);
-%                \begin{scope}[on background layer]
-%                    \draw [-latex,dashed] ([shift={(6pt,-10pt)}] top) to [out=-10,in=190] (7.7,2.65);
-%                    \draw [-latex,dashed] ([shift={(6pt,8pt)}] bottom) to [out=10,in=170] (7.7,1.35);
-%                \end{scope}
-%                \draw[-latex] ([shift={(-75pt,-10pt)}] ubottom) to [out=10,in=170] ([shift={(-3pt,-15pt)}] utop);
-%                \draw[-latex] ([shift={(-75pt,14pt)}] ltop) to [out=-10,in=170] ([shift={(-3pt,-15pt)}] ltop);
-%                \node at ([shift={(-60pt,-12pt)}] ubottom)  {$\mathcal{C}$};
-%            \end{tikzpicture}
-%            \caption{The selection process for determining the total number of BTRAs for a call site, based on the configurable ranges $[U_u,L_u]$, $[U_l,L_l]$ and the execution count $\mathcal{C}$ (see \cref{r2c:ss:impl-pgo} for details).}
-%        \end{subfigure}
-%        \hfill
-%        \begin{subfigure}[b]{0.3\textwidth}
-%            \usebox\instrumented
-%            \vspace{0.8em}
-%            \begin{tikzpicture}[overlay, remember picture]
-%                \draw [decorate,decoration={brace,mirror,amplitude=5pt,raise=4pt},yshift=0pt] ([shift={(0pt,5pt)}] pic cs:T-Before-Begin) -- ([shift={(0pt,-2pt)}] pic cs:T-Before-End) node [black,midway,xshift=-0.5cm]  {$\alpha$};
-%                \draw [decorate,decoration={brace,mirror,amplitude=5pt,raise=4pt},yshift=0pt] ([shift={(0pt,5pt)}] pic cs:T-After-Begin) -- ([shift={(0pt,-2pt)}] pic cs:T-After-End) node [black,midway,xshift=-0.5cm] {$\beta$};
-%            \end{tikzpicture}
-%            \caption{\rtwoc instruments the call site to insert $\alpha$ BTRAs before and $\beta$ BTRAs after the return address.}
-%        \end{subfigure}
-%        \caption{\rtwoc automatically configures the random trial that determines the number of BTRAs based on the call site's execution count.}
-%        \label{r2c:fig:selection-process}
-%    \end{figure*}
 
 
 \begin{figure}[t]
     \centering
-    \vspace{0.3cm}
-    \resizebox{0.9\columnwidth}{!}{%
-        \includegraphics{figures/r2c/btdp-setup}
-    }
+    \includegraphics[width=0.7\linewidth]{figures/r2c/btdp-setup}
     \caption[]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
     In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
     The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{r2c:ss:impl-heap-boobytraps}).}
@@ -295,7 +295,28 @@ add %rsp, |$\alpha*8$|
 \end{figure}
 
 \subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
-\fbetodo{Add code examples}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/r2c/btdp-stack}
+    \caption{Stack and heap with inserted \glspl{heapbt}.}
+    \label{r2c:fig:btdp-stack}
+\end{figure}
+
+\begin{listing}[t]
+    \begin{minted}{gas}
+mov 0x4f04d7(%rip),%r11  // load the BTDP array pointer
+mov 0x220(%r11),%rax     // load an array entry into rax
+mov %rax,0x30(%rsp)      // store the pointer to a compile-time random slot
+mov 0x600(%r11),%rax     // load another array entry into rax
+mov %rax,0x20(%rsp)      // ...
+mov 0x5b0(%r11),%rax
+mov %rax,0x10(%rsp)
+mov 0x1a0(%r11),%rax
+    \end{minted}
+    \caption{Example \glspl{heapbt} setup code in the prolog of a function.}
+    \label{r2c:lst:btdp-setup-code}
+\end{listing}
+
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
 To maintain the illusion of a benign heap pointer, \glspl{heapbt} must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
 Ideally, \glspl{heapbt} would point to random addresses on the heap that are protected by memory permissions.
@@ -315,6 +336,10 @@ During compilation, \rtwoc{} instruments function prologs to write \glspl{heapbt
 How many \glspl{heapbt} are written per function is chosen randomly using compile-time parameters.
 The stack slots for the \glspl{heapbt} are allocated like stack slots for local variables during compilation.
 As a result, stack slot randomization shuffles \glspl{heapbt} with other stack objects, including benign heap pointers.
+\cref{r2c:lst:btdp-setup-code} shows the \glspl{heapbt} setup code in the prolog of a function.
+Storing the \glspl{heapbt} to the stack requires $2*B+1$ instructions, where $B$ is the number of \glspl{heapbt}.
+\cref{r2c:fig:btdp-stack} shows an example stack and heap with inserted \glspl{heapbt}.
+Note that \glspl{heapbt} can point to arbitrary addresses within a guard page and multiple \glspl{heapbt} point to the same guard page.
 
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
 If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{r2c:fig:hardened-data-traps}).

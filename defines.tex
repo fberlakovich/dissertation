@@ -556,6 +556,19 @@ style=nextline
 
 \newlist{inline}{enumerate*}{1}
 \setlist[inline]{label=(\roman*)}
+\crefname{inlinei}{item}{items}
+
+\newlist{inlinenum}{enumerate*}{1}
+\setlist[inlinenum]{label=(\arabic*)}
+\crefname{inlinenumi}{item}{items}
+
+\newlist{inlinealpha}{enumerate*}{1}
+\setlist[inlinealpha]{label=(\alph*), itemjoin={,\ }, itemjoin*={ and\ }}
+\crefname{inlinealphai}{item}{items}
+
+\newlist{inlinecircle}{enumerate*}{1}
+\setlist[inlinecircle]{label=\protect\Circled{\arabic*}, itemjoin={,\ }, itemjoin*={ and\ }}
+\crefname{inlinecirclei}{item}{items}
 
 \newtcolorbox{infobox}{
 colback=black!5,      % Background color (5% black, 95% white)

@@ -15,6 +15,11 @@ Although \propername{random-params} is more stable in terms of triggering rare o
 \propername{Static-params} on the other hand achieves less code coverage than the feedback-driven configurations, but reaches high rare optimization scores.
 The high scores are likely the result of the manual tuning that went into the \propername{static-params} configuration over the last years, with the explicit goal of triggering interesting optimizations.
 
+%The strong code coverage performance of \propername{random-params} can be explained by a "depth vs.\ breadth" trade-off.
+%The \propername{random-params} configuration, being unburdened by feedback overhead, achieves a high throughput and rapidly explores the "breadth" of the compiler's state space---triggering standard compilation phases (parsing, high-level IR generation) across many diverse inputs.
+%In contrast, the feedback-driven genetic algorithm optimizes for "depth"---specifically aiming for rare optimizations and complex phase interactions that occur less frequently.
+%While the random approach covers more code lines in total (\eg error handling or common paths), the genetic algorithm successfully pressures the compiler into deep optimization pipelines that a random search rarely reaches, as evidenced by the higher rareness scores.
+
 Despite the lack of feedback, both \propername{random-params} and \propername{static-params} achieve better results than \aflpp-based configurations.
 We attribute the improvement of the unguided configurations over \aflpp to the more structural issues with \aflpp, which we discuss in \cref{lool:ss:aflpp-vs-genetic}.
 

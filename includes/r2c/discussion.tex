@@ -52,11 +52,25 @@ To test this correlation with call frequency, we instrumented the SPEC CPU bench
 Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
 \Cref{tab:call-frequencies} shows the median number of calls performed by the SPEC CPU 2017 benchmarks.
 For each benchmark we took the median call frequencies across all inputs.
-The data suggests that there is a correlation with the overhead, but this correlation is insufficient to predict the overhead:
+The data suggests that there is only a weak correlation with the overhead:
 \propername{Perlbench}, for example, has less than half the number of calls as \propername{omnetpp}, but shows a similar overhead.
 
 The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
 Similarly, prolog trap insertion also contributes to the increased instruction cache pressure.
+
+To better understand the exact causes of the overhead, we recorded \code{perf} counters for particularly affected benchmarks.
+As expected, each benchmark shows a significant increase in the number of instructions.
+Most of \rtwoc's diversification measures, \ie prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
+Additional instructions can affect execution performance in at least two ways:
+\begin{enumerate*}
+    \item Executing an instruction requires \gls{CPU} cycles.
+    This effect is particularly pronounced in hot code;
+    \item Additional instructions change the code geometry and increase instruction cache pressure.
+    Thus, additional instructions can influence other code parts, even if they are not executed at all.
+\end{enumerate*}
+While it is generally hard to differentiate the two effects, we can correlate the instruction cache pressure increase with the performance overhead increase.
+
+
 
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
@@ -170,6 +184,9 @@ For an indirect JIT-ROP attack, an attacker needs to locate valid code pointers,
 For an \gls{AOCR} attack, an attacker needs to locate function pointers or infer them from other code pointers (\eg return addresses), as well as manipulate function parameters.
 In the following subsections we discuss how \rtwoc{} counters each of these attack vectors.
 We also discuss the security of stack unwinding tables and the possibility of an attacker corrupting entire or partial code pointers.
+
+Our security evaluation relies on a probabilistic model to estimate an attacker's success rate.
+We instantiate the model's variables (such as stack frame composition and pointer distribution) with empirical measurements from \propername{nginx}, \propername{Apache} and \propername{ighttpd}.
 
 \subsubsection{Leaking Return Addresses}\label{r2c:sss:leaking-return-addresses}
 \rtwoc protects return addresses with \glspl{BTRA}.

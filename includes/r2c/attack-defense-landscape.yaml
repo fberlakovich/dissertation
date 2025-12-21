@@ -1,3 +1,76 @@
+layout:
+  lanes:
+    - id: attack
+      label: Attacks
+    - id: defense
+      label: Defenses
+  gridlines:
+    enabled: true
+    color: "#e0e0e0"
+    style: "dotted"
+    penwidth: "0.6"
+    only_labeled: true
+  edges:
+    visibility: minimal
+  graph:
+    nodesep: "0.35"
+    ranksep: "0.6"
+    pad: "0.35"
+  phase_bands:
+    cell_width: "1.1"
+    height: "0.18"
+    fontsize: "9"
+  drawio:
+    column_width: 160
+    margin_left: 80
+    margin_top: 40
+    year_row_height: 28
+    phase_height: 20
+    phase_gap: 10
+    node_width: 120
+    node_height: 32
+    stack_gap: 8
+    lane_gap: 40
+    include_edges: false
+  phases:
+    - id: phase_foundation
+      label: "Foundations"
+      start: 1997
+      end: 2004
+      fill: "#f7f7ff"
+      border: "#d9d9f0"
+    - id: phase_rop_cfi
+      label: "ROP & CFI"
+      start: 2005
+      end: 2012
+      fill: "#f7fbff"
+      border: "#d0e3f0"
+    - id: phase_disclosure
+      label: "Disclosure-Resilient"
+      start: 2013
+      end: 2017
+      fill: "#f8fff8"
+      border: "#d9f0d9"
+    - id: phase_post_leakage
+      label: "Post-Leakage"
+      start: 2018
+      end: 2023
+      fill: "#fff8f2"
+      border: "#f0ddc8"
+  year_labels:
+    step: 2
+    fontsize: "10"
+    anchor_minlen: "1"
+  lane_labels:
+    fontsize: "10"
+    align_to_first_year: true
+  nodes:
+    fontsize: "8"
+    width: "1.25"
+    height: "0.32"
+    margin: "0.16,0.05"
+    wrap: 18
+
 nodes:
   # ===== 1997 =====
 - id: A_ret2libc
@@ -320,6 +393,7 @@ nodes:
   type: defense
   tags: [randomization]
   label: R2C
+  highlight: true
 
 - id: D_Shadow
   year: 2023
@@ -332,18 +406,21 @@ edges:
 - from: A_ret2libc
   to: D_StackGuard98
   label: motivated
+  primary: true
   description: |-
     Stack canaries were introduced to stop classic stack-smashing / ret2libc-style hijacking of return addresses.
 
 - from: A_ret2libc
   to: D_ASLR03
   label: motivated
+  primary: true
   description: |-
     ASLR’s original purpose is to stop attackers from reliably jumping to known library code, i.e., ret2libc.
 
 - from: A_ROP07
   to: D_ILR12
   label: motivated
+  primary: true
   description: |-
     Instruction Layout Randomization randomizes instruction positions specifically to make it difficult to chain gadgets for ROP.
 
@@ -418,6 +495,7 @@ edges:
 - from: A_JITROP13
   to: D_Readactor15
   label: motivated
+  primary: true
   description: |-
     Readactor advertises itself as code randomization resilient to memory disclosure; it uses execute-only memory and pointer hiding specifically to resist JIT-ROP-style disclosure attacks.
 
@@ -464,6 +542,7 @@ edges:
 - from: A_BROP14
   to: D_Readactor15
   label: motivated
+  primary: true
   description: |-
     Readactor’s leak-resilient randomization is also motivated by blind and partial-disclosure attacks like BROP; execute-only and pointer hiding make BROP’s probing harder.
 
@@ -619,6 +698,7 @@ edges:
 - from: A_AOCR17
   to: D_R2C23
   label: motivated
+  primary: true
   description: |-
     R2C (in your thesis) is designed explicitly to defeat AOCR-like address-oblivious and JIT-ROP style attacks by jointly randomizing code and data and using traps.
 
