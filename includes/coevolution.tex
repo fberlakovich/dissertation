@@ -1,76 +1,73 @@
 \fbetodo{Add timeline and give historical context}
-Before \glspl{CRA}, the most straightforward way for an attacker to execute arbitrary code was to inject code into the target process via a memory corruption.
-The introduction of the hardware feature \gls{DEP} made it practical, however, to prevent memory regions from being writable and executable at the same time.
-With the widespread adoption of \gls{DEP}, attackers switched to \glspl{CRA}.
 
-Unlike code injection, a \gls{CRA} reuses the code that is already present in the target process.
-Initially, \glspl{CRA} operated on the function level and \eg reused functions from the standard C library (a technique called \propername{return-to-libc}).
+The history of software security is characterized by a continuous cycle of new attack paradigms and corresponding defensive responses.
+This coevolutionary process has led to a highly sophisticated landscape of memory corruption exploits and mitigations.
+
+Code-injection attacks and \glspl{CRA} typically proceed in three phases:
+\begin{inlinenum}
+    \item a reconnaissance phase where the attacker collects information about the target, such as addresses,
+    \item a memory corruption to overwrite control-flow data and
+    \item the malicious code execution that transfers control to attacker-chosen code.
+\end{inlinenum}
+
+Defenses against such attacks can be categorized into three categories:
+\begin{inline}
+    \item memory-safety enforcement;
+    \item control-flow enforcement;
+    \item randomization.
+\end{inline}
+
+Each defense category targets a different step of the attack.
+Memory-safety enforcement aims to prevent the memory corruption required to divert the control flow.
+Control-flow enforcement tolerates the memory corruption but tries to lock the attacker into a previously determined control-flow graph.
+Randomization-based techniques, also called software diversity, aim to disrupt the attacker's reconnaissance phase, by invalidating a-priori knowledge the attacker has about the target.
+
+The following sections give a historical overview of the development of \glspl{CRA} and how defenses in each category evolved with them.
+
+\section{Code Injection (1997--2004)}
+\label{sec:epoch-injection}
+\begin{figure}[t]
+    \centering
+    \input{generated/r2c/coevolution-epoch-code-injection.tex}
+    \caption{Epoch timeline for code-injection attacks and defenses (1997--2004).}
+    \label{fig:coevolution-epoch-code-injection}
+\end{figure}
+In the earliest era, the adversary's primary goal was to inject new code (\eg shellcode) into the target process' memory space and subsequently redirect execution to the injected code.
+Despite the possibility of code injection in the early days, a form of \gls{CRA} called \propername{return-to-libc} was described already in 1997.
+\propername{Return-to-libc} operates on the function level and reuses functions from the standard C library.
 These functions are both powerful and likely present in most attacked programs.
 
-In 2007, Shacham introduced the first version of \gls{ROP} attacks~\cite{Shacham2007}.
-\gls{ROP} is a generalization of whole-function reuse attacks such as \propername{return-to-libc}.
+To counter these early attacks, several randomization-based techniques were proposed.
+\propername{StackGuard} protects return addresses against buffer overflows with \enquote{canaries}---random values checked before a function returns.
+Based on the observation that an attacker needs exact addresses both for injection and reuse, \gls{ASLR} was introduced to randomize the base addresses of the stack, heap and libraries~\cite{PaXTeam2003}.
+Full adoption of \gls{ASLR} took years, however, as it requires position-independent code.
+Another issue with \gls{ASLR} is that a 32-bit address space does not offer enough entropy, and even in a 64-bit address space, pointer leaks and side-channels make \gls{ASLR} vulnerable.
+Research into \gls{ISR} explored randomizing the processor's instruction set to prevent the execution of injected code~\cite{boyd2010}.
+
+At around 2004, the introduction of a new \gls{CPU} feature made it practical to prevent memory regions from being writable and executable at the same time.
+The memory-safety enforcement mechanism leveraging this \gls{CPU} feature is known as \wox or \gls{DEP}.
+With the widespread adoption of \gls{DEP}, attackers were forced to switch to more advanced forms of \glspl{CRA}.
+
+\section{Static Return-Oriented Programming (2005--2013)}
+\label{sec:epoch-static-reuse}
+\begin{figure}[t]
+    \centering
+    \input{generated/r2c/coevolution-epoch-static-rop.tex}
+    \caption{Epoch timeline for static return-oriented programming and defenses (2005--2013).}
+    \label{fig:coevolution-epoch-static-rop}
+\end{figure}
+With \gls{DEP} preventing code injection, attackers were forced to reuse code already present in the process memory.
+In 2007, \citeauthor{Shacham2007} introduced the first version of \gls{ROP} attacks~\cite{Shacham2007}, a generalization of whole-function reuse attacks such as \propername{return-to-libc}.
 \gls{ROP} attacks reuse small snippets of assembly that are already present in the target process and end in a free-branch instruction.
 These snippets are commonly referred to as \emph{gadgets} and by chaining them into a \emph{gadget chain}, an attacker can achieve arbitrary code execution.
-Initially, Shacham demonstrated \gls{ROP} for the x86 architecture and with gadgets ending in \code{ret} instructions.
-The \gls{ROP} was later generalized to other architectures~\cite{roemer2012,cloosters2022,jaloyan2020} and to gadgets with other free-branch instructions~\cite{checkoway2010,Bletsch2011a}.
+Initially, \citeauthor{Shacham2007} demonstrated \gls{ROP} for the x86 architecture and with gadgets ending in \code{ret} instructions.
+\gls{ROP} was later generalized to other architectures~\cite{roemer2012,cloosters2022,jaloyan2020} and to gadgets with other free-branch instructions~\cite{checkoway2010,Bletsch2011a}, as well as returnless variants that avoid the return stack entirely~\cite{checkoway2010}.
 
-\gls{ROP} attacks typically proceed in three phases:
-\begin{enumerate*}
-    \item a reconnaissance phase where the attacker collects gadget addresses,
-    \item a memory corruption to overwrite control-flow data, and
-    \item the gadget chain execution that transfers control to each gadget.
-\end{enumerate*}
-
-\gls{ROP} attacks, or slight variations thereof, have since posed a significant challenge for the security research community.
-The unit of execution as well as the necessary primitives can vary from attack to attack.
-For example, \gls{CHOP} abuses exception handlers to execute malicious code~\cite{duta2023}, whereas \gls{AOCR} returned to the principle of whole-function reuse~\cite{Rudd2017}.
-
-Several defenses against \gls{ROP} attacks have been proposed.
-Among the defenses, three broad categories have emerged:
-\begin{enumerate}[label=(\roman*), itemsep=0pt, topsep=3pt]
-    \item memory-safety enforcement;
-    \item control-flow enforcement (e.g., \acrfull{CFI});
-    \item software diversity.
-\end{enumerate}
-Each of these categories aims to prevent a different phase of a \gls{ROP} or more generally \gls{CRA} attack.
-The following sections describe these categories in more detail, along with example defenses belonging to the category.
-
-\section{Memory-Safety Enforcement}
-Memory-safety techniques try to solve the problem at the root of many attack classes, including \glspl{CRA}: memory corruption.
-Control-flow hijacking as well as data-only attacks typically rely on memory corruption to corrupt sensitive (control) data~\cite{Szekeres}.
-By preventing memory corruption itself, memory-safety techniques thus rob an attacker of a crucial primitive for a large number of attacks.
-
-Different memory-safety enforcement techniques restrict combinations of \enquote{who} (subject) is allowed to write \enquote{what} (spatial safety) and \enquote{when} (temporal safety).
-For example, data-flow integrity~\cite{castro2006} and WIT~\cite{Akritidis2008} treat \emph{instructions} as subject and limit which memory objects each write-instruction is allowed to modify.
-Both use static dataflow analysis to establish relations between instructions and allowed memory targets.
-Neither defense deals with temporal safety.
-
-Other approaches treat \emph{pointers} as access control subjects and associate metadata with memory objects~\cite{Nagarakatte2009,orthen2024}.
-The associated metadata can include the memory object bounds, type and liveness information.
-Upon accessing a memory object via a pointer, the enforcement techniques check the intended access against the valid object's metadata.
-To improve performance, later work tried to relax certain aspects of the enforcement by trading precision for performance~\cite{kwon2013,kroes2017,Kroes2018}.
-Other techniques sidestep the question of \enquote{what} entirely and instead focus on the temporal aspect~\cite{dang2017a,vanderkouwe2017,lee2015}.
-
-Techniques like \propername{StackArmor}~\cite{Chen2015c} and \gls{CPI}~\cite{Kuznetsov2014} aim to establish memory safety by separating \enquote{safe} from \enquote{unsafe} data.
-\gls{CPI}, for example, separates sensitive data like control-flow data or pointers from \eg potentially overflowing buffers.
-However, the security of this separation approach critically hinges on the protection of the isolated data against corruption and disclosure.
-An initial attempt at protecting such a sensitive area in a performance-friendly way was hiding it in the vast address space of 64-bit systems.
-This technique of hiding a safe area by randomizing its base address is known as \emph{information hiding}.
-For example, the \gls{CPI} paper suggested the use of information hiding to protect the isolated stack.
-
-Several attacks illustrate the limitations of information hiding~\cite{Goktas2016,Evans2015,Oikonomopoulos2016a}.
-The safe area is notoriously hard to protect because leaked pointers give away its location.
-Even without pointer leaks, information hiding is susceptible to leakage.
-By using memory allocation side-channels, attackers can disclose the safe area location.
-A technique called stack spraying, for example, successfully reveals the hidden stack of code-pointer integrity~\cite{Kuznetsov2014}.
-In light of these issues, the common consensus among researchers is to avoid information hiding~\cite{koning2017,Burow2018a}.
-
-Apart from imprecision in the case of techniques that rely on static analysis, the major drawback of memory-enforcement techniques is their often prohibitive performance overhead.
-For example, combining \propername{SoftBounds} and \propername{CETS} for spatial and temporal safety leads to an overhead of more than 100\%~\cite{Nagarakatte2009}.
-
-\section{Control-Flow Integrity}
-\fbetodo{add CFI figure}
-\acrfull{CFI} aims to restrict control-flow transfers at runtime to the ones intended by the programmer for a particular program point and for a particular program state.
+To prevent control-flow hijacking in general and \gls{ROP} in particular, researchers proposed to enforce the program's intended control-flow graph (\gls{CFG}).
+The first publication on \acrfull{CFI} appeared in \citeyear{Abadi2005}~\cite{Abadi2005}, actually predating the first \gls{ROP} publication~\cite{Shacham2007}.
+Although the paper was publicly available, the implementation itself remained proprietary to Microsoft Research, which hindered its immediate adoption and prompted further research into open-source alternatives.
+One such alternative was \propername{XFI} (2006), which used binary rewriting and verification to enforce \gls{CFI} on system address spaces~\cite{Erlingsson2006}.
+\gls{CFI} aims to restrict control-flow transfers at runtime to the ones intended by the programmer for a particular program point and for a particular program state.
 \begin{listing}
     \begin{minted}[escapeinside=||]{C}
         int dispatch(short param) {
@@ -90,105 +87,187 @@ Enforcing these ideal policies in practice, however, proves to be challenging.
 One approach to \gls{CFI} is to limit \code{call} and \code{ret} instructions to the semantics typically used by compilers~\cite{Cheng2014}.
 That is, \code{call} instructions are only used to jump to the beginning of a \emph{function} and \code{ret} instructions only jump to \emph{call-preceded} locations.
 While this approach is relatively easy to implement and does not depend on precise static analysis, its defensive power is limited~\cite{Davi2014}.
+Implementations like \propername{CFI for COTS Binaries} demonstrated that such policies could be applied to stripped binaries using static binary rewriting, albeit with the aforementioned precision limitations~\cite{zhang2013}.
 
 Another approach is to determine the program's \gls{CFG} via static analysis, to the extent possible.
 Several \gls{CFI} implementations use a statically determined \gls{CFG} to restrict indirect calls (forward-edge control-flow transfers).\fbetodo{Citations}
 Statically determining the \gls{CFG} has theoretical limits, however, and to avoid false positives, static \gls{CFI} solutions overapproximate possible targets~\cite{Grove2001a}.
-This overapproximation gives attackers room to maneuver, as demonstrated by a series of attacks on \gls{CFI}.\cite{Carlini2015,Evans2015a}
-Another challenge in \gls{CFG} construction is that it requires a holistic view of the entire program.
-Separate compilation and dynamic loading of modules, however, prevent such a global view.
-Modular control-flow integrity addresses this limitation by enabling the linkage of independently instrumented program modules~\cite{niu2014a}.
+To reduce the resulting attack surface, \propername{Control-Flow Locking} refines the \gls{CFI} policy by dynamically locking and unlocking allowed targets~\cite{Bletsch2011b}.
+Other approaches like \propername{G-Free} avoid the \gls{CFG} problem entirely by eliminating unaligned free branches during compilation, effectively removing the gadgets themselves~\cite{Onarlioglu2010}.
+Using hardware features, \propername{kBouncer} utilizes the \gls{LBR} to check for \gls{ROP}-like execution patterns at runtime without requiring binary instrumentation~\cite{Pappas2013b}.
+
+Parallel to \gls{CFI}, memory-safety techniques try to solve the problem at the root of many attack classes, including \glspl{CRA}: memory corruption.
+Different memory-safety enforcement techniques restrict combinations of \enquote{who} (subject) is allowed to write \enquote{what} (spatial safety) and \enquote{when} (temporal safety).
+For example, data-flow integrity~\cite{castro2006} and WIT~\cite{Akritidis2008} treat \emph{instructions} as subject and limit which memory objects each write-instruction is allowed to modify.
+Both use static dataflow analysis to establish relations between instructions and allowed memory targets.
+Other approaches treat \emph{pointers} as access control subjects and associate metadata with memory objects~\cite{Nagarakatte2009}.
+The associated metadata can include the memory object bounds, type and liveness information.
+Upon accessing a memory object via a pointer, the enforcement techniques check the intended access against the valid object's metadata.
+However, the major drawback of these precise memory-enforcement techniques is their often prohibitive performance overhead.
+For example, combining \propername{SoftBounds} and \propername{CETS} for spatial and temporal safety leads to an overhead of more than 100\%~\cite{Nagarakatte2009}.
+
+In the \gls{ROP} attacks from this era, collecting gadgets happens offline and before the actual attack, typically on a separate copy of the target binary.
+For example, a \gls{ROP} attack requires the exact memory addresses of the gadgets used in an attack.
+Offline gadget collection with an identical copy of the target is possible due to the software monoculture~\cite{Larsen2014}.
+That is, in a non-diversified binary, an attacker can assume that all gadget locations are identical to their own installation of the target software~\cite{Cohen1993,Franz2010,Pappas2012a,Hiser2012,Larsen2014,Homescu2013a,Koo2018}.
+In other words, an attacker knows \emph{a-priori} where to find gadgets in the target process.
+Randomization-based defenses attempt to invalidate this a-priori knowledge an attacker has.
+As a response to the new threat of \gls{ROP} attacks, researchers proposed finer-grained (compared to \gls{ASLR}) randomization techniques.
+In-place code randomization invalidates knowledge about \gls{ROP} \emph{gadgets} by replacing instruction sequences with semantically equivalent instructions (\eg swapping registers)~\cite{Pappas2012a}.
+Instruction-Layout randomization invalidates knowledge about gadget \emph{locations} by running the program in a custom virtual machine to randomize the location of every instruction~\cite{Hiser2012}.
+Binary Stirring performs randomization on a basic-block level by shuffling basic blocks at load time~\cite{Wartell2012}.
+To make randomization more practical for deployment, \propername{Compiler-Assisted Code Randomization} proposed embedding metadata to allow fine-grained diversity without heavy runtime overhead~\cite{Koo2018}.
+
+\begin{table}[ht]
+    \centering
+    \caption{Comparison of randomization granularities.}
+    \label{tab:randomization-granularity}
+    \begin{tabular}{@{}llp{4cm}p{4cm}@{}}
+        \toprule
+        \textbf{Technique} & \textbf{Granularity} & \textbf{Prevents} & \textbf{Limitation} \\
+        \midrule
+        \gls{ASLR} & Base Address & Static Exploit Reuse & Vulnerable to leaks; Low entropy (32-bit) \\
+        Function Perm. & Function & Function Reuse (\eg \propername{ret2libc}) & Vulnerable to \gls{ROP}; Partial overwrites \\
+        Basic Block & Basic Block & \gls{ROP} Gadget Chains & Performance overhead \\
+        Instruction & Instruction & All \gls{ROP} Gadgets & High overhead; Compatibility issues \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%A crucial factor for the security of code randomization is the granularity of randomization.
+%Thus, code-randomization techniques typically provide finer-grained randomization, such as function permutation~\cite{Kil2006,WilliamsKing2016,Braden2016,Chen2017a}, basic-block shuffling~\cite{Wartell2012,Mohan2015,Pomonis2017,Koo2018}, or instruction-level and register randomization~\cite{Kc2003,Pappas2012a,Braden2016,Crane2015,Crane2015b,Hiser2012,Kooa}.
+
+\section{Dynamic Attacks and Semantic Bypasses (2013--Present)}
+\label{sec:epoch-dynamic-semantic}
+\begin{figure}[t]
+    \centering
+    \input{generated/r2c/coevolution-epoch-dynamic-semantic.tex}
+    \caption{Epoch timeline for dynamic attacks, semantic bypasses, and corresponding defenses (2013--present).}
+    \label{fig:coevolution-epoch-dynamic-semantic}
+\end{figure}
+The third epoch was driven by the realization that \emph{static} defenses cannot withstand \emph{dynamic} attacks.
+Another group of attacks exploited the fact that several \gls{CFI} defenses did not sufficiently restrict an attacker's mobility or had a narrow semantic scope, \eg not considering \cpp semantics.
+
+In \citeyear{Snow2013} an attack called \gls{JITROP} showed that invalidating static a-priori knowledge alone is insufficient.
+\gls{JITROP} learns gadget locations by analyzing readable pointers into the code section.
+In a second step, \gls{JITROP} uses this target-specific information to build a \gls{ROP} attack just in time, tailored to the target process memory layout.
+A similar attack, called \gls{BROP}, exploits the behavior of certain server software to automatically respawn upon a crash.
+\gls{BROP} probes for valid gadget addresses by trying different addresses with brute force.
+
+An attack called \gls{PIROP} showed that randomization that is too coarse-grained leaves randomized programs susceptible to partial address corruptions.
+\gls{PIROP} exploits the fact that the relative distances between code units (\eg gadgets) below the randomization granularity remain constant.
+
+As a response to \gls{JITROP} and \gls{BROP}, researchers upgraded their defenses to provide \emph{leakage-resilience}.
+A key component in these defenses is to protect the randomized code with execute-only memory, thereby preventing an attacker from leaking a process' code section.
+Early systems like \propername{XnR}~\cite{Backes2013} and \propername{HideM}~\cite{Goktas2016b} pioneered this approach by emulating execute-only pages in software or using split-TLB architectures.
+\propername{Oxymoron} combined fine-grained randomization with execute-only memory while preserving code sharing between processes~\cite{Backes2014f}, and systems like \propername{\krx} extended these protections to the kernel~\cite{Pomonis2019}.
+Execute-only memory comes in different variants, based on hardware support~\cite{Crane2015,luo2025}\todo{more citations}, with destructive code reads~\cite{Tang2015,Werner2016} or with compartmentalization~\cite{Braden2016}.
+For example, \propername{Readactor} combines fine-grained randomization with execute-only memory and \emph{booby traps}~\cite{Crane2015}.
+Booby traps penalize an attacker for failed attack attempts by giving a clear signal of an ongoing attack~\cite{Crane2013,Crane2015b}.
+Such a signal allows the attacked program to take counter-measures, such as preventing restarts or even retaliative action.
+Taking a different approach, \propername{Isomeron} randomized the execution path rather than just the code layout by switching between diversified program variants at runtime~\cite{Davi2015}.
+
+An alternative response to \gls{JITROP} is \emph{continuous re-randomization}.
+\propername{Shuffler}, for example, re-randomizes code layout at short intervals (50\,ms), introducing a tight deadline for disclosure~\cite{WilliamsKing2016}.
+Similarly, \propername{TASR} rerandomizes at regular intervals, but instead of a translation table updates pointers inplace~\cite{bigelow2015}.
+
+Unable to disclose the code layout directly, a more sophisticated version of \gls{JITROP}---\emph{indirect} \gls{JITROP}---demonstrated the feasibility of inferring gadget locations from code pointers found on the stack~\cite{Davi2015,Crane2015}, which is commonly referred to as \emph{indirect information disclosure}.
+In response to indirect information disclosure, \citeauthor{Crane2015} proposed \gls{CPH}~\cite{Crane2015}.
+To prevent disclosure, \gls{CPH} redirects code pointers through a randomized trampoline table, located in execute-only memory.
+However, \glsfirst{AOCR} demonstrated that attacks are still possible, even in the presence of \gls{CPH} or similar protection schemes~\cite{Rudd2017}.
+Even without concrete information about gadgets, \gls{CPH} function pointers can be called using \emph{whole-function reuse}.
+Thus, \gls{AOCR} directly challenges the \enquote{leakage resilience} postulated by Readactor.
+Since the \gls{AOCR} attack is the main motivation for the defense presented in \cref{ch:r2c}, we will discuss its assumptions and principles in more detail in \cref{r2c:s:aocr}.
+
+Just as static randomization failed against dynamic inspection, early implementations of \gls{CFI} were challenged by the inherent imprecision of static analysis.
+Because determining a precise \gls{CFG} is often undecidable, most \gls{CFI} solutions rely on an overapproximation of valid targets to avoid false positives.
+This overapproximation gives attackers sufficient maneuverability to construct malicious execution paths that adhere to the statically allowed edges, as demonstrated by a series of attacks on \gls{CFI}~\cite{Carlini2015,Evans2015a}.
+Another related issue are semantic bypasses that target areas not covered by a \gls{CFI} solution.
+For example, early \gls{CFI} defenses failed to take into account the semantics of dynamic dispatch in languages like \cpp, enabling attacks such as \gls{COOP}~\cite{Schuster2015a}.
+\gls{COOP} uses virtual function calls to perform malicious computation, but from the perspective of a \cpp-oblivious \gls{CFI} \gls{COOP} stays within the legitimate \gls{CFG}.
+\begin{listing}[ht]
+\begin{minted}{C++}
+// The "Main Loop" Gadget (in existing code)
+void dispatch(std::vector<Object*> &objs) {
+    for (Object* obj : objs) {
+        // Attacker controls 'obj' -> vtable
+        obj->virtualFunc(); 
+    }
+}
+\end{minted}
+\caption{Example of a \gls{COOP} \enquote{Main Loop} gadget. An attacker can chain virtual calls by injecting a list of counterfeit objects.}
+\label{lst:coop-gadget}
+\end{listing}
+In response, researchers have proposed \gls{CFI} solutions specialized for object-oriented languages~\cite{Gawlik2014,Zhang2015,Prakash2015,wang2018a}.
+For example, \propername{CFIXX} enforces strict object-type integrity on virtual calls to prevent COOP-style attacks~\cite{Burow2018CFIXX}.
+Another semantic bypass called \gls{CHOP} focuses on stack unwinding and exception handlers~\cite{duta2023}.
 
 To mitigate the shortcomings of static analysis, researchers have proposed further improvements of \gls{CFI}.
 For example, \propername{OCFI} combines \gls{CFI} with code-layout randomization~\cite{Mohan2015}.
-Instead of restricting indirect calls to specific targets in the \gls{CFG}, \propername{OCFI} restricts indirect calls to specific code address ranges.
 \propername{OCFI} uses the (now deprecated) MPX CPU extension to efficiently check targets against address ranges.
 \propername{TypeArmor} addresses the problem of reconstructing the \gls{CFG} for binaries by considering function signatures instead~\cite{VanderVeen2015b}.
 By instrumenting the program with dynamic binary instrumentation, \propername{TypeArmor} enforces conservatively determined lower and upper bounds on the number of function arguments.
-Various attacks exploit either the inherent imprecision of these techniques or their failure to explicitly account for dynamic dispatch~\cite{Schuster2015a,wang2018a}.
-The dynamic dispatch of languages like \cpp requires \gls{CFI} solutions specialized for these languages~\cite{Gawlik2014,Zhang2015,Prakash2015}.
-
 \textpi{}CFI extends the traditional \enquote{code only} view of \gls{CFI} by taking concrete inputs into account~\cite{Niu2015}.
 \propername{PathArmor} extends \gls{CFI} with context sensitivity by validating not only single call targets, but sequences of calls with the Intel \propername{Last Branch Register}.
+Another challenge in \gls{CFG} construction is that it requires a holistic view of the entire program.
+Modular control-flow integrity addresses this limitation by enabling the linkage of independently instrumented program modules~\cite{niu2014a}.
+Unfortunately, even precise \gls{CFG} construction cannot prevent attacks that stay entirely on legitimate control-flow paths.
+\glsfirst{BOP} demonstrated that sufficiently large programs contain enough valid execution paths to construct malicious Turing-complete logic using only whole basic blocks~\cite{Ispoglou2018}.
 
 Function returns (backward-edge control-flow transfers) are also challenging to restrict with static analysis, which is why most \gls{CFI} defenses use a different technique for returns.
 The most robust form of backward-edge \gls{CFI} are shadow stacks~\cite{Burow2018a}.
 A shadow stack is a separate stack in memory that holds copies of the return addresses on the regular stack.
 Upon return, \gls{CFI} compares the return address on the regular stack with the return address on the shadow stack.
 The motivation behind this separation is to isolate sensitive control-flow information (return addresses) from other data such as buffers.
-The biggest challenge behind the separation approach lies in the protection of the separated data.
-Like in the case of memory safety enforcement through data separation, information hiding is a possible but vulnerable solution.
+Similar to the forward-edge case, shadow stacks must take into account semantic subtleties such as non-linear control-flow caused by C-style \code{setjmp} or \cpp exceptions.
+When a \cpp function, for example, throws an exception, \cpp's stack-unwinding machinery unwinds the stack to the stack frame of a catching function (if any).
+
+Researchers also attempted to generalize the separation of control-flow data and to generally separate \enquote{safe} from \enquote{unsafe} data.
+Techniques like \propername{StackArmor}~\cite{Chen2015c} and \gls{CPI}~\cite{Kuznetsov2014} aim to establish memory safety by separating \enquote{safe} from \enquote{unsafe} data.
+\gls{CPI}, for example, separates sensitive data like control-flow data and pointers from \eg potentially overflowing buffers.
+However, the security of this separation approach critically hinges on the protection of the isolated data against corruption and disclosure.
+An initial attempt at protecting such a sensitive area in a performance-friendly way was hiding it in the vast address space of 64-bit systems.
+This technique of hiding a safe area by randomizing its base address is known as \emph{information hiding}.
 \propername{ASLRGuard}, for example, relies on information hiding to protect its \propername{AG-Stack}, a shadow stack implementation that includes indirect information disclosure in its threat model~\cite{Lu2015}.
-A more robust way to protect the sensitive area is to rely on hardware features such as Intel CET or Intel MPK.
+Several attacks illustrate the limitations of information hiding~\cite{Goktas2016,Evans2015,Oikonomopoulos2016a}.
+Even without pointer leaks, information hiding is susceptible to leakage.
+By using memory allocation side-channels, attackers can disclose the safe area location.
+A technique called stack spraying, for example, successfully reveals the hidden stack of code-pointer integrity~\cite{Kuznetsov2014}.
+A more robust way to protect the sensitive area for shadow stacks is to rely on hardware features such as Intel CET or Intel MPK.
 CET implements shadow stacks in hardware, whereas MPK allows the protection of arbitrary memory regions with secret keys.
 
-Another challenge for shadow stacks is non-linear control-flow, such as C-style \code{setjmp} or \cpp exceptions.
-When a \cpp function, for example, throws an exception, \cpp's stack-unwinding machinery unwinds the stack to the stack frame of a catching function (if any).
-Thus, instead of continuing in the direct caller of the throwing function, control-flow continues several levels up in the caller/callee hierarchy.
-\citeauthor{duta2023} showed that attackers can use this non-linear control-transfer to bypass various forms of shadow stacks with an attack called CHOP~\cite{duta2023}.
-In general, enforcing a legitimate control-flow is particularly difficult for \gls{CFI} when control-flow transfers depend on more complex interactions than a typical indirect jump.
-For example, in the case of \cpp, control-flow transfers depend on an object's vtable pointer and the vtable involved.
-In the case of CHOP, control-flow transfers are governed by the abstract stack unwinding machine.
-
-\gls{CCFI} chose a different approach to enforce the \gls{CFI} policy.
+\gls{CCFI} chose a different approach to enforce the \gls{CFI} policy~\cite{Mashtizadeh2015}.
 Instead of instrumenting the program to check control-flow transfers against a statically computed \gls{CFG}, \gls{CCFI} cryptographically encrypts control-flow data with a \gls{HMAC}.
 \gls{CCFI} provides strong security guarantees, but \gls{CCFI} incurs a significant performance overhead (up to 2.5x) and requires 12 vector registers for the cryptographic key.
 The \gls{CCFI} approach was later implemented in hardware in the form of ARM's \gls{PAC}.
-However, the security provided by \gls{PAC} is limited by the available, unused bits in a memory address.
 While \gls{CCFI} chose to outline \gls{HMAC}s into a separate table to deal with values greater than 64 bits, \gls{PAC} reuses up to 31 bits of a pointer's address upper bits to store the \gls{HMAC}.
-This limitation means that \gls{PAC} becomes vulnerable to cryptographic attacks, in particular offline attacks.~\cite{li2022}
+This inlining also means, however, that the security provided by \gls{PAC} is limited by the available unused bits in a memory address.
+This limitation makes \gls{PAC} vulnerable to cryptographic attacks, in particular offline attacks~\cite{li2022}.
 
-In summary, \gls{CFI} defenses tolerate the initial memory corruption but try to contain the attacker within the program's intended control-flow.
 
-\section{Randomization-based defenses}
+To address the prohibitive overhead of full memory safety, researchers explored ways to trade precision for performance.
+Techniques like \propername{Low-Fat Pointers}~\cite{kwon2013} and \propername{Delta Pointers}~\cite{kroes2017,Kroes2018} optimized metadata checks to reduce the cost of spatial safety.
+Other approaches abandoned spatial enforcement entirely to focus solely on temporal safety, which can often be enforced more efficiently~\cite{dang2017a,vanderkouwe2017,lee2015}.
+Despite these optimizations, software-based memory safety typically still incurs overheads that hinder widespread adoption in production systems.
 
-Randomization-based defenses leverage the observation that code reuse attacks depend crucially on the software monoculture~\cite{Larsen2014}.
-For example, a \gls{ROP} attack requires the exact memory addresses of the gadgets used in an attack.
-In a non-diversified binary, an attacker can assume that all gadget locations are identical to their own installation of the target software~\cite{Cohen1993,Franz2010,Pappas2012a,Hiser2012,Larsen2014,Homescu2013a,Koo2018}.
-In other words, an attacker knows \emph{a-priori} where to find gadgets in the target process.
-Code-layout randomization techniques invalidate this a-priori adversarial knowledge.
-While randomization-based defenses tolerate memory corruptions and control-flow hijacks, they limit what an attacker can do with those capabilities.
-Without knowing a valuable jump target, the ability to hijack the control-flow is of little use to an attacker.
+\section{Transient Execution Attacks (2018--Present)}
+\label{sec:epoch-transient}
+In 2018, the disclosure of \propername{Spectre} and \propername{Meltdown} marked a paradigm shift in system security.
+These \emph{transient execution attacks} exploit microarchitectural side-channels to leak data across protection boundaries, fundamentally challenging the assumption that architectural isolation implies security.
+This discovery drew significant attention away from classical \glspl{CRA}, with researchers trying to understand and mitigate this new class of threats.
+While \glspl{TEA} represent a critical threat to data confidentiality, they are not \glspl{CRA} in the traditional sense; they do not typically aim to hijack control flow to execute arbitrary code, but rather to leak information.
+However, as demonstrated by \gls{JITROP} and \gls{AOCR}, information leakage is often the precursor to a successful control-flow hijack.
+Despite the shift in focus towards microarchitectural defenses, the architectural vulnerabilities allowing for \gls{ROP}, \gls{COP}, and data-oriented attacks remain a critical threat.
+As the \gls{AOCR} attack demonstrates, even with modern mitigations, the coupling of code and data remains a critical weakness that attackers can exploit without needing to trigger transient execution.
 
-A crucial factor for the security of code randomization is the granularity of randomization.
-For example, \gls{ASLR} provides only weak security guarantees, as the number of randomizable bits is limited, a single pointer leak undermines the entire randomization and the randomization itself is susceptible to side-channel attacks~\cite{Gras2017}.
-Thus, code-randomization techniques typically provide finer-grained randomization, such as function permutation~\cite{Kil2006,WilliamsKing2016,Braden2016,Chen2017a}, basic-block shuffling~\cite{Wartell2012,Mohan2015,Pomonis2017,Koo2018}, or instruction-level and register randomization~\cite{Kc2003,Pappas2012a,Braden2016,Crane2015,Crane2015b,Hiser2012,Kooa}.
-An attack called \gls{PIROP} showed that randomization that is too coarse-grained leaves randomized programs susceptible to partial address corruptions.
-\gls{PIROP} exploits the fact that the relative distances between code units (\eg gadgets) below the randomization granularity remain constant.
-For example, with a function permutation scheme, an attacker can partially corrupt a function address to address gadgets \emph{within} the function.
+\section{Summary}
 
-In \citeyear{Snow2013} an attack called \gls{JITROP} showed that invalidating the a-priori knowledge alone is insufficient.
-\gls{JITROP} learns gadget locations by analyzing readable pointers into the code section.
-In a second step, \gls{JITROP} uses this target-specific information to build a \gls{ROP} attack just in time, tailored to the target process memory layout.
-A similar attack, called \gls{BROP}, exploits the behavior of certain server software to automatically respawn upon a crash.
-\gls{BROP} probes for valid gadget addresses by trying different addresses with brute force.
-As the process respawning does not penalize an attacker for crashing the target process, the attacker has almost unlimited attempts to find the right addresses.
+This chapter has traced decades of coevolution between code-reuse attacks and defenses.
+Each epoch reveals a recurring pattern: a new defense closes one attack vector, only to be circumvented by attackers exploiting a different assumption.
+Code injection was stopped by \gls{DEP}; \gls{ROP} prompted both \gls{CFI} research and fine-grained randomization; and advanced attacks like \gls{COOP} and \gls{JITROP} exposed gaps in existing \gls{CFI} and randomization techniques.
 
-As a response to \gls{JITROP} and \gls{BROP}, researchers also upgraded their defenses to provide \emph{leakage-resilience} in combination with booby traps~\cite{Crane2015}.
-A key component in these defenses is to protect the randomized code with execute-only memory, thereby preventing an attacker from leaking a process' code section.
-Execute-only memory comes in different variants, based on hardware support~\cite{Crane2015,luo2025}\todo{more citations}, with destructive code reads~\cite{Tang2015,Werner2016} or with compartmentalization~\cite{Braden2016}.
-The other crucial component is booby traps~\cite{Crane2013}.
-Booby traps penalize an attacker for failed attack attempts by giving a clear signal of an ongoing attack.
-In response to such an attack, the target program could
-\begin{enumerate*}
-    \item stop respawning, thus preventing \gls{BROP},
-    \item enable additional mitigations~\cite{Bhat2019},
-    \item create a dump and shutdown,
-\end{enumerate*}
-to name just a few.
-
-An alternative response to \gls{JITROP} is \emph{continuous re-randomization}.
-\propername{Shuffler} , for example, re-randomizes code layout at short intervals (50\,ms), introducing a tight deadline for disclosure~\cite{WilliamsKing2016}.
-The idea behind re-randomization is that knowledge about the code layout becomes stale before an attacker can exploit it.
-
-Unable to disclose the code layout directly, a more sophisticated version of \gls{JITROP}---\emph{indirect} \gls{JITROP}---demonstrated the feasibility of inferring gadget locations from code pointers found on the stack~\cite{Davi2015,Crane2015}, which is commonly referred to as \emph{indirect information disclosure}.
-In response to indirect information disclosure, \citeauthor{Crane2015} proposed \gls{CPH}~\cite{Crane2015}.
-To prevent disclosure, \gls{CPH} redirects code pointers through a randomized trampoline table, located in execute-only memory.
-This redirection prevents the inference of gadget addresses from pointers in readable memory.
-
-\glsfirst{AOCR} demonstrated that attacks are still possible, even in the presence of \gls{CPH} or similar protection schemes:
-Even without concrete information about gadgets, \gls{CPH} function pointers can be called using \emph{whole-function reuse}.
-Due to the specific layout of \gls{CPH}'s trampoline table, an attacker can further use \gls{CPH} protected return addresses to reveal the location of such function pointers.
-Thus, the leakage of return addresses and code pointers remains a threat with or without \gls{CPH}.
-
-In summary, randomization-based defenses tolerate the initial memory corruption and control-flow hijacks but prevent an attacker from capitalizing on these capabilities.
+While the defense categories examined in this chapter target various stages of the attack lifecycle, a holistic solution remains elusive.
+Memory-safety enforcement thwarts corruption at the point of origin, yet the performance costs of achieving exhaustive spatial and temporal safety are often prohibitive.
+\gls{CFI} accommodates the presence of corruption but is constrained by the inherent imprecision of static analysis and subsequent gaps in semantic coverage.
+Leakage-resilient randomization, while complicating attacker reconnaissance, still fails to eliminate all inference-based exploitation vectors.
+The following chapter investigates one such vulnerability: the predictability of observable data within randomized environments.

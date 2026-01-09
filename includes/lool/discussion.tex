@@ -6,7 +6,7 @@
 The main advantage of having no coverage at all is the higher execution speed, as evidenced by the data in \cref{lool:tbl:coverage-overhead}.
 On the other hand, coverage feedback enables guidance through feedback-directed input mutation.
 \cref{lool:fig:cumulative-coverage} shows that \propername{random-params}, \ie without feedback but with random generation parameters, achieves the highest cumulative code coverage of all configurations.
-This advantage in code coverage is not, however, reflected in the achieved rare optimization scores (see \cref{lool:fig:rare-opts,fig:rare-pairs}).
+This advantage in code coverage is not, however, reflected in the achieved rare optimization scores (see \cref{lool:fig:rare-opts,lool:fig:rare-pairs}).
 \propername{Random-params} ranks below all of the feedback-driven configurations based on the genetic algorithm.
 One possible explanation is that even if \propername{random-params} discovers new code coverage, the lack of feedback means the configuration cannot build on these gains systematically.
 Unlike rare optimization scores, cumulative code coverage does not reflect how consistently a configuration triggers edges.
@@ -51,7 +51,7 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
 The cumulative coverage in \cref{lool:fig:cumulative-coverage} indicates that our custom genetic algorithm outperforms the \aflpp and \propername{static-params} configurations in terms of code coverage.
 The only exception is \propername{genetic-code}, which achieves less code coverage than the \propername{static-params} and the \propername{random-params} configuration.
 We attribute this difference to the significantly reduced test throughput of \propername{genetic-code}, caused by the code coverage instrumentation.
-\cref{lool:fig:rare-opts,fig:rare-pairs} show that \propername{genetic-code} nonetheless triggers a similar amount of rare optimizations and pairs.
+\cref{lool:fig:rare-opts,lool:fig:rare-pairs} show that \propername{genetic-code} nonetheless triggers a similar amount of rare optimizations and pairs.
 
 Except for the \propername{afl-contextblind-only-params} configuration, all \aflpp-based configurations achieve less coverage than even the \propername{static-params} configuration.
 One reason for \aflpp's poor performance lies in the translation of \aflpp generated input files to generated test cases.
@@ -87,7 +87,7 @@ Unstable seeds are not further calibrated, thus avoiding the enormous overhead c
 This difference is reflected in the low calibration times of 2\% and 4\% of the total runtime in \propername{afl-globalcounters} and \propername{afl-globalcounters-hyperonly}.
 \propername{afl-globalcounter} loses this advantage again, however, by spending 90\% of the total runtime in trimming.
 
-Configurations using the genetic algorithm consistently trigger more rare optimizations and optimization pairs than their \aflpp counterparts (see \cref{lool:fig:rare-opts,fig:rare-pairs}).
+Configurations using the genetic algorithm consistently trigger more rare optimizations and optimization pairs than their \aflpp counterparts (see \cref{lool:fig:rare-opts,lool:fig:rare-pairs}).
 For example, \propername{genetic-code} achieves a higher rareness score than \propername{afl-code-only-params} and \propername{afl-code}.
 The domain-specific mutation has the advantage of knowing the types of the mutated parameters and is thus able to mutate them in small incremental steps.
 
@@ -112,7 +112,7 @@ While our code coverage implementation is not fully optimized for speed, a consi
 \end{infobox}
 At the same time, \cref{lool:fig:cumulative-coverage} shows that configurations based on code coverage consistently achieve less overall code coverage than configurations based on the optimization log, regardless of the mutation strategy.
 For example, \propername{genetic-code} achieves less code coverage than all other configurations using the genetic algorithm and any form of optimization-log coverage.
-\cref{lool:fig:rare-opts,fig:rare-pairs} show that code coverage feedback triggers fewer rare optimizations and optimization pairs.
+\cref{lool:fig:rare-opts,lool:fig:rare-pairs} show that code coverage feedback triggers fewer rare optimizations and optimization pairs.
 We suspect that two factors contribute to the worse performance of code coverage.
 First, code coverage severely constrains the test throughput and fewer tests lead to less coverage overall.
 Second, code coverage does not differentiate between \enquote{interesting} code paths and \enquote{uninteresting} code paths.
@@ -134,7 +134,7 @@ This loss of context can lead the fuzzer down a route where it tries to, \eg, in
 
 \end{table}
 
-Cumulative code coverage (\cref{lool:fig:cumulative-coverage}) and rareness scores (\cref{lool:fig:rare-opts,fig:rare-pairs}) suggest that context-aware coverage is less beneficial than context-blind coverage.
+Cumulative code coverage (\cref{lool:fig:cumulative-coverage}) and rareness scores (\cref{lool:fig:rare-opts,lool:fig:rare-pairs}) suggest that context-aware coverage is less beneficial than context-blind coverage.
 Surprisingly, the less fine-grained context-blind coverage performs slightly better in all three metrics than the more granular context-aware coverage.
 We note, however, that the results of context-blind and context-aware coverage are within the variance range of one another.
 

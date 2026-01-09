@@ -34,14 +34,14 @@ Publications about attack techniques typically provide evidence by showing that 
 Successful exploitation of a \emph{particular} software package with a \emph{particular} implementation of a defense is no guarantee, however, that the attack's principle is generalizable.
 The \gls{AOCR} paper, for example, claims that \gls{AOCR} can bypass several types of pointer hiding and redirection schemes, not just \gls{CPH}.
 While this claim might be true in principle, two of the example exploits rely on the ability to reliably infer forward pointers from leaked return addresses.
-Such an inference is only possible (at least reliably), however, due to the specific layout of the \gls{CPH} table.
+Such an inference is only possible (at least reliably) due to the specific layout of the \gls{CPH} table.
 
 On the defense side, a sound security evaluation is equally challenging.
 Many \gls{CFI} techniques, for example, did not take into account that programs using \code{printf} essentially embed a hard-to-restrict interpreter with powerful capabilities.
 Similarly, the Readactor authors speculated about the possibility of a whole-function-reuse attack, but without \gls{AOCR}'s malicious thread blocking and pointer profiling, such an attack was infeasible.
-Another issue is the lack of metrics describing security capabilities of a defense.
+Another issue is the lack of metrics formalizing the security capabilities of a defense.
 While metrics such as \gls{AIR}~\cite{zhang2013} and newer variants such as BlockInsulation and CFGInsulation~\cite{frassetto2022} provide a foundation for \gls{CFI}, similar metrics for software diversity are missing.
 The \propername{Survivor} algorithm provided a comparable metric for early variants of software diversity focusing on reducing the risk of \gls{ROP} gadgets.
-In light of new challenges such as \gls{JITROP} and new diversification techniques that reach far beyond the gadget level, however, a new metric is needed.
+In light of new challenges such as \gls{JITROP} and new diversification techniques that reach far beyond the gadget level a new metric is needed.
 Although transformations like function permutation or stack layout randomization allow for localized probability-theoretic arguments, their effect on real attacks remains hard to predict.
 Thus, we hope that future researchers take up the challenging of formulating a theory of software diversity

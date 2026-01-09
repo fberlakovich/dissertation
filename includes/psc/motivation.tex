@@ -18,7 +18,7 @@ The situation is different, however, for indirect call sites, which represent mu
 To better understand this problem, consider the program in \cref{psc:lst:dynamic-dispatch-c}.
 
 \begin{listing}
-    \begin{minted}[mathescape]{C}
+    \begin{minted}[mathescape,escapeinside=||]{C}
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,7 +37,7 @@ void (*handlers[2])(char *) = {handler1, handler2};
 
 int main(int argc, char **argv) {
     // block C
-    handler1(argv[2]); $\label{psc:line:handler1-call}$
+    handler1(argv[2]); |\label{psc:line:handler1-call}|
     handler2(argv[2]);
     handlers[atoi(argv[1])](argv[2]);
 }

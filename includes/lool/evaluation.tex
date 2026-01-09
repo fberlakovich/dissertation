@@ -48,6 +48,8 @@ This separate measurement step guarantees that experiments without code coverage
 \fbetodo{Add table with configurations}
 We evaluated the following 8 different configurations:
 \aflpp configurations, by default, are fully parametric (see \cref{lool:sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{lool:ss:afl-parameter-mutation}).
+\paragraph{\aflpp only-params}\label{lool:sss:afl-only-params}
+The \propername{only-params} variants restrict the input bytes that \aflpp mutates to the generator parameters, removing the program bytes from the mutation space.
 For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
 Configurations with \propername{memory} accumulate counters over time, whereas \propername{generation} in the name means genetic algorithm measures fitness relative only to other individuals in the same generation.
 \begin{configurations}
@@ -251,6 +253,6 @@ We found that due to the very high counts of these features, they would dispropo
 
 Based on this definition we calculate a score for each run in a configuration that rates how many rare optimizations or optimization pairs the configuration triggered.
 The score for a run is simply the sum of all individual feature scores in that run.
-The boxplots in \cref{lool:fig:rare-opts,fig:rare-pairs} illustrate statistics based on the rareness scores of the runs in a configuration.
-The boxplot in \cref{lool:fig:rare-opts} is based on optimization rareness scores and the boxplot in \cref{fig:rare-pairs} is based on optimization-pair rareness scores.
+The boxplots in \cref{lool:fig:rare-opts,lool:fig:rare-pairs} illustrate statistics based on the rareness scores of the runs in a configuration.
+The boxplot in \cref{lool:fig:rare-opts} is based on optimization rareness scores and the boxplot in \cref{lool:fig:rare-pairs} is based on optimization-pair rareness scores.
 Note that the scores for optimizations and optimization pairs are not directly comparable.

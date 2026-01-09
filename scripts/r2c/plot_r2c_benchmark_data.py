@@ -11,6 +11,13 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator, FormatStrFormat
 from scipy.stats import gmean
 import matplot2tikz
 
+from r2c_common import (
+    BENCHMARK_NAMES,
+    BENCHMARK_NAMES_INT,
+    GEOMEAN_SETS,
+    natural_sort_key,
+)
+
 plt.style.use("petroff10")
 
 
@@ -463,24 +470,8 @@ def plot_r2c(
     baseline_path=None,
     baseline_machine=None,
 ):
-    benchmark_names = [
-        "perlbench",
-        "gcc",
-        "mcf",
-        "lbm",
-        "omnetpp",
-        "xalancbmk",
-        "x264",
-        "deepsjeng",
-        "imagick",
-        "leela",
-        "nab",
-        "xz",
-    ]
-    only_int = [
-        name for name in benchmark_names if name not in ["lbm", "imagick", "nab"]
-    ]
-    geomean_sets = {"Geomean int": only_int, "Geomean all": benchmark_names}
+    benchmark_names = BENCHMARK_NAMES
+    geomean_sets = GEOMEAN_SETS
 
     row_to_key = dict(zip(benchmark_names, df.index))
     actual_totals = (
@@ -624,6 +615,48 @@ def min_max(df, name_mapping):
     return result
 
 
+def build_table(df, name_mapping, sort_key=None, as_percentage=True):
+    """Build a table with configurations as columns and benchmarks as rows.
+
+    Args:
+        df: DataFrame with benchmarks as index and configurations as columns
+        name_mapping: dict mapping column keys to display names
+        sort_key: optional function to sort configuration columns (applied to keys)
+        as_percentage: if True, display as percentage overhead; otherwise as ratio
+
+    Returns:
+        DataFrame with benchmarks + geomean as rows, configurations as columns
+    """
+    # Get columns in order
+    cols = list(df.columns)
+    if sort_key:
+        cols = sorted(cols, key=sort_key)
+
+    # Build result dataframe
+    result_data = {}
+    for col in cols:
+        col_name = name_mapping.get(col, col)
+        if as_percentage:
+            result_data[col_name] = (df[col] - 1.0) * 100
+        else:
+            result_data[col_name] = df[col]
+
+    result = pd.DataFrame(result_data, index=df.index)
+
+    # Add geomean row
+    geomean_row = {}
+    for col in cols:
+        col_name = name_mapping.get(col, col)
+        if as_percentage:
+            geomean_row[col_name] = (gmean(df[col]) - 1.0) * 100
+        else:
+            geomean_row[col_name] = gmean(df[col])
+
+    result.loc["geomean"] = geomean_row
+
+    return result
+
+
 class KeyValParser(argparse.Action):
     def __call__(self, parser, namespace, parts, option_string=None):
         setattr(namespace, self.dest, dict())
@@ -639,7 +672,23 @@ if __name__ == "__main__":
     parser.add_argument("data", metavar="DATA", type=argparse.FileType("r"))
     parser.add_argument("--names", nargs="*", action=KeyValParser)
     parser.add_argument(
-        "--mode", choices=["plot", "minmax"], action="store", default="plot"
+        "--mode", choices=["plot", "minmax", "table"], action="store", default="plot"
+    )
+    parser.add_argument(
+        "--sort-key",
+        type=str,
+        help="Regex pattern to extract sort key from column names (e.g., '(\\d+)$' to sort by trailing number)",
+    )
+    parser.add_argument(
+        "--natural-sort",
+        action="store_true",
+        help="Use natural sorting for column names (e.g., btra2, btra10, btra20 instead of btra10, btra2, btra20)",
+    )
+    parser.add_argument(
+        "--table-format",
+        choices=["markdown", "latex"],
+        default=None,
+        help="Output format for table mode (default: markdown). Implies --mode table.",
     )
     parser.add_argument("--output", type=str, action="store", required=True)
     parser.add_argument("--stack", nargs="*", help="List of component keys to stack")
@@ -722,10 +771,21 @@ if __name__ == "__main__":
         type=str,
         help="Machine key inside baseline JSON (e.g., epyc)",
     )
+    parser.add_argument(
+        "--quiet", "-q",
+        action="store_true",
+        help="Suppress info messages (useful for table mode)",
+    )
 
     args = parser.parse_args()
+
+    # If --table-format is specified but mode is still default, switch to table mode
+    if args.table_format and args.mode == "plot":
+        args.mode = "table"
+
     data = json.load(args.data)
-    count_datapoints(data, "runtime:all")
+    if not args.quiet:
+        count_datapoints(data, "runtime:all")
     df = build_dataframe(data, "runtime:median")
 
     name_mapping = args.names
@@ -756,20 +816,7 @@ if __name__ == "__main__":
         error_map = None
         bootstrap_table = None
         if args.error_bars:
-            benchmark_names = [
-                "perlbench",
-                "gcc",
-                "mcf",
-                "lbm",
-                "omnetpp",
-                "xalancbmk",
-                "x264",
-                "deepsjeng",
-                "imagick",
-                "leela",
-                "nab",
-                "xz",
-            ]
+            benchmark_names = BENCHMARK_NAMES
             row_to_key = dict(zip(benchmark_names, df.index))
             error_map = {}
             for comp_key, comp_data in data.items():
@@ -792,25 +839,9 @@ if __name__ == "__main__":
             elif not args.actual_total:
                 print("Residual report requires --actual-total; skipping.")
             else:
-                benchmark_names = [
-                    "perlbench",
-                    "gcc",
-                    "mcf",
-                    "lbm",
-                    "omnetpp",
-                    "xalancbmk",
-                    "x264",
-                    "deepsjeng",
-                    "imagick",
-                    "leela",
-                    "nab",
-                    "xz",
-                ]
+                benchmark_names = BENCHMARK_NAMES
                 row_to_key = dict(zip(benchmark_names, df.index))
-                geomean_sets = {
-                    "Geomean int": [n for n in benchmark_names if n not in ["lbm", "imagick", "nab"]],
-                    "Geomean all": benchmark_names,
-                }
+                geomean_sets = GEOMEAN_SETS
                 actual_totals = build_actual_totals(args.actual_total, args.actual_machine, row_to_key, geomean_sets)
                 actual_cv = build_actual_cv(args.actual_total, args.actual_machine, row_to_key)
                 # Predicted from stacked col (already added)
@@ -899,25 +930,9 @@ if __name__ == "__main__":
         print(comp_summary.to_markdown(index=False, floatfmt=".4f"))
 
         if args.actual_total:
-            benchmark_names = [
-                "perlbench",
-                "gcc",
-                "mcf",
-                "lbm",
-                "omnetpp",
-                "xalancbmk",
-                "x264",
-                "deepsjeng",
-                "imagick",
-                "leela",
-                "nab",
-                "xz",
-            ]
+            benchmark_names = BENCHMARK_NAMES
             row_to_key = dict(zip(benchmark_names, df.index))
-            geomean_sets = {
-                "Geomean int": [n for n in benchmark_names if n not in ["lbm", "imagick", "nab"]],
-                "Geomean all": benchmark_names,
-            }
+            geomean_sets = GEOMEAN_SETS
             actual_totals = build_actual_totals(args.actual_total, args.actual_machine, row_to_key, geomean_sets)
             if actual_totals:
                 actual_df = pd.DataFrame({"actual_total_pct": actual_totals})
@@ -948,3 +963,42 @@ if __name__ == "__main__":
         result = min_max(df, name_mapping)
         styler = result.style.format(decimal=".", thousands=",", precision=2)
         print(styler.to_latex())
+
+    if args.mode == "table":
+        import re
+
+        sort_key = None
+        if args.natural_sort:
+            sort_key = natural_sort_key
+        elif args.sort_key:
+            pattern = re.compile(args.sort_key)
+
+            def sort_key(col):
+                match = pattern.search(col)
+                if match:
+                    try:
+                        return int(match.group())
+                    except ValueError:
+                        return match.group()
+                return col
+
+        result = build_table(df, name_mapping, sort_key=sort_key, as_percentage=True)
+        table_format = args.table_format or "markdown"
+        if table_format == "latex":
+            # Generate LaTeX manually to avoid jinja2 dependency
+            cols = result.columns.tolist()
+            col_spec = "l" + "r" * len(cols)
+            lines = [
+                "\\begin{tabular}{" + col_spec + "}",
+                "\\toprule",
+                " & " + " & ".join(str(c) for c in cols) + " \\\\",
+                "\\midrule",
+            ]
+            for idx, row in result.iterrows():
+                vals = [f"{v:.1f}" if isinstance(v, float) else str(v) for v in row]
+                lines.append(f"{idx} & " + " & ".join(vals) + " \\\\")
+            lines.append("\\bottomrule")
+            lines.append("\\end{tabular}")
+            print("\n".join(lines))
+        else:
+            print(result.to_markdown(floatfmt=".1f"))

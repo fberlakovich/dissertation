@@ -1,75 +1,16 @@
-layout:
-  lanes:
-    - id: attack
-      label: Attacks
-    - id: defense
-      label: Defenses
-  gridlines:
-    enabled: true
-    color: "#e0e0e0"
-    style: "dotted"
-    penwidth: "0.6"
-    only_labeled: true
-  edges:
-    visibility: minimal
-  graph:
-    nodesep: "0.35"
-    ranksep: "0.6"
-    pad: "0.35"
-  phase_bands:
-    cell_width: "1.1"
-    height: "0.18"
-    fontsize: "9"
-  drawio:
-    column_width: 160
-    margin_left: 80
-    margin_top: 40
-    year_row_height: 28
-    phase_height: 20
-    phase_gap: 10
-    node_width: 120
-    node_height: 32
-    stack_gap: 8
-    lane_gap: 40
-    include_edges: false
-  phases:
-    - id: phase_foundation
-      label: "Foundations"
-      start: 1997
-      end: 2004
-      fill: "#f7f7ff"
-      border: "#d9d9f0"
-    - id: phase_rop_cfi
-      label: "ROP & CFI"
-      start: 2005
-      end: 2012
-      fill: "#f7fbff"
-      border: "#d0e3f0"
-    - id: phase_disclosure
-      label: "Disclosure-Resilient"
-      start: 2013
-      end: 2017
-      fill: "#f8fff8"
-      border: "#d9f0d9"
-    - id: phase_post_leakage
-      label: "Post-Leakage"
-      start: 2018
-      end: 2023
-      fill: "#fff8f2"
-      border: "#f0ddc8"
-  year_labels:
-    step: 2
-    fontsize: "10"
-    anchor_minlen: "1"
-  lane_labels:
-    fontsize: "10"
-    align_to_first_year: true
-  nodes:
-    fontsize: "8"
-    width: "1.25"
-    height: "0.32"
-    margin: "0.16,0.05"
-    wrap: 18
+epochs:
+  - id: epoch_code_injection
+    label: "Code Injection"
+    start: 1997
+    end: 2004
+  - id: epoch_static_rop
+    label: "Static Return-Oriented Programming"
+    start: 2005
+    end: 2013
+  - id: epoch_dynamic_semantic
+    label: "Dynamic Attacks and Semantic Bypasses"
+    start: 2013
+    end: 2023
 
 nodes:
   # ===== 1997 =====
@@ -83,7 +24,7 @@ nodes:
 - id: D_StackGuard98
   year: 1998
   type: defense
-  tags: [enforcement]
+  tags: [enforcement,randomization]
   label: StackGuard
 
   # ===== 2003 =====
@@ -91,20 +32,36 @@ nodes:
   year: 2003
   type: defense
   tags: [randomization]
-  label: ASLR
+  label: Address-Space Layout\\ Randomization
+  cite: PaXTeam2003
 
 - id: D_ISR03
   year: 2003
   type: defense
   tags: [randomization]
-  label: Instruction Set Randomization
+  label: Instruction-Set\\ Randomization
+  cite: boyd2010
+
+- id: D_DEP04
+  year: 2004
+  type: defense
+  tags: [enforcement]
+  label: Data-Execution Prevention
 
   # ===== 2005 =====
 - id: D_CFI05
   year: 2005
   type: defense
-  tags: [cfi, enforcement]
+  tags: [cfi]
   label: Control-Flow Integrity
+  cite: Abadi2005
+
+- id: D_XFI06
+  year: 2006
+  type: defense
+  tags: [cfi, enforcement]
+  label: XFI
+  cite: Erlingsson2006
 
   # ===== 2007 =====
 - id: A_ROP07
@@ -112,6 +69,7 @@ nodes:
   type: attack
   tags: [code-reuse]
   label: ROP
+  cite: Shacham2007
 
   # ===== 2008 =====
 - id: D_WIT08
@@ -119,18 +77,35 @@ nodes:
   type: defense
   tags: [enforcement]
   label: Write Integrity Testing
+  cite: Akritidis2008
 
 - id: D_DFI08
   year: 2008
   type: defense
   tags: [enforcement]
   label: Data Flow Integrity
+  cite: castro2006
 
+  # ===== 2010 =====
 - id: D_CFLock10
   year: 2010
   type: defense
   tags: [cfi]
   label: Control Flow Locking
+  cite: Bletsch2011b
+
+- id: D_GFree10
+  year: 2010
+  type: defense
+  label: G-Free
+  cite: Onarlioglu2010
+
+- id: A_ReturnlessROP
+  year: 2010
+  type: attack
+  tags: [code-reuse]
+  label: Returnless ROP
+  cite: checkoway2010
 
   # ===== 2011 =====
 - id: A_JOP11
@@ -138,25 +113,36 @@ nodes:
   type: attack
   tags: [code-reuse]
   label: JOP
+  cite: Bletsch2011a
 
   # ===== 2012 =====
 - id: D_ILR12
   year: 2012
   type: defense
   tags: [randomization]
-  label: Instruction Layout Randomization
+  label: Instruction-Layout\\ Randomization
+  cite: Hiser2012
 
 - id: D_IPCR12
   year: 2012
   type: defense
   tags: [randomization]
-  label: In-Place Code Randomization
+  label: In-Place Code\\ Randomization
+  cite: Pappas2012a
 
 - id: D_Stir12
   year: 2012
   type: defense
   tags: [randomization]
   label: Binary Stirring
+  cite: Wartell2012
+
+- id: D_KBouncer12
+  year: 2012
+  type: defense
+  tags: [cfi, hardware]
+  label: KBouncer
+  cite: Pappas2013b
 
   # ===== 2013 =====
 - id: A_JITROP13
@@ -164,18 +150,35 @@ nodes:
   type: attack
   tags: [code-reuse]
   label: JIT ROP
+  cite: Snow2013
 
 - id: D_XnR13
   year: 2013
   type: defense
   tags: [XOM]
   label: XnR Execute No Read
+  cite: Backes2013
 
 - id: D_binCFI13
   year: 2013
   type: defense
   tags: [cfi]
   label: binCFI
+  cite: zhang2013
+
+- id: D_CFI_COTS13
+  year: 2013
+  type: defense
+  tags: [cfi]
+  label: CFI for COTS Binaries
+  cite: zhang2013
+
+- id: D_HideM13
+  year: 2013
+  type: defense
+  tags: [XOM]
+  label: HideM
+  cite: Goktas2016b
 
   # ===== 2014 =====
 - id: A_BROP14
@@ -183,6 +186,7 @@ nodes:
   type: attack
   tags: [code-reuse]
   label: Blind ROP
+  cite: Bittau2014a
 
 - id: A_SROP14
   year: 2014
@@ -195,24 +199,28 @@ nodes:
   type: defense
   tags: [randomization]
   label: Oxymoron
+  cite: Backes2014f
 
 - id: D_MCFI14
   year: 2014
   type: defense
   tags: [cfi]
   label: Modular CFI
+  cite: niu2014a
 
 - id: D_CPI14
   year: 2014
   type: defense
   tags: [enforcement]
   label: Code Pointer Integrity
+  cite: Kuznetsov2014
 
 - id: D_SafeDisp14
   year: 2014
   type: defense
   tags: [cfi, c++]
   label: SafeDispatch
+  cite: jang2014
 
   # ===== 2015 =====
 - id: A_COOP15
@@ -220,91 +228,113 @@ nodes:
   type: attack
   tags: [code-reuse, c++]
   label: COOP
+  cite: Schuster2015a
 
 - id: A_CFB15
   year: 2015
   type: attack
   tags: [code-reuse]
   label: Control Flow Bending
+  cite: Carlini2015a
 
 - id: A_Jujutsu15
   year: 2015
   type: attack
   tags: [code-reuse]
   label: Control Jujutsu
+  cite: Evans2015a
 
 - id: D_Isomeron15
   year: 2015
   type: defense
   tags: [randomization]
   label: Isomeron
+  cite: Davi2015
 
 - id: D_Readactor15
   year: 2015
   type: defense
   tags: [randomization]
   label: Readactor
+  cite: Crane2015
 
 - id: D_TRAP15
   year: 2015
   type: defense
   tags: [randomization]
   label: Its a TRaP
+  cite: Crane2015b
+
+- id: D_TASR15
+  year: 2015
+  type: defense
+  tags: [randomization]
+  label: TASR
+  cite: bigelow2015
 
 - id: D_pICFI15
   year: 2015
   type: defense
   tags: [cfi]
   label: Per Input CFI
+  cite: Niu2015
 
 - id: D_OCFI15
   year: 2015
   type: defense
   tags: [cfi, randomization]
-  label: Opaque CFI 2015
+  label: Opaque CFI
+  cite: Mohan2015
 
 - id: D_vfGuard15
   year: 2015
   type: defense
   tags: [cfi, c++]
   label: vfGuard
+  cite: Prakash2015
 
 - id: D_CCFI15
   year: 2015
   type: defense
   tags: [cfi]
   label: CCFI
+  cite: Mashtizadeh2015
 
 - id: D_PathArmor15
   year: 2015
   type: defense
   tags: [cfi]
   label: PathArmor
+  cite: Goktas2016b
 
 - id: D_StackArmor15
   year: 2015
   type: defense
   tags: [randomization]
   label: StackArmor
+  cite: Chen2015c
 
 - id: D_ASLRGuard15
   year: 2015
   type: defense
   tags: [randomization, enforcement]
   label: ASLR Guard
+  cite: Lu2015
 
   # ===== 2016 =====
 - id: A_UIH16
   year: 2016
   type: attack
   tags: [information-hiding]
-  label: Undermining Information Hiding
+  label: Undermining\\ Information Hiding
+  cite: Goktas2016
 
 - id: A_DOP16
   year: 2016
   type: attack
   tags: [data-only]
-  label: Data Oriented Programming
+  label: Data-Oriented\\ Programming
+  cite: Hu2016
 
 - id: A_PIROP16
   year: 2016
@@ -317,6 +347,7 @@ nodes:
   type: defense
   tags: [XOM]
   label: No Execute After Read
+  cite: Werner2016
 
 - id: D_Juggle16
   year: 2016
@@ -329,57 +360,85 @@ nodes:
   type: defense
   tags: [randomization]
   label: Shuffler
+  cite: WilliamsKing2016
 
 - id: D_LR16
   year: 2016
   type: defense
   tags: [randomization]
-  label: Leakage Resilient Randomization
+  label: Leakage Resilient\\ Randomization
+  cite: Braden2016
 
 - id: D_TypeArmor16
   year: 2016
   type: defense
   tags: [cfi]
   label: TypeArmor
+  cite: VanderVeen2015b
+
+- id: D_MPK16
+  year: 2016
+  type: defense
+  tags: [enforcement, hardware]
+  label: Intel MPK
+  cite: Wahbe1993
+
+- id: D_PAC16
+  year: 2016
+  type: defense
+  tags: [cfi, hardware]
+  label: ARM PAC
+
+- id: D_CET16
+  year: 2016
+  type: defense
+  tags: [cfi, hardware]
+  label: Intel CET
+  cite: IntelCET
 
   # ===== 2017 =====
 - id: A_AOCR17
   year: 2017
   type: attack
   tags: [code-reuse]
-  label: Address Oblivious Code Reuse
+  label: Address Oblivious\\ Code Reuse
+  cite: Rudd2017
 
 - id: D_kRX17
   year: 2017
   type: defense
   tags: [randomization]
   label: kRX
-
+  cite: Pomonis2019
 
 - id: D_CodeArmor17
   year: 2017
   type: defense
   tags: [randomization]
   label: CodeArmor
+  cite: Chen2017a
 
   # ===== 2018 =====
 - id: A_BOP18
   year: 2018
   type: attack
   tags: [code-reuse, data-only]
-  label: Block Oriented Programming
+  label: Block-Oriented\\ Programming
+  cite: Ispoglou2018
 
 - id: D_CFIXX18
   year: 2018
   type: defense
   tags: [cfi]
   label: CFIXX
+  cite: Burow2018CFIXX
 
 - id: D_CACR18
   year: 2018
   type: defense
   tags: [randomization]
-  label: Compiler Assisted Randomization
+  label: Compiler Assisted\\ Code Randomization
+  cite: Koo2018
 
   # ===== 2023 =====
 - id: A_CHOP23
@@ -387,6 +446,7 @@ nodes:
   type: attack
   tags: [code-reuse]
   label: CHOP
+  cite: duta2023
 
 - id: D_R2C23
   year: 2023
@@ -394,340 +454,3 @@ nodes:
   tags: [randomization]
   label: R2C
   highlight: true
-
-- id: D_Shadow
-  year: 2023
-  type: defense
-  tags: [cfi, enforcement]
-  label: Shadow Stacks Software and CET PAC
-
-
-edges:
-- from: A_ret2libc
-  to: D_StackGuard98
-  label: motivated
-  primary: true
-  description: |-
-    Stack canaries were introduced to stop classic stack-smashing / ret2libc-style hijacking of return addresses.
-
-- from: A_ret2libc
-  to: D_ASLR03
-  label: motivated
-  primary: true
-  description: |-
-    ASLR’s original purpose is to stop attackers from reliably jumping to known library code, i.e., ret2libc.
-
-- from: A_ROP07
-  to: D_ILR12
-  label: motivated
-  primary: true
-  description: |-
-    Instruction Layout Randomization randomizes instruction positions specifically to make it difficult to chain gadgets for ROP.
-
-- from: A_ROP07
-  to: D_IPCR12
-  label: motivated
-  description: |-
-    In-place Code Randomization is a fine-grained code randomization scheme proposed to disrupt gadget addresses and thus ROP chains.
-
-- from: A_ROP07
-  to: D_Stir12
-  label: motivated
-  description: |-
-    Binary Stirring’s goal is to randomize basic blocks in binaries at load time, again to break ROP gadget predictability.
-
-- from: A_ROP07
-  to: D_WIT08
-  label: motivated
-  description: |-
-    Write-Integrity Testing enforces that writes only go to designated locations, preventing corruption of code pointers and thus ROP exploitation.
-
-- from: A_ROP07
-  to: D_DFI08
-  label: motivated
-  description: |-
-    Data-Flow Integrity constrains writes and data flow so that control data cannot be arbitrarily corrupted, blocking ROP-style attacks.
-
-- from: D_MCFI14
-  to: D_CFI05
-  label: extends
-  description: |-
-    Modular CFI explicitly extends CFI to better control indirect branches (including jump-oriented programming) on COTS binaries, so we connect JOP (2010) to MCFI.
-
-- from: A_JITROP13
-  to: D_ILR12
-  label: bypasses
-  description: |-
-    JIT-ROP is explicitly proposed to defeat fine-grained ASLR/ILR by using memory disclosure to re-map code at run time.
-
-- from: A_JITROP13
-  to: D_Stir12
-  label: bypasses
-  description:
-
-- from: A_JITROP13
-  to: D_IPCR12
-  label: bypasses
-  description:
-
-- from: A_JITROP13
-  to: D_ASLR03
-  label: bypasses
-  description:
-
-- from: A_JITROP13
-  to: D_XnR13
-  label: motivated
-  description:
-
-- from: A_JITROP13
-  to: D_Oxymoron14
-  label: motivated
-  description: |-
-    Oxymoron combines execute-only memory with diversification; the execute-only part directly counters JIT-ROP’s need to read code bytes.
-
-- from: A_JITROP13
-  to: D_Isomeron15
-  label: motivated
-  description: |-
-    Isomeron executes diversified “isomers” and relies on execute-only semantics; again JIT-ROP’s disclosure-driven model is the motivating threat.
-
-- from: A_JITROP13
-  to: D_Readactor15
-  label: motivated
-  primary: true
-  description: |-
-    Readactor advertises itself as code randomization resilient to memory disclosure; it uses execute-only memory and pointer hiding specifically to resist JIT-ROP-style disclosure attacks.
-
-- from: A_JITROP13
-  to: D_NEAR16
-  label: motivated
-  description: |-
-    NEAR (“No Execute After Read”) enforces that pages are not both readable and executable, which is meant to block disclosure-then-reuse strategies like JIT-ROP.
-
-- from: A_JITROP13
-  to: D_Juggle16
-  label: motivated
-  description: |-
-    “Juggling the Gadgets” hardens randomization against disclosure-based gadget discovery; the authors explicitly discuss JIT-ROP as an adversary.
-
-- from: A_JITROP13
-  to: D_Shuffler16
-  label: motivated
-  description: |-
-    Shuffler’s continuous re-randomization is explicitly designed to make JIT-ROP and other code-reuse strategies fail by invalidating layout knowledge within milliseconds.
-
-- from: A_JITROP13
-  to: D_kRX17
-  label: motivated
-  description: |-
-    Kernel execute-only schemes like kRX aim to remove readable kernel code pages, directly countering disclosure-driven ROP.
-
-- from: A_JITROP13
-  to: D_CodeArmor17
-  label: motivated
-  description: |-
-    CodeArmor virtualizes code space and hides code pointers to defend against disclosure-based code reuse, again motivated by JIT-ROP-style attacks.
-
-- from: A_BROP14
-  to: D_TRAP15
-  label: motivated
-  description:
-
-- from: D_TRAP15
-  to: D_Readactor15
-  label: extends
-  description:
-
-- from: A_BROP14
-  to: D_Readactor15
-  label: motivated
-  primary: true
-  description: |-
-    Readactor’s leak-resilient randomization is also motivated by blind and partial-disclosure attacks like BROP; execute-only and pointer hiding make BROP’s probing harder.
-
-- from: A_SROP14
-  to: D_XnR13
-  label: motivated
-  description: |-
-    SROP is another disclosure-driven code-reuse technique; execute-only code (XnR) prevents reading signal frames or code pages that SROP relies on.
-
-- from: A_SROP14
-  to: D_StackArmor15
-  label: motivated
-  description:
-
-- from: D_CFLock10
-  to: D_CFI05
-  label: extends
-  description: |-
-    Control-Flow Locking refines Abadi-style CFI with locking schemes to reduce overhead and improve compatibility while enforcing similar policies.
-
-- from: D_binCFI13
-  to: D_CFI05
-  label: extends
-  description: |-
-    binCFI adapts CFI enforcement to COTS binaries via binary rewriting; conceptually a COTS instantiation of Abadi’s CFI.
-
-- from: D_MCFI14
-  to: D_CFI05
-  label: extends
-  description: |-
-    Modular CFI builds directly on CFI, adding modularity and better handling of complex control-flow graphs for real systems.
-
-- from: D_SafeDisp14
-  to: D_CFI05
-  label: extends
-  description: |-
-    SafeDispatch narrows forward-edge targets for C++ virtual calls; it uses the same “only allowed edges” idea from CFI but specialized to OO dispatch.
-
-- from: D_MCFI14
-  to: D_pICFI15
-  label: extends
-  description: |-
-    Per-input CFI uses an MCFI-style baseline and then adapts policies per input to reduce overhead while maintaining security; this is a specialization and refinement of MCFI.
-
-- from: D_MCFI14
-  to: D_OCFI15
-  label: extends
-  description: |-
-    OCFI (opaque CFI) leverages ideas from MCFI but focuses on hiding targets and opaque security state to resist information leaks.
-
-- from: D_MCFI14
-  to: D_PathArmor15
-  label: extends
-  description: |-
-    PathArmor extends CFI with path and context sensitivity to stop attacks like CFB and Jujutsu that exploit permissive paths under coarse CFI.
-
-- from: A_COOP15
-  to: D_CFI05
-  label: bypasses
-  description: |-
-    COOP systematically shows how modern implementations of CFI and C++-oriented defenses can be bypassed using only legal virtual calls, undermining earlier CFI designs.
-
-- from: A_COOP15
-  to: D_SafeDisp14
-  label: motivated
-  description: |-
-    SafeDispatch and similar virtual-call–hardening schemes are designed to prevent precisely the kind of OO gadget chains that COOP demonstrates.
-
-- from: A_COOP15
-  to: D_vfGuard15
-  label: motivated
-  description: |-
-    vfGuard and related vtable-protection mechanisms are evaluated against COOP; they are strengthened to close the gaps COOP exploits.
-
-- from: A_COOP15
-  to: D_TypeArmor16
-  label: motivated
-  description: |-
-    TypeArmor is motivated by COOP and similar OO-centric attacks, enforcing tighter type constraints on indirect calls to defeat them.
-
-- from: A_COOP15
-  to: D_CCFI15
-  label: motivated
-  description: |-
-    CCFI uses cryptographic protection of control data (including vtables) to prevent COOP-style corruption of C++ object dispatch.
-
-- from: A_COOP15
-  to: D_CFIXX18
-  label: motivated
-  description: |-
-    CFIXX (object-type–aware CFI) is specifically designed to stop OO-based control-flow hijacks such as COOP by enforcing class-hierarchy-compatible targets.
-
-- from: A_CFB15
-  to: D_CFI05
-  label: bypasses
-  description: |-
-    Control-Flow Bending shows how to “bend” execution while still respecting a coarse CFI policy, directly targeting Abadi-style schemes.
-
-- from: A_Jujutsu15
-  to: D_CFI05
-  label: bypasses
-  description: |-
-    Control Jujutsu demonstrates that even with CFI enforced, data-only manipulations can steer execution to malicious states.
-
-- from: A_CFB15
-  to: D_PathArmor15
-  label: motivated
-  description: |-
-    PathArmor’s path-sensitive enforcement aims to stop the kinds of policy-respecting but malicious paths used in CFB.
-
-- from: A_Jujutsu15
-  to: D_PathArmor15
-  label: motivated
-  description: |-
-    PathArmor’s stronger context enforcement is a response to attacks showing that coarse CFI is insufficient, such as Control Jujutsu.
-
-- from: A_CHOP23
-  to: D_Shadow
-  label: bypasses
-  description: |-
-    CHOP leverages exception handler and catch-frame machinery to build code-reuse attacks that can bypass standard shadow-stack-based backward-edge protection.
-
-- from: D_WIT08
-  to: D_CPI14
-  label: inspired
-  description: |-
-    CPI builds on the idea of protecting “sensitive” pointers (similar in spirit to WIT’s integrity checks) and provides stronger guarantees for code pointers.
-
-- from: D_DFI08
-  to: D_CPI14
-  label: inspired
-  description: |-
-    CPI is a more targeted, practical instantiation of data-flow–based integrity specifically for control data, inspired by DFI.
-
-- from: D_CPI14
-  to: D_StackArmor15
-  label: inspired
-  description: |-
-    StackArmor inherits CPI’s idea of protecting control data, applying it to stack frames and return addresses more aggressively.
-
-- from: A_UIH16
-  to: D_CPI14
-  label: bypasses
-  description: |-
-    The “Undermining Information Hiding” paper shows that information-hiding-based CFI/CPI-style schemes can be bypassed via side channels and spills, explicitly analyzing CPI-like designs.
-
-- from: A_AOCR17
-  to: D_Readactor15
-  label: bypasses
-  description: |-
-    Address-Oblivious Code Reuse shows that some randomization schemes can be bypassed even when addresses are hidden; Readactor’s execute-only and pointer hiding aim to close those gaps.
-
-- from: A_AOCR17
-  to: D_R2C23
-  label: motivated
-  primary: true
-  description: |-
-    R2C (in your thesis) is designed explicitly to defeat AOCR-like address-oblivious and JIT-ROP style attacks by jointly randomizing code and data and using traps.
-
-- from: A_PIROP16
-  to: D_ASLR03
-  label: bypasses
-  description: |-
-    PIROP (“position-independent ROP”) is introduced as a way to perform code reuse without knowing concrete addresses, thereby bypassing ASLR and similar randomizations.
-
-- from: A_PIROP16
-  to: D_ILR12
-  label: bypasses
-  description: |-
-    Fine-grained randomization like ILR is also bypassed by PIROP’s use of relative offsets and position-independent gadgets.
-
-- from: A_PIROP16
-  to: D_IPCR12
-  label: bypasses
-  description: |-
-    IPCR is another fine-grained randomization scheme that PIROP’s ideas are meant to circumvent.
-
-- from: D_R2C23
-  to: A_PIROP16
-  label: motivated
-  description: |-
-    R2C explicitly considers PIROP-style attacks when designing its combined code-and-data randomization and trap-based enforcement.
-
-- from: A_BOP18
-  to: A_DOP16
-  label: extends
-  description: |-
-    Block-Oriented Programming can be seen as extending Data-Oriented Programming: BOP generalizes DOP into code reuse at basic-block granularity while preserving data-only constraints.

@@ -38,7 +38,7 @@ A representation as control-flow allows \aflpp's coverage instrumentation to ins
 We call this principle \emph{Program State Convolution}, or \glsshortkey{PSC} for short, because it combines control flow with parts of the program's hidden state.
 
 \begin{listing}
-    \begin{minted}{cpp}
+    \begin{minted}[escapeinside=||]{cpp}
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 
   // filter parsedShapes somehow
 
-  for (auto shape : parsedShapes) shape->draw(0); $\label{psc:line:broken-draw-call}
+  for (auto shape : parsedShapes) shape->draw(0); |\label{psc:line:broken-draw-call}|
 }
     \end{minted}
     \label{psc:lst:vcall-dependence}
@@ -123,15 +123,15 @@ From the perspective of edge coverage, each control-flow point partitions the va
 For example, consider the C condition in \cref{psc:lst:c-value-range}.
 \begin{listing}
     \begin{minted}{C}
-        void target(int16_t param) {
-          if (param < 0) {
-            deal_with_negative(param);
-          } else {
-            deal_with_positive(param);
-          }
-        }
+void target(int16_t param) {
+  if (param < 0) {
+    deal_with_negative(param);
+  } else {
+    deal_with_positive(param);
+  }
+}
     \end{minted}
-    \label{psc:lst:c-value-range}
+    \label{psc:lst:c-value-range-transformed}
 \end{listing}
 The function \code{target} executes different logic depending on whether \code{param} is positive or negative.
 An \code{int16\_t}, however, has a value in the range $[-32768, 32767]$, meaning that from the perspective of edge coverage, all values in the ranges $[-32768, -1]$ and $[0, 32767]$ are treated uniformly.
@@ -141,19 +141,19 @@ This blind spot can lead to cases where a fuzzer struggles to find certain inter
 Similar to the case of indirect call unfolding, we observe that a compiler already contains elaborate analyses to reason about such value ranges.
 For example, compilers use such analyses to eliminate redundant conditions, as seen in line~\ref{psc:line:redundant-condition} of \cref{psc:lst:redundant-condition}.
 \begin{listing}
-    \begin{minted}[mathescape]{C}
-        void target(int16_t param) {
-          if (param < 0) {
+    \begin{minted}[mathescape,escapeinside=||]{C}
+void target(int16_t param) {
+  if (param < 0) {
 
-            // redundant condition
-            if (param == 0) { $\label{psc:line:redundant-condition}$
-              // deal with zero param
-            }
-            deal_with_negative(param);
-          } else {
-            deal_with_positive(param);
-          }
-        }
+    // redundant condition
+    if (param == 0) { |\label{psc:line:redundant-condition}|
+      // deal with zero param
+    }
+    deal_with_negative(param);
+  } else {
+    deal_with_positive(param);
+  }
+}
     \end{minted}
     \label{psc:lst:redundant-condition}
 \end{listing}
@@ -166,21 +166,21 @@ From the perspective of edge coverage, the transformation effectively divides th
 The semantics of the program remain unchanged because the bodies in the artificially introduced control-flow split are identical.
 \begin{listing}
     \begin{minted}{C}
-        void target(int16_t param) {
-          if (param < 0) {
-            if (param > -16384) {
-                deal_with_negative(param);
-            } else {
-                deal_with_negative(param);
-            }
-          } else {
-            if (param < 16384) {
-                deal_with_positive(param);
-            } else {
-                deal_with_positive(param);
-            }
-          }
-        }
+void target(int16_t param) {
+  if (param < 0) {
+    if (param > -16384) {
+        deal_with_negative(param);
+    } else {
+        deal_with_negative(param);
+    }
+  } else {
+    if (param < 16384) {
+        deal_with_positive(param);
+    } else {
+        deal_with_positive(param);
+    }
+  }
+}
     \end{minted}
     \label{psc:lst:c-value-range}
 \end{listing}
@@ -206,17 +206,17 @@ For example, the following three are simple heuristics for splitting the value r
 \begin{listing}
     \begin{minted}{C}
 void process_data(uint8_t x) {
-    if (x < 250) {
-        // other code
-        // This operation is dominated by the 'if'.
-        // If x > 235, (x + 20) overflows 8-bit int (255).
-        uint8_t result = x + 20;
+if (x < 250) {
+    // other code
+    // This operation is dominated by the 'if'.
+    // If x > 235, (x + 20) overflows 8-bit int (255).
+    uint8_t result = x + 20;
 
-        if (result < 5) {
-            // Bug triggered only by overflow
-            crash_program();
-        }
+    if (result < 5) {
+        // Bug triggered only by overflow
+        crash_program();
     }
+}
     \end{minted}
     \label{psc:lst:lookahead-splitting-example}
 \end{listing}

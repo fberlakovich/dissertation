@@ -32,7 +32,7 @@ In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite 
 For example, consider the Java Program in \cref{psc:lst:polymorphic-call}.
 \begin{listing}
     \centering
-    \begin{minted}[mathescape]{Java}
+    \begin{minted}[mathescape,escapeinside=||]{Java}
 abstract class Animal { public void makeSound(); }
 class Cat extends Animal  { public void makeSound() {$\dots$} }
 class Dog extends Animal  { public void makeSound() {$\dots$} }
@@ -41,7 +41,7 @@ class Elephant extends Animal  { public void makeSound() {$\dots$} }
 Animal[] animals = {new Dog(), new Cat()};
 for (int i=0; i<1000; i++) {
     Animal animal = animals[i % animals.length];
-    animal.makeSound(); $\label{psc:line:polymorphic-call}$
+    animal.makeSound(); |\label{psc:line:polymorphic-call}|
 }
     \end{minted}
     \label{psc:lst:polymorphic-call}

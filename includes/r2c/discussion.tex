@@ -38,11 +38,29 @@
 \end{table}
 
 
+\begin{table}[t]
+    \centering
+    \caption{\Gls{BTRA} overhead by step count. Cycles column shows overhead in percent.}
+    \label{tab:btra-overhead}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{l *{6}{rr}}
+        \toprule
+        & \multicolumn{2}{c}{2 BTRAs} & \multicolumn{2}{c}{6 BTRAs} & \multicolumn{2}{c}{10 BTRAs} & \multicolumn{2}{c}{14 BTRAs} & \multicolumn{2}{c}{18 BTRAs} & \multicolumn{2}{c}{22 BTRAs} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+        Benchmark & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC \\
+        \midrule
+        \fileInput{generated/r2c/btra-step-cycles}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
 For CPU's without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
-We ran our benchmarks also on a machine with AVX512 and found that the performance is roughly identical with the same number of vector moves.
-On such machines, we could either half the BTRA performance impact, or use twice as many BTRAs.
+The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
+Similarly, prolog trap insertion also contributes to the increased instruction cache pressure.
+
 % We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
 % We could not evaluate this effect due to the lack of compatible hardware.
 
@@ -52,13 +70,38 @@ To test this correlation with call frequency, we instrumented the SPEC CPU bench
 Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
 \Cref{tab:call-frequencies} shows the median number of calls performed by the SPEC CPU 2017 benchmarks.
 For each benchmark we took the median call frequencies across all inputs.
-The data suggests that there is only a weak correlation with the overhead:
+The data suggests that there is only a weak direct correlation between calls and the overhead:
 \propername{Perlbench}, for example, has less than half the number of calls as \propername{omnetpp}, but shows a similar overhead.
+The mere call count, therefore, does not sufficiently explain the performance profile.
 
-The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
-Similarly, prolog trap insertion also contributes to the increased instruction cache pressure.
+A possible explanation for the super-additive overhead (sum of component-overheads is less than actual total overhead) in \propername{mcf} and \propername{omnetpp} are memory stalls.
+Both \propername{mcf} and \propername{omnetpp} are memory-bound benchmarks and memory stalls can hide a certain number of additional instructions.
+Thus, the stalls might hide the instructions of each component in isolation, but the stalls might be too few to hide all components combined.
 
-To better understand the exact causes of the overhead, we recorded \code{perf} counters for particularly affected benchmarks.
+\subsubsection{Detailed Performance Counter Analysis}
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{
+        every axis/.append style={
+            yticklabel style={font=\footnotesize},
+            xticklabel style={font=\footnotesize},
+            execute at begin axis={
+                \pgfplotsset{
+                    width=\textwidth,
+                    height=0.8\linewidth}
+            },
+        },
+    }
+    \input{figures/r2c/btra-instr-vs-cycles}%
+    \endgroup
+    \caption{The relationship between instruction overhead and cycle overhead.}
+    \label{r2c:fig:btra-instr-vs-cycles}
+\end{figure}
+
+The example of call count and performance overhead differences between \propername{perlbench} and \propername{omnetpp} above showed that instructions and call counts alone give an incomplete picture.
+To better understand the exact causes of the overhead, we recorded \code{perf} counters for particularly affected benchmarks on \propername{i9}.
+We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
 As expected, each benchmark shows a significant increase in the number of instructions.
 Most of \rtwoc's diversification measures, \ie prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
 Additional instructions can affect execution performance in at least two ways:
@@ -68,9 +111,55 @@ Additional instructions can affect execution performance in at least two ways:
     \item Additional instructions change the code geometry and increase instruction cache pressure.
     Thus, additional instructions can influence other code parts, even if they are not executed at all.
 \end{enumerate*}
-While it is generally hard to differentiate the two effects, we can correlate the instruction cache pressure increase with the performance overhead increase.
+Conversely, additional instructions do not necessarily lead to more cycles, as sometimes they can hide in stalls.
+The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint of a benchmark's performance profile.
+Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all of \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
+\cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}.
+\propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
 
+For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
+This phenomenon can happen, for example, through memory stalls.
+Memory stalls enable the \gls{CPU} to execute other instructions in the speculation window \enquote{for free}, while waiting for the fulfillment of the memory request.
+Whether an instruction can hide in such a stall window depends on whether the instruction lands in a speculation window including a stall.
+For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instruction, the \glspl{BTRA} execute essentially for free (not account for stalls the \glspl{BTRA} themselves might cause).
+If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
+In benchmarks with memory stalls, thus, \glspl{BTRA} cost fewer cycles on average.
+For example, for \propername{mcf} we observe that while, relative to the baseline, instructions increase by almost 60\%, cycles increase only by about 17\%.
+This indicates that stalls can absorb many of the additional instructions, explaining at least in part the relatively low overhead of \propername{mcf}.
+\propername{Omnetpp} shows a similar picture, with instructions increasing by 60\%, but cycles increasing only by about 26\%.
 
+For \propername{deepsjeng}, which is also below the diagonal but closer to it than \eg \propername{omnetpp} and \propername{mcf}, the hiding effect is less pronounced.
+In particular, \rtwoc causes about 17\% more instructions but only 12\% more cycles.
+The relatively low performance overhead of \propername{deepsjeng} is better explained by its low \emph{call density}, \ie the ratio of calls to baseline instructions.
+\Cref{tab:call-density} shows that \propername{deepsjeng} has the lowest call density (7.0 calls per 1000 instructions) because it executes about 143 instructions between calls on average.
+In contrast, \propername{mcf} and \propername{omnetpp} call functions every 43 and 36 instructions respectively, resulting in call densities of 23.5 and 27.5.
+Since each call adds approximately 25 \gls{BTRA} instructions, the instruction overhead is roughly proportional to call density.
+This explains why \propername{deepsjeng} has only 17\% instruction overhead despite executing more total calls than \propername{perlbench} (11.4B vs 9.4B): the fixed \gls{BTRA} cost is amortized over more baseline work.
+
+\begin{table}[t]
+    \centering
+    \caption{Call density analysis. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
+    \label{tab:call-density}
+    \sisetup{
+        table-alignment-mode=none,
+        table-number-alignment=right,
+    }
+    \begin{tabular}{l
+        S[table-format=4.1]
+        S[table-format=2.1]
+        S[table-format=2.1]}
+        \toprule
+        Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
+        \midrule
+        \propername{deepsjeng} & 1635.1               & 11.4        & 7.0       \\
+        \propername{perlbench} & 829.1                & 9.4         & 11.4      \\
+        \propername{gcc}       & 651.7                & 7.5         & 11.5      \\
+        \propername{xalancbmk} & 879.8                & 12.4        & 14.1      \\
+        \propername{mcf}       & 1645.8               & 38.7        & 23.5      \\
+        \propername{omnetpp}   & 857.3                & 23.5        & 27.5      \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
@@ -159,22 +248,22 @@ Further research is necessary to substantiate these suspicions.
         \textbf{Server} & \textbf{Case} & Real Func. Ptr. & Total Func. Ptr. & $P_{Success}$ \\
         \midrule
         \multirow{4}{*}{\propername{nginx}}
-        & Worst         & 24         & 27    & 3.7\%         \\
-        & Average       & 2.8        & 5.8   & 17.3\%        \\
-        & Median        & 1          & 4     & 25.0\%        \\
-        & Best          & 1          & 4     & 25.0\%        \\
+        & Worst         & 24              & 27               & 3.7\%         \\
+        & Average       & 2.8             & 5.8              & 17.3\%        \\
+        & Median        & 1               & 4                & 25.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
         \midrule
         \multirow{4}{*}{\propername{Apache}}
-        & Worst         & 18         & 21    & 4.8\%         \\
-        & Average       & 1.5        & 4.5   & 22.0\%        \\
-        & Median        & 1          & 4     & 25.0\%        \\
-        & Best          & 1          & 4     & 25.0\%        \\
+        & Worst         & 18              & 21               & 4.8\%         \\
+        & Average       & 1.5             & 4.5              & 22.0\%        \\
+        & Median        & 1               & 4                & 25.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
         \midrule
         \multirow{4}{*}{\propername{Lighttpd}}
-        & Worst         & 72         & 75    & 1.3\%         \\
-        & Average       & 19.9       & 22.9  & 4.4\%         \\
-        & Median        & 2          & 5     & 20.0\%        \\
-        & Best          & 1          & 4     & 25.0\%        \\
+        & Worst         & 72              & 75               & 1.3\%         \\
+        & Average       & 19.9            & 22.9             & 4.4\%         \\
+        & Median        & 2               & 5                & 20.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
         \bottomrule
     \end{tabular}
 \end{table}

@@ -7,7 +7,7 @@
     series = {Leibniz {{International Proceedings}} in {{Informatics}} ({{LIPIcs}})},
     volume = {313},
     pages = {6:1--6:29},
-    publisher = {Schloss Dagstuhl ? Leibniz-Zentrum f�r Informatik},
+    publisher = {Schloss Dagstuhl --- Leibniz-Zentrum f{\"u}r Informatik},
     location = {Dagstuhl, Germany},
     issn = {1868-8969},
     doi = {10.4230/LIPIcs.ECOOP.2024.6},
@@ -204,24 +204,6 @@
     title = {{Defeating Zombie Gadgets by Re-randomizing Code upon Disclosure}},
     volume = {10379 LNCS},
     year = {2017}
-}
-
-@inproceedings{Bigelow2015,
-    abstract = {Address Space Layout Randomization (ASLR) can increase the cost of exploiting memory corruption vulnerabilities. One major weakness of ASLR is that it assumes the secrecy of memory addresses and is thus ineffective in the face of memory disclosure vulnerabilities. Even fine-grained variants of ASLR are shown to be ineffective against memory disclosures. In this paper we present an approach that synchronizes randomization with potential runtime disclosure. By applying rerandomization to the memory layout of a process every time it generates an output, our approach renders disclosures stale by the time they can be used by attackers to hijack control flow. We have developed a fully functioning prototype for x86 64 C programs by extending the Linux kernel, GCC, and the libc dynamic linker. The prototype operates on C source code and recompiles programs with a set of augmented information required to track pointer locations and support runtime rerandomization. Using this augmented information we dynamically relocate code segments and update code pointer values during runtime. Our evaluation on the SPEC CPU2006 benchmark, along with other applications, show that our technique incurs a very low performance overhead (2.1{\%} on average).},
-    address = {New York, New York, USA},
-    annote = {generate pointer information during compilation (including dynamic pointer tracking)
-randomize the position of the code after each output syscall},
-    author = {Bigelow, David and Hobson, Thomas and Rudd, Robert and Streilein, William and Okhravi, Hamed},
-    booktitle = {Proceedings of the 22nd ACM SIGSAC Conference on Computer and Communications Security - CCS '15},
-    doi = {10.1145/2810103.2813691},
-    file = {:/mnt/c/Users/felixl/AppData/Local/Mendeley Ltd/Mendeley Desktop/Downloaded/Bigelow et al. - 2015 - Timely Rerandomization for Mitigating Memory Disclosures.pdf:pdf},
-    isbn = {9781450338325},
-    issn = {15437221},
-    pages = {268--279},
-    publisher = {ACM Press},
-    title = {{Timely Rerandomization for Mitigating Memory Disclosures}},
-    volume = {2015-Octob},
-    year = {2015}
 }
 
 @inproceedings{Davi2015,
@@ -934,7 +916,7 @@ kopien haben gadgets an unterschiedlichen stellen},
     booktitle = {2019 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)},
     doi = {10.1109/CGO.2019.8661202},
     isbn = {978-1-7281-1436-1},
-    month = {feb},
+    month = feb,
     pages = {26--36},
     publisher = {IEEE},
     title = {{Smokestack: Thwarting DOP Attacks with Runtime Stack Layout Randomization}},
@@ -949,7 +931,7 @@ kopien haben gadgets an unterschiedlichen stellen},
     isbn = {978-1-5386-6660-9},
     issn = {10816011},
     keywords = {Microarchitectural-attack,Microarchitecture-security,Spectre,Speculative-execution},
-    month = {may},
+    month = may,
     pages = {1--19},
     publisher = {IEEE},
     title = {{Spectre Attacks: Exploiting Speculative Execution}},
@@ -962,7 +944,7 @@ kopien haben gadgets an unterschiedlichen stellen},
     author = {Lipp, Moritz and Schwarz, Michael and Gruss, Daniel and Prescher, Thomas and Haas, Werner and Fogh, Anders and Horn, Jann and Mangard, Stefan and Kocher, Paul and Genkin, Daniel and Yarom, Yuval and Hamburg, Mike},
     booktitle = {27th {USENIX} Security Symposium ({USENIX} Security 18)},
     isbn = {978-1-939133-04-5},
-    month = {aug},
+    month = aug,
     pages = {973--990},
     publisher = {{USENIX} Association},
     title = {{Meltdown: Reading Kernel Memory from User Space}},
@@ -1321,7 +1303,6 @@ kopien haben gadgets an unterschiedlichen stellen},
     year = {2017},
     isbn = {9781450349383},
     publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     doi = {10.1145/3064176.3064216},
     booktitle = {Proceedings of the Twelfth European Conference on Computer Systems},
     pages = {420–436},
@@ -2856,4 +2837,146 @@ kopien haben gadgets an unterschiedlichen stellen},
     isbn = {978-1-891562-74-7},
     langid = {english},
     file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Frassetto et al. - 2022 - CFInsight A Comprehensive Metric for CFI Policies.pdf}
+}
+@inproceedings{Erlingsson2006,
+  author    = {{\'{U}}lfar Erlingsson and Martin Abadi and Michael Vrable and Mihai Budiu and George C. Necula},
+  title     = {{XFI}: Software Guards for System Address Spaces},
+  booktitle = {Proceedings of the 7th USENIX Symposium on Operating Systems Design and Implementation (OSDI)},
+  year      = {2006},
+  month     = {November},
+  publisher = {USENIX Association},
+  address   = {Seattle, WA},
+}
+
+@inproceedings{Bletsch2011b,
+  title={Mitigating code-reuse attacks with control-flow locking},
+  author={Tyler Bletsch and Xuxian Jiang and Vince W. Freeh},
+  booktitle={Proceedings of the 27th Annual Computer Security Applications Conference (ACSAC)},
+  year={2011},
+  pages={353-362}
+}
+
+@inproceedings{pappas2012,
+    title = {Smashing the {{Gadgets}}: {{Hindering Return-Oriented Programming Using In-place Code Randomization}}},
+    booktitle = {2012 {{IEEE Symposium}} on {{Security}} and {{Privacy}}},
+    author = {Pappas, Vasilis and Polychronakis, Michalis and Keromytis, Angelos D.},
+    date = {2012-05},
+    pages = {601--615},
+    publisher = {IEEE},
+    issn = {10816011},
+    doi = {10.1109/SP.2012.41},
+    url = {http://ieeexplore.ieee.org/document/6234439/},
+    urldate = {2018-05-04},
+    abstract = {The wide adoption of non-executable page protec- tions in recent versions of popular operating systems has given rise to attacks that employ return-oriented programming (ROP) to achieve arbitrary code execution without the injection of any code. Existing defenses against ROP exploits either require source code or symbolic debugging information, or impose a significant runtime overhead, which limits their applicability for the protection of third-party applications. In this paper we present in-place code randomization, a practical mitigation technique against ROP attacks that can be applied directly on third-party software. Our method uses various narrow-scope code transformations that can be applied statically, without changing the location of basic blocks, allowing the safe randomization of stripped binaries even with partial disassembly coverage. These transformations effectively eliminate about 10\%, and probabilistically break about 80\% of the useful instruction sequences found in a large set of PE files. Since no additional code is inserted, in-place code randomization does not incur any measurable runtime overhead, enabling it to be easily used in tandem with existing exploit mitigations such as address space layout randomization. Our evaluation using publicly available ROP exploits and two ROP code generation toolkits demonstrates that our technique prevents the exploitation of the tested vulnerableWindows 7 applications, including Adobe Reader, as well as the automated construction of alternative ROP payloads that aim to circumvent in-place code randomization using solely any remaining unaffected instruction sequences.},
+    isbn = {978-1-4673-1244-8},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Pappas et al. - 2012 - Smashing the Gadgets Hindering Return-Oriented Programming Using In-place Code Randomization.pdf}
+}
+
+@article{boyd2010,
+    title = {On the {{General Applicability}} of {{Instruction-Set Randomization}}},
+    author = {Boyd, Stephen W. and Kc, Gaurav S. and Locasto, Michael E. and Keromytis, Angelos D. and Prevelakis, Vassilis},
+    date = {2010-07},
+    journaltitle = {IEEE Transactions on Dependable and Secure Computing},
+    volume = {7},
+    number = {3},
+    pages = {255--270},
+    issn = {1941-0018},
+    doi = {10.1109/TDSC.2008.58},
+    url = {https://ieeexplore.ieee.org/document/4653499},
+    urldate = {2025-12-22},
+    abstract = {We describe Instruction-Set Randomization (ISR), a general approach for safeguarding systems against any type of code-injection attack. We apply Kerckhoffs' principle to create OS process-specific randomized instruction sets (e.g., machine instructions) of the system executing potentially vulnerable software. An attacker who does not know the key to the randomization algorithm will inject code that is invalid for that (randomized) environment, causing a runtime exception. Our approach is applicable to machine-language programs and scripting and interpreted languages. We discuss three approaches (protection for Intel x86 executables, Perl scripts, and SQL queries), one from each of the above categories. Our goal is to demonstrate the generality and applicability of ISR as a protection mechanism. Our emulator-based prototype demonstrates the feasibility ISR for x86 executables and should be directly usable on a suitably modified processor. We demonstrate how to mitigate the significant performance impact of emulation-based ISR by using several heuristics to limit the scope of randomized (and interpreted) execution to sections of code that may be more susceptible to exploitation. The SQL prototype consists of an SQL query-randomizing proxy that protects against SQL injection attacks with no changes to database servers, minor changes to CGI scripts, and with negligible performance overhead. Similarly, the performance penalty of a randomized Perl interpreter is minimal. Where the performance impact of our proposed approach is acceptable (i.e., in an already-emulated environment, in the presence of programmable or specialized hardware, or in interpreted languages), it can serve as a broad protection mechanism and complement other security mechanisms.},
+    keywords = {Buffer overflow,buffer overflows,Computer worms,Databases,emulators,Filtering,Hardware,Instruction sets,Interpreters,Invasive software,performance.,Protection,Protection mechanisms,Prototypes,randomization,Runtime environment,security,Security,SQL injection},
+    file = {/Users/felix/Zotero/storage/G9EJNEE9/Boyd et al. - 2010 - On the General Applicability of Instruction-Set Randomization.pdf;/Users/felix/Zotero/storage/QDGJZCLX/4653499.html}
+}
+@misc{PaXTeam2003,
+  author = {{PaX Team}},
+  title = {Address Space Layout Randomization ({ASLR})},
+  year = {2003},
+  howpublished = {\url{https://pax.grsecurity.net/docs/aslr.txt}},
+  note = {Accessed: 2023-10-27}
+}
+
+@inproceedings{Onarlioglu2010,
+  title={{G-Free}: Defeating Return-Oriented Programming through Gadget-less Binaries},
+  author={Onarlioglu, Kaan and Bilge, Leyla and Lanzi, Andrea and Balzarotti, Davide and Kirda, Engin},
+  booktitle={Proceedings of the 26th Annual Computer Security Applications Conference (ACSAC)},
+  pages={49--58},
+  year={2010}
+}
+
+@inproceedings{Pappas2013b,
+  author = {Vasilis Pappas and Michalis Polychronakis and Angelos D. Keromytis},
+  title = {Transparent {ROP} Exploit Mitigation Using Indirect Branch Tracing},
+  booktitle = {22nd USENIX Security Symposium (USENIX Security 13)},
+  year = {2013},
+  pages = {447--462},
+  publisher = {USENIX Association},
+  month = aug
+}
+
+@inproceedings{wuerthinger2013,
+  title = {One VM to Rule Them All},
+  author = {Wuerthinger, Thomas and Woess, Andreas and Stadler, Lukas and Duboscq, Gilles and Simon, Doug and Wimmer, Christian and Wolczko, Mario},
+  booktitle = {Proceedings of the ACM International Symposium on New Ideas, New Paradigms, and Reflections on Programming \& Software (Onward!)},
+  year = {2013}
+}
+
+@inproceedings{bigelow2015,
+    title = {Timely {{Rerandomization}} for {{Mitigating Memory Disclosures}}},
+    booktitle = {Proceedings of the 22nd {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}} - {{CCS}} '15},
+    author = {Bigelow, David and Hobson, Thomas and Rudd, Robert and Streilein, William and Okhravi, Hamed},
+    date = {2015},
+    volume = {2015-Octob},
+    pages = {268--279},
+    publisher = {ACM Press},
+    location = {New York, New York, USA},
+    issn = {15437221},
+    doi = {10.1145/2810103.2813691},
+    url = {http://dl.acm.org/citation.cfm?doid=2810103.2813691},
+    urldate = {2018-05-04},
+    abstract = {Address Space Layout Randomization (ASLR) can increase the cost of exploiting memory corruption vulnerabilities. One major weakness of ASLR is that it assumes the secrecy of memory addresses and is thus ineffective in the face of memory disclosure vulnerabilities. Even fine-grained variants of ASLR are shown to be ineffective against memory disclosures. In this paper we present an approach that synchronizes randomization with potential runtime disclosure. By applying rerandomization to the memory layout of a process every time it generates an output, our approach renders disclosures stale by the time they can be used by attackers to hijack control flow. We have developed a fully functioning prototype for x86 64 C programs by extending the Linux kernel, GCC, and the libc dynamic linker. The prototype operates on C source code and recompiles programs with a set of augmented information required to track pointer locations and support runtime rerandomization. Using this augmented information we dynamically relocate code segments and update code pointer values during runtime. Our evaluation on the SPEC CPU2006 benchmark, along with other applications, show that our technique incurs a very low performance overhead (2.1\% on average).},
+    isbn = {978-1-4503-3832-5},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Bigelow et al. - 2015 - Timely Rerandomization for Mitigating Memory Disclosures.pdf}
+}
+@inproceedings{Backes2013,
+  title={Execute-no-Read: Preventing Code Disclosure in Userspace},
+  author={Backes, Michael and Holz, Thorsten and Kollenda, Benjamin and Koppe, Philipp and N{"u}rnberger, Stefan and Pewny, Jannik},
+  booktitle={Proceedings of the 8th ACM SIGSAC Symposium on Information, Computer and Communications Security (ASIACCS)},
+  pages={223--234},
+  year={2013}
+}
+
+@inproceedings{Goktas2016b,
+  title={Out of Control: Overcoming Control-Flow Integrity},
+  author={G{"o}ktas, Enes and Athanasopoulos, Elias and Bos, Herbert and Portokalidis, Georgios},
+  booktitle={Proceedings of the 37th IEEE Symposium on Security and Privacy (S\&P)},
+  pages={575--589},
+  year={2016}
+}
+
+@inproceedings{Ispoglou2018,
+  title={Block Oriented Programming: Automating Data-Only Attacks},
+  author={Ispoglou, Kyriakos K. and AlBassam, Bader and Jaeger, Trent and Payer, Mathias},
+  booktitle={Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages={2107--2122},
+  year={2018}
+}
+
+@inproceedings{Burow2018CFIXX,
+  title={{CFIXX: Object Type Integrity for C++ Virtual Dispatch}},
+  author={Burow, Nathan and McKee, Derrick and Carr, Scott A and Payer, Mathias},
+  booktitle={Proceedings of the 2018 Network and Distributed System Security Symposium (NDSS)},
+  year={2018}
+}
+
+@article{Pomonis2019,
+  author    = {Marios Pomonis and Theofilos Petsios and Angelos D. Keromytis and Michalis Polychronakis and Vasileios P. Kemerlis},
+  title     = {{kR\string^X: Comprehensive Kernel Protection against Just-In-Time Code Reuse}},
+  journal   = {ACM Transactions on Privacy and Security (TOPS)},
+  volume    = {22},
+  number    = {1},
+  pages     = {1--28},
+  year      = {2019}
 }

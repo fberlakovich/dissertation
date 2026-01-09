@@ -119,7 +119,7 @@ We built our prototype for \lool in the context of GraalVM, a family of technolo
 
 \subsubsection{The GraalVM compiler}
 GraalVM features both just-in-time (JIT) and ahead-of-time (AOT) compilation of programs written in Java and other languages, such as Scala or Kotlin, that compile to Java virtual machine (JVM) bytecode.
-GraalVM also includes the Truffle language implementation framework~\cite{wuerthinger2013}.
+GraalVM also includes the Truffle language implementation framework.
 Truffle allows users to obtain a JIT compiler for domain-specific languages or other programming languages by implementing an interpreter for the language's semantics.
 The GraalVM project maintains Truffle implementations of several common languages including Python, JavaScript, and Ruby.
 The common GraalVM compiler compiles all languages running on GraalVM (\eg Java, Truffle languages, Scala, and Kotlin) to machine code.
@@ -206,7 +206,7 @@ static class Class1 {
     float var2 = 3.975332E8f;
     boolean var7 = FuzzerUtils.randomBoolean();
     StringBuilder[] var8 = new StringBuilder[]{(new StringBuilder()), (new StringBuilder()), (new StringBuilder()), (new StringBuilder())};
-    String var9 = "ݽƬ��\\u000e���\\u0010]�";
+    String var9 = "\\u077d\\u01ac\\ufffd\\ufffd\\u000e\\ufffd\\ufffd\\ufffd\\u0010]\\ufffd";
     float var10 = -3.4028235E38f;
     short var11 = (short) param1;
     String[] var12 = new String[]{("oIZ+.^"), ("")};
