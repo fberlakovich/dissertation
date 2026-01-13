@@ -259,3 +259,12 @@ TSWLatexianTemp*
 /venv/bin/python
 /venv/bin/python3
 /venv/pyvenv.cfg
+/scripts/javabytecode-lexer/build/lib/pygments_javabytecode/__init__.py
+/scripts/javabytecode-lexer/build/lib/pygments_javabytecode/lexer.py
+/scripts/javabytecode-lexer/pygments_javabytecode/lexer.py
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/dependency_links.txt
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/entry_points.txt
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/PKG-INFO
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/requires.txt
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/SOURCES.txt
+/scripts/javabytecode-lexer/pygments_javabytecode.egg-info/top_level.txt

@@ -1,0 +1,104 @@
+% This file was created with matplot2tikz v0.5.1.
+\begin{tikzpicture}
+
+\definecolor{crimson2143940}{RGB}{214,39,40}
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{darkorange25512714}{RGB}{255,127,14}
+\definecolor{forestgreen4416044}{RGB}{44,160,44}
+\definecolor{lightgray204}{RGB}{204,204,204}
+\definecolor{mediumpurple148103189}{RGB}{148,103,189}
+\definecolor{sienna1408675}{RGB}{140,86,75}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.97)},
+  anchor=north west,
+  draw=lightgray204
+},
+tick align=outside,
+tick pos=left,
+x grid style={darkgray176},
+xlabel={Instructions Overhead (\%)},
+xmajorgrids,
+xmin=-3.04758795520441, xmax=63.9993470592926,
+xtick style={color=black},
+y grid style={darkgray176},
+ylabel={Cycles Overhead (\%)},
+ymajorgrids,
+ymin=-3.04758795520441, ymax=63.9993470592926,
+ytick style={color=black}
+]
+\addplot [semithick, steelblue31119180, mark=*, mark size=2.5, mark options={solid}]
+table {%
+8.68315314766959 6.54468497852116
+10.659759526619 8.15244331554183
+12.8335014532074 9.55377836333147
+14.6469208246389 10.270424123921
+16.2961992298368 11.5939388434833
+17.1435265874302 12.0971093756303
+};
+\addlegendentry{deepsjeng}
+\addplot [semithick, darkorange25512714, mark=*, mark size=2.5, mark options={solid}]
+table {%
+12.8422490949055 8.84093937560735
+16.580925174706 11.5347208056533
+19.6780445452728 13.5252902540719
+22.3546650381079 15.4254228994779
+25.0026447723166 17.7076082258803
+27.667288609883 19.973369750429
+};
+\addlegendentry{gcc}
+\addplot [semithick, forestgreen4416044, mark=*, mark size=2.5, mark options={solid}]
+table {%
+21.6759709835633 7.99060318963245
+28.9590628040491 6.8036177051719
+34.1003119492923 8.91540255519194
+50.2706123209434 14.1530241722607
+57.2225035768568 15.1197629649742
+59.3015234001033 17.4466468907476
+};
+\addlegendentry{mcf}
+\addplot [semithick, crimson2143940, mark=*, mark size=2.5, mark options={solid}]
+table {%
+26.7929121079266 10.347788707789
+34.6197872507122 13.4488558023119
+40.1786043009389 16.1818182827626
+46.544403488804 18.263188153161
+53.2786289645238 21.7985845368226
+60.9517591040882 25.9659495976347
+};
+\addlegendentry{omnetpp}
+\addplot [semithick, mediumpurple148103189, mark=*, mark size=2.5, mark options={solid}]
+table {%
+13.2259205112568 14.9611373203991
+16.6447399301002 17.0613259544541
+21.1138755021096 20.9380712638759
+22.6882861462425 22.6696202995824
+25.0634199000281 25.1422902006169
+28.8614406627788 29.1494411064275
+};
+\addlegendentry{perlbench}
+\addplot [semithick, sienna1408675, mark=*, mark size=2.5, mark options={solid}]
+table {%
+14.5831815563206 10.8431581807429
+19.4221640217005 11.8710557505893
+22.364805157524 13.60091954089
+25.3111050617607 15.0515743752384
+29.3160985002629 17.9180522093448
+32.1557887496839 19.8637883246697
+};
+\addlegendentry{xalancbmk}
+\addplot [black, opacity=0.5, dashed]
+table {%
+0 0
+60.9517591040882 60.9517591040882
+};
+\addlegendentry{y = x}
+\end{axis}
+
+\end{tikzpicture}

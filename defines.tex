@@ -25,6 +25,24 @@
 \usepackage{textgreek}
 \usepackage{xparse} % <-- Add this package
 \usepackage{luacode}
+
+% Check Python version compatibility for minted/latexminted
+% Python 3.14+ has breaking changes in argparse that break latexminted
+\begin{luacode}
+  local handle = io.popen("python3 --version 2>&1")
+  if handle then
+    local result = handle:read("*a")
+    handle:close()
+    local major, minor = result:match("Python ([0-9]+)%.([0-9]+)")
+    if major and minor then
+      major, minor = tonumber(major), tonumber(minor)
+      if major >= 3 and minor >= 14 then
+        tex.error("Python " .. major .. "." .. minor .. " detected but latexminted requires Python < 3.14. Fix: brew unlink python@3.14")
+      end
+    end
+  end
+\end{luacode}
+
 \usepackage[newfloat,cachedir=minted-cache]{minted}
 \usepackage{booktabs}
 \usepackage{csquotes}
@@ -356,7 +374,8 @@
 \newacronym{TEA}{TEA}{Transient-Execution Attack}
 \newacronym{COP}{COP}{Call-Oriented Programming}
 \newacronym{ILR}{ILR}{Instruction-Layout Randomization}
-
+\newacronym{IPC}{IPC}{Instructions Per Cycle}
+\newacronym{VRP}{VRP}{Value-Range Partitioning}
 
 \newglossaryentry{CRA}{
 name={code-reuse attack},

@@ -102,6 +102,14 @@ Thus, the stalls might hide the instructions of each component in isolation, but
 The example of call count and performance overhead differences between \propername{perlbench} and \propername{omnetpp} above showed that instructions and call counts alone give an incomplete picture.
 To better understand the exact causes of the overhead, we recorded \code{perf} counters for particularly affected benchmarks on \propername{i9}.
 We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
+Two performance counters are particularly important when interpreting the results: cycles and instructions.
+The cycles counter tells us the total number of cycles the benchmark run took.
+Given a fixed \gls{CPU} frequency, cycles directly translate to execution time.
+Instructions, on the other hand, tell us how many instructions the \gls{CPU} executed.
+A single instruction can (and usually does) take more than one cycle.
+At the same time, superscalar pipelining \glspl{CPU}, like all of the \glspl{CPU} in our evaluation, overlap instruction execution and can execute multiple operations in parallel, depending on the instruction type.
+As a result, the ratio of instructions and cycles, called \gls{IPC}, can be both smaller than, equal to, or greater than 1.
+
 As expected, each benchmark shows a significant increase in the number of instructions.
 Most of \rtwoc's diversification measures, \ie prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
 Additional instructions can affect execution performance in at least two ways:
@@ -114,19 +122,25 @@ Additional instructions can affect execution performance in at least two ways:
 Conversely, additional instructions do not necessarily lead to more cycles, as sometimes they can hide in stalls.
 The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint of a benchmark's performance profile.
 Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all of \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
-\cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}.
+\cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
+
 \propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
+\propername{Perlbench} already has a relatively high \gls{IPC} of ~3 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
+
 
 For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
 This phenomenon can happen, for example, through memory stalls.
 Memory stalls enable the \gls{CPU} to execute other instructions in the speculation window \enquote{for free}, while waiting for the fulfillment of the memory request.
 Whether an instruction can hide in such a stall window depends on whether the instruction lands in a speculation window including a stall.
 For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instruction, the \glspl{BTRA} execute essentially for free (not account for stalls the \glspl{BTRA} themselves might cause).
+\fbetodo{Add figure}
 If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
 In benchmarks with memory stalls, thus, \glspl{BTRA} cost fewer cycles on average.
 For example, for \propername{mcf} we observe that while, relative to the baseline, instructions increase by almost 60\%, cycles increase only by about 17\%.
 This indicates that stalls can absorb many of the additional instructions, explaining at least in part the relatively low overhead of \propername{mcf}.
 \propername{Omnetpp} shows a similar picture, with instructions increasing by 60\%, but cycles increasing only by about 26\%.
+
+\propername{Gcc}, which
 
 For \propername{deepsjeng}, which is also below the diagonal but closer to it than \eg \propername{omnetpp} and \propername{mcf}, the hiding effect is less pronounced.
 In particular, \rtwoc causes about 17\% more instructions but only 12\% more cycles.
@@ -135,6 +149,8 @@ The relatively low performance overhead of \propername{deepsjeng} is better expl
 In contrast, \propername{mcf} and \propername{omnetpp} call functions every 43 and 36 instructions respectively, resulting in call densities of 23.5 and 27.5.
 Since each call adds approximately 25 \gls{BTRA} instructions, the instruction overhead is roughly proportional to call density.
 This explains why \propername{deepsjeng} has only 17\% instruction overhead despite executing more total calls than \propername{perlbench} (11.4B vs 9.4B): the fixed \gls{BTRA} cost is amortized over more baseline work.
+
+
 
 \begin{table}[t]
     \centering
@@ -275,7 +291,7 @@ In the following subsections we discuss how \rtwoc{} counters each of these atta
 We also discuss the security of stack unwinding tables and the possibility of an attacker corrupting entire or partial code pointers.
 
 Our security evaluation relies on a probabilistic model to estimate an attacker's success rate.
-We instantiate the model's variables (such as stack frame composition and pointer distribution) with empirical measurements from \propername{nginx}, \propername{Apache} and \propername{ighttpd}.
+We instantiate the model's variables (such as stack frame composition and pointer distribution) with empirical measurements from \propername{nginx}, \propername{Apache,} and \propername{ighttpd}.
 
 \subsubsection{Leaking Return Addresses}\label{r2c:sss:leaking-return-addresses}
 \rtwoc protects return addresses with \glspl{BTRA}.
@@ -310,7 +326,7 @@ Assuming that an attacker can leak arbitrary stack snapshots (see \cref{r2c:s:th
 An attacker can reasonably differentiate function pointers from the return address and \glspl{BTRA} because these occur only at the top of a frame.
 With value range analysis an attacker can further differentiate function pointers from other stack slots, such as variables values or heap pointers.
 Thus, guessing a function pointer's location means choosing an element from a permutation of all function pointers in the stack frame.
-To measure the probability empirically, we have collected stack snapshots from benchmarking workloads on \propername{Apache}, \propername{nginx,} and \propername{lighttp}.
+To measure the probability empirically, we have collected stack snapshots from benchmarking workloads on \propername{Apache}, \propername{nginx,,} and \propername{lighttp}.
 \cref{r2c:tab:func-ptr-dist} shows the function pointer distribution in these snapshots.
 About 25\% to 26\% of stack frames (depending on the software) contain no function pointer at all.
 In \propername{nginx}, 45\% of all stack frames contain only one function pointer, in \propername{Apache} 35\% and in \propername{lighttp} 14\%.
