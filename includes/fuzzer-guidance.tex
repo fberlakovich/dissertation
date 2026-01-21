@@ -24,9 +24,17 @@ This inclusion of directionality provides a more granular view of the execution 
 Despite its widespread use and success, edge coverage, and more general code coverage, suffers from conceptual and from implementation issues.
 An analysis by \citeauthor{Bohme2022} even suggests that code coverage alone is insufficient to judge a fuzzer's bug-finding performance~\cite{Bohme2022}.
 
-On the implementation side, early inefficiencies present in, \eg, AFL were largely solved or at least mitigated with increasingly refined code coverage implementations.
+On the implementation side, early inefficiencies present in, \eg AFL were largely solved or at least mitigated with increasingly refined code coverage implementations.
 For instance, the initial coverage implementation in AFL modified the assembler to instrument targets.
-The instrumentation assigns a pseudorandom ID to each basic block and computes edge IDs at runtime by combining the ID of the previous block with the ID of the current block.\fbetodo{Show AFL hash functions}
+The instrumentation assigns a pseudorandom ID to each basic block and computes edge IDs at runtime by combining the ID of the previous block with the ID of the current block~\cite{Zalewski2014}:
+\begin{center}
+\begin{minted}{C}
+cur_location = <COMPILE_TIME_RANDOM>;
+shared_mem[cur_location ^ prev_location]++;
+prev_location = cur_location >> 1;
+\end{minted}
+\end{center}
+The right-shift by one distinguishes edge $A \rightarrow B$ from edge $B \rightarrow A$.
 While the implementation in the assembler is conceptually simple, it is prone to hash collisions and prevents the compiler's optimization passes from optimizing the inserted code.
 CollAFL reduces AFL's hash collisions by parameterizing the hash function with additional parameters chosen at link time~\cite{Gan2018}.
 Other implementations, such as \aflpp, improve on these issues with a full-fledged compiler pass that builds on LLVM's sanitizer instrumentation infrastructure.
@@ -197,7 +205,7 @@ void guest_login() {
 \end{listing}
 Angora, for example, addresses this issue by augmenting edge-coverage with a call context hash.
 The call context hash is the result of XORing unique call-site IDs at runtime.
-In \XXX we explore an alternative way to incorporate caller context by projecting the context onto code coverage with a compiler transformation.
+In \cref{ch:psc} we explore an alternative way to incorporate caller context by projecting the context onto code coverage with a compiler transformation.
 
 Researchers have also proposed alternative types of coverage feedback that are not based on code coverage.
 The goal of these coverage metrics is to improve the fuzzer's ability to differentiate program states.
@@ -207,5 +215,5 @@ Unfortunately, later proposed coverage metrics have not been evaluated within th
 DDFuzz~\cite{Mantovani2022} and DAFL~\cite{Kim2023}, for instance, use data-dependency information as coverage feedback.
 Similarly, \citeauthor{herrera2023} investigate fuzzer guidance by different granularities of dataflow information~\cite{herrera2023}.
 
-In \XXX we introduce a new form of coverage feedback for compiler fuzzing that incurs less overhead than code coverage, while allowing for more context sensitivity.
+In \cref{ch:lool} we introduce a new form of coverage feedback for compiler fuzzing that incurs less overhead than code coverage, while allowing for more context sensitivity.
 

@@ -1,4 +1,4 @@
-\section{Program State Convolution}
+\section{Program State Convolution}\label{psc:s:program-state-convolution}
 In \cref{psc:sec:motivation}, we discussed how \aflpp relies on edge coverage instrumentation to guide the fuzzing process.
 We also identified one of the blind spots of compiler-based code coverage instrumentation: indirect calls.
 A closer examination reveals that this specific blind spot is an instance of a more general issue.
@@ -160,7 +160,7 @@ void target(int16_t param) {
     \caption{A redundant condition that compilers can eliminate using value range analysis.}
     \label{psc:lst:redundant-condition}
 \end{listing}
-Assuming that \code{param} is not, \eg, \code{volatile}, the compiler can prove that at the time control flow reaches the condition at line~\ref{psc:line:redundant-condition}, \code{param} can never be $0$.
+Assuming that \code{param} is not, \eg \code{volatile}, the compiler can prove that at the time control flow reaches the condition at line~\ref{psc:line:redundant-condition}, \code{param} can never be $0$.
 
 We can use this compiler knowledge to map these hidden data-space boundaries onto the control flow, again making them available for edge-coverage instrumentation.
 For example, a simple compiler transformation can convert \cref{psc:lst:c-value-range} into \cref{psc:lst:c-value-range-transformed}.

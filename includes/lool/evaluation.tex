@@ -45,8 +45,28 @@ For the experiments that do not use code coverage, we re-ran all test cases in a
 This separate measurement step guarantees that experiments without code coverage are not negatively affected by the overhead induced by code coverage.
 
 \subsection{Experiment Evaluation}\label{lool:ss:experiment-evaluation}
-\fbetodo{Add table with configurations}
 We evaluated the following 8 different configurations:
+
+\begin{table}[t]
+    \centering
+    \caption{Overview of evaluated configurations.}
+    \label{lool:tbl:configurations}
+    \small
+    \begin{tabular}{lll}
+        \toprule
+        Configuration & Mutation Engine & Coverage Feedback \\
+        \midrule
+        \textbf{\ref{config:static})} Static-Params & None & None \\
+        \textbf{\ref{config:no-feedback})} Random-Params & Random & None \\
+        \textbf{\ref{config:aflcodecov})} \aflpp Code Coverage & \aflpp & Code coverage \\
+        \textbf{\ref{config:aflcontextblind})} \aflpp Context-Blind & \aflpp & Global opt.\ counters \\
+        \textbf{\ref{config:aflcontextaware})} \aflpp Context-Aware & \aflpp & Per-method opt.\ pairs \\
+        \textbf{\ref{config:loolcodecov})} \lool Code Coverage & Genetic algorithm & Code coverage \\
+        \textbf{\ref{config:loolcontextblind})} \lool Context-Blind & Genetic algorithm & Global opt.\ counters \\
+        \textbf{\ref{config:loolfull})} \lool Context-Aware & Genetic algorithm & Per-method opt.\ pairs \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 \aflpp configurations, by default, are fully parametric (see \cref{lool:sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{lool:ss:afl-parameter-mutation}).
 \paragraph{\aflpp only-params}\label{lool:sss:afl-only-params}
 The \propername{only-params} variants restrict the input bytes that \aflpp mutates to the generator parameters, removing the program bytes from the mutation space.
@@ -91,12 +111,13 @@ We also provide the number of unique bugs found by each configuration.
 We note, however, that without a ground truth the number of bugs found is unsuitable for comparing the configurations.
 
 \begin{table}[!t]
-    \small
+    \footnotesize
     \caption{The total number of successful, failed, skipped and timeout tests in each configuration summed over all runs as well as their median test runtimes and LoC.}
     \label{lool:tbl:test-overview}
+    \setlength{\tabcolsep}{4pt}
     \begin{tabular}{>{\nextrow}E C C C C r T T}
         \toprule
-        {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Median \\ Runtime (s)}} & {\makecell{Median \\ LoC}} \\
+        {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Med.\ \\ Time (s)}} & {\makecell{Med.\ \\ LoC}} \\
         \midrule
         \fileInput{generated/lool/test-overview}
         \bottomrule

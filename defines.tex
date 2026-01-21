@@ -25,22 +25,23 @@
 \usepackage{textgreek}
 \usepackage{xparse} % <-- Add this package
 \usepackage{luacode}
+\usepackage{pgfplotstable}
 
 % Check Python version compatibility for minted/latexminted
 % Python 3.14+ has breaking changes in argparse that break latexminted
 \begin{luacode}
-  local handle = io.popen("python3 --version 2>&1")
-  if handle then
-    local result = handle:read("*a")
-    handle:close()
-    local major, minor = result:match("Python ([0-9]+)%.([0-9]+)")
-    if major and minor then
-      major, minor = tonumber(major), tonumber(minor)
-      if major >= 3 and minor >= 14 then
-        tex.error("Python " .. major .. "." .. minor .. " detected but latexminted requires Python < 3.14. Fix: brew unlink python@3.14")
-      end
-    end
-  end
+	local handle = io.popen("python3 --version 2>&1")
+	if handle then
+	local result = handle:read("*a")
+	handle:close()
+	local major, minor = result:match("Python ([0-9]+)%.([0-9]+)")
+	if major and minor then
+	major, minor = tonumber(major), tonumber(minor)
+	if major >= 3 and minor >= 14 then
+	tex.error("Python " .. major .. "." .. minor .. " detected but latexminted requires Python < 3.14. Fix: brew unlink python@3.14")
+	end
+	end
+	end
 \end{luacode}
 
 \usepackage[newfloat,cachedir=minted-cache]{minted}
@@ -91,38 +92,49 @@
 \usetikzlibrary{patterns,shapes.arrows, arrows.meta, matrix}
 \pgfplotsset{compat=newest}
 
+% Fix for duplicate bars in legend entries (matplot2tikz issue with ybar legend)
+% Redefines ybar legend to show only one bar instead of two (bigger + smaller)
+\pgfplotsset{
+	/pgfplots/ybar legend/.style={
+			/pgfplots/legend image code/.code={
+					\draw[##1,/tikz/.cd,yshift=-0.25em]
+					(0cm,0cm) rectangle (3pt,0.8em);
+				},
+		},
+}
+
 \pgfplotsset{every axis/.append style={
-    scaled y ticks = false,
-    scaled x ticks = false,
-    y tick label style = {/pgf/number format/fixed},
-    x tick label style = {/pgf/number format/fixed},
-    legend style={font=\small}
-}}
+			scaled y ticks = false,
+			scaled x ticks = false,
+			y tick label style = {/pgf/number format/fixed},
+			x tick label style = {/pgf/number format/fixed},
+			legend style={font=\small}
+		}}
 
 \lstset{language=C++,
-    keywordstyle={\bfseries\color{RoyalBlue}},
-    basicstyle=\small\ttfamily,
-    commentstyle=\color{ForestGreen}\ttfamily,
-    rulecolor=\color{black},
-    upquote=true,
-    numberstyle=\tiny\color{gray},
-    stepnumber=1,
-    numbersep=8pt,
-    showstringspaces=false,
-    breaklines=true,
-    frame=single,
-%belowcaptionskip=3mm,
-    tabsize=4,
-    captionpos=b
-%escapechar=\@
+	keywordstyle={\bfseries\color{RoyalBlue}},
+	basicstyle=\small\ttfamily,
+	commentstyle=\color{ForestGreen}\ttfamily,
+	rulecolor=\color{black},
+	upquote=true,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=8pt,
+	showstringspaces=false,
+	breaklines=true,
+	frame=single,
+	%belowcaptionskip=3mm,
+	tabsize=4,
+	captionpos=b
+	%escapechar=\@
 }
 
 \lstdefinestyle{sidebyside}
 {
-    basicstyle=\small\ttfamily,
-    framexleftmargin=3pt,
-    xleftmargin=8pt,
-    numbersep=-4pt,
+	basicstyle=\small\ttfamily,
+	framexleftmargin=3pt,
+	xleftmargin=8pt,
+	numbersep=-4pt,
 }
 
 
@@ -132,51 +144,51 @@
 \definecolor{set1orange}{RGB}{255, 127, 0}
 
 \lstdefinestyle{asmcode}{
-    language={[x86masm]Assembler},
-    escapechar=|
-,
-    frame=none,
-    keywordstyle={\bfseries\color{RoyalBlue}},
-    basicstyle=\small\ttfamily,
-    commentstyle=\color{ForestGreen}\ttfamily,
-    rulecolor=\color{black},
-    upquote=true,
-    numberstyle=\tiny\color{gray},
-    stepnumber=1,
-    numbersep=8pt,
-    showstringspaces=false,
-    breaklines=true,
-%belowcaptionskip=3mm,
-    tabsize=4,
-    captionpos=b,
-    morekeywords={vmovdqa,vmovdqu,vzeroupper},
+	language={[x86masm]Assembler},
+	escapechar=|
+	,
+	frame=none,
+	keywordstyle={\bfseries\color{RoyalBlue}},
+	basicstyle=\small\ttfamily,
+	commentstyle=\color{ForestGreen}\ttfamily,
+	rulecolor=\color{black},
+	upquote=true,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=8pt,
+	showstringspaces=false,
+	breaklines=true,
+	%belowcaptionskip=3mm,
+	tabsize=4,
+	captionpos=b,
+	morekeywords={vmovdqa,vmovdqu,vzeroupper},
 }
 
 \lstdefinestyle{coloredrads}{
-    keywords=[2]{BTRA1},
-    keywords=[3]{BTRA2},
-    keywords=[4]{BTRA3},
-    keywords=[5]{BTRA3},
-    keywordstyle=[2]{\color{set1red}},
-    keywordstyle=[3]{\color{set1green}},
-    keywordstyle=[4]{\color{set1violet}},
-    keywordstyle=[5]{\color{set1orange}},
+	keywords=[2]{BTRA1},
+	keywords=[3]{BTRA2},
+	keywords=[4]{BTRA3},
+	keywords=[5]{BTRA3},
+	keywordstyle=[2]{\color{set1red}},
+	keywordstyle=[3]{\color{set1green}},
+	keywordstyle=[4]{\color{set1violet}},
+	keywordstyle=[5]{\color{set1orange}},
 }
 
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
 
 \makeatletter
 \newcommand{\closepart}{
-    \begingroup
-    % Prevent \part* from forcing a page break
-    \let\clearpage\relax
-    \let\cleardoublepage\relax
-    % Start an unnumbered, empty part:
-    % - no page
-    % - no TOC entry
-    % - but it resets the “current part” state / marks
-    \part*{}
-    \endgroup
+	\begingroup
+	% Prevent \part* from forcing a page break
+	\let\clearpage\relax
+	\let\cleardoublepage\relax
+	% Start an unnumbered, empty part:
+	% - no page
+	% - no TOC entry
+	% - but it resets the “current part” state / marks
+	\part*{}
+	\endgroup
 }
 \makeatother
 
@@ -186,9 +198,9 @@
 
 
 \newcommand{\includetimed}[1]{
-    \timerstart{#1}%
-    \include{#1}%
-    \timerprint{#1}%
+	\timerstart{#1}%
+	\include{#1}%
+	\timerprint{#1}%
 }
 
 
@@ -199,38 +211,38 @@
 % --- main macro (Lua-driven) ---
 \makeatletter
 \DeclareDocumentCommand{\includeDrawioFigure}{ O{\textwidth} m O{} +m }{
-% #1 target width (TeX dimen, default \textwidth)
-% #2 base name (expects #2.pdf, #2-defs.tex, #2-coords.tex)
-% #3 tikz options
-% #4 overlay tikz code
+	% #1 target width (TeX dimen, default \textwidth)
+	% #2 base name (expects #2.pdf, #2-defs.tex, #2-coords.tex)
+	% #3 tikz options
+	% #4 overlay tikz code
 
-% typeset the PDF into a box so we can measure it
-    \savebox{\drawioMacroBox}{\includegraphics[width=#1]{#2.pdf}}%
-    \input{#2-defs.tex}% defines \drawionativewidthpx, \drawionativeheightpx
+	% typeset the PDF into a box so we can measure it
+	\savebox{\drawioMacroBox}{\includegraphics[width=#1]{#2.pdf}}%
+	\input{#2-defs.tex}% defines \drawionativewidthpx, \drawionativeheightpx
 
-    % capture target width as a dimen
-    \drawioTargetWidth=#1\relax
+	% capture target width as a dimen
+	\drawioTargetWidth=#1\relax
 
-    % the formatter gets confused with the braces in the lua code
-    % @formatter:off
-    \directlua{
-        local function sp_to_pt(sp) return sp/65536.0 end
-        local function pt_to_bp(pt) return pt * 72.0 / 72.27 end
-        local w_bp = pt_to_bp(sp_to_pt(\number\wd\drawioMacroBox))
-        local h_bp = pt_to_bp(sp_to_pt(\number\ht\drawioMacroBox))
-        local nat_w = \drawionativewidthpx
-        local nat_h = \drawionativeheightpx
-        local xbp = w_bp / nat_w
-        local ybp = h_bp / nat_h
-        tex.sprint("\\def\\drawioXbp{" .. xbp .. "}\\def\\drawioYbp{" .. ybp .. "}")
-    }%
+	% the formatter gets confused with the braces in the lua code
+	% @formatter:off
+	\directlua{
+		local function sp_to_pt(sp) return sp/65536.0 end
+		local function pt_to_bp(pt) return pt * 72.0 / 72.27 end
+		local w_bp = pt_to_bp(sp_to_pt(\number\wd\drawioMacroBox))
+		local h_bp = pt_to_bp(sp_to_pt(\number\ht\drawioMacroBox))
+		local nat_w = \drawionativewidthpx
+		local nat_h = \drawionativeheightpx
+		local xbp = w_bp / nat_w
+		local ybp = h_bp / nat_h
+		tex.sprint("\\def\\drawioXbp{" .. xbp .. "}\\def\\drawioYbp{" .. ybp .. "}")
+	}%
 
-    \begin{tikzpicture}[x=\drawioXbp bp, y=\drawioYbp bp, #3]
-        \node[anchor=south west, inner sep=0] at (0,0) {\usebox{\drawioMacroBox}};
-        \input{#2-coords.tex}
-        #4
-    \end{tikzpicture}%
-    % @formatter:on
+	\begin{tikzpicture}[x=\drawioXbp bp, y=\drawioYbp bp, #3]
+		\node[anchor=south west, inner sep=0] at (0,0) {\usebox{\drawioMacroBox}};
+		\input{#2-coords.tex}
+		#4
+	\end{tikzpicture}%
+	% @formatter:on
 }
 \makeatother
 
@@ -265,9 +277,9 @@
 \newcommand{\musllib}{\propername{musl}/\propername{libc\plusplus}\xspace}
 \newcommand{\glibclib}{\propername{glibc}/\propername{libstdc\plusplus}\xspace}
 \newcommand*{\figuretitle}[1]{
-{\centering%   <--------  will only affect the title because of the grouping (by the
-\sffamily{\textbf{#1}}%              braces before \centering and behind \medskip). If you remove
-\par\medskip}%            these braces the whole body of a {figure} env will be centered.
+	{\centering%   <--------  will only affect the title because of the grouping (by the
+			\sffamily{\textbf{#1}}%              braces before \centering and behind \medskip). If you remove
+			\par\medskip}%            these braces the whole body of a {figure} env will be centered.
 }
 
 
@@ -288,42 +300,42 @@
 \newcolumntype{O}{S[table-format=6.1, round-precision=1]}
 \newcolumntype{T}{S[table-format=3.1, round-precision=1]}
 \newcolumntype{E}{>{\ifnum
-                        \value{rowcounter}>0\propernamedecl
-\fi\arraybackslash}l}
+				\value{rowcounter}>0\propernamedecl
+			\fi\arraybackslash}l}
 
 \definecolor{rowgray}{gray}{0.95} % A very light gray
 \newcommand{\conditionalcell}[1]{
-    \ifnum
-        \value{rowcounter}=1
-        % Row 1: Apply rotation
-        \rotatebox[origin=bc]{45}{
-        % Use [b] for bottom alignment
-        % Use the new \rotHeadWidth
-            \parbox[b]{3cm}{
-                \propernamedecl
-                \smaller
-                \centering % Add this for clean line breaks
-                #1%
-            }
-        }
-    \else
-    % Other rows: Just output the content
-        #1%
-    \fi
+	\ifnum
+		\value{rowcounter}=1
+		% Row 1: Apply rotation
+		\rotatebox[origin=bc]{45}{
+			% Use [b] for bottom alignment
+			% Use the new \rotHeadWidth
+			\parbox[b]{3cm}{
+				\propernamedecl
+				\smaller
+				\centering % Add this for clean line breaks
+				#1%
+			}
+		}
+	\else
+		% Other rows: Just output the content
+		#1%
+	\fi
 }
 
 \newcolumntype{Y}{%
-        >{\ifnum
-              \value{rowcounter}=1
-              \relax % Row 1: Don't apply \raggedright
-    \else
-              \raggedright % Other rows: Apply \raggedright
-    \fi
-    \arraybackslash     % Fix \raggedright
-    \collectcell\conditionalcell % Collect the cell content
-    }%
-    X% Base column type
-        <{\endcollectcell}%
+	>{\ifnum
+				\value{rowcounter}=1
+				\relax % Row 1: Don't apply \raggedright
+			\else
+				\raggedright % Other rows: Apply \raggedright
+			\fi
+			\arraybackslash     % Fix \raggedright
+			\collectcell\conditionalcell % Collect the cell content
+		}%
+	X% Base column type
+	<{\endcollectcell}%
 }
 % @formatter:on
 
@@ -376,90 +388,91 @@
 \newacronym{ILR}{ILR}{Instruction-Layout Randomization}
 \newacronym{IPC}{IPC}{Instructions Per Cycle}
 \newacronym{VRP}{VRP}{Value-Range Partitioning}
+\newacronym{TMA}{TMA}{Top-Down Microarchitectural Analysis}
 
 \newglossaryentry{CRA}{
-name={code-reuse attack},
-plural={code-reuse attacks},
-description={An attack that reuses code already present in the target process}
+	name={code-reuse attack},
+	plural={code-reuse attacks},
+	description={An attack that reuses code already present in the target process}
 }
 
 \ifxetex
-% WORKAROUND for xelatex vs tikzmark:
-% Definition copied from /usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf-via-dvi.def
-% Compare https://tex.stackexchange.com/q/229500 and comments!
-\makeatletter
-\def\pgfsys@hboxsynced#1+{
-{% 
-\pgfsys@beginscope%
-\setbox\pgf@hbox=\hbox+{
-\hskip\pgf@pt@x%
-\raise\pgf@pt@y\hbox+{
-\pgf@pt@x=0pt%
-\pgf@pt@y=0pt%
-\special{pdf: content q}%
-\pgflowlevelsynccm%
-\pgfsys@invoke{q -1 0 0 -1 0 0 cm}%
-\special{pdf: content -1 0 0 -1 0 0 cm q}% translate to original coordinate system
-\pgfsys@invoke{0 J [] 0 d}% reset line cap and dash
-\wd#1=0pt%
-\ht#1=0pt%
-\dp#1=0pt%
-\box#1%
-\pgfsys@invoke{n Q Q Q}%
-}
-\hss%
-}
-\wd\pgf@hbox=0pt%
-\ht\pgf@hbox=0pt%
-\dp\pgf@hbox=0pt%
-\pgfsys@hbox\pgf@hbox%
-\pgfsys@endscope%
-}
-}
-\makeatother
+	% WORKAROUND for xelatex vs tikzmark:
+	% Definition copied from /usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf-via-dvi.def
+	% Compare https://tex.stackexchange.com/q/229500 and comments!
+	\makeatletter
+	\def\pgfsys@hboxsynced#1+{
+	{% 
+			\pgfsys@beginscope%
+			\setbox\pgf@hbox=\hbox+{
+				\hskip\pgf@pt@x%
+				\raise\pgf@pt@y\hbox+{
+					\pgf@pt@x=0pt%
+					\pgf@pt@y=0pt%
+					\special{pdf: content q}%
+					\pgflowlevelsynccm%
+					\pgfsys@invoke{q -1 0 0 -1 0 0 cm}%
+					\special{pdf: content -1 0 0 -1 0 0 cm q}% translate to original coordinate system
+					\pgfsys@invoke{0 J [] 0 d}% reset line cap and dash
+					\wd#1=0pt%
+					\ht#1=0pt%
+					\dp#1=0pt%
+					\box#1%
+					\pgfsys@invoke{n Q Q Q}%
+				}
+				\hss%
+			}
+			\wd\pgf@hbox=0pt%
+			\ht\pgf@hbox=0pt%
+			\dp\pgf@hbox=0pt%
+			\pgfsys@hbox\pgf@hbox%
+			\pgfsys@endscope%
+		}
+	}
+	\makeatother
 
-\newfontfamily\firasans[Path=fonts/,
-UprightFont = *-Regular,
-BoldFont = *-Bold,
-ItalicFont = *-Italic,
-BoldItalicFont = *-BoldItalic,
-FontFace={xl}{n}{*-ExtraLight},
-FontFace={xl}{it}{*-ExtraLightItalic},
-FontFace={l}{n}{*-Light},
-FontFace={l}{it}{*-LightItalic},
-FontFace={mb}{n}{*-Medium},
-FontFace={mb}{it}{*-MediumItalic},
-FontFace={k}{n}{*-Black},
-FontFace={k}{it}{*-BlackItalic},
-Extension = .ttf,
-]{FiraSans}
+	\newfontfamily\firasans[Path=fonts/,
+		UprightFont = *-Regular,
+		BoldFont = *-Bold,
+		ItalicFont = *-Italic,
+		BoldItalicFont = *-BoldItalic,
+		FontFace={xl}{n}{*-ExtraLight},
+		FontFace={xl}{it}{*-ExtraLightItalic},
+		FontFace={l}{n}{*-Light},
+		FontFace={l}{it}{*-LightItalic},
+		FontFace={mb}{n}{*-Medium},
+		FontFace={mb}{it}{*-MediumItalic},
+		FontFace={k}{n}{*-Black},
+		FontFace={k}{it}{*-BlackItalic},
+		Extension = .ttf,
+	]{FiraSans}
 
-\newfontfamily\firacode[Path=fonts/,
-UprightFont = *-Regular,
-BoldFont = *-Bold,
-FontFace={l}{n}{*-Light},
-FontFace={m}{n}{*-Medium},
-FontFace={sb}{n}{*-SemiBold},
-Extension = .ttf,
-]{FiraCode}
+	\newfontfamily\firacode[Path=fonts/,
+		UprightFont = *-Regular,
+		BoldFont = *-Bold,
+		FontFace={l}{n}{*-Light},
+		FontFace={m}{n}{*-Medium},
+		FontFace={sb}{n}{*-SemiBold},
+		Extension = .ttf,
+	]{FiraCode}
 
-\newcommand{\figurefont}[1]{{\sf{\firasans #1}}}%
+	\newcommand{\figurefont}[1]{{\sf{\firasans #1}}}%
 \else
-\newcommand{\figurefont}[1]{#1}%
+	\newcommand{\figurefont}[1]{#1}%
 \fi
 
 \newcommand*\circledtikz[1]{\tikz[baseline=(char.base)]{
-\node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+		\node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
 \newcommand*\circleddashedtikz[1]{\tikz[baseline=(char.base)]{
-\node[shape=circle,dashed,draw,inner sep=1pt] (char) {#1};}}
+		\node[shape=circle,dashed,draw,inner sep=1pt] (char) {#1};}}
 
 \newcommand{\cnp}{\prj{}-\np{}\xspace}
 \newcommand{\oapilong}{Optimization Interface\xspace}
 \newcommand{\oapi}{OINT\xspace}
 
 \newcommand{\makepropername}[2]{
-\expandafter\newcommand\csname #1\endcsname{\propername{#2}\xspace}%
-\expandafter\newcommand\csname #1noformat\endcsname{#2\xspace}%
+	\expandafter\newcommand\csname #1\endcsname{\propername{#2}\xspace}%
+	\expandafter\newcommand\csname #1noformat\endcsname{#2\xspace}%
 }
 
 \makepropername{np}{NumPy}
@@ -479,26 +492,26 @@ Extension = .ttf,
 
 
 \DeclareRobustCommand{\rtwoc}{
-\ifdefined\pdfstringdefPreHook
-% This branch is executed for PDF bookmarks and the Table of Contents.
-\texorpdfstring{R\textsuperscript{2}C}{R²C}%
-\else
-% This branch is executed for the main document text.
-\textsc{R\textsuperscript{2}C}%
-\fi
-\xspace
+	\ifdefined\pdfstringdefPreHook
+		% This branch is executed for PDF bookmarks and the Table of Contents.
+		\texorpdfstring{R\textsuperscript{2}C}{R²C}%
+	\else
+		% This branch is executed for the main document text.
+		\textsc{R\textsuperscript{2}C}%
+	\fi
+	\xspace
 }
 
 
 \DeclareRobustCommand{\lool}{
-\ifdefined\pdfstringdefPreHook
-% This branch is executed for PDF bookmarks and the Table of Contents.
-\texorpdfstring{LOOL}{LOOL}%
-\else
-% This branch is executed for the main document text.
-\textsc{LOOL}%
-\fi
-\xspace
+	\ifdefined\pdfstringdefPreHook
+		% This branch is executed for PDF bookmarks and the Table of Contents.
+		\texorpdfstring{LOOL}{LOOL}%
+	\else
+		% This branch is executed for the main document text.
+		\textsc{LOOL}%
+	\fi
+	\xspace
 }
 
 
@@ -508,11 +521,11 @@ Extension = .ttf,
 
 \newlist{configurations}{enumerate}{1}
 \setlist[configurations,1]{
-label=\textbf{\Alph*)}      % Bold + uppercase letter + closing parenthesis
-ref=\Alph*,                  % For cleveref referencing (gives "A", "B", etc.)
+	label=\textbf{\Alph*)},     % Bold + uppercase letter + closing parenthesis
+	ref=\Alph*,                 % For cleveref referencing (gives "A", "B", etc.)
 }
 \newcommand{\configuration}[1]{
-\item \textbf{#1}
+	\item \textbf{#1}
 }
 \crefname{configurationsi}{Configuration}{Configurations}
 % see https://github.com/matplotlib/matplotlib/issues/27907
@@ -532,31 +545,31 @@ ref=\Alph*,                  % For cleveref referencing (gives "A", "B", etc.)
 
 % 2. Configure the new list
 \setlist[hypotheses]{
-font=\bfseries,   % Makes the label text bold
-leftmargin=1.5em, % Adjust indentation as needed
-labelwidth=!,    % Let the label width be determined by the longest label
-itemsep=2pt,       % Space between items
-style=nextline
+	font=\bfseries,   % Makes the label text bold
+	leftmargin=1.5em, % Adjust indentation as needed
+	labelwidth=!,    % Let the label width be determined by the longest label
+	itemsep=2pt,       % Space between items
+	style=nextline
 }
 
 \makeatletter
 \newcommand{\hypothesis}[2][]{%
-% Step the counter. This sets \@currentlabel to the number.
-\refstepcounter{hypothesiscounter}%
-% Check if an optional label key was provided.
-\if
-\relax\detokenize{#1}\relax\else
-% Save the original \@currentlabel (the number).
-\let\original@currentlabel\@currentlabel
-% Redefine \@currentlabel to be your custom text for the label.
-\protected@edef\@currentlabel{\unexpanded{#2}}%
-% Write the label using the new, custom \@currentlabel.
-\label{#1}%
-% IMPORTANT: Restore the original \@currentlabel.
-\let\@currentlabel\original@currentlabel
-\fi
-% Now, display the item text in the list.
-\item[\textbf{Hypothesis #2}]%
+	% Step the counter. This sets \@currentlabel to the number.
+	\refstepcounter{hypothesiscounter}%
+	% Check if an optional label key was provided.
+	\if
+		\relax\detokenize{#1}\relax\else
+		% Save the original \@currentlabel (the number).
+		\let\original@currentlabel\@currentlabel
+		% Redefine \@currentlabel to be your custom text for the label.
+		\protected@edef\@currentlabel{\unexpanded{#2}}%
+		% Write the label using the new, custom \@currentlabel.
+		\label{#1}%
+		% IMPORTANT: Restore the original \@currentlabel.
+		\let\@currentlabel\original@currentlabel
+	\fi
+	% Now, display the item text in the list.
+	\item[\textbf{Hypothesis #2}]%
 }
 \makeatother
 
@@ -597,16 +610,16 @@ style=nextline
 \crefname{inlinecirclei}{item}{items}
 
 \newtcolorbox{infobox}{
-colback=black!5,      % Background color (5% black, 95% white)
-colframe=black,       % Frame color
-boxrule=1.2pt,        % Frame thickness
-%arc=3mm,              % Radius of the rounded corners
-boxsep=3pt,           % Padding between text and box
-left=8pt,            % Specific padding on the left
-right=8pt,           % Specific padding on the right
-top=8pt,              % Specific padding on the top
-bottom=8pt,           % Specific padding on the bottom
-%    breakable,            % Allows the box to break across pages
+	colback=black!5,      % Background color (5% black, 95% white)
+	colframe=black,       % Frame color
+	boxrule=1.2pt,        % Frame thickness
+	%arc=3mm,              % Radius of the rounded corners
+	boxsep=3pt,           % Padding between text and box
+	left=8pt,            % Specific padding on the left
+	right=8pt,           % Specific padding on the right
+	top=8pt,              % Specific padding on the top
+	bottom=8pt,           % Specific padding on the bottom
+	%    breakable,            % Allows the box to break across pages
 }
 
 \numberwithin{figure}{section}
@@ -614,9 +627,9 @@ bottom=8pt,           % Specific padding on the bottom
 
 % Inline helper: draw a tiny boxed number and mark it with a global node name.
 \newcommand{\numtag}[2]{
-\tikz[remember picture,baseline=(#1.base)]%
-\node[inner sep=1pt,outer sep=0pt,draw,rounded corners=2pt,%
-font=\footnotesize] (#1) {#2};
+	\tikz[remember picture,baseline=(#1.base)]%
+	\node[inner sep=1pt,outer sep=0pt,draw,rounded corners=2pt,%
+		font=\footnotesize] (#1) {#2};
 }
 
 \setminted{fontsize=\footnotesize}

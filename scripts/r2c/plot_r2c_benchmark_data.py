@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 
 import numpy as np
 import pandas
@@ -11,12 +12,17 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator, FormatStrFormat
 from scipy.stats import gmean
 import matplot2tikz
 
-from r2c_common import (
+# Add parent directory to path for utils import
+sys.path.insert(0, str(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from common import (
     BENCHMARK_NAMES,
     BENCHMARK_NAMES_INT,
     GEOMEAN_SETS,
     natural_sort_key,
+    BENCH_FULL_TO_SHORT,
 )
+from utils import define_latex_table
 
 plt.style.use("petroff10")
 
@@ -776,6 +782,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Suppress info messages (useful for table mode)",
     )
+    parser.add_argument(
+        "--latex-output",
+        type=str,
+        default=None,
+        help="Output directory for LaTeX table rows (uses define_latex_table).",
+    )
 
     args = parser.parse_args()
 
@@ -983,6 +995,23 @@ if __name__ == "__main__":
                 return col
 
         result = build_table(df, name_mapping, sort_key=sort_key, as_percentage=True)
+
+        # Map benchmark names from full SPEC names to short names
+        result.index = result.index.map(lambda x: BENCH_FULL_TO_SHORT.get(x, x))
+
+        # Rename columns: strip "r2c-btra" prefix to just show the number
+        result.columns = [c.replace("r2c-btra", "") if c.startswith("r2c-btra") else c for c in result.columns]
+
+        # Write LaTeX rows if requested
+        if args.latex_output:
+            # Prepare table for LaTeX: move index to column, format values as strings
+            latex_df = result.reset_index().rename(columns={"index": "Benchmark"})
+            # Format numeric columns with 1 decimal place
+            for col in latex_df.columns:
+                if col != "Benchmark":
+                    latex_df[col] = latex_df[col].apply(lambda x: f"{x:.1f}")
+            define_latex_table(args, "btra-steps", latex_df, remove_header=True)
+
         table_format = args.table_format or "markdown"
         if table_format == "latex":
             # Generate LaTeX manually to avoid jinja2 dependency

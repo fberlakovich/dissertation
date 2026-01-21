@@ -9,62 +9,37 @@ Yet testing compilers is challenging precisely because the interesting behaviors
 \lool addresses this challenge by leveraging a unique property of compilers: they already record which optimizations they perform.
 By treating these optimization events as coverage features, \lool can guide input generation toward rare optimization combinations that are likely to expose bugs.
 
-\definecolor{mylinecolor}{HTML}{113377}
+\pgfplotsset{
+    optimizationchart/.style={
+        width=0.9\textwidth,
+        height=13cm,
+        xlabel={Count},
+        ylabel={},
+        yticklabel style={font=\footnotesize},
+        y axis line style={opacity=0},
+        axis x line*=bottom,
+        tick align=outside,
+        enlarge y limits={0.03},
+        bar width=10pt,
+        y=14pt,
+        xminorticks=false,
+        axis lines*=left,
+    },
+    optimizationbar/.style={
+        fill=gray!20,
+        draw=blue!40,
+        line width=0.5pt,
+    },
+}
+\tikzset{
+    optimizationlabel/.style={
+        anchor=center,
+        font=\footnotesize,
+    },
+}
 \begin{figure}[t]
     \centering
-
-    \begin{tikzpicture}
-        \begin{axis}
-        [
-            title={Performed optimizations},
-            xbar, % Horizontal bars
-            xmode=log, % Logarithmic x-axis
-            xlabel={Count},
-            ylabel={}, % No label on the y-axis
-            xmin=10, % Start x-axis slightly above 1 to match original
-            width=0.9\textwidth,
-            height=13cm, % Adjust height as needed
-            ytick=data, % A tick for each bar
-            yticklabels from table={figures/lool/optimizationcounts.dat}{Optimization}, % Get y-labels from the 'Optimization' column
-            yticklabel style={font=\propernamedecl\footnotesize},
-            y axis line style={opacity=0}, % Hide y-axis line
-            axis x line*=bottom, % Show only bottom x-axis line
-            tick align=outside,
-            enlarge y limits={0.05},
-            bar width=0.7,
-            xminorticks=false,
-            axis lines*=left,
-            y axis line style={opacity=0},
-            point meta=explicit,
-            nodes near coords, % Activate nodes
-            every node near coord/.append style={
-                color=white,
-                font=\small
-            },
-            visualization depends on={meta < 30000 \as \mycond}, % Condition to move small-bar labels
-            nodes near coords style={
-                font=\footnotesize\propernamedecl,
-                color=black,                       % Set color directly to white
-                /pgf/number format/fixed,          % Use fixed-point number format
-                /pgf/number format/precision=0     % ...with zero decimal places
-            },
-            execute at begin node near coord/.code={
-                \pgfkeys{/tikz/anchor=west} % small bar: outside, black
-            },
-        ]
-            % Read data from the file for the plot
-            \addplot+[
-            fill=gray!20,
-            draw=mylinecolor,
-            line width=0.5pt
-            ]  table [
-            x=Count,
-            y expr=\coordindex, % Use the row number for the y-coordinate
-            meta=Count,
-            col sep=tab % Specify that columns are separated by tabs
-            ] {figures/lool/optimizationcounts.dat};
-        \end{axis}
-    \end{tikzpicture}
+    \input{figures/lool/optimizationcounts.tex}
     \caption{Counts of selected optimizations during the compilation of \num{1000} fuzzed test cases (logarithmic axis).}\label{lool:fig:optimizations}
 \end{figure}
 
@@ -112,41 +87,46 @@ However, code coverage has two major drawbacks:
     In other words, code coverage merges the coverage for an entire input program, even if compiler passes execute multiple times on different parts of the input (\eg methods).
 \end{description}
 
-\newlength{\originalbelowcaptionskip}
-\setlength{\originalbelowcaptionskip}{\belowcaptionskip}
 \begin{figure}
-    \setlength{\belowcaptionskip}{\baselineskip}
-
-    \begin{subfigure}[t]{\linewidth}
+    % Row 1: Code blocks (top-aligned)
+    \begin{minipage}[t]{0.48\linewidth}
         \centering
-        \begin{minted}{java}
+        \begin{minted}[fontsize=\footnotesize]{java}
 int sum = 0;
 for (int i = 0; i < array.length; i++) {
     if (i == 0)
-        log("summing non-empty array %s", array);
+        log("summing array %s", array);
     sum += array[i];
 }
         \end{minted}
-        \caption{Example loop not amenable to loop vectorization due to control flow and a method call in the loop.}
-        \label{lool:fig:loop_before_peeling}
-    \end{subfigure}
-    \setlength{\belowcaptionskip}{\originalbelowcaptionskip}
-
-    \begin{subfigure}[t]{\linewidth}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{0.48\linewidth}
         \centering
-        \begin{minted}{java}
+        \begin{minted}[fontsize=\footnotesize]{java}
 int sum = 0;
 if (array.length > 0) {
-    log("summing non-empty array %s", array);
+    log("summing array %s", array);
     sum += array[0];
     for (int i = 1; i < array.length; i++) {
         sum += array[i];
     }
 }
         \end{minted}
-        \caption{Example loop after loop peeling. The remaining loop is amenable to loop vectorization.}
+    \end{minipage}
+
+    \vspace{0.5\baselineskip}
+
+    % Row 2: Subcaptions (aligned)
+    \begin{minipage}[t]{0.48\linewidth}
+        \subcaption{Example loop not amenable to loop vectorization due to control flow and a method call.}
+        \label{lool:fig:loop_before_peeling}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{0.48\linewidth}
+        \subcaption{Example loop after loop peeling. The remaining loop is amenable to loop vectorization.}
         \label{lool:fig:loop_after_peeling}
-    \end{subfigure}
+    \end{minipage}
 
     \caption{Combination of compiler optimizations.}
     \label{lool:fig:context_example}

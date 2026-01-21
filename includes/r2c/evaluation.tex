@@ -95,7 +95,6 @@ For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 p
 
 In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-btras}).
 Each block of 4 addresses requires one AVX2 instruction to load them into a register and one to write them onto the stack.
-\fbetodo{adjust to new numbers}
 \cref{r2c:fig:perf-components} shows that the optimization improves the overhead caused by \glspl{BTRA} over all benchmarks by 2 percent points.
 Most importantly, the optimization decreases the overhead of the outlier \propername{omnetpp} by about 13 absolute percent points, down to 8\%.
 In this configuration, the maximum overhead of 10\% is caused by \propername{xalancbmk}.
@@ -108,7 +107,6 @@ These numbers suggest that the majority of the overhead is caused by writing the
 
 \subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
-\fbetodo{adjust to new numbers}
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
 The optimization to insert \glspl{heapbt} only in functions that write to their stack frame improves performance by 1\%.
 
@@ -181,10 +179,16 @@ Apart from Apache and nginx, we also compiled the GTK version of WebKit~\cite{We
 We built both browsers with a fixed total number of 10 \glspl{BTRA} per call site.
 WebKit and Chromium are massive \cpp projects with more than 4.5 million lines and almost 32 million lines of C/C\plusplus code, respectively.
 
-\fbetodo{show code that had to be changed}
 To verify that \rtwoc does not introduce errors into the browser, we ran the included tests as well as the Speedometer browser benchmark.
 To pass the tests, we had to modify a single source file in Chromium, and three source files in Webkit to deactivate \rtwoc for a few functions.
 In both cases, unprotected code called an \rtwoc compiled function with stack arguments.
+An example is the following function signature from WebKit's \propername{WebCore} module:
+\begin{minted}[breaklines]{cpp}
+        static void gbkCallbackEscape(const void* context, UConverterFromUnicodeArgs* fromUArgs, const UChar* codeUnits, int32_t length, UChar32 codePoint, UConverterCallbackReason reason, UErrorCode* error);
+\end{minted}
+WebKit registers this function as a callback in the ICU unicode library.
+The function has more parameters than can be passed in registers and, thus, needs stack arguments.
+Unless the ICU library is compiled with \rtwoc, the calling code does perform \cfs (see \cref{r2c:sss:stack-arguments}).
 We discuss this implementation limitation in \cref{r2c:ss:abi-change}.
 We did not include the Speedometer performance results in the performance evaluation since Speedometer's results showed a variation of more than 20\% even in the baseline.
 In daily browsing we did not notice any difference.

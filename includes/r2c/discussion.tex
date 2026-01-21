@@ -40,17 +40,15 @@
 
 \begin{table}[t]
     \centering
-    \caption{\Gls{BTRA} overhead by step count. Cycles column shows overhead in percent.}
-    \label{tab:btra-overhead}
+    \caption{Performance overhead (\%) by \gls{BTRA} count relative to baseline.
+    ALl other \rtwoc components use the same configuration as full \rtwoc (see \cref{r2c:sss:eval-btra}).}
+    \label{r2c:tab:btra-steps-overhead}
     \footnotesize
-    \setlength{\tabcolsep}{4pt}
-    \begin{tabular}{l *{6}{rr}}
+    \begin{tabular}{l *{6}{r}}
         \toprule
-        & \multicolumn{2}{c}{2 BTRAs} & \multicolumn{2}{c}{6 BTRAs} & \multicolumn{2}{c}{10 BTRAs} & \multicolumn{2}{c}{14 BTRAs} & \multicolumn{2}{c}{18 BTRAs} & \multicolumn{2}{c}{22 BTRAs} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
-        Benchmark & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC & Cycles & IPC \\
+        Benchmark & 2 \glspl{BTRA} & 6 \glspl{BTRA} & 10 \glspl{BTRA} & 14 \glspl{BTRA} & 18 \glspl{BTRA} & 22 \glspl{BTRA} \\
         \midrule
-        \fileInput{generated/r2c/btra-step-cycles}
+        \fileInput{generated/r2c/btra-steps}
         \bottomrule
     \end{tabular}
 \end{table}
@@ -58,8 +56,8 @@
 As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
 For CPU's without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
-The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) indicates that increased instruction cache pressure contributes to the overhead.
-Similarly, prolog trap insertion also contributes to the increased instruction cache pressure.
+The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) suggests that instruction cache pressure may contribute to the overhead, although our counter analysis does not isolate AVX2 vs \code{push}.
+Similarly, prolog trap insertion likely adds instruction-cache pressure by expanding hot code.
 
 % We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
 % We could not evaluate this effect due to the lack of compatible hardware.
@@ -100,18 +98,30 @@ Thus, the stalls might hide the instructions of each component in isolation, but
 \end{figure}
 
 The example of call count and performance overhead differences between \propername{perlbench} and \propername{omnetpp} above showed that instructions and call counts alone give an incomplete picture.
-To better understand the exact causes of the overhead, we recorded \code{perf} counters for particularly affected benchmarks on \propername{i9}.
+To better understand the exact causes of the overhead, we recorded \code{perf} counters for benchmarks with overhead on \propername{i9}.
+Note that we did not record the counters with the same seeds that were used for the initial performance evaluation.
+The difference in seeds and the sampling inaccuracies introduced by \code{perf} can cause slight differences in the observed cycle overhead compared to the runtime overhead described in \cref{r2c:fig:perf-full}.
+The relative differences between configurations and the baseline as well as between counters stay intact, however.
 We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
-Two performance counters are particularly important when interpreting the results: cycles and instructions.
+
+Two performance counters are particularly important when interpreting the results: cycles, instructions and Intel's \gls{TMA} counters\cite{yasin2014}.
 The cycles counter tells us the total number of cycles the benchmark run took.
 Given a fixed \gls{CPU} frequency, cycles directly translate to execution time.
 Instructions, on the other hand, tell us how many instructions the \gls{CPU} executed.
 A single instruction can (and usually does) take more than one cycle.
-At the same time, superscalar pipelining \glspl{CPU}, like all of the \glspl{CPU} in our evaluation, overlap instruction execution and can execute multiple operations in parallel, depending on the instruction type.
+At the same time, superscalar pipelining \glspl{CPU} (all of the \glspl{CPU} in our evaluation), overlap instruction execution and can execute multiple micro-operations in parallel, depending on the instruction type.
 As a result, the ratio of instructions and cycles, called \gls{IPC}, can be both smaller than, equal to, or greater than 1.
+Intel's \gls{TMA} counters are subdivided into multiple layers, of which the first layer is the most important one for our analysis.
+The first layer classifies pipeline slots into one of four categories:
+\begin{enumerate}
+    \item \textbf{Retiring}: Pipeline slots where micro-operations complete successfully and contribute to useful work.
+    \item \textbf{Bad Speculation}: Slots wasted due to branch mispredictions or other speculative execution that was later discarded.
+    \item \textbf{Frontend Bound}: Slots where the backend could accept work, but the frontend (instruction fetch and decode) cannot supply micro-operations fast enough.
+    \item \textbf{Backend Bound}: Slots where the frontend has work ready, but the backend (execution units and memory subsystem) cannot accept it due to resource contention or memory latency.
+\end{enumerate}
 
 As expected, each benchmark shows a significant increase in the number of instructions.
-Most of \rtwoc's diversification measures, \ie prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
+Most of \rtwoc's diversification measures, \eg prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
 Additional instructions can affect execution performance in at least two ways:
 \begin{enumerate*}
     \item Executing an instruction requires \gls{CPU} cycles.
@@ -120,12 +130,20 @@ Additional instructions can affect execution performance in at least two ways:
     Thus, additional instructions can influence other code parts, even if they are not executed at all.
 \end{enumerate*}
 Conversely, additional instructions do not necessarily lead to more cycles, as sometimes they can hide in stalls.
-The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint of a benchmark's performance profile.
+The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint at a benchmark's performance profile.
 Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all of \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
+\cref{r2c:tab:btra-steps-overhead} shows the performance overhead of each progression relative to the baseline.
 \cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
 
 \propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
-\propername{Perlbench} already has a relatively high \gls{IPC} of ~3 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
+\propername{Perlbench} already has a relatively high \gls{IPC} of ~2.5 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
+We initially speculated that \propername{perlbench}, just like \propername{xalancbmk}, is affected by an increased instruction-cache pressure.
+This hypothesis was supported by the sharp increase in L1 (+72\%) and L2 (+90\%) code cache misses for \propername{perlbench} in the full \rtwoc configuration.
+The relative numbers can be misleading, however, as a comparison of the L1 and L2 miss rates and a relatively low increase in L2 stall cycles suggests that the L2 cache absorbs most of the L1 misses and the L3 cache most of the L2 misses.
+The positive effect of the cache hierarchy is also confirmed by the \gls{TMA} counters: \rtwoc causes no notable increase in the \propername{Frontend Bound} category.
+No increase in the \propername{Frontend Bound} category means that with \rtwoc, the \gls{CPU} does not stall more on waiting for instructions than it already did in the baseline.
+Additional cache misses and memory stalls in \propername{perlbench} cause overall only about 1.5\% of the additional cycles.
+The remaining cycle overhead is caused by additional instructions, which cannot hide in the relatively small stall room of the baseline.
 
 
 For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
@@ -136,26 +154,48 @@ For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instru
 \fbetodo{Add figure}
 If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
 In benchmarks with memory stalls, thus, \glspl{BTRA} cost fewer cycles on average.
-For example, for \propername{mcf} we observe that while, relative to the baseline, instructions increase by almost 60\%, cycles increase only by about 17\%.
+For example, for \propername{mcf} we observe that while, relative to the baseline, instructions increase by almost 42\%, cycles increase only by about 13\%.
 This indicates that stalls can absorb many of the additional instructions, explaining at least in part the relatively low overhead of \propername{mcf}.
-\propername{Omnetpp} shows a similar picture, with instructions increasing by 60\%, but cycles increasing only by about 26\%.
+\propername{Omnetpp} shows a similar picture, with instructions increasing by 42\%, but cycles increasing only by about 16\%.
+The memory hiding theory is further substantiated by the fact that for both \propername{mcf} and \propername{omnetpp} the \propername{Retiring} category \emph{increases}.
+Such an increase means that the CPU performs more work (presumably the \glspl{BTRA} instructions) relative to the overall cycles instead of \eg waiting for a memory stall.
 
-\propername{Gcc}, which
+\propername{Gcc} shows a combination of the phenomenons discussed so far.
+Like for \propername{perlbench}, the cache hierarchy absorbs the additional instruction pressure well, causing no notable increase in the \propername{Frontend Bound} category.
+Like \propername{mcf} and \propername{omnetpp}, the \propername{gcc} baseline provides some stall room for additional instructions to hide, although the effect is less pronounced than for \propername{mcf} and \propername{omnetpp}.
+Additional instructions that cannot hide in the fewer stall cycles, thus, directly contribute to \propername{gcc}'s overhead.
 
-For \propername{deepsjeng}, which is also below the diagonal but closer to it than \eg \propername{omnetpp} and \propername{mcf}, the hiding effect is less pronounced.
-In particular, \rtwoc causes about 17\% more instructions but only 12\% more cycles.
+For \propername{deepsjeng}, which is also below the diagonal but closer to it than \eg \propername{omnetpp} and \propername{mcf}, the hiding effect is also less pronounced.
+In particular, \rtwoc causes about 12\% more instructions but only 9\% more cycles.
 The relatively low performance overhead of \propername{deepsjeng} is better explained by its low \emph{call density}, \ie the ratio of calls to baseline instructions.
-\Cref{tab:call-density} shows that \propername{deepsjeng} has the lowest call density (7.0 calls per 1000 instructions) because it executes about 143 instructions between calls on average.
+\Cref{r2c:tab:call-density} shows that \propername{x264} has the lowest call density (2.7 calls per 1000 instructions) due to its loop-intensive video encoding kernels, followed by \propername{deepsjeng} and \propername{leela} (7.0 and 7.2 respectively) which execute about 140 instructions between calls on average.
 In contrast, \propername{mcf} and \propername{omnetpp} call functions every 43 and 36 instructions respectively, resulting in call densities of 23.5 and 27.5.
-Since each call adds approximately 25 \gls{BTRA} instructions, the instruction overhead is roughly proportional to call density.
-This explains why \propername{deepsjeng} has only 17\% instruction overhead despite executing more total calls than \propername{perlbench} (11.4B vs 9.4B): the fixed \gls{BTRA} cost is amortized over more baseline work.
+Since each call instrumented by \rtwoc adds approximately 25 \gls{BTRA} instructions, the instruction overhead is roughly proportional to call density.
+This explains why \propername{deepsjeng} has only 12\% instruction overhead despite executing more total calls than \propername{perlbench} (11.4B vs 9.4B): the fixed \gls{BTRA} cost is amortized over more baseline work.
 
+\propername{xalancbmk}, which shows a similar \gls{IPC} progression in \cref{r2c:fig:btra-instr-vs-cycles} as \propername{deepsjeng}, can also hide some of the additional instructions in stalls.
+Specifically, \propername{xalancbmk} with \rtwoc has 23\% additional instructions, but only 12\% additional cycles.
+Like for other benchmarks below the diagonal, we can see an increase in the \propername{Retiring} category and a decrease in the \propername{Backend Bound} category, meaning that preexisting stalls can hide some of the additional instructions.
+The L1/L2/L3 instruction cache counters also indicate that the cache hierarchy can absorb much of the additional instruction pressure.
+Unlike with the other benchmarks, however, we see a slight increase (+1.2\%) in the \propername{Frontend Bound} category, suggesting that the additional instruction pressure occasionally overwhelms the caches.
+
+The benchmark \propername{x264} shows a small amount of hiding.
+The actual cycle overhead is about 30\% smaller than the instruction overhead alone predicts.
+That is, about 30\% of the additional cycles can hide in a preexisting stall.
+The overall low overhead is best explained by the low call density of x264 (see \cref{r2c:tab:call-density}).
+Already in the baseline the \gls{CPU} spends most of its time performing time-consuming number crunching for the video encoding.
+
+\propername{Leela}'s low performance overhead is likely the result of execution port underutilization rather than memory slack alone.
+The baseline \gls{IPC} is low ($\approx$1.05), indicating that a 4-wide core leaves substantial headroom for additional instructions to execute in parallel.
+The perf counter data also show non-trivial memory stalls (about 22\%) and divider activity (about 3\%), which provide additional hiding capacity.
+Both \propername{Backend Bound} and the \propername{Frontend Bound} categories decrease slightly with \rtwoc, consistent with BTRA instructions filling otherwise idle slots.
+The high \propername{Bad Speculation} rate correlates with low baseline utilization but does not itself create slack; it explains why the baseline \gls{IPC} is low, not why the overhead is hidden.
 
 
 \begin{table}[t]
     \centering
     \caption{Call density analysis. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
-    \label{tab:call-density}
+    \label{r2c:tab:call-density}
     \sisetup{
         table-alignment-mode=none,
         table-number-alignment=right,
@@ -167,7 +207,9 @@ This explains why \propername{deepsjeng} has only 17\% instruction overhead desp
         \toprule
         Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
         \midrule
+        \propername{x264}      & 866.8                & 2.3         & 2.7       \\
         \propername{deepsjeng} & 1635.1               & 11.4        & 7.0       \\
+        \propername{leela}     & 1638.0               & 11.8        & 7.2       \\
         \propername{perlbench} & 829.1                & 9.4         & 11.4      \\
         \propername{gcc}       & 651.7                & 7.5         & 11.5      \\
         \propername{xalancbmk} & 879.8                & 12.4        & 14.1      \\
