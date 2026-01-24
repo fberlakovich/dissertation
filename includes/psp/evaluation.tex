@@ -1,8 +1,8 @@
 \section{Evaluation}
 
-This section describes the evaluation of our prototype implementation described in \cref{psc:s:implementation}.
+This section describes the evaluation of our prototype implementation described in \cref{psp:s:implementation}.
 
-\subsection{System Configuration}\label{psc:ss:system-configuration}
+\subsection{System Configuration}\label{psp:ss:system-configuration}
 
 Experiments were conducted on a private Kubernetes cluster consisting of 10 identical worker nodes, each equipped with dual AMD EPYC 7H12 64-core processors (256 threads) and 1 TB of RAM, running Debian 12.
 The cluster is orchestrated by K3s with the Volcano batch scheduler.
@@ -17,21 +17,21 @@ The evaluation infrastructure is based on a customized fork of FuzzBench.
 % EVALUATION OUTLINE WITH DATA-DRIVEN INSIGHTS
 % =============================================================================
 % Data: vrp-unfold-eval01.zip (40 trials × 18 benchmarks × 5 fuzzers, 24h each)
-% Analysis script: scripts/psc/compare_fuzzers.py
+% Analysis script: scripts/psp/compare_fuzzers.py
 % =============================================================================
 
-\subsection{Research Questions}\label{psc:ss:research-questions}
+\subsection{Research Questions}\label{psp:ss:research-questions}
 % RQ1: Does VRP improve edge coverage compared to baseline AFL++?
 % RQ2: Does indirect call unfolding improve edge coverage?
-% RQ3: Do PSC transformations affect fuzzing throughput?
-% RQ4: Do PSC transformations improve bug-finding capability (Magma)?
+% RQ3: Do PSP transformations affect fuzzing throughput?
+% RQ4: Do PSP transformations improve bug-finding capability (Magma)?
 % RQ5: Are improvements statistically significant across benchmarks?
 
-\subsection{Evaluated Configurations and Benchmarks}\label{psc:ss:configurations}
+\subsection{Evaluated Configurations and Benchmarks}\label{psp:ss:configurations}
 
-To test the effectiveness of \gls{PSC} and in particular dynamic call unfolding and \gls{VRP}, we build a separate configuration for each component.
+To test the effectiveness of \gls{PSP} and in particular dynamic call unfolding and \gls{VRP}, we build a separate configuration for each component.
 We use \aflpp version \propername{4.32c} as the fuzzer.
-\gls{PSC} configurations differ from the baseline configurations only in the instrumented binary because \gls{PSC} is compatible with any code-coverage-guided fuzzer.
+\gls{PSP} configurations differ from the baseline configurations only in the instrumented binary because \gls{PSP} is compatible with any code-coverage-guided fuzzer.
 As dynamic call unfolding relies on \gls{LTO} for a whole-program view, we test \propername{aflplusplus\_unfold} against an \aflpp configuration with \gls{LTO} enabled.
 We also test \gls{VRP} with \gls{LTO}, again against an \aflpp baseline with \gls{LTO}.
 Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assignment enabled by \gls{LTO} can help with the larger number of edge-ids produced by \gls{VRP}.
@@ -85,7 +85,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
     \end{tabular}
 \end{table}
 
-\subsection{Edge Coverage}\label{psc:ss:coverage}
+\subsection{Edge Coverage}\label{psp:ss:coverage}
 
 % -----------------------------------------------------------------------------
 % FINAL COVERAGE RESULTS (from data analysis)
@@ -153,7 +153,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 %     96     | 8738     | 8821  | 8937  | 8873    | 8879
 %     → VRP reaches 90% at cycle 25 vs baseline cycle 31
 
-\subsection{Fuzzing Throughput}\label{psc:ss:throughput}
+\subsection{Fuzzing Throughput}\label{psp:ss:throughput}
 % TABLE: Execution speed
 % | Configuration   | Mean execs/sec | vs Baseline |
 % |-----------------|----------------|-------------|
@@ -162,11 +162,11 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 %
 % KEY INSIGHT: No throughput penalty. VRP actually shows +1.8% faster execution,
 % likely due to variance rather than real improvement. The additional branches
-% from PSC transformations do not measurably slow down fuzzing.
+% from PSP transformations do not measurably slow down fuzzing.
 %
 % (Note: LTO configs lack stats data in current dataset)
 
-\subsection{Bug Detection (Magma)}\label{psc:ss:bugs}
+\subsection{Bug Detection (Magma)}\label{psp:ss:bugs}
 % TABLE: Bug triggering summary
 % | Comparison          | More Bugs | Fewer Bugs | Same |
 % |---------------------|-----------|------------|------|
@@ -174,26 +174,26 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % | VRP+LTO vs LTO      | 6         | 4          | 16   |
 % | Unfold vs LTO       | 7         | 5          | 14   |
 %
-% KEY INSIGHT: Mixed results - PSC changes WHICH bugs are found, not HOW MANY.
+% KEY INSIGHT: Mixed results - PSP changes WHICH bugs are found, not HOW MANY.
 % No clear winner in aggregate bug finding.
 
 % TABLE: Notable bug differences (biggest deltas)
-% | Bug ID | Target  | PSC Config | PSC Triggers | Baseline | Delta    |
+% | Bug ID | Target  | PSP Config | PSP Triggers | Baseline | Delta    |
 % |--------|---------|------------|--------------|----------|----------|
-% | TIF008 | libtiff | VRP        | 22,007       | 1,900    | +20,107  | ← PSC helps
-% | TIF008 | libtiff | Unfold     | 16,044       | 445      | +15,599  | ← PSC helps
-% | PNG003 | libpng  | VRP+LTO    | 384,047      | 293,708  | +90,339  | ← PSC helps
-% | PNG003 | libpng  | Unfold     | 410,235      | 293,708  | +116,527 | ← PSC helps
-% | TIF014 | libtiff | VRP        | 187,483      | 217,948  | -30,465  | ← PSC hurts
-% | TIF014 | libtiff | VRP+LTO    | 235,560      | 368,987  | -133,427 | ← PSC hurts
-% | TIF014 | libtiff | Unfold     | 157,176      | 368,987  | -211,811 | ← PSC hurts
+% | TIF008 | libtiff | VRP        | 22,007       | 1,900    | +20,107  | ← PSP helps
+% | TIF008 | libtiff | Unfold     | 16,044       | 445      | +15,599  | ← PSP helps
+% | PNG003 | libpng  | VRP+LTO    | 384,047      | 293,708  | +90,339  | ← PSP helps
+% | PNG003 | libpng  | Unfold     | 410,235      | 293,708  | +116,527 | ← PSP helps
+% | TIF014 | libtiff | VRP        | 187,483      | 217,948  | -30,465  | ← PSP hurts
+% | TIF014 | libtiff | VRP+LTO    | 235,560      | 368,987  | -133,427 | ← PSP hurts
+% | TIF014 | libtiff | Unfold     | 157,176      | 368,987  | -211,811 | ← PSP hurts
 %
-% OBSERVATION: TIF008 consistently benefits from PSC (10-50× more triggers),
+% OBSERVATION: TIF008 consistently benefits from PSP (10-50× more triggers),
 % while TIF014 consistently suffers (30-60% fewer triggers). This suggests
-% PSC transformations change exploration paths in ways that favor some bugs
+% PSP transformations change exploration paths in ways that favor some bugs
 % over others, rather than providing uniform improvement.
 
-\subsection{Statistical Analysis}\label{psc:ss:statistics}
+\subsection{Statistical Analysis}\label{psp:ss:statistics}
 % Methodology:
 % - 40 trials per benchmark-fuzzer configuration
 % - Mann-Whitney U test for significance (p < 0.05)
@@ -211,7 +211,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % negligible range (0.44-0.56), indicating true absence of effect rather than
 % insufficient sample size.
 
-\subsection{Discussion}\label{psc:ss:discussion}
+\subsection{Discussion}\label{psp:ss:discussion}
 % -----------------------------------------------------------------------------
 % ANSWERS TO RESEARCH QUESTIONS
 % -----------------------------------------------------------------------------
@@ -222,10 +222,10 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 %     Avg +0.46%, one benchmark (openssl_x509) shows +8.2% but not significant
 %
 % RQ3 (Throughput): NO PENALTY - VRP shows +1.8% faster execution
-%     PSC transformations do not slow down fuzzing
+%     PSP transformations do not slow down fuzzing
 %
 % RQ4 (Bug finding): MIXED - Changes which bugs are found, not total count
-%     TIF008: +10-50× with PSC; TIF014: -30-60% with PSC
+%     TIF008: +10-50× with PSP; TIF014: -30-60% with PSP
 %
 % RQ5 (Significance): NO - Only 1/54 comparisons significant (a regression)
 %     Effect sizes uniformly negligible (A12 ≈ 0.5)
@@ -233,7 +233,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % -----------------------------------------------------------------------------
 % INTERPRETATION
 % -----------------------------------------------------------------------------
-% The data suggests PSC transformations have negligible impact on fuzzing
+% The data suggests PSP transformations have negligible impact on fuzzing
 % effectiveness in 24-hour campaigns on FuzzBench targets.
 %
 % Possible explanations:
@@ -247,7 +247,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % - libtiff: VRP+LTO maintains consistent ~3% lead (suggests VRP helps here)
 % - openssl_x509: Unfold diverges after cycle 20 (late-stage benefit)
 % - sqlite3: VRP reaches 90% coverage faster but final coverage similar
-% These patterns suggest PSC may provide marginal benefits in specific contexts.
+% These patterns suggest PSP may provide marginal benefits in specific contexts.
 
 % -----------------------------------------------------------------------------
 % LIMITATIONS
@@ -255,7 +255,7 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % - 24-hour campaign duration (longer campaigns may show different results)
 % - FuzzBench benchmark selection (may not be representative of all software)
 % - Single LLVM version (transformation applicability varies by compiler)
-% - Coverage-based evaluation (PSC may help with properties not captured by coverage)
+% - Coverage-based evaluation (PSP may help with properties not captured by coverage)
 
 % =============================================================================
 % FIGURES AND TABLES TO CREATE
@@ -275,4 +275,4 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % TABLE 5: Magma bug triggering results (focus on TIF008/TIF014/PNG003)
 % =============================================================================
 
-\todo{Implement evaluation based on above outline. Data: data/psc/dataframes/vrp-unfold-eval01.zip}
+\todo{Implement evaluation based on above outline. Data: data/psp/dataframes/vrp-unfold-eval01.zip}

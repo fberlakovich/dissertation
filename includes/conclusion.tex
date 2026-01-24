@@ -15,7 +15,7 @@ Rather than treating the compiler as a black box and relying on generic code cov
 A genetic algorithm uses this feedback to breed inputs that trigger rare optimization interactions.
 Our evaluation on the GraalVM compiler showed that \lool outperforms both static parameter configurations and AFL-based parametric fuzzing in triggering rare optimizations.
 
-Finally, we introduced \gls{PSC}, a technique that leverages compiler analyses to expose hidden program state to coverage-guided fuzzers.
+Finally, we introduced \gls{PSP}, a technique that leverages compiler analyses to expose hidden program state to coverage-guided fuzzers.
 The key insight is that compilers already perform sophisticated reasoning about data dependencies---for devirtualization, value-range analysis, and other optimizations.
-By repurposing these analyses to transform data dependencies into control dependencies, PSC provides stepping stones that help fuzzers explore deeper into the state space.
+By repurposing these analyses to transform data dependencies into control dependencies, PSP provides stepping stones that help fuzzers explore deeper into the state space.
 Preliminary results do not show a clear advantage, calling for further research in that direction.

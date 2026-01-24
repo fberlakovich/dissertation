@@ -113,8 +113,8 @@ In Part~\ref{part:fuzzing}, I present \lool, a compiler fuzzing framework based 
 Instead of relying on code coverage, \lool leverages the compiler's own optimization log as a domain-specific feedback signal.
 A genetic algorithm uses this feedback to steer test-case generation toward rare optimization interactions that are difficult to trigger otherwise.
 
-\paragraph{Program State Convolution}
-Finally, I present \emph{Program State Convolution} (PSC), a technique that uses compiler analyses to expose hidden data dependencies to coverage-guided fuzzers.
-By transforming indirect calls into explicit control-flow branches and partitioning value ranges, PSC provides stepping stones that help fuzzers explore program states that conventional coverage metrics would conflate.
+\paragraph{Program State Projection}
+Finally, I present \emph{Program State Projection} (PSP), a technique that uses compiler analyses to expose hidden data dependencies to coverage-guided fuzzers.
+By transforming indirect calls into explicit control-flow branches and partitioning value ranges, PSP provides stepping stones that help fuzzers explore program states that conventional coverage metrics would conflate.
 This contribution includes preliminary results that demonstrate the approach's potential.
 

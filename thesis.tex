@@ -155,7 +155,7 @@ This part explores two ways to leverage this information.
 
 \Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
 We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
-Finally, we introduce \emph{Program State Convolution} (PSC), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
+Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
 }
 \part{Improving Fuzzer-Guidance with Compiler Assistance}\label{part:fuzzing}
 \input{includes/fuzzer-guidance}
@@ -168,15 +168,15 @@ Finally, we introduce \emph{Program State Convolution} (PSC), a technique that u
 \input{includes/lool/discussion}
 \input{includes/lool/future-work}
 \input{includes/lool/summary}
-\chapter{Fuzzer-Guidance with Program-State Convolution}\label{ch:psc}
-\input{includes/psc/motivation}
-\input{includes/psc/background}
-\input{includes/psc/psc}
-\input{includes/psc/implementation}
-\input{includes/psc/evaluation}
-\input{includes/psc/discussion}
-\input{includes/psc/future-work}
-\input{includes/psc/summary}
+\chapter{Fuzzer-Guidance with Program-State Projection}\label{ch:psp}
+\input{includes/psp/motivation}
+\input{includes/psp/background}
+\input{includes/psp/psp}
+\input{includes/psp/implementation}
+\input{includes/psp/evaluation}
+\input{includes/psp/discussion}
+\input{includes/psp/future-work}
+\input{includes/psp/summary}
 \chapter{Outlook}\label{ch:outlook-fuzzing}
 \input{includes/outlook-fuzzing}
 

@@ -1,5 +1,5 @@
-\section{Implementation}\label{psc:s:implementation}
-In this section we describe the relevant implementation details of \glsfirst{PSC}.
+\section{Implementation}\label{psp:s:implementation}
+In this section we describe the relevant implementation details of \glsfirst{PSP}.
 Our implementation is based on \propername{LLVM} 16 and consists of \XXX.
 The following subsections describe the implementation of indirect call unfolding and value range partitioning.
 
@@ -29,11 +29,11 @@ Thus, restricting the target set merely based on the function's type is insuffic
 Instead, we built our prototype based on \gls{MLTA}~\cite{lu2019}.
 The basic idea behind \gls{MLTA} is to match a function pointer's type not only against possible function types in the program, but to also consider the function pointer's dataflow.
 More specifically, \gls{MLTA} analyzes \emph{into} which types prior program code has stored the pointer.
-As an example consider the program in \cref{psc:lst:mlta-example}.
-A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psc:line:mlta-call-1} and \cref{psc:line:mlta-call-2}.
+As an example consider the program in \cref{psp:lst:mlta-example}.
+A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psp:line:mlta-call-1} and \cref{psp:line:mlta-call-2}.
 In contrast, \gls{MLTA} builds up a model of typed structures and function pointers assigned to these structures.
 Based on this model, \gls{MLTA} records that, \eg \code{handle\_positive} is only ever stored into a struct of type \code{HandlerContext} within a struct of type \code{HandlerA}.
-When the program retrieves the function pointer before \cref{psc:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer cal only lead to \code{handle\_positive}.
+When the program retrieves the function pointer before \cref{psp:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer cal only lead to \code{handle\_positive}.
 
 \begin{listing}
     \begin{minted}[mathescape]{C}
@@ -70,11 +70,11 @@ void test() {
 
     // Load and invoke the handler through WrapperA
     handler_t f1 = A.context.exec;
-    f1(10);    // Only handle_positive is possible $\label{psc:line:mlta-call-1}$
+    f1(10);    // Only handle_positive is possible $\label{psp:line:mlta-call-1}$
 
     // Load and invoke the handler through WrapperB
     handler_t f2 = B.context.exec;
-    f2(-3);    // Only handle_negative is possible $\label{psc:line:mlta-call-2}$
+    f2(-3);    // Only handle_negative is possible $\label{psp:line:mlta-call-2}$
 }
 
 int main() {
@@ -84,13 +84,13 @@ int main() {
 
     \end{minted}
     \caption{\gls{MLTA} uses type context to disambiguate indirect call targets.}
-    \label{psc:lst:mlta-example}
+    \label{psp:lst:mlta-example}
 \end{listing}
 
 We integrated and extended the analysis implementation from \citeauthor{lu2019} and use the analysis results to unfold indirect calls\cite{lu2019}.
 
 \subsection{Value Range Partitioning}
-Our implementation consists of a LLVM pass that implements the splitting point and transformation heuristics described in \cref{psc:s:value-range-partitioning}.
+Our implementation consists of a LLVM pass that implements the splitting point and transformation heuristics described in \cref{psp:s:value-range-partitioning}.
 The pass consists of two phases, resembling the two questions discussed before.
 The first phase collects splitting points based on the configured heuristic and feeds them to the second phase to perform the instrumentation.
 In addition to the individual heuristics (\propername{midpoint}, \propername{boundaries}, and \propername{arithmetic}), our pass also implements a \propername{combined} heuristic.
@@ -107,7 +107,7 @@ The split point heuristics need to know the effective possible value range they 
 A naive implementation would simply derive the range from the type of the variable in question.
 The program's control-flow can, however, further constrain the variable's value range.
 Splitting based on the type's full value range would thus create dead code.
-As an example, consider the code in \cref{psc:lst:constraint-value-range}.
+As an example, consider the code in \cref{psp:lst:constraint-value-range}.
 Within the branch of the \code{if} statement, the variable \code{x} has a new effective value range of $[0, 16383]$.
 LLVM provides two analyses to track such value ranges: Lazy Value Info (LVI) and Scalar Evolution (SCEV).
 While LVI tracks constraints based on control-flow, SCEV models induction variables as chains of recurrences.
@@ -123,22 +123,22 @@ void process_data(uint32_t x) {
 }
     \end{minted}
     \caption{Control-flow constraining the value range of \code{x}.}
-    \label{psc:lst:constraint-value-range}
+    \label{psp:lst:constraint-value-range}
 \end{listing}
 
 For the \propername{boundaries} and \propername{arithmetic} heuristics to be able to find values that lead to interesting cases in a later operation, they must be able to track the value's dataflow.
-Consider, for example, the code in \cref{psc:lst:offset-tracking-example}.
+Consider, for example, the code in \cref{psp:lst:offset-tracking-example}.
 The placement heuristic chooses the existing comparison \code{x > 0 \&\& x < 100} as an insertion point, but then the \propername{boundaries} heuristic needs to find a good split point.
 A naive \propername{boundaries} implementation would start with a range based on the array bounds, \ie $[0, 100]$.
 Since the constraint from the control-flow and the array-bounds range match, the range $[0, 100]$ is not constrained further.
-The naive implementation would, thus, transform the example to the code shown in \cref{psc:lst:offset-tracking-example-transformed-naive}.
+The naive implementation would, thus, transform the example to the code shown in \cref{psp:lst:offset-tracking-example-transformed-naive}.
 The inserted comparisons are redundant and useless.
 
 To deal with such cases, our implementations of the \propername{boundaries} and \propername{arithmetic} heuristics track simple arithmetic modifications of the variable between the insertion point and the usage.
-In the example in \cref{psc:lst:offset-tracking-example}, the \propername{boundaries} heuristic detects the additional offset of $10$ and instead transforms the program as shown in \cref{psc:lst:offset-tracking-example-transformed}.
-\Cref{psc:fig:offset-tracking-comparison} compares both approaches.
+In the example in \cref{psp:lst:offset-tracking-example}, the \propername{boundaries} heuristic detects the additional offset of $10$ and instead transforms the program as shown in \cref{psp:lst:offset-tracking-example-transformed}.
+\Cref{psp:fig:offset-tracking-comparison} compares both approaches.
 Similarly, the heuristics deal with simple forms of casts and aliasing.
-If \cref{psc:lst:offset-tracking-example} was written as \cref{psc:lst:offset-tracking-example-aliasing}, for example, the heuristics would still perform the transformation, since the value of \code{idx} flows to the usage.
+If \cref{psp:lst:offset-tracking-example} was written as \cref{psp:lst:offset-tracking-example-aliasing}, for example, the heuristics would still perform the transformation, since the value of \code{idx} flows to the usage.
 
 \begin{listing}[t]
     \begin{minted}{C}
@@ -153,7 +153,7 @@ void process_buffer(int idx) {
 }
     \end{minted}
     \caption{Array access with an offset: the OOB boundary depends on the arithmetic.}
-    \label{psc:lst:offset-tracking-example}
+    \label{psp:lst:offset-tracking-example}
 \end{listing}
 
 \begin{figure}[t]
@@ -196,15 +196,15 @@ void process_buffer(int idx) {
 
     \begin{minipage}[t]{0.48\textwidth}
         \subcaption{Naive: split at 100 is redundant.}
-        \label{psc:lst:offset-tracking-example-transformed-naive}
+        \label{psp:lst:offset-tracking-example-transformed-naive}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.48\textwidth}
         \subcaption{With offset tracking: split at 90.}
-        \label{psc:lst:offset-tracking-example-transformed}
+        \label{psp:lst:offset-tracking-example-transformed}
     \end{minipage}
-    \caption{Comparison of naive vs.\ offset-aware transformation for \cref{psc:lst:offset-tracking-example}.}
-    \label{psc:fig:offset-tracking-comparison}
+    \caption{Comparison of naive vs.\ offset-aware transformation for \cref{psp:lst:offset-tracking-example}.}
+    \label{psp:fig:offset-tracking-comparison}
 \end{figure}
 
 \begin{listing}[t]
@@ -220,5 +220,5 @@ void process_buffer(int idx) {
 }
     \end{minted}
     \caption{Variant with a separate variable: the heuristics trace \code{offset} back to \code{idx}.}
-    \label{psc:lst:offset-tracking-example-aliasing}
+    \label{psp:lst:offset-tracking-example-aliasing}
 \end{listing}

@@ -1,9 +1,9 @@
-\section{Motivation}\label{psc:sec:motivation}
+\section{Motivation}\label{psp:sec:motivation}
 
 The previous chapter presented \lool, a domain-specific approach to compiler fuzzing that leverages optimization logs.
-This chapter presents a complementary technique called \emph{Program State Convolution} (PSC) that addresses a more general problem: the blindness of code coverage to data dependencies.
+This chapter presents a complementary technique called \emph{Program State Projection} (PSP) that addresses a more general problem: the blindness of code coverage to data dependencies.
 
-While \lool is tailored to compiler testing, PSC aims to improve fuzzer guidance for arbitrary programs.
+While \lool is tailored to compiler testing, PSP aims to improve fuzzer guidance for arbitrary programs.
 The core insight is that compilers already perform sophisticated analyses to reason about data dependencies---for optimization, for devirtualization, and for security hardening.
 By repurposing these analyses, we can project hidden data-state variations onto the control-flow graph, making them visible to standard coverage instrumentation.
 
@@ -15,7 +15,7 @@ Edges between a call and a function, both static and dynamic, are not explicitly
 For static calls, the call-site's basic block counter indirectly encodes the information.
 Since each execution of the call-site's basic block also executes the call and since the call constitutes only a single edge in the \gls{CFG}, no information is lost.
 The situation is different, however, for indirect call sites, which represent multiple edges in the \gls{CFG}.
-To better understand this problem, consider the program in \cref{psc:lst:dynamic-dispatch-c}.
+To better understand this problem, consider the program in \cref{psp:lst:dynamic-dispatch-c}.
 
 \begin{listing}
     \begin{minted}[mathescape,escapeinside=||]{C}
@@ -37,12 +37,12 @@ void (*handlers[2])(char *) = {handler1, handler2};
 
 int main(int argc, char **argv) {
     // block C
-    handler1(argv[2]); |\label{psc:line:handler1-call}|
+    handler1(argv[2]); |\label{psp:line:handler1-call}|
     handler2(argv[2]);
     handlers[atoi(argv[1])](argv[2]);
 }
     \end{minted}
-    \label{psc:lst:dynamic-dispatch-c}
+    \label{psp:lst:dynamic-dispatch-c}
 \end{listing}
 
 After a single execution, all edge IDs identified by \aflpp's instrumentation have been hit.
@@ -58,7 +58,7 @@ In general, however, where the indirect call targets have multiple callers as we
 The reason is that \aflpp's compiler instrumentation does not assign IDs to edges between calls and functions.
 
 \aflpp's classic instrumentation \enquote{solves} this problem because the edge ID is always a combination of the previous block ID and the current one, regardless of the block's function.
-An important observation, however, is that the instrumentation does not reset the current block ID after a call, \eg after the call to \code{handler1} in \cref{psc:line:handler1-call}.
+An important observation, however, is that the instrumentation does not reset the current block ID after a call, \eg after the call to \code{handler1} in \cref{psp:line:handler1-call}.
 This means that strictly speaking the instrumentation would record an edge $A$ \rightarrow $B$.
 Alternatively, call-context combines the edge ID with a representation of the calling context (either the entire call trace or just a single ID per calling function).
 All these variants rely on runtime hash computation, however, and are thus susceptible to collisions.
