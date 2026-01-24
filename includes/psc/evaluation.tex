@@ -1,12 +1,278 @@
 \section{Evaluation}
 
-\todo{PSC evaluation is pending. This section should include experimental results demonstrating the effectiveness of indirect call unfolding and value range partitioning for fuzzing.}
+This section describes the evaluation of our prototype implementation described in \cref{psc:s:implementation}.
 
-\section{Summary}
+\subsection{System Configuration}\label{psc:ss:system-configuration}
 
-Program State Convolution demonstrates that compiler analyses can expose hidden program state to coverage-guided fuzzers.
-By transforming data dependencies into control dependencies, PSC provides stepping stones that help fuzzers explore deeper into the state space.
+Experiments were conducted on a private Kubernetes cluster consisting of 10 identical worker nodes, each equipped with dual AMD EPYC 7H12 64-core processors (256 threads) and 1 TB of RAM, running Debian 12.
+The cluster is orchestrated by K3s with the Volcano batch scheduler.
+Fuzzing trials run in parallel across the cluster, with each fuzzer instance limited to a single dedicated CPU core and distributed evenly across machines.
+Each fuzzer-benchmark combination ran for 24 hours, with the initial seed corpus included with the benchmark.
+During fuzzing, the fuzzing infrastructure takes corpus snapshots at regular intervals.
+Coverage is measured offline after the experiment completes by replaying each snapshot's corpus through a separate binary built with Clang's source-based coverage instrumentation and linked against libFuzzer.
+Shared storage for corpora and results is provided via NFS, with results aggregated into a PostgreSQL database.
+The evaluation infrastructure is based on a customized fork of FuzzBench.
 
-Together with \lool, PSC illustrates the broader theme of this part: the compiler's semantic knowledge can be repurposed to improve fuzzer guidance.
-While \lool leverages optimization logs for domain-specific compiler testing, PSC offers a more general approach applicable to arbitrary programs.
-The following chapter discusses future directions for both techniques and their potential combination.
+% =============================================================================
+% EVALUATION OUTLINE WITH DATA-DRIVEN INSIGHTS
+% =============================================================================
+% Data: vrp-unfold-eval01.zip (40 trials × 18 benchmarks × 5 fuzzers, 24h each)
+% Analysis script: scripts/psc/compare_fuzzers.py
+% =============================================================================
+
+\subsection{Research Questions}\label{psc:ss:research-questions}
+% RQ1: Does VRP improve edge coverage compared to baseline AFL++?
+% RQ2: Does indirect call unfolding improve edge coverage?
+% RQ3: Do PSC transformations affect fuzzing throughput?
+% RQ4: Do PSC transformations improve bug-finding capability (Magma)?
+% RQ5: Are improvements statistically significant across benchmarks?
+
+\subsection{Evaluated Configurations and Benchmarks}\label{psc:ss:configurations}
+
+To test the effectiveness of \gls{PSC} and in particular dynamic call unfolding and \gls{VRP}, we build a separate configuration for each component.
+We use \aflpp version \propername{4.32c} as the fuzzer.
+\gls{PSC} configurations differ from the baseline configurations only in the instrumented binary because \gls{PSC} is compatible with any code-coverage-guided fuzzer.
+As dynamic call unfolding relies on \gls{LTO} for a whole-program view, we test \propername{aflplusplus\_unfold} against an \aflpp configuration with \gls{LTO} enabled.
+We also test \gls{VRP} with \gls{LTO}, again against an \aflpp baseline with \gls{LTO}.
+Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assignment enabled by \gls{LTO} can help with the larger number of edge-ids produced by \gls{VRP}.
+\cref{tab:psc-configurations} summarizes the evaluated configurations and their baselines.
+
+\begin{table}[h]
+    \centering
+    \caption{Evaluated fuzzer configurations}
+    \label{tab:psc-configurations}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Configuration}                & \textbf{Description}                   & \textbf{Baseline}             \\
+        \midrule
+        \propername{aflplusplus}              & Standard \aflpp (non-LTO)              & ---                           \\
+        \propername{aflplusplus\_lto}         & \aflpp with LTO instrumentation        & ---                           \\
+        \propername{aflplusplus\_vrp}         & \aflpp + \gls{VRP} transformations     & \propername{aflplusplus}      \\
+        \propername{aflplusplus\_vrp\_lto}    & \aflpp LTO + \gls{VRP} transformations & \propername{aflplusplus\_lto} \\
+        \propername{aflplusplus\_unfold} & \aflpp LTO + indirect call unfolding   & \propername{aflplusplus\_lto} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[h]
+    \centering
+    \caption{Benchmark versions used in the evaluation}
+    \label{tab:benchmark-versions}
+    \begin{tabular}{lllc}
+        \toprule
+        \textbf{Benchmark}               & \textbf{Project} & \textbf{Source} & \textbf{Commit} \\
+        \midrule
+        curl\_curl\_fuzzer\_http         & curl             & FuzzBench       & a20f74a1        \\
+        freetype2\_ftfuzzer              & FreeType         & FuzzBench       & cd02d359        \\
+        harfbuzz\_hb-shape-fuzzer        & HarfBuzz         & FuzzBench       & cb47dca7        \\
+        jsoncpp\_jsoncpp\_fuzzer         & JsonCpp          & FuzzBench       & 8190e061        \\
+        libpng                           & libpng           & Magma           & a37d4836        \\
+        libtiff                          & libtiff          & Magma           & c145a6c1        \\
+        libxml2\_xml\_read\_memory       & libxml2          & Magma           & ec6e3efb        \\
+        libxslt\_xpath                   & libxslt          & FuzzBench       & 180cdb80        \\
+        mbedtls\_fuzz\_dtlsclient        & Mbed TLS         & FuzzBench       & 169d9e6e        \\
+        openssl\_asn1                    & OpenSSL          & Magma           & 3bd5319b        \\
+        openssl\_bignum                  & OpenSSL          & Magma           & 3bd5319b        \\
+        openssl\_x509                    & OpenSSL          & Magma           & 3bd5319b        \\
+        openthread\_ot-ip6-send-fuzzer   & OpenThread       & FuzzBench       & 25506997        \\
+        re2\_fuzzer                      & RE2              & FuzzBench       & b025c6a3        \\
+        sqlite3                          & SQLite           & Magma           & 8c432642        \\
+        stb\_stbi\_read\_fuzzer          & stb              & FuzzBench       & 5736b15f        \\
+        systemd\_fuzz-link-parser        & systemd          & FuzzBench       & 07faa499        \\
+        woff2\_convert\_woff2ttf\_fuzzer & WOFF2            & FuzzBench       & 8109a2cc        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Edge Coverage}\label{psc:ss:coverage}
+
+% -----------------------------------------------------------------------------
+% FINAL COVERAGE RESULTS (from data analysis)
+% -----------------------------------------------------------------------------
+% TABLE: Statistical summary of final coverage
+% | Comparison          | Wins | Losses | Ties | Avg Δ    | Avg A12 | Effect     |
+% |---------------------|------|--------|------|----------|---------|------------|
+% | VRP vs Baseline     | 1    | 1      | 16   | -0.01%   | 0.504   | negligible |
+% | VRP+LTO vs LTO      | 0    | 0      | 18   | +0.30%   | 0.515   | negligible |
+% | Unfold vs LTO       | 0    | 0      | 18   | +0.46%   | 0.507   | negligible |
+%
+% KEY INSIGHT: No statistically significant improvements in final coverage.
+% Only 1 significant result across all 54 comparisons (18 benchmarks × 3 comparisons),
+% and it is a regression (stb_stbi_read_fuzzer -1.1%, p<0.01).
+
+% FIGURE 1: Final coverage bar chart with error bars
+% - Show mean ± std for each fuzzer on representative benchmarks
+% - Highlight: libtiff (+3.2% VRP+LTO), openssl_x509 (+8.2% Unfold), stb (-1.1% VRP)
+
+% TABLE: Per-benchmark improvements (top/bottom 3 for each comparison)
+% VRP vs Baseline:
+%   Top: openthread +1.3%, sqlite3 +1.0%, freetype2 +0.8%
+%   Bottom: stb -1.1%*, libxml2 -1.4%, openssl_x509 -1.8%
+% VRP+LTO vs LTO:
+%   Top: libtiff +3.2%, mbedtls +2.0%, freetype2 +1.2%
+%   Bottom: libxml2 -0.4%, sqlite3 -0.7%, openthread -2.0%
+% Unfold vs LTO:
+%   Top: openssl_x509 +8.2%, mbedtls +2.0%, woff2 +0.7%
+%   Bottom: sqlite3 -0.6%, systemd -0.8%, openthread -1.1%
+
+% -----------------------------------------------------------------------------
+% COVERAGE OVER TIME ANALYSIS
+% -----------------------------------------------------------------------------
+% TABLE: Time-based metrics
+% | Comparison          | Avg AUC Δ | Early Cov Δ | Faster 90% | Slower 90% | Same |
+% |---------------------|-----------|-------------|------------|------------|------|
+% | VRP vs Baseline     | -0.42%    | -0.42%      | 4          | 4          | 10   |
+% | VRP+LTO vs LTO      | +0.35%    | +0.44%      | 5          | 3          | 10   |
+% | Unfold vs LTO       | +0.41%    | -0.05%      | 4          | 4          | 10   |
+%
+% KEY INSIGHT: Coverage progression over time shows similarly negligible differences.
+% VRP+LTO shows slight early-coverage advantage (+0.44%) and reaches 90% faster
+% on 5 vs 3 benchmarks, but differences are not substantial.
+
+% FIGURE 2: Coverage over time (line plots for 2-3 benchmarks)
+% Recommended benchmarks showing different patterns:
+%
+% (a) libtiff_magma - VRP+LTO advantage throughout:
+%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
+%     1      | 3057     | 3110  | 3200  | 3266    | 3152
+%     10     | 4341     | 4471  | 4472  | 4606    | 4368
+%     96     | 5298     | 5339  | 5349  | 5518    | 5315
+%     → VRP+LTO consistently ~3% ahead; Unfold falls behind baseline
+%
+% (b) openssl_x509_magma - Unfold late-stage divergence:
+%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
+%     1      | 1789     | 1717  | 1717  | 1752    | 1703
+%     40     | 2496     | 2340  | 2539  | 2579    | 2751   ← Unfold pulls ahead
+%     96     | 2753     | 2704  | 2767  | 2796    | 2995
+%     → Unfold shows +8.2% final coverage, divergence after cycle 20
+%
+% (c) sqlite3_magma - VRP early advantage that diminishes:
+%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
+%     5      | 6548     | 6707  | 6859  | 6690    | 6712
+%     96     | 8738     | 8821  | 8937  | 8873    | 8879
+%     → VRP reaches 90% at cycle 25 vs baseline cycle 31
+
+\subsection{Fuzzing Throughput}\label{psc:ss:throughput}
+% TABLE: Execution speed
+% | Configuration   | Mean execs/sec | vs Baseline |
+% |-----------------|----------------|-------------|
+% | aflplusplus     | 1628           | -           |
+% | aflplusplus_vrp | 1657           | +1.8%       |
+%
+% KEY INSIGHT: No throughput penalty. VRP actually shows +1.8% faster execution,
+% likely due to variance rather than real improvement. The additional branches
+% from PSC transformations do not measurably slow down fuzzing.
+%
+% (Note: LTO configs lack stats data in current dataset)
+
+\subsection{Bug Detection (Magma)}\label{psc:ss:bugs}
+% TABLE: Bug triggering summary
+% | Comparison          | More Bugs | Fewer Bugs | Same |
+% |---------------------|-----------|------------|------|
+% | VRP vs Baseline     | 5         | 7          | 14   |
+% | VRP+LTO vs LTO      | 6         | 4          | 16   |
+% | Unfold vs LTO       | 7         | 5          | 14   |
+%
+% KEY INSIGHT: Mixed results - PSC changes WHICH bugs are found, not HOW MANY.
+% No clear winner in aggregate bug finding.
+
+% TABLE: Notable bug differences (biggest deltas)
+% | Bug ID | Target  | PSC Config | PSC Triggers | Baseline | Delta    |
+% |--------|---------|------------|--------------|----------|----------|
+% | TIF008 | libtiff | VRP        | 22,007       | 1,900    | +20,107  | ← PSC helps
+% | TIF008 | libtiff | Unfold     | 16,044       | 445      | +15,599  | ← PSC helps
+% | PNG003 | libpng  | VRP+LTO    | 384,047      | 293,708  | +90,339  | ← PSC helps
+% | PNG003 | libpng  | Unfold     | 410,235      | 293,708  | +116,527 | ← PSC helps
+% | TIF014 | libtiff | VRP        | 187,483      | 217,948  | -30,465  | ← PSC hurts
+% | TIF014 | libtiff | VRP+LTO    | 235,560      | 368,987  | -133,427 | ← PSC hurts
+% | TIF014 | libtiff | Unfold     | 157,176      | 368,987  | -211,811 | ← PSC hurts
+%
+% OBSERVATION: TIF008 consistently benefits from PSC (10-50× more triggers),
+% while TIF014 consistently suffers (30-60% fewer triggers). This suggests
+% PSC transformations change exploration paths in ways that favor some bugs
+% over others, rather than providing uniform improvement.
+
+\subsection{Statistical Analysis}\label{psc:ss:statistics}
+% Methodology:
+% - 40 trials per benchmark-fuzzer configuration
+% - Mann-Whitney U test for significance (p < 0.05)
+% - Vargha-Delaney A12 effect size (0.5 = no effect)
+%
+% SUMMARY TABLE:
+% | Comparison          | Wins | Losses | Ties | Avg A12 | Interpretation           |
+% |---------------------|------|--------|------|---------|--------------------------|
+% | VRP vs Baseline     | 1    | 1      | 16   | 0.504   | No significant effect    |
+% | VRP+LTO vs LTO      | 0    | 0      | 18   | 0.515   | No significant effect    |
+% | Unfold vs LTO       | 0    | 0      | 18   | 0.507   | No significant effect    |
+%
+% With 40 trials, this study has adequate statistical power to detect medium
+% effects (A12 > 0.64 or < 0.36). The observed A12 values are all within the
+% negligible range (0.44-0.56), indicating true absence of effect rather than
+% insufficient sample size.
+
+\subsection{Discussion}\label{psc:ss:discussion}
+% -----------------------------------------------------------------------------
+% ANSWERS TO RESEARCH QUESTIONS
+% -----------------------------------------------------------------------------
+% RQ1 (VRP coverage): NO - No statistically significant improvement.
+%     Avg +0.15% across LTO/non-LTO, A12 = 0.51 (negligible)
+%
+% RQ2 (Unfold coverage): NO - No statistically significant improvement.
+%     Avg +0.46%, one benchmark (openssl_x509) shows +8.2% but not significant
+%
+% RQ3 (Throughput): NO PENALTY - VRP shows +1.8% faster execution
+%     PSC transformations do not slow down fuzzing
+%
+% RQ4 (Bug finding): MIXED - Changes which bugs are found, not total count
+%     TIF008: +10-50× with PSC; TIF014: -30-60% with PSC
+%
+% RQ5 (Significance): NO - Only 1/54 comparisons significant (a regression)
+%     Effect sizes uniformly negligible (A12 ≈ 0.5)
+
+% -----------------------------------------------------------------------------
+% INTERPRETATION
+% -----------------------------------------------------------------------------
+% The data suggests PSC transformations have negligible impact on fuzzing
+% effectiveness in 24-hour campaigns on FuzzBench targets.
+%
+% Possible explanations:
+% 1. Campaign duration: 24h may be too short to see benefits in deeper state space
+% 2. Benchmark selection: FuzzBench targets may not exercise transformed code paths
+% 3. Transformation coverage: Compiler may not apply VRP/unfolding in hot paths
+% 4. Already saturated: AFL++ may already cover relevant branches without help
+% 5. Bug sensitivity: Different bugs favor different exploration strategies
+%
+% The time-series data shows benchmark-specific patterns:
+% - libtiff: VRP+LTO maintains consistent ~3% lead (suggests VRP helps here)
+% - openssl_x509: Unfold diverges after cycle 20 (late-stage benefit)
+% - sqlite3: VRP reaches 90% coverage faster but final coverage similar
+% These patterns suggest PSC may provide marginal benefits in specific contexts.
+
+% -----------------------------------------------------------------------------
+% LIMITATIONS
+% -----------------------------------------------------------------------------
+% - 24-hour campaign duration (longer campaigns may show different results)
+% - FuzzBench benchmark selection (may not be representative of all software)
+% - Single LLVM version (transformation applicability varies by compiler)
+% - Coverage-based evaluation (PSC may help with properties not captured by coverage)
+
+% =============================================================================
+% FIGURES AND TABLES TO CREATE
+% =============================================================================
+% FIGURE 1: Final coverage comparison (bar chart with error bars)
+%           Show 3-4 representative benchmarks, all 5 fuzzers
+%
+% FIGURE 2: Coverage over time (line plots)
+%           (a) libtiff_magma - VRP+LTO advantage
+%           (b) openssl_x509_magma - Unfold late divergence
+%           (c) sqlite3_magma - VRP early advantage
+%
+% TABLE 1: Configuration overview (5 rows)
+% TABLE 2: Final coverage statistical summary (3 comparisons)
+% TABLE 3: Per-benchmark results (full 18 benchmarks, can go in appendix)
+% TABLE 4: Coverage-over-time metrics (AUC, time-to-90%)
+% TABLE 5: Magma bug triggering results (focus on TIF008/TIF014/PNG003)
+% =============================================================================
+
+\todo{Implement evaluation based on above outline. Data: data/psc/dataframes/vrp-unfold-eval01.zip}

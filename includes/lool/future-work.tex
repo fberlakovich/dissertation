@@ -1,4 +1,5 @@
-\section{Possible Extensions}
+\section{Future Work}
+
 \subsection{Compiler optimization logs}\label{lool:ss:other-opt-logs}
 Our approach to guided fuzzing should apply to any mature compiler that saves information about the optimizations it performed.
 
@@ -12,3 +13,12 @@ Other compilers, such as GCC, do not produce such structured logs.
 As an alternative to an explicit structured log, debug dumps of the program state before and after compiler phases could be compared to infer if an optimization has taken place.
 This would also provide a form of optimization coverage information suitable for use as feedback to a fuzzer.
 However, if a structured log proves to be helpful for fuzzing, it should be easy for compiler developers to retrofit the required logging in their compilers.
+
+\subsection{Finer-grained Code-Generation Control}
+In \cref{lool:ss:context-aware-vs-context-blind} we discussed that the finer-grained coverage feedback in the form of optimization pairs does not translate into better overall coverage or triggering more rare optimizations.
+One reason we discussed is that most (but evidently not all) optimizations are independent.
+For the dependent rare optimizations, our generator fails to reliably translate the coverage signal into programs that trigger those optimizations together.
+We suspect that the knobs which the genetic algorithm can tune are too coarse-grained, leading to structurally different programs even with similar generation parameters.
+Finding ways to better control the program generation could allow the genetic algorithm to translate fine-grained coverage signal more directly to desired programs.
+Similar to existing approaches, the genetic algorithm could also mutate programs that provide promising coverage signals.
+Such a mutation would have to retain desired properties like type correctness and liveness, however.

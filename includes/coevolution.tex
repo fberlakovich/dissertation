@@ -1,7 +1,8 @@
-\fbetodo{Add timeline and give historical context}
+\fbetodo{Needs editing}
 
-The history of software security is characterized by a continuous cycle of new attack paradigms and corresponding defensive responses.
+The history of software security is characterized by a continuous cycle of new attack avenues and corresponding defensive responses.
 This coevolutionary process has led to a highly sophisticated landscape of memory corruption exploits and mitigations.
+A particularly common and dangerous class of memory corruption exploits are \glspl{CRA} and their, now mostly obsolete, predecessor code-injection attacks.
 
 Code-injection attacks and \glspl{CRA} typically proceed in three phases:
 \begin{inlinenum}
@@ -21,8 +22,8 @@ Each defense category targets a different step of the attack.
 Memory-safety enforcement aims to prevent the memory corruption required to divert the control flow.
 Control-flow enforcement tolerates the memory corruption but tries to lock the attacker into a previously determined control-flow graph.
 Randomization-based techniques, also called software diversity, aim to disrupt the attacker's reconnaissance phase, by invalidating a-priori knowledge the attacker has about the target.
-
-The following sections give a historical overview of the development of \glspl{CRA} and how defenses in each category evolved with them.
+Together with increasingly sophisticated variants of \glspl{CRA}, defenses in each category have also evolved alongside.
+The following sections trace the historical development of \glspl{CRA} together with the development of defenses in each category.
 
 \section{Code Injection (1997--2004)}
 \label{sec:epoch-injection}
@@ -32,7 +33,7 @@ The following sections give a historical overview of the development of \glspl{C
     \caption{Epoch timeline for code-injection attacks and defenses (1997--2004).}
     \label{fig:coevolution-epoch-code-injection}
 \end{figure}
-In the earliest era, the adversary's primary goal was to inject new code (\eg shellcode) into the target process' memory space and subsequently redirect execution to the injected code.
+In the earliest era (1997--2004), the adversary's primary goal was to inject new code (\eg shellcode) into the target process' memory space and subsequently redirect execution to the injected code.
 Despite the possibility of code injection in the early days, a form of \gls{CRA} called \propername{return-to-libc} was described already in 1997.
 \propername{Return-to-libc} operates on the function level and reuses functions from the standard C library.
 These functions are both powerful and likely present in most attacked programs.
@@ -41,7 +42,7 @@ To counter these early attacks, several randomization-based techniques were prop
 \propername{StackGuard} protects return addresses against buffer overflows with \enquote{canaries}---random values checked before a function returns.
 Based on the observation that an attacker needs exact addresses both for injection and reuse, \gls{ASLR} was introduced to randomize the base addresses of the stack, heap and libraries~\cite{PaXTeam2003}.
 Full adoption of \gls{ASLR} took years, however, as it requires position-independent code.
-Another issue with \gls{ASLR} is that a 32-bit address space does not offer enough entropy, and even in a 64-bit address space, pointer leaks and side-channels make \gls{ASLR} vulnerable.
+Another issue with \gls{ASLR} is that a 32-bit address space does not offer enough entropy, and even in a 64-bit address space, pointer leaks and side-channels make \gls{ASLR} vulnerable~\cite{Gras2017}.
 Research into \gls{ISR} explored randomizing the processor's instruction set to prevent the execution of injected code~\cite{boyd2010}.
 
 At around 2004, the introduction of a new \gls{CPU} feature made it practical to prevent memory regions from being writable and executable at the same time.
@@ -56,7 +57,8 @@ With the widespread adoption of \gls{DEP}, attackers were forced to switch to mo
     \caption{Epoch timeline for static return-oriented programming and defenses (2005--2013).}
     \label{fig:coevolution-epoch-static-rop}
 \end{figure}
-With \gls{DEP} preventing code injection, attackers were forced to reuse code already present in the process memory.
+With \gls{DEP} preventing code injection (mid-2000s), attackers were forced to change tactics.
+As demonstrated by \propername{return-to-libc} already, reusing code already present in the process memory provides a viable alternative to injection.
 In 2007, \citeauthor{Shacham2007} introduced the first version of \gls{ROP} attacks~\cite{Shacham2007}, a generalization of whole-function reuse attacks such as \propername{return-to-libc}.
 \gls{ROP} attacks reuse small snippets of assembly that are already present in the target process and end in a free-branch instruction.
 These snippets are commonly referred to as \emph{gadgets} and by chaining them into a \emph{gadget chain}, an attacker can achieve arbitrary code execution.
@@ -83,6 +85,7 @@ One such alternative was \propername{XFI} (2006), which used binary rewriting an
 \end{listing}
 For example, the indirect function call in \cref{r2c:lst:indirect-call-c} is supposed to happen only if \code{param > 0} and only ever to target \code{func1}.
 Enforcing these ideal policies in practice, however, proves to be challenging.
+Especially earlier \gls{CFI} implementations limited themselves to pure control-flow restrictions without taking dataflow (\eg \code{param > 3}) into account.
 
 One approach to \gls{CFI} is to limit \code{call} and \code{ret} instructions to the semantics typically used by compilers~\cite{Cheng2014}.
 That is, \code{call} instructions are only used to jump to the beginning of a \emph{function} and \code{ret} instructions only jump to \emph{call-preceded} locations.
@@ -106,7 +109,7 @@ Upon accessing a memory object via a pointer, the enforcement techniques check t
 However, the major drawback of these precise memory-enforcement techniques is their often prohibitive performance overhead.
 For example, combining \propername{SoftBounds} and \propername{CETS} for spatial and temporal safety leads to an overhead of more than 100\%~\cite{Nagarakatte2009}.
 
-In the \gls{ROP} attacks from this era, collecting gadgets happens offline and before the actual attack, typically on a separate copy of the target binary.
+In the \gls{ROP} attacks from this era (2005--2013), collecting gadgets happens offline and before the actual attack, typically on a separate copy of the target binary.
 For example, a \gls{ROP} attack requires the exact memory addresses of the gadgets used in an attack.
 Offline gadget collection with an identical copy of the target is possible due to the software monoculture~\cite{Larsen2014}.
 That is, in a non-diversified binary, an attacker can assume that all gadget locations are identical to their own installation of the target software~\cite{Cohen1993,Franz2010,Pappas2012a,Hiser2012,Larsen2014,Homescu2013a,Koo2018}.
@@ -145,7 +148,7 @@ To make randomization more practical for deployment, \propername{Compiler-Assist
     \caption{Epoch timeline for dynamic attacks, semantic bypasses, and corresponding defenses (2013--present).}
     \label{fig:coevolution-epoch-dynamic-semantic}
 \end{figure}
-The third epoch was driven by the realization that \emph{static} defenses cannot withstand \emph{dynamic} attacks.
+The third epoch (2013--present) was driven by the realization that \emph{static} defenses cannot withstand \emph{dynamic} attacks.
 Another group of attacks exploited the fact that several \gls{CFI} defenses did not sufficiently restrict an attacker's mobility or had a narrow semantic scope, \eg not considering \cpp semantics.
 
 In \citeyear{Snow2013} an attack called \gls{JITROP} showed that invalidating static a-priori knowledge alone is insufficient.

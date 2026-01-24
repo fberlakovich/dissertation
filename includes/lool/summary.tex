@@ -1,0 +1,6 @@
+\section{Summary}
+In this chapter we explored a new type of coverage signal specifically for fuzzing compilers.
+We introduced \lool, which uses optimization counters from the GraalVM optimization log as feedback and combines them with a genetic code generator to steer inputs toward rare optimizations and optimization pairs.
+Our evaluation shows that optimization-log feedback has lower overhead than code coverage and that domain-specific mutation outperforms \aflpp-style parametric mutation in both coverage and rare-optimization scores.
+Context-aware coverage based on per-method optimization pairs, however, does not consistently outperform the simpler context-blind counters.
+Overall, \lool demonstrates that lightweight, compiler-native signals can guide compiler fuzzing effectively without the cost of full code coverage.
