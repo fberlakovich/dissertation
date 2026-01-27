@@ -14,443 +14,517 @@ epochs:
 
 nodes:
   # ===== 1997 =====
-- id: A_ret2libc
-  year: 1997
-  type: attack
-  tags: [code-reuse]
-  label: ret2libc
+  - id: A_ret2libc
+    year: 1997
+    type: attack
+    tags: [ code-reuse ]
+    label: ret2libc
+    nocite: true
 
   # ===== 1998 =====
-- id: D_StackGuard98
-  year: 1998
-  type: defense
-  tags: [enforcement,randomization]
-  label: StackGuard
+  - id: D_StackGuard98
+    year: 1998
+    type: defense
+    tags: [ enforcement, randomization ]
+    label: StackGuard
+    nocite: true
 
   # ===== 2003 =====
-- id: D_ASLR03
-  year: 2003
-  type: defense
-  tags: [randomization]
-  label: Address-Space Layout\\ Randomization
-  cite: PaXTeam2003
+  - id: PaXTeam2003
+    year: 2003
+    type: defense
+    tags: [ randomization ]
+    label: "Address-Space Layout\\\\ Randomization"
 
-- id: D_ISR03
-  year: 2003
-  type: defense
-  tags: [randomization]
-  label: Instruction-Set\\ Randomization
-  cite: boyd2010
+  - id: boyd2010
+    year: 2003
+    type: defense
+    tags: [ randomization ]
+    label: "Instruction-Set\\\\ Randomization"
 
-- id: D_DEP04
-  year: 2004
-  type: defense
-  tags: [enforcement]
-  label: Data-Execution Prevention
+  # ===== 2004 =====
+  - id: D_DEP04
+    year: 2004
+    type: defense
+    tags: [ enforcement ]
+    label: Data-Execution Prevention
+    nocite: true
 
   # ===== 2005 =====
-- id: D_CFI05
-  year: 2005
-  type: defense
-  tags: [cfi]
-  label: Control-Flow Integrity
-  cite: Abadi2005
+  - id: Abadi2005
+    year: 2005
+    type: defense
+    tags: [ cfi ]
+    label: Control-Flow Integrity
 
-- id: D_XFI06
-  year: 2006
-  type: defense
-  tags: [cfi, enforcement]
-  label: XFI
-  cite: Erlingsson2006
+  # ===== 2006 =====
+  - id: Erlingsson2006
+    year: 2006
+    type: defense
+    tags: [ cfi, enforcement ]
+    label: XFI
 
   # ===== 2007 =====
-- id: A_ROP07
-  year: 2007
-  type: attack
-  tags: [code-reuse]
-  label: ROP
-  cite: Shacham2007
+  - id: Shacham2007
+    year: 2007
+    type: attack
+    tags: [ code-reuse ]
+    label: ROP
 
   # ===== 2008 =====
-- id: D_WIT08
-  year: 2008
-  type: defense
-  tags: [enforcement]
-  label: Write Integrity Testing
-  cite: Akritidis2008
+  - id: Akritidis2008
+    year: 2008
+    type: defense
+    tags: [ enforcement ]
+    label: Write Integrity Testing
 
-- id: D_DFI08
-  year: 2008
-  type: defense
-  tags: [enforcement]
-  label: Data Flow Integrity
-  cite: castro2006
+  - id: castro2006
+    year: 2008
+    type: defense
+    tags: [ enforcement ]
+    label: Data Flow Integrity
 
   # ===== 2010 =====
-- id: D_CFLock10
-  year: 2010
-  type: defense
-  tags: [cfi]
-  label: Control Flow Locking
-  cite: Bletsch2011b
+  - id: Bletsch2011b
+    year: 2010
+    type: defense
+    tags: [ cfi ]
+    label: Control Flow Locking
 
-- id: D_GFree10
-  year: 2010
-  type: defense
-  label: G-Free
-  cite: Onarlioglu2010
+  - id: Onarlioglu2010
+    year: 2010
+    type: defense
+    label: G-Free
 
-- id: A_ReturnlessROP
-  year: 2010
-  type: attack
-  tags: [code-reuse]
-  label: Returnless ROP
-  cite: checkoway2010
+  - id: checkoway2010
+    year: 2010
+    type: attack
+    tags: [ code-reuse ]
+    label: Returnless ROP
 
   # ===== 2011 =====
-- id: A_JOP11
-  year: 2011
-  type: attack
-  tags: [code-reuse]
-  label: JOP
-  cite: Bletsch2011a
+  - id: D_ROPdefender11
+    year: 2011
+    type: defense
+    tags: [ cfi ]
+    label: ROPdefender
+    nocite: true
+
+  - id: Bletsch2011a
+    year: 2011
+    type: attack
+    tags: [ code-reuse ]
+    label: JOP
 
   # ===== 2012 =====
-- id: D_ILR12
-  year: 2012
-  type: defense
-  tags: [randomization]
-  label: Instruction-Layout\\ Randomization
-  cite: Hiser2012
+  - id: Hiser2012
+    year: 2012
+    type: defense
+    tags: [ randomization ]
+    label: "Instruction-Layout\\\\ Randomization"
 
-- id: D_IPCR12
-  year: 2012
-  type: defense
-  tags: [randomization]
-  label: In-Place Code\\ Randomization
-  cite: Pappas2012a
+  - id: Pappas2012a
+    year: 2012
+    type: defense
+    tags: [ randomization ]
+    label: "In-Place Code\\\\ Randomization"
 
-- id: D_Stir12
-  year: 2012
-  type: defense
-  tags: [randomization]
-  label: Binary Stirring
-  cite: Wartell2012
+  - id: Wartell2012
+    year: 2012
+    type: defense
+    tags: [ randomization ]
+    label: Binary Stirring
 
-- id: D_KBouncer12
-  year: 2012
-  type: defense
-  tags: [cfi, hardware]
-  label: KBouncer
-  cite: Pappas2013b
+  - id: Pappas2013b
+    year: 2012
+    type: defense
+    tags: [ cfi, hardware ]
+    label: KBouncer
 
   # ===== 2013 =====
-- id: A_JITROP13
-  year: 2013
-  type: attack
-  tags: [code-reuse]
-  label: JIT ROP
-  cite: Snow2013
+  - id: Snow2013
+    year: 2013
+    type: attack
+    tags: [ code-reuse ]
+    label: JIT ROP
 
-- id: D_XnR13
-  year: 2013
-  type: defense
-  tags: [XOM]
-  label: XnR Execute No Read
-  cite: Backes2013
+  - id: Backes2013
+    year: 2013
+    type: defense
+    tags: [ XOM ]
+    label: XnR Execute No Read
 
-- id: D_binCFI13
-  year: 2013
-  type: defense
-  tags: [cfi]
-  label: binCFI
-  cite: zhang2013
+  - id: zhang2013
+    year: 2013
+    type: defense
+    tags: [ cfi ]
+    label: binCFI
 
-- id: D_CFI_COTS13
-  year: 2013
-  type: defense
-  tags: [cfi]
-  label: CFI for COTS Binaries
-  cite: zhang2013
+  - id: zhang2013
+    year: 2013
+    type: defense
+    tags: [ cfi ]
+    label: CFI for COTS Binaries
 
-- id: D_HideM13
-  year: 2013
-  type: defense
-  tags: [XOM]
-  label: HideM
-  cite: Goktas2016b
+  - id: Goktas2016b
+    year: 2013
+    type: defense
+    tags: [ XOM ]
+    label: HideM
+
+  - id: papadogiannakis2013
+    year: 2013
+    type: defense
+    tags: [ randomization ]
+    label: ASIST
 
   # ===== 2014 =====
-- id: A_BROP14
-  year: 2014
-  type: attack
-  tags: [code-reuse]
-  label: Blind ROP
-  cite: Bittau2014a
+  - id: Bittau2014a
+    year: 2014
+    type: attack
+    tags: [ code-reuse ]
+    label: Blind ROP
 
-- id: A_SROP14
-  year: 2014
-  type: attack
-  tags: [code-reuse]
-  label: SROP
+  - id: Bittau2014a
+    year: 2014
+    type: attack
+    tags: [ code-reuse ]
+    label: Framing Signals
 
-- id: D_Oxymoron14
-  year: 2014
-  type: defense
-  tags: [randomization]
-  label: Oxymoron
-  cite: Backes2014f
+  - id: A_SROP14
+    year: 2014
+    type: attack
+    tags: [ code-reuse ]
+    label: SROP
+    nocite: true
 
-- id: D_MCFI14
-  year: 2014
-  type: defense
-  tags: [cfi]
-  label: Modular CFI
-  cite: niu2014a
+  - id: Backes2014f
+    year: 2014
+    type: defense
+    tags: [ randomization ]
+    label: Oxymoron
 
-- id: D_CPI14
-  year: 2014
-  type: defense
-  tags: [enforcement]
-  label: Code Pointer Integrity
-  cite: Kuznetsov2014
+  - id: niu2014a
+    year: 2014
+    type: defense
+    tags: [ cfi ]
+    label: Modular CFI
 
-- id: D_SafeDisp14
-  year: 2014
-  type: defense
-  tags: [cfi, c++]
-  label: SafeDispatch
-  cite: jang2014
+  - id: Kuznetsov2014
+    year: 2014
+    type: defense
+    tags: [ enforcement ]
+    label: Code Pointer Integrity
+
+  - id: Cheng2014
+    year: 2014
+    type: defense
+    tags: [ cfi ]
+    label: ROPecker
+
+  - id: A_OutOfControl14
+    year: 2014
+    type: attack
+    tags: [ code-reuse ]
+    label: Out of Control
+    nocite: true
+
+  - id: A_ROPStillDangerous14
+    year: 2014
+    type: attack
+    tags: [ code-reuse ]
+    label: ROP is Still Dangerous
+    nocite: true
+
+  - id: jang2014
+    year: 2014
+    type: defense
+    tags: [ cfi, c++ ]
+    label: SafeDispatch
 
   # ===== 2015 =====
-- id: A_COOP15
-  year: 2015
-  type: attack
-  tags: [code-reuse, c++]
-  label: COOP
-  cite: Schuster2015a
+  - id: Schuster2015a
+    year: 2015
+    type: attack
+    tags: [ code-reuse, c++ ]
+    label: COOP
 
-- id: A_CFB15
-  year: 2015
-  type: attack
-  tags: [code-reuse]
-  label: Control Flow Bending
-  cite: Carlini2015a
+  - id: Carlini2015a
+    year: 2015
+    type: attack
+    tags: [ code-reuse ]
+    label: Control Flow Bending
 
-- id: A_Jujutsu15
-  year: 2015
-  type: attack
-  tags: [code-reuse]
-  label: Control Jujutsu
-  cite: Evans2015a
+  - id: Evans2015a
+    year: 2015
+    type: attack
+    tags: [ code-reuse ]
+    label: Control Jujutsu
 
-- id: D_Isomeron15
-  year: 2015
-  type: defense
-  tags: [randomization]
-  label: Isomeron
-  cite: Davi2015
+  - id: Davi2015
+    year: 2015
+    type: defense
+    tags: [ randomization ]
+    label: Isomeron
 
-- id: D_Readactor15
-  year: 2015
-  type: defense
-  tags: [randomization]
-  label: Readactor
-  cite: Crane2015
+  - id: Crane2015
+    year: 2015
+    type: defense
+    tags: [ randomization ]
+    label: Readactor
 
-- id: D_TRAP15
-  year: 2015
-  type: defense
-  tags: [randomization]
-  label: Its a TRaP
-  cite: Crane2015b
+  - id: Crane2015b
+    year: 2015
+    type: defense
+    tags: [ randomization ]
+    label: Its a TRaP
 
-- id: D_TASR15
-  year: 2015
-  type: defense
-  tags: [randomization]
-  label: TASR
-  cite: bigelow2015
+  - id: bigelow2015
+    year: 2015
+    type: defense
+    tags: [ randomization ]
+    label: TASR
 
-- id: D_pICFI15
-  year: 2015
-  type: defense
-  tags: [cfi]
-  label: Per Input CFI
-  cite: Niu2015
+  - id: Niu2015
+    year: 2015
+    type: defense
+    tags: [ cfi ]
+    label: Per Input CFI
 
-- id: D_OCFI15
-  year: 2015
-  type: defense
-  tags: [cfi, randomization]
-  label: Opaque CFI
-  cite: Mohan2015
+  - id: Mohan2015
+    year: 2015
+    type: defense
+    tags: [ cfi, randomization ]
+    label: Opaque CFI
 
-- id: D_vfGuard15
-  year: 2015
-  type: defense
-  tags: [cfi, c++]
-  label: vfGuard
-  cite: Prakash2015
+  - id: Prakash2015
+    year: 2015
+    type: defense
+    tags: [ cfi, c++ ]
+    label: vfGuard
 
-- id: D_CCFI15
-  year: 2015
-  type: defense
-  tags: [cfi]
-  label: CCFI
-  cite: Mashtizadeh2015
+  - id: Mashtizadeh2015
+    year: 2015
+    type: defense
+    tags: [ cfi ]
+    label: CCFI
 
-- id: D_PathArmor15
-  year: 2015
-  type: defense
-  tags: [cfi]
-  label: PathArmor
-  cite: Goktas2016b
+  - id: Goktas2016b
+    year: 2015
+    type: defense
+    tags: [ cfi ]
+    label: PathArmor
 
-- id: D_StackArmor15
-  year: 2015
-  type: defense
-  tags: [randomization]
-  label: StackArmor
-  cite: Chen2015c
+  - id: Chen2015c
+    year: 2015
+    type: defense
+    tags: [ randomization ]
+    label: StackArmor
 
-- id: D_ASLRGuard15
-  year: 2015
-  type: defense
-  tags: [randomization, enforcement]
-  label: ASLR Guard
-  cite: Lu2015
+  - id: Lu2015
+    year: 2015
+    type: defense
+    tags: [ randomization, enforcement ]
+    label: ASLR Guard
+
+  - id: Evans2015
+    year: 2015
+    type: attack
+    tags: [ enforcement ]
+    label: Missing the Point(er)
+
+  - id: A_LosingControl15
+    year: 2015
+    type: attack
+    tags: [ cfi ]
+    label: Losing Control
+    nocite: true
 
   # ===== 2016 =====
-- id: A_UIH16
-  year: 2016
-  type: attack
-  tags: [information-hiding]
-  label: Undermining\\ Information Hiding
-  cite: Goktas2016
+  - id: Goktas2016
+    year: 2016
+    type: attack
+    tags: [ information-hiding ]
+    label: "Undermining\\\\ Information Hiding"
 
-- id: A_DOP16
-  year: 2016
-  type: attack
-  tags: [data-only]
-  label: Data-Oriented\\ Programming
-  cite: Hu2016
+  - id: Oikonomopoulos2016a
+    year: 2016
+    type: attack
+    tags: [ information-hiding ]
+    label: Poking Holes
 
-- id: A_PIROP16
-  year: 2016
-  type: attack
-  tags: [code-reuse]
-  label: Position Independent ROP
+  - id: Hu2016
+    year: 2016
+    type: attack
+    tags: [ data-only ]
+    label: "Data-Oriented\\\\ Programming"
 
-- id: D_NEAR16
-  year: 2016
-  type: defense
-  tags: [XOM]
-  label: No Execute After Read
-  cite: Werner2016
+  - id: A_PIROP16
+    year: 2016
+    type: attack
+    tags: [ code-reuse ]
+    label: Position Independent ROP
+    nocite: true
 
-- id: D_Juggle16
-  year: 2016
-  type: defense
-  tags: [randomization]
-  label: Juggling the Gadgets
+  - id: Werner2016
+    year: 2016
+    type: defense
+    tags: [ XOM ]
+    label: No Execute After Read
 
-- id: D_Shuffler16
-  year: 2016
-  type: defense
-  tags: [randomization]
-  label: Shuffler
-  cite: WilliamsKing2016
+  - id: D_Juggle16
+    year: 2016
+    type: defense
+    tags: [ randomization ]
+    label: Juggling the Gadgets
+    nocite: true
 
-- id: D_LR16
-  year: 2016
-  type: defense
-  tags: [randomization]
-  label: Leakage Resilient\\ Randomization
-  cite: Braden2016
+  - id: WilliamsKing2016
+    year: 2016
+    type: defense
+    tags: [ randomization ]
+    label: Shuffler
 
-- id: D_TypeArmor16
-  year: 2016
-  type: defense
-  tags: [cfi]
-  label: TypeArmor
-  cite: VanderVeen2015b
+  - id: Braden2016
+    year: 2016
+    type: defense
+    tags: [ randomization ]
+    label: "Leakage Resilient\\\\ Randomization"
 
-- id: D_MPK16
-  year: 2016
-  type: defense
-  tags: [enforcement, hardware]
-  label: Intel MPK
-  cite: Wahbe1993
+  - id: VanderVeen2015b
+    year: 2016
+    type: defense
+    tags: [ cfi ]
+    label: TypeArmor
 
-- id: D_PAC16
-  year: 2016
-  type: defense
-  tags: [cfi, hardware]
-  label: ARM PAC
+  - id: Wahbe1993
+    year: 2016
+    type: defense
+    tags: [ enforcement, hardware ]
+    label: Intel MPK
 
-- id: D_CET16
-  year: 2016
-  type: defense
-  tags: [cfi, hardware]
-  label: Intel CET
-  cite: IntelCET
+  - id: D_PAC16
+    year: 2016
+    type: defense
+    tags: [ cfi, hardware ]
+    label: ARM PAC
+    nocite: true
+
+  - id: IntelCET
+    year: 2016
+    type: defense
+    tags: [ cfi, hardware ]
+    label: Intel CET
 
   # ===== 2017 =====
-- id: A_AOCR17
-  year: 2017
-  type: attack
-  tags: [code-reuse]
-  label: Address Oblivious\\ Code Reuse
-  cite: Rudd2017
+  - id: Rudd2017
+    year: 2017
+    type: attack
+    tags: [ code-reuse ]
+    label: "Address Oblivious\\\\ Code Reuse"
 
-- id: D_kRX17
-  year: 2017
-  type: defense
-  tags: [randomization]
-  label: kRX
-  cite: Pomonis2019
+  - id: Pomonis2019
+    year: 2017
+    type: defense
+    tags: [ randomization ]
+    label: kRX
 
-- id: D_CodeArmor17
-  year: 2017
-  type: defense
-  tags: [randomization]
-  label: CodeArmor
-  cite: Chen2017a
+  - id: Chen2017a
+    year: 2017
+    type: defense
+    tags: [ randomization ]
+    label: CodeArmor
+
 
   # ===== 2018 =====
-- id: A_BOP18
-  year: 2018
-  type: attack
-  tags: [code-reuse, data-only]
-  label: Block-Oriented\\ Programming
-  cite: Ispoglou2018
+  - id: Ispoglou2018
+    year: 2018
+    type: attack
+    tags: [ code-reuse, data-only ]
+    label: "Block-Oriented\\\\ Programming"
 
-- id: D_CFIXX18
-  year: 2018
-  type: defense
-  tags: [cfi]
-  label: CFIXX
-  cite: Burow2018CFIXX
+  - id: Burow2018CFIXX
+    year: 2018
+    type: defense
+    tags: [ cfi ]
+    label: CFIXX
 
-- id: D_CACR18
-  year: 2018
-  type: defense
-  tags: [randomization]
-  label: Compiler Assisted\\ Code Randomization
-  cite: Koo2018
+  - id: Koo2018
+    year: 2018
+    type: defense
+    tags: [ randomization ]
+    label: "Compiler Assisted\\\\ Code Randomization"
+
+  - id: A_BackToEpilogue18
+    year: 2018
+    type: attack
+    tags: [ cfi ]
+    label: Back To The Epilogue
+    nocite: true
+
+  # ===== 2019 =====
+  - id: D_OSCFI19
+    year: 2019
+    type: defense
+    tags: [ cfi ]
+    label: Origin-sensitive CFI
+    nocite: true
+
+  - id: D_ACSCFI19
+    year: 2019
+    type: defense
+    tags: [ cfi ]
+    label: "Adaptive Call-Site\\\\ Sensitive CFI"
+    nocite: true
+
+  - id: D_SafeHidden19
+    year: 2019
+    type: defense
+    tags: [ randomization, information-hiding ]
+    label: SafeHidden
+    nocite: true
+
+  # ===== 2020 =====
+  - id: A_RISCVROP20
+    year: 2020
+    type: attack
+    tags: [ code-reuse ]
+    label: ROP on RISC-V
+    nocite: true
+
+  - id: A_FindingCracks20
+    year: 2020
+    type: attack
+    tags: [ cfi ]
+    label: Finding Cracks in Shields
+    nocite: true
+
+  - id: D_Saffire20
+    year: 2020
+    type: defense
+    tags: [ randomization ]
+    label: Saffire
+    nocite: true
+
+  # ===== 2022 =====
+  - id: D_TamingStack22
+    year: 2022
+    type: defense
+    tags: [ enforcement ]
+    label: Taming of the Stack
+    nocite: true
 
   # ===== 2023 =====
-- id: A_CHOP23
-  year: 2023
-  type: attack
-  tags: [code-reuse]
-  label: CHOP
-  cite: duta2023
+  - id: duta2023
+    year: 2023
+    type: attack
+    tags: [ code-reuse ]
+    label: CHOP
 
-- id: D_R2C23
-  year: 2023
-  type: defense
-  tags: [randomization]
-  label: R2C
-  highlight: true
+  - id: D_R2C23
+    year: 2023
+    type: defense
+    tags: [ randomization ]
+    label: R2C
+    highlight: true
+    nocite: true

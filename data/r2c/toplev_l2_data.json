@@ -1,0 +1,546 @@
+{
+  "baseline": {
+    "600.perlbench_s": {
+      "iterations": 3,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.83,
+          "std": 4.1,
+          "n": 3
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.57,
+          "std": 2.5,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 12.6,
+          "std": 1.92,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 11.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 30.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.0,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "602.gcc_s": {
+      "iterations": 3,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 12.2,
+          "std": 4.25,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 9.97,
+          "std": 3.12,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 32.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.67,
+          "std": 2.9,
+          "n": 3
+        },
+        "Backend_Bound": {
+          "mean": 35.33,
+          "std": 14.82,
+          "n": 3
+        },
+        "Frontend_Bound": {
+          "mean": 25.8,
+          "std": 2.12,
+          "n": 2
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 13.5,
+          "std": 1.27,
+          "n": 2
+        }
+      }
+    },
+    "605.mcf_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 20.0,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation": {
+          "mean": 18.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 42.7,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 10.9,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 9.1,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 18.7,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 23.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 19.5,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "620.omnetpp_s": {
+      "iterations": 1,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 9.2,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 4.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 51.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.7,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 66.0,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "623.xalancbmk_s": {
+      "iterations": 1,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 2.6,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 7.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 52.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 68.6,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "625.x264_s": {
+      "iterations": 3,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.13,
+          "std": 0.29,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 5.07,
+          "std": 0.15,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 17.47,
+          "std": 0.76,
+          "n": 3
+        },
+        "Backend_Bound": {
+          "mean": 21.53,
+          "std": 0.21,
+          "n": 3
+        }
+      }
+    },
+    "631.deepsjeng_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 27.3,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 14.2,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 12.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.4,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "641.leela_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 29.0,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation": {
+          "mean": 32.1,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 15.1,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 13.9,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 31.9,
+          "std": 0,
+          "n": 1
+        }
+      }
+    }
+  },
+  "r2c-btra10": {
+    "600.perlbench_s": {
+      "iterations": 15,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.53,
+          "std": 3.88,
+          "n": 15
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.17,
+          "std": 2.37,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 11.17,
+          "std": 2.11,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 13.13,
+          "std": 1.32,
+          "n": 6
+        },
+        "Backend_Bound": {
+          "mean": 24.94,
+          "std": 0.48,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 12.42,
+          "std": 0.4,
+          "n": 5
+        }
+      }
+    },
+    "602.gcc_s": {
+      "iterations": 15,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 10.73,
+          "std": 3.08,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 9.05,
+          "std": 2.7,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 31.26,
+          "std": 0.24,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 15.76,
+          "std": 3.33,
+          "n": 15
+        },
+        "Backend_Bound": {
+          "mean": 33.15,
+          "std": 13.45,
+          "n": 15
+        },
+        "Frontend_Bound": {
+          "mean": 26.57,
+          "std": 1.79,
+          "n": 10
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 15.48,
+          "std": 1.43,
+          "n": 10
+        }
+      }
+    },
+    "605.mcf_s": {
+      "iterations": 5,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 20.2,
+          "std": 0.92,
+          "n": 5
+        },
+        "Bad_Speculation": {
+          "mean": 20.34,
+          "std": 0.93,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 41.32,
+          "std": 0.86,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 22.76,
+          "std": 0.94,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 18.56,
+          "std": 0.45,
+          "n": 5
+        },
+        "Frontend_Bound": {
+          "mean": 16.4,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 6.43,
+          "std": 1.02,
+          "n": 3
+        }
+      }
+    },
+    "620.omnetpp_s": {
+      "iterations": 5,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 9.12,
+          "std": 0.18,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 4.26,
+          "std": 0.38,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 47.26,
+          "std": 0.65,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.58,
+          "std": 0.26,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 61.84,
+          "std": 0.46,
+          "n": 5
+        }
+      }
+    },
+    "623.xalancbmk_s": {
+      "iterations": 5,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 2.44,
+          "std": 0.09,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 6.94,
+          "std": 0.11,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 47.64,
+          "std": 0.51,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.48,
+          "std": 0.28,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 64.12,
+          "std": 0.51,
+          "n": 5
+        }
+      }
+    },
+    "625.x264_s": {
+      "iterations": 15,
+      "metrics": {
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 7.25,
+          "std": 0.96,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 4.99,
+          "std": 0.85,
+          "n": 15
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 17.7,
+          "std": 0.83,
+          "n": 6
+        },
+        "Backend_Bound": {
+          "mean": 22.33,
+          "std": 1.25,
+          "n": 6
+        },
+        "Retiring.Light_Operations": {
+          "mean": 60.53,
+          "std": 0.41,
+          "n": 6
+        },
+        "Retiring.Light_Operations.Memory_Operations": {
+          "mean": 16.4,
+          "std": 0.27,
+          "n": 7
+        },
+        "Retiring.Light_Operations.Other_Light_Ops": {
+          "mean": 40.91,
+          "std": 0.2,
+          "n": 7
+        }
+      }
+    },
+    "631.deepsjeng_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.92,
+          "std": 0.45,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 26.24,
+          "std": 0.29,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 12.92,
+          "std": 0.2,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 13.18,
+          "std": 0.26,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.14,
+          "std": 0.23,
+          "n": 5
+        }
+      }
+    },
+    "641.leela_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 26.82,
+          "std": 0.49,
+          "n": 5
+        },
+        "Bad_Speculation": {
+          "mean": 30.92,
+          "std": 0.48,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 13.86,
+          "std": 0.36,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 12.94,
+          "std": 0.38,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 30.82,
+          "std": 0.48,
+          "n": 5
+        }
+      }
+    }
+  }
+}

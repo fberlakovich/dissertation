@@ -120,7 +120,7 @@ goto          234
 ldc           #58
 // Assert.fail
 invokestatic  #60
-    \end{minted}
+        \end{minted}
     \end{subfigure}
     \label{lool:lst:code-coverage-instrumentation}
     \caption{Bytecode from \cref{lst:lool:java-if-cascade} instrumented for code coverage.}
@@ -129,7 +129,7 @@ invokestatic  #60
 \subsection{\aflpp-compatible Counter Coverage}
 In our evaluation (see \cref{lool:s:evaluation}) we evaluate various configurations that use \aflpp as the mutation engine.
 \aflpp expects a byte buffer as coverage in which each byte represents a unique counter from 0 to 255.
-In a standard \aflpp setup, this coverage map is provided by a binary instrumented for code coverage, and each byte represents the execution count of a specific edge identifier.
+In a standard \aflpp setup, this coverage map is provided by a binary instrumented for code coverage, and each byte represents the execution count of a specific control-flow edge.
 In experiments where we use \aflpp for mutation but use coverage information that does not directly represent code coverage, we need to map our coverage onto such a byte buffer.
 
 In the case of context-blind coverage (global optimization counters), the number of optimization counters is known a priori.
@@ -140,58 +140,81 @@ For example, the execution counts 1, 2 and 3 each have their own bucket, whereas
 The idea behind this principle is that small changes in execution-count frequency are more interesting for smaller execution counts than for larger ones.
 The same applies to optimization frequencies.
 Whether an optimization was applied once, twice or three times likely makes a bigger difference than whether it was applied 100 or 120 times.
+Note that this bucketization in \aflpp occurs not during the test run, but when \aflpp integrates the run's coverage into its global coverage map.
 
-\begin{listing}
-    \begin{minted}[escapeinside=||,fontsize=\footnotesize]{json}
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[c]{0.50\textwidth}
+        \centering
+        \textbf{Optimization Log}\par\smallskip
+        \begin{minted}[escapeinside=@@,fontsize=\footnotesize]{json}
 {
-  |...|
-  "DeDuplication_Deduplication": 64,
-  "Reassociation_ConstantReassociation": 51,
-  "Reassociation_ArithmeticWithMulReplacement": 848,
-  "FixReads_IfElimination": 1519
-  |...|
+  @...@
+  "Deduplication": @\tikzmarknode[draw,inner sep=1pt]{num1}{9}@,
+  "ConstantReassociation": @\tikzmarknode[draw,inner sep=1pt]{num2}{27}@,
+  "ArithmeticWithMulReplacement": @\tikzmarknode[draw,inner sep=1pt]{num3}{125}@,
+  "IfElimination": @\tikzmarknode[draw,inner sep=1pt]{num4}{1519}@
+  @...@
 }
-    \end{minted}
-\end{listing}
-\fbetodo{Arrows from optimization counts to boxes}
-\begin{figure}
-    \begingroup
-    \normalsize
+        \end{minted}
+    \end{minipage}%
+    \hfill
+    \tikzset{
+        stackcell/.style={draw,thick,minimum width=1.2cm,minimum height=0.5cm,fill=gray!20},
+        stackellipsis/.style={stackcell,fill=white},
+        overlayarrow/.style={->,thick,gray},
+    }
+    \begin{minipage}[t]{0.22\textwidth}
+        \centering
+        \vspace{0pt}
+        \textbf{Run Coverage}\strut\par\smallskip
+        \renewcommand{\arraystretch}{0}%
+        \setlength{\tabcolsep}{0pt}%
+        \begin{tabular}{c}
+            \tikzmarknode[stackellipsis]{ellipT}{$\cdots$}    \\
+            \tikzmarknode[stackcell]{box1}{\footnotesize 9}   \\
+            \tikzmarknode[stackcell]{box2}{\footnotesize 27}  \\
+            \tikzmarknode[stackcell]{box3}{\footnotesize 125} \\
+            \tikzmarknode[stackcell]{box4}{\footnotesize 255} \\
+            \tikzmarknode[stackellipsis]{ellipB}{$\cdots$}    \\
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.22\textwidth}
+        \centering
+        \vspace{0pt}
+        \textbf{Bucketed Map}\strut\par\smallskip
+        \renewcommand{\arraystretch}{0}%
+        \setlength{\tabcolsep}{0pt}%
+        \begin{tabular}{c}
+            \tikzmarknode[stackellipsis]{ellipTr}{$\cdots$}    \\
+            \tikzmarknode[stackcell]{box1r}{\footnotesize 16}  \\
+            \tikzmarknode[stackcell]{box2r}{\footnotesize 32}  \\
+            \tikzmarknode[stackcell]{box3r}{\footnotesize 64}  \\
+            \tikzmarknode[stackcell]{box4r}{\footnotesize 128} \\
+            \tikzmarknode[stackellipsis]{ellipBr}{$\cdots$}    \\
+        \end{tabular}
+    \end{minipage}
 
-% -- measure natural sizes (3 digits and ellipses) --
-    \newsavebox{\digitbox}\sbox{\digitbox}{000}% exactly 3 digits
-    \newsavebox{\ellipsbox}\sbox{\ellipsbox}{$\cdots$}
-
-    \newlength{\SmallW} \setlength{\SmallW}{\wd\digitbox}
-    \newlength{\OuterH} \setlength{\OuterH}{\dimexpr\ht\digitbox+\dp\digitbox\relax}
-    \newlength{\EllW}   \setlength{\EllW}{\wd\ellipsbox}
-    \addtolength{\EllW}{0.6em} % small breathing room for the dots
-
-    \newcount\nboxes \nboxes=4\relax
-
-    \newlength{\BoxesW} \setlength{\BoxesW}{\dimexpr\nboxes\SmallW\relax}
-    \newlength{\OuterW} \setlength{\OuterW}{\dimexpr2\EllW+\BoxesW\relax}
-
-    \begin{tikzpicture}[x=1pt,y=1pt]
-        % outer rectangle: just big enough
-        \draw[thick] (0,0) rectangle (\the\OuterW,\the\OuterH);
-
-        % ellipses (centered in their bands)
-        \node at (0.5\EllW,0.5\OuterH) {$\cdots$};
-        \node at (\OuterW-0.5\EllW,0.5\OuterH) {$\cdots$};
-
-        % small boxes: natural width, no gaps
-        \newlength{\x}\setlength{\x}{\EllW}
-        \count255=0
-        \loop
-        \draw[thick,fill=gray!10] (\the\x,0) rectangle ++(\the\SmallW,\the\OuterH);
-        \addtolength{\x}{\SmallW}
-        \advance\count255 by 1
-        \ifnum\count255<\nboxes
-        \repeat
+    % Draw arrows using overlay
+    \begin{tikzpicture}[remember picture,overlay,>=Latex,shorten >=0pt]
+        \draw[overlayarrow] let \p1=(num1.north), \p2=(box1.west),
+        \n1={0.55*(\x1+\x2) + 40pt} in
+        (\p1) -- ++(0,0.15) -- (\n1,\y1+0.15cm) -- (\n1,\y2) -- (box1.west);
+        \draw[overlayarrow] let \p1=(num2.north), \p2=(box2.west),
+        \n1={0.55*(\x1+\x2) + 15pt} in
+        (\p1) -- ++(0,0.25) -- (\n1,\y1+0.25cm) -- (\n1,\y2) -- (box2.west);
+        \draw[overlayarrow] let \p1=(num3.north), \p2=(box3.west),
+        \n1={0.55*(\x1+\x2) - 15pt} in
+        (\p1) -- ++(0,0.35) -- (\n1,\y1+0.35cm) -- (\n1,\y2) -- (box3.west);
+        \draw[overlayarrow] let \p1=(num4.south), \p2=(box4.west),
+        \n1={0.55*(\x1+\x2) - 40pt} in
+        (\p1) -- ++(0,-0.45) -- (\n1,\y1-0.45cm) -- (\n1,\y2) -- (box4.west);
+        \draw[overlayarrow] (box1.east) -- (box1r.west);
+        \draw[overlayarrow] (box2.east) -- (box2r.west);
+        \draw[overlayarrow] (box3.east) -- (box3r.west);
+        \draw[overlayarrow] (box4.east) -- (box4r.west);
     \end{tikzpicture}
-
-    \endgroup
 \end{figure}
 
 
@@ -199,15 +222,16 @@ In the case of context-aware coverage (per-method optimization counters), only t
 Thus, the total number of optimization counters depends on the number of compiled methods and varies from test to test.
 Ideally, we want the transformation that converts optimization-log data into \aflpp compatible coverage to
 \begin{enumerate}
-\item \label{lool:enum:stable} be stable.
-The same optimization-log data should lead to the same \aflpp style coverage every time;
-\item \label{lool:enum:non-chaotic} map common optimization-log data to common code coverage;
-\item \label{lool:enum:injective} be injective.
-A non-injective mapping means there are coverage collisions.
+    \item \label{lool:enum:stable} be stable.
+    The same optimization-log data should lead to the same \aflpp style coverage every time;
+    \item \label{lool:enum:non-chaotic} map identical optimization-log data to identical code coverage.
+    Counter \propername{O} of a program's method \propername{M} should map to the same position regardless of whether the rest of the program changes;
+    \item \label{lool:enum:injective} be injective.
+    A non-injective mapping means there are coverage collisions.
 \end{enumerate}
 Condition \ref{lool:enum:stable} is satisfied as long as there is no non-determinism involved in the mapping.
 To satisfy condition \ref{lool:enum:non-chaotic}, we assign an index range to each compiled method, starting at an index based on the method name's hash code.
-Within each method's index range, we use the same optimization to index mapping as for the context-blind coverage mapping.
+Within each method's index range, we use the same optimization-to-index mapping as for the context-blind coverage mapping.
 For example, consider two tests with methods \propername{A}, \propername{B}, \propername{C} and \propername{A}, \propername{B}, \propername{D}, respectively.
 The counter positions for methods \propername{A} and \propername{B} will be the same in both cases, whereas the ones for \propername{C} and \propername{D} differ.
 Condition \ref{lool:enum:injective} is hard to fulfill in practice.
@@ -257,6 +281,3 @@ All later bytes in the seed file are ignored.
 The integer serves as a random seed for a new, in-memory random instance that drives the concrete random decisions.
 This approach allows \aflpp to mutate the generation parameters in a more targeted way.
 Reading the seed for the in-memory random instance from the input file is important to guarantee the same generated program (and thus the same coverage feedback) given the same input file.
-
-
-\fbetodo{describe passing of information between parent and child process}

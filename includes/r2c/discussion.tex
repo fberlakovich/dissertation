@@ -8,7 +8,6 @@
 
 \subsection{Performance}\label{r2c:ss:discussion-evaluation}
 
-\fbetodo{Add perf counter discussion}
 \fbetodo{Add section about profile-guided optimization}
 \begin{table}[t]
     \sisetup{
@@ -76,7 +75,7 @@ A possible explanation for the super-additive overhead (sum of component-overhea
 Both \propername{mcf} and \propername{omnetpp} are memory-bound benchmarks and memory stalls can hide a certain number of additional instructions.
 Thus, the stalls might hide the instructions of each component in isolation, but the stalls might be too few to hide all components combined.
 
-\subsubsection{Detailed Performance Counter Analysis}
+\subsubsection{Detailed Performance Counter Analysis}\label{r2c:sss:perf-counters}
 \begin{figure}[t]
     \centering
     \begingroup
@@ -93,7 +92,8 @@ Thus, the stalls might hide the instructions of each component in isolation, but
     }
     \input{figures/r2c/btra-instr-vs-cycles}%
     \endgroup
-    \caption{The relationship between instruction overhead and cycle overhead.}
+    \caption{The relationship between instruction overhead and cycle overhead.
+    The leftmost points resemble a configuration with 2 \glspl{BTRA}, whereas the rightmost points are 22 \glspl{BTRA} (see \cref{r2c:sss:perf-counters} for details).}
     \label{r2c:fig:btra-instr-vs-cycles}
 \end{figure}
 
@@ -133,7 +133,29 @@ Conversely, additional instructions do not necessarily lead to more cycles, as s
 The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint at a benchmark's performance profile.
 Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all of \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
 \cref{r2c:tab:btra-steps-overhead} shows the performance overhead of each progression relative to the baseline.
+\Cref{r2c:tab:ipc-progression} shows the absolute \gls{IPC} values as the number of \glspl{BTRA} increases from 2 to 22.
 \cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
+In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depication of the numerical values in \cref{r2c:tab:ipc-progression}.
+\begin{table}[t]
+    \centering
+    \caption{\gls{IPC} progression with increasing \gls{BTRA} count.
+    Benchmarks with memory slack show \gls{IPC} improvement as \gls{BTRA} instructions fill idle cycles; \gls{CPU}-bound benchmarks show flat or slightly decreasing \gls{IPC}.}
+    \label{r2c:tab:ipc-progression}
+    \footnotesize
+    \begin{tabular}{l
+    S[table-format=1.2]
+        c c c c c c}
+        \toprule
+        & & \multicolumn{6}{c}{\glspl{BTRA} ($\Delta$\%)} \\
+        \cmidrule(lr){3-8}
+        Benchmark & {Baseline} & {2} & {6} & {10} & {14} & {18} & {22} \\
+        \midrule
+        \fileInput{generated/r2c/ipc-progression}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
 
 \propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
 \propername{Perlbench} already has a relatively high \gls{IPC} of ~2.5 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
@@ -144,7 +166,6 @@ The positive effect of the cache hierarchy is also confirmed by the \gls{TMA} co
 No increase in the \propername{Frontend Bound} category means that with \rtwoc, the \gls{CPU} does not stall more on waiting for instructions than it already did in the baseline.
 Additional cache misses and memory stalls in \propername{perlbench} cause overall only about 1.5\% of the additional cycles.
 The remaining cycle overhead is caused by additional instructions, which cannot hide in the relatively small stall room of the baseline.
-
 
 For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
 This phenomenon can happen, for example, through memory stalls.
@@ -168,8 +189,8 @@ Additional instructions that cannot hide in the fewer stall cycles, thus, direct
 For \propername{deepsjeng}, which is also below the diagonal but closer to it than \eg \propername{omnetpp} and \propername{mcf}, the hiding effect is also less pronounced.
 In particular, \rtwoc causes about 12\% more instructions but only 9\% more cycles.
 The relatively low performance overhead of \propername{deepsjeng} is better explained by its low \emph{call density}, \ie the ratio of calls to baseline instructions.
-\Cref{r2c:tab:call-density} shows that \propername{x264} has the lowest call density (2.7 calls per 1000 instructions) due to its loop-intensive video encoding kernels, followed by \propername{deepsjeng} and \propername{leela} (7.0 and 7.2 respectively) which execute about 140 instructions between calls on average.
-In contrast, \propername{mcf} and \propername{omnetpp} call functions every 43 and 36 instructions respectively, resulting in call densities of 23.5 and 27.5.
+\Cref{r2c:tab:call-density} shows that \propername{x264} has the lowest call density (3.9 calls per 1000 instructions) due to its loop-intensive video encoding kernels, followed by \propername{deepsjeng} and \propername{leela} (5.8 and 8.0 respectively) which execute about 170 and 125 instructions between calls on average.
+In contrast, \propername{mcf} and \propername{omnetpp} call functions every 50 and 43 instructions respectively, resulting in call densities of 19.7 and 23.1.
 Since each call instrumented by \rtwoc adds approximately 25 \gls{BTRA} instructions, the instruction overhead is roughly proportional to call density.
 This explains why \propername{deepsjeng} has only 12\% instruction overhead despite executing more total calls than \propername{perlbench} (11.4B vs 9.4B): the fixed \gls{BTRA} cost is amortized over more baseline work.
 
@@ -189,36 +210,38 @@ Already in the baseline the \gls{CPU} spends most of its time performing time-co
 The baseline \gls{IPC} is low ($\approx$1.05), indicating that a 4-wide core leaves substantial headroom for additional instructions to execute in parallel.
 The perf counter data also show non-trivial memory stalls (about 22\%) and divider activity (about 3\%), which provide additional hiding capacity.
 Both \propername{Backend Bound} and the \propername{Frontend Bound} categories decrease slightly with \rtwoc, consistent with BTRA instructions filling otherwise idle slots.
-The high \propername{Bad Speculation} rate correlates with low baseline utilization but does not itself create slack; it explains why the baseline \gls{IPC} is low, not why the overhead is hidden.
+Notably, \propername{leela} has the highest \propername{Bad Speculation} rate among our benchmarks ($\approx$22\%), which explains why its baseline \gls{IPC} is low despite not being memory-bound---the CPU frequently discards speculative work.
+However, this misprediction overhead does not itself create hiding capacity; rather, it is the resulting execution port underutilization that provides slack for \gls{BTRA} instructions to execute without extending the critical path.
 
 
 \begin{table}[t]
     \centering
-    \caption{Call density analysis. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
+    \caption{Call density analysis. Call counts are from runtime instrumentation (see \cref{tab:call-frequencies}); baseline instructions from \texttt{perf stat}. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
     \label{r2c:tab:call-density}
     \sisetup{
         table-alignment-mode=none,
         table-number-alignment=right,
     }
     \begin{tabular}{l
-        S[table-format=4.1]
+        S[table-format=4.0]
         S[table-format=2.1]
         S[table-format=2.1]}
         \toprule
         Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
         \midrule
-        \propername{x264}      & 866.8                & 2.3         & 2.7       \\
-        \propername{deepsjeng} & 1635.1               & 11.4        & 7.0       \\
-        \propername{leela}     & 1638.0               & 11.8        & 7.2       \\
-        \propername{perlbench} & 829.1                & 9.4         & 11.4      \\
-        \propername{gcc}       & 651.7                & 7.5         & 11.5      \\
-        \propername{xalancbmk} & 879.8                & 12.4        & 14.1      \\
-        \propername{mcf}       & 1645.8               & 38.7        & 23.5      \\
-        \propername{omnetpp}   & 857.3                & 23.5        & 27.5      \\
+        \propername{x264}      & 867                  & 3.4         & 3.9       \\
+        \propername{deepsjeng} & 1957                 & 11.4        & 5.8       \\
+        \propername{leela}     & 1638                 & 13.1        & 8.0       \\
+        \propername{perlbench} & 994                  & 9.4         & 9.5       \\
+        \propername{gcc}       & 781                  & 7.5         & 9.6       \\
+        \propername{xalancbmk} & 1053                 & 12.4        & 11.8      \\
+        \propername{mcf}       & 1965                 & 38.7        & 19.7      \\
+        \propername{omnetpp}   & 1020                 & 23.5        & 23.1      \\
         \bottomrule
     \end{tabular}
 \end{table}
 
+\subsubsection{Memory Overhead}
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
 The results confirmed a memory overhead of only a few percent.
@@ -472,7 +495,6 @@ Through function reordering/permutation row-based references become invalid.
 Since exceptions occur infrequently, one could also use a more expensive protection scheme, such as encryption, to protect these meta-data.
 
 \subsubsection{Corrupting code pointers}\label{r2c:sss:corrupting-code-pointers}
-\fbetodo{extend section}
 \Glspl{CRA} typically corrupt entire code pointers.
 An attack called \gls{PIROP} generalizes this principle by corrupting only parts of code pointers and, as a result, is immune to ASLR and page-level randomization~\cite{Goktas2018}.
 \rtwoc{} impedes a \gls{PIROP} attack in two ways.

@@ -1,6 +1,12 @@
 \section{Evaluation}
 
 This section describes the evaluation of our prototype implementation described in \cref{psp:s:implementation}.
+With our evaluation we aim to test the following hypotheses:
+\begin{hypotheses}
+    \hypothesis[psp:hpt:vrp-coverage]{VRP Coverage} \gls{VRP} improves the fuzzer's ability to discover new edges;
+    \hypothesis[psp:hpt:unfold-coverage]{Unfolding Coverage} Indirect call unfolding improves the fuzzer's ability to discover new edges;
+    \hypothesis[psp:hpt:bugs]{Bug Finding} \gls{PSP} transformations improve bug-finding capability.
+\end{hypotheses}
 
 \subsection{System Configuration}\label{psp:ss:system-configuration}
 
@@ -9,7 +15,7 @@ The cluster is orchestrated by K3s with the Volcano batch scheduler.
 Fuzzing trials run in parallel across the cluster, with each fuzzer instance limited to a single dedicated CPU core and distributed evenly across machines.
 Each fuzzer-benchmark combination ran for 24 hours, with the initial seed corpus included with the benchmark.
 During fuzzing, the fuzzing infrastructure takes corpus snapshots at regular intervals.
-Coverage is measured offline after the experiment completes by replaying each snapshot's corpus through a separate binary built with Clang's source-based coverage instrumentation and linked against libFuzzer.
+Coverage is measured offline after the experiment completes by replaying each snapshot's corpus through a separate binary built with Clang's source-based coverage instrumentation.
 Shared storage for corpora and results is provided via NFS, with results aggregated into a PostgreSQL database.
 The evaluation infrastructure is based on a customized fork of FuzzBench.
 
@@ -19,13 +25,6 @@ The evaluation infrastructure is based on a customized fork of FuzzBench.
 % Data: vrp-unfold-eval01.zip (40 trials × 18 benchmarks × 5 fuzzers, 24h each)
 % Analysis script: scripts/psp/compare_fuzzers.py
 % =============================================================================
-
-\subsection{Research Questions}\label{psp:ss:research-questions}
-% RQ1: Does VRP improve edge coverage compared to baseline AFL++?
-% RQ2: Does indirect call unfolding improve edge coverage?
-% RQ3: Do PSP transformations affect fuzzing throughput?
-% RQ4: Do PSP transformations improve bug-finding capability (Magma)?
-% RQ5: Are improvements statistically significant across benchmarks?
 
 \subsection{Evaluated Configurations and Benchmarks}\label{psp:ss:configurations}
 
@@ -37,19 +36,20 @@ We also test \gls{VRP} with \gls{LTO}, again against an \aflpp baseline with \gl
 Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assignment enabled by \gls{LTO} can help with the larger number of edge-ids produced by \gls{VRP}.
 \cref{tab:psc-configurations} summarizes the evaluated configurations and their baselines.
 
+
 \begin{table}[h]
     \centering
     \caption{Evaluated fuzzer configurations}
     \label{tab:psc-configurations}
     \begin{tabular}{lll}
         \toprule
-        \textbf{Configuration}                & \textbf{Description}                   & \textbf{Baseline}             \\
+        \textbf{Configuration}             & \textbf{Description}                   & \textbf{Baseline}             \\
         \midrule
-        \propername{aflplusplus}              & Standard \aflpp (non-LTO)              & ---                           \\
-        \propername{aflplusplus\_lto}         & \aflpp with LTO instrumentation        & ---                           \\
-        \propername{aflplusplus\_vrp}         & \aflpp + \gls{VRP} transformations     & \propername{aflplusplus}      \\
-        \propername{aflplusplus\_vrp\_lto}    & \aflpp LTO + \gls{VRP} transformations & \propername{aflplusplus\_lto} \\
-        \propername{aflplusplus\_unfold} & \aflpp LTO + indirect call unfolding   & \propername{aflplusplus\_lto} \\
+        \propername{aflplusplus}           & Standard \aflpp (non-LTO)              & ---                           \\
+        \propername{aflplusplus\_lto}      & \aflpp with LTO instrumentation        & ---                           \\
+        \propername{aflplusplus\_vrp}      & \aflpp + \gls{VRP} transformations     & \propername{aflplusplus}      \\
+        \propername{aflplusplus\_vrp\_lto} & \aflpp LTO + \gls{VRP} transformations & \propername{aflplusplus\_lto} \\
+        \propername{aflplusplus\_unfold}   & \aflpp LTO + indirect call unfolding   & \propername{aflplusplus\_lto} \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -59,33 +59,38 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
     \centering
     \caption{Benchmark versions used in the evaluation}
     \label{tab:benchmark-versions}
-    \begin{tabular}{lllc}
+    \begin{tabular}{llll}
         \toprule
-        \textbf{Benchmark}               & \textbf{Project} & \textbf{Source} & \textbf{Commit} \\
+        \textbf{Benchmark}                              & \textbf{Project}        & \textbf{Source} & \textbf{Commit} \\
         \midrule
-        curl\_curl\_fuzzer\_http         & curl             & FuzzBench       & a20f74a1        \\
-        freetype2\_ftfuzzer              & FreeType         & FuzzBench       & cd02d359        \\
-        harfbuzz\_hb-shape-fuzzer        & HarfBuzz         & FuzzBench       & cb47dca7        \\
-        jsoncpp\_jsoncpp\_fuzzer         & JsonCpp          & FuzzBench       & 8190e061        \\
-        libpng                           & libpng           & Magma           & a37d4836        \\
-        libtiff                          & libtiff          & Magma           & c145a6c1        \\
-        libxml2\_xml\_read\_memory       & libxml2          & Magma           & ec6e3efb        \\
-        libxslt\_xpath                   & libxslt          & FuzzBench       & 180cdb80        \\
-        mbedtls\_fuzz\_dtlsclient        & Mbed TLS         & FuzzBench       & 169d9e6e        \\
-        openssl\_asn1                    & OpenSSL          & Magma           & 3bd5319b        \\
-        openssl\_bignum                  & OpenSSL          & Magma           & 3bd5319b        \\
-        openssl\_x509                    & OpenSSL          & Magma           & 3bd5319b        \\
-        openthread\_ot-ip6-send-fuzzer   & OpenThread       & FuzzBench       & 25506997        \\
-        re2\_fuzzer                      & RE2              & FuzzBench       & b025c6a3        \\
-        sqlite3                          & SQLite           & Magma           & 8c432642        \\
-        stb\_stbi\_read\_fuzzer          & stb              & FuzzBench       & 5736b15f        \\
-        systemd\_fuzz-link-parser        & systemd          & FuzzBench       & 07faa499        \\
-        woff2\_convert\_woff2ttf\_fuzzer & WOFF2            & FuzzBench       & 8109a2cc        \\
+        \propername{curl\_curl\_fuzzer\_http}           & \propername{curl}       & FuzzBench       & \propername{a20f74a1} \\
+        \propername{freetype2\_ftfuzzer}                & \propername{FreeType}   & FuzzBench       & \propername{cd02d359} \\
+        \propername{harfbuzz\_hb-shape-fuzzer}          & \propername{HarfBuzz}   & FuzzBench       & \propername{cb47dca7} \\
+        \propername{jsoncpp\_jsoncpp\_fuzzer}           & \propername{JsonCpp}    & FuzzBench       & \propername{8190e061} \\
+        \propername{libxslt\_xpath}                     & \propername{libxslt}    & FuzzBench       & \propername{180cdb80} \\
+        \propername{mbedtls\_fuzz\_dtlsclient}          & \propername{Mbed TLS}   & FuzzBench       & \propername{169d9e6e} \\
+        \propername{openthread\_ot-ip6-send-fuzzer}     & \propername{OpenThread} & FuzzBench       & \propername{25506997} \\
+        \propername{re2\_fuzzer}                        & \propername{RE2}        & FuzzBench       & \propername{b025c6a3} \\
+        \propername{stb\_stbi\_read\_fuzzer}            & \propername{stb}        & FuzzBench       & \propername{5736b15f} \\
+        \propername{systemd\_fuzz-link-parser}          & \propername{systemd}    & FuzzBench       & \propername{07faa499} \\
+        \propername{woff2\_convert\_woff2ttf\_fuzzer}   & \propername{WOFF2}      & FuzzBench       & \propername{8109a2cc} \\
+        \midrule
+        \propername{libpng}                             & \propername{libpng}     & Magma           & \propername{a37d4836} \\
+        \propername{libtiff}                            & \propername{libtiff}    & Magma           & \propername{c145a6c1} \\
+        \propername{libxml2\_xml\_read\_memory}         & \propername{libxml2}    & Magma           & \propername{ec6e3efb} \\
+        \propername{openssl\_asn1}                      & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
+        \propername{openssl\_bignum}                    & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
+        \propername{openssl\_x509}                      & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
+        \propername{sqlite3}                            & \propername{SQLite}     & Magma           & \propername{8c432642} \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \subsection{Edge Coverage}\label{psp:ss:coverage}
+
+We measure the achieved edge coverage by replaying the corpus found by each configuration on a binary instrumented with Clang's coverage sanitizer.
+Measuring coverage with a common binary is particularly important since \gls{PSP} introduces new edge ids not present in the baseline binary.
+
 
 % -----------------------------------------------------------------------------
 % FINAL COVERAGE RESULTS (from data analysis)
@@ -153,7 +158,6 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 %     96     | 8738     | 8821  | 8937  | 8873    | 8879
 %     → VRP reaches 90% at cycle 25 vs baseline cycle 31
 
-\subsection{Fuzzing Throughput}\label{psp:ss:throughput}
 % TABLE: Execution speed
 % | Configuration   | Mean execs/sec | vs Baseline |
 % |-----------------|----------------|-------------|
@@ -193,7 +197,6 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % PSP transformations change exploration paths in ways that favor some bugs
 % over others, rather than providing uniform improvement.
 
-\subsection{Statistical Analysis}\label{psp:ss:statistics}
 % Methodology:
 % - 40 trials per benchmark-fuzzer configuration
 % - Mann-Whitney U test for significance (p < 0.05)
@@ -211,68 +214,3 @@ Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assign
 % negligible range (0.44-0.56), indicating true absence of effect rather than
 % insufficient sample size.
 
-\subsection{Discussion}\label{psp:ss:discussion}
-% -----------------------------------------------------------------------------
-% ANSWERS TO RESEARCH QUESTIONS
-% -----------------------------------------------------------------------------
-% RQ1 (VRP coverage): NO - No statistically significant improvement.
-%     Avg +0.15% across LTO/non-LTO, A12 = 0.51 (negligible)
-%
-% RQ2 (Unfold coverage): NO - No statistically significant improvement.
-%     Avg +0.46%, one benchmark (openssl_x509) shows +8.2% but not significant
-%
-% RQ3 (Throughput): NO PENALTY - VRP shows +1.8% faster execution
-%     PSP transformations do not slow down fuzzing
-%
-% RQ4 (Bug finding): MIXED - Changes which bugs are found, not total count
-%     TIF008: +10-50× with PSP; TIF014: -30-60% with PSP
-%
-% RQ5 (Significance): NO - Only 1/54 comparisons significant (a regression)
-%     Effect sizes uniformly negligible (A12 ≈ 0.5)
-
-% -----------------------------------------------------------------------------
-% INTERPRETATION
-% -----------------------------------------------------------------------------
-% The data suggests PSP transformations have negligible impact on fuzzing
-% effectiveness in 24-hour campaigns on FuzzBench targets.
-%
-% Possible explanations:
-% 1. Campaign duration: 24h may be too short to see benefits in deeper state space
-% 2. Benchmark selection: FuzzBench targets may not exercise transformed code paths
-% 3. Transformation coverage: Compiler may not apply VRP/unfolding in hot paths
-% 4. Already saturated: AFL++ may already cover relevant branches without help
-% 5. Bug sensitivity: Different bugs favor different exploration strategies
-%
-% The time-series data shows benchmark-specific patterns:
-% - libtiff: VRP+LTO maintains consistent ~3% lead (suggests VRP helps here)
-% - openssl_x509: Unfold diverges after cycle 20 (late-stage benefit)
-% - sqlite3: VRP reaches 90% coverage faster but final coverage similar
-% These patterns suggest PSP may provide marginal benefits in specific contexts.
-
-% -----------------------------------------------------------------------------
-% LIMITATIONS
-% -----------------------------------------------------------------------------
-% - 24-hour campaign duration (longer campaigns may show different results)
-% - FuzzBench benchmark selection (may not be representative of all software)
-% - Single LLVM version (transformation applicability varies by compiler)
-% - Coverage-based evaluation (PSP may help with properties not captured by coverage)
-
-% =============================================================================
-% FIGURES AND TABLES TO CREATE
-% =============================================================================
-% FIGURE 1: Final coverage comparison (bar chart with error bars)
-%           Show 3-4 representative benchmarks, all 5 fuzzers
-%
-% FIGURE 2: Coverage over time (line plots)
-%           (a) libtiff_magma - VRP+LTO advantage
-%           (b) openssl_x509_magma - Unfold late divergence
-%           (c) sqlite3_magma - VRP early advantage
-%
-% TABLE 1: Configuration overview (5 rows)
-% TABLE 2: Final coverage statistical summary (3 comparisons)
-% TABLE 3: Per-benchmark results (full 18 benchmarks, can go in appendix)
-% TABLE 4: Coverage-over-time metrics (AUC, time-to-90%)
-% TABLE 5: Magma bug triggering results (focus on TIF008/TIF014/PNG003)
-% =============================================================================
-
-\todo{Implement evaluation based on above outline. Data: data/psp/dataframes/vrp-unfold-eval01.zip}

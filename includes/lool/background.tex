@@ -82,21 +82,10 @@ The mutations are specifically tailored to exercise JVM JIT compiler optimizatio
 Artemis generates input programs with Java* Fuzzer~\cite{JavaFuzzer} and transplants code snippets from JIT compiler test suites into the program~\cite{Li2023a}.
 In addition, Artemis tests combinations of compiled and interpreted methods by triggering only compilation of randomly selected methods in the input program.
 
-\fbetodo{Integrate swarm testing into background}
-
 \citeauthor{Groce2012}~propose a method called \emph{swarm testing} that varies code generator configurations throughout a fuzzing campaign to generate more diverse test cases~\cite{Groce2012}.
+The insight behind swarm testing is that inputs including more features are not necessarily beneficial and in some cases even detrimental to the testing effort~\cite{Groce2013}.
 In the literature as well as in our own experiments, this has proven to be effective.
 \emph{Directed} swarm testing~\cite{Alipour2016} is a refinement that guides the configuration mutation by \emph{code coverage} data collected during testing.
-
-\paragraph{Swarm testing}
-\lool{} follows the idea of swarm testing~\cite{Groce2012}.
-The insight behind swarm testing is that inputs including more features are not necessarily beneficial and in some cases even detrimental to the testing effort~\cite{Groce2013}.
-Features, in our case Java language constructs, can either trigger, suppress or be irrelevant for a certain bug.
-Thus, \lool{} tries to achieve a large diversity of input features, which includes also the \emph{omission} of features in some inputs.
-\citeauthor{Alipour2016} extended swarm testing to be \emph{directed}~\cite{Alipour2016}.
-Like \lool{}, directed swarm testing incorporates statistical information about triggers and suppressors from previous runs into the generation of inputs.
-However, \lool{} chooses the targets for its directed swarm testing approach automatically based on the optimization log coverage.
-
 
 Following the spirit of swarm testing, the authors of JOpFuzz investigate triggering test case features and required JVM options based on real bug reports~\cite{Jia2023}.
 In an initial step, JOpFuzz tries to automatically infer the relationship between code features and JIT compiler optimizations.

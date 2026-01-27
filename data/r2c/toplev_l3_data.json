@@ -1,0 +1,1601 @@
+{
+  "baseline": {
+    "600.perlbench_s": {
+      "iterations": 3,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.3,
+          "std": 4.51,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 2.57,
+          "std": 0.97,
+          "n": 3
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.5,
+          "std": 2.7,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.1,
+          "std": 0.1,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 3.53,
+          "std": 0.45,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 11.73,
+          "std": 2.64,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 0.43,
+          "std": 0.15,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.07,
+          "std": 0.12,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 13.9,
+          "std": 13.19,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 11.8,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.ICache_Misses": {
+          "mean": 6.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 31.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 16.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 93.7,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "602.gcc_s": {
+      "iterations": 3,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 4.37,
+          "std": 1.53,
+          "n": 3
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 11.93,
+          "std": 4.36,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.03,
+          "std": 0.06,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 8.0,
+          "std": 5.98,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 10.13,
+          "std": 3.23,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 32.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.5,
+          "std": 2.69,
+          "n": 3
+        },
+        "Backend_Bound": {
+          "mean": 35.33,
+          "std": 14.88,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 3.4,
+          "std": 2.36,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.43,
+          "std": 0.15,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 24.53,
+          "std": 14.5,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L2_Bound": {
+          "mean": 13.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 21.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 5.4,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 15.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 20.43,
+          "std": 0.85,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 56.6,
+          "std": 11.53,
+          "n": 3
+        },
+        "Frontend_Bound": {
+          "mean": 26.45,
+          "std": 1.48,
+          "n": 2
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 13.85,
+          "std": 0.78,
+          "n": 2
+        },
+        "Frontend_Bound.Fetch_Latency.ICache_Misses": {
+          "mean": 5.2,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers": {
+          "mean": 8.7,
+          "std": 0.0,
+          "n": 2
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 15.6,
+          "std": 0.57,
+          "n": 2
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 16.75,
+          "std": 0.35,
+          "n": 2
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 2
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 2
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 2
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 2
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 13.95,
+          "std": 0.21,
+          "n": 2
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 14.7,
+          "std": 0.14,
+          "n": 2
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 36.5,
+          "std": 0.57,
+          "n": 2
+        }
+      }
+    },
+    "605.mcf_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 19.8,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation": {
+          "mean": 19.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 42.7,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 11.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 9.0,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 19.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 23.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 19.5,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers": {
+          "mean": 5.5,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 7.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 4.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.Lock_Latency": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.Store_Bound.Store_Latency": {
+          "mean": 6.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 10.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 46.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 12.4,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 11.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 18.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 21.9,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "620.omnetpp_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 2.9,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 9.1,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 6.3,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 4.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 51.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.7,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 65.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 4.7,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 52.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 8.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 45.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 31.7,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "623.xalancbmk_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 1.3,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 2.5,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 1.3,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 7.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 51.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 67.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 4.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.2,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 37.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L2_Bound": {
+          "mean": 6.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 30.6,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 36.4,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "625.x264_s": {
+      "iterations": 3,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 3.5,
+          "std": 0.17,
+          "n": 3
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.43,
+          "std": 0.12,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.17,
+          "std": 0.06,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 1.97,
+          "std": 0.23,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 5.67,
+          "std": 0.9,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 17.97,
+          "std": 0.21,
+          "n": 3
+        },
+        "Backend_Bound": {
+          "mean": 21.87,
+          "std": 0.67,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 2.3,
+          "std": 0.89,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.33,
+          "std": 0.15,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 4.7,
+          "std": 1.13,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 26.3,
+          "std": 0.36,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 18.67,
+          "std": 0.51,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 100.9,
+          "std": 0.62,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization": {
+          "mean": 42.77,
+          "std": 1.04,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 35.63,
+          "std": 0.67,
+          "n": 3
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 42.17,
+          "std": 1.21,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 53.2,
+          "std": 1.51,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 40.13,
+          "std": 0.67,
+          "n": 3
+        },
+        "Retiring.Light_Operations.Memory_Operations": {
+          "mean": 14.9,
+          "std": 0,
+          "n": 1
+        },
+        "Retiring.Light_Operations.Other_Light_Ops": {
+          "mean": 42.2,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "631.deepsjeng_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.7,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound": {
+          "mean": 27.2,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 5.6,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 14.1,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 2.7,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 12.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.4,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 6.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 12.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 19.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 15.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 67.8,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 22.2,
+          "std": 0,
+          "n": 1
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 22.3,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 22.9,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 34.5,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "641.leela_s": {
+      "iterations": 1,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 29.0,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation": {
+          "mean": 32.0,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 15.1,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 14.0,
+          "std": 0,
+          "n": 1
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 31.9,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers": {
+          "mean": 12.6,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.4,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 5.4,
+          "std": 0,
+          "n": 1
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 10.5,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 1.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.1,
+          "std": 0,
+          "n": 1
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 1.2,
+          "std": 0,
+          "n": 1
+        }
+      }
+    }
+  },
+  "r2c-btra10": {
+    "600.perlbench_s": {
+      "iterations": 15,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 20.61,
+          "std": 4.24,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 2.33,
+          "std": 0.63,
+          "n": 15
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.19,
+          "std": 2.26,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.09,
+          "std": 0.1,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 3.37,
+          "std": 0.97,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 10.72,
+          "std": 2.03,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 0.46,
+          "std": 0.11,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.06,
+          "std": 0.07,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 12.35,
+          "std": 7.36,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 12.93,
+          "std": 1.39,
+          "n": 6
+        },
+        "Frontend_Bound.Fetch_Latency.ICache_Misses": {
+          "mean": 8.34,
+          "std": 0.5,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 25.06,
+          "std": 1.39,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 12.58,
+          "std": 0.8,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 16.76,
+          "std": 0.59,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 101.78,
+          "std": 0.73,
+          "n": 4
+        }
+      }
+    },
+    "602.gcc_s": {
+      "iterations": 15,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 4.29,
+          "std": 0.97,
+          "n": 15
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 10.67,
+          "std": 3.1,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.07,
+          "std": 0.05,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 4.63,
+          "std": 3.2,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 9.4,
+          "std": 3.02,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 31.58,
+          "std": 0.52,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 15.64,
+          "std": 3.49,
+          "n": 15
+        },
+        "Backend_Bound": {
+          "mean": 33.09,
+          "std": 13.85,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 2.65,
+          "std": 1.6,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.45,
+          "std": 0.08,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 23.97,
+          "std": 12.21,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L2_Bound": {
+          "mean": 12.74,
+          "std": 0.4,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 22.02,
+          "std": 0.73,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 5.36,
+          "std": 0.15,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 14.98,
+          "std": 0.32,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 20.32,
+          "std": 0.84,
+          "n": 15
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 62.65,
+          "std": 10.72,
+          "n": 15
+        },
+        "Frontend_Bound": {
+          "mean": 26.49,
+          "std": 1.5,
+          "n": 10
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 15.36,
+          "std": 1.21,
+          "n": 10
+        },
+        "Frontend_Bound.Fetch_Latency.ICache_Misses": {
+          "mean": 7.17,
+          "std": 1.04,
+          "n": 10
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers": {
+          "mean": 8.28,
+          "std": 0.4,
+          "n": 10
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 15.15,
+          "std": 0.06,
+          "n": 4
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 15.7,
+          "std": 0.32,
+          "n": 4
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 4
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 4
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 4
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 4
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 15.38,
+          "std": 0.3,
+          "n": 4
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 16.48,
+          "std": 0.33,
+          "n": 4
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 34.2,
+          "std": 0.41,
+          "n": 4
+        }
+      }
+    },
+    "605.mcf_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 15.55,
+          "std": 0.07,
+          "n": 2
+        },
+        "Bad_Speculation": {
+          "mean": 21.04,
+          "std": 1.8,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 41.26,
+          "std": 1.02,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 4.26,
+          "std": 0.59,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 20.94,
+          "std": 1.8,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.07,
+          "std": 0.06,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 6.73,
+          "std": 1.72,
+          "n": 3
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 6.27,
+          "std": 1.07,
+          "n": 3
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 22.74,
+          "std": 0.87,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 18.54,
+          "std": 0.3,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.Lock_Latency": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.Store_Bound.Store_Latency": {
+          "mean": 6.26,
+          "std": 0.3,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 8.48,
+          "std": 0.43,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 43.46,
+          "std": 1.29,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 12.42,
+          "std": 0.79,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 10.14,
+          "std": 0.3,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 18.58,
+          "std": 0.69,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 18.76,
+          "std": 1.13,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 56.6,
+          "std": 4.43,
+          "n": 5
+        }
+      }
+    },
+    "620.omnetpp_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 2.46,
+          "std": 0.11,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 9.06,
+          "std": 0.21,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.1,
+          "std": 0.0,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 4.64,
+          "std": 0.44,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 4.16,
+          "std": 0.36,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 47.44,
+          "std": 0.46,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.78,
+          "std": 0.08,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 62.22,
+          "std": 0.48,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 3.54,
+          "std": 0.36,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.22,
+          "std": 0.04,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 48.48,
+          "std": 0.39,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 8.24,
+          "std": 0.11,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound": {
+          "mean": 41.8,
+          "std": 0.33,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 33.04,
+          "std": 0.18,
+          "n": 5
+        }
+      }
+    },
+    "623.xalancbmk_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 1.24,
+          "std": 0.05,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 2.38,
+          "std": 0.08,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 1.34,
+          "std": 0.21,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 6.74,
+          "std": 0.32,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound": {
+          "mean": 48.56,
+          "std": 1.02,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 16.34,
+          "std": 0.24,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 64.9,
+          "std": 0.81,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 3.56,
+          "std": 0.5,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.34,
+          "std": 0.05,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 37.52,
+          "std": 0.77,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L2_Bound": {
+          "mean": 7.16,
+          "std": 0.39,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Latency": {
+          "mean": 31.04,
+          "std": 0.72,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound": {
+          "mean": 35.76,
+          "std": 0.81,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 15.0,
+          "std": 0,
+          "n": 1
+        }
+      }
+    },
+    "625.x264_s": {
+      "iterations": 15,
+      "metrics": {
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 2.86,
+          "std": 0.29,
+          "n": 15
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 6.89,
+          "std": 0.83,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.17,
+          "std": 0.05,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 1.97,
+          "std": 0.2,
+          "n": 15
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 5.08,
+          "std": 1.1,
+          "n": 15
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 17.75,
+          "std": 1.0,
+          "n": 6
+        },
+        "Backend_Bound": {
+          "mean": 22.37,
+          "std": 1.57,
+          "n": 6
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 2.28,
+          "std": 1.56,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.33,
+          "std": 0.05,
+          "n": 15
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 5.4,
+          "std": 1.35,
+          "n": 15
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 24.55,
+          "std": 0.95,
+          "n": 6
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 18.42,
+          "std": 0.4,
+          "n": 6
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 102.73,
+          "std": 1.89,
+          "n": 3
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization": {
+          "mean": 42.16,
+          "std": 0.79,
+          "n": 15
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 35.17,
+          "std": 0.47,
+          "n": 6
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 6
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 6
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 6
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 6
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 40.1,
+          "std": 1.25,
+          "n": 6
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 51.67,
+          "std": 1.04,
+          "n": 6
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 39.32,
+          "std": 0.8,
+          "n": 6
+        },
+        "Retiring.Light_Operations.Memory_Operations": {
+          "mean": 16.5,
+          "std": 0.36,
+          "n": 7
+        },
+        "Retiring.Light_Operations.Other_Light_Ops": {
+          "mean": 40.9,
+          "std": 0.41,
+          "n": 7
+        },
+        "Retiring.Light_Operations": {
+          "mean": 60.71,
+          "std": 0.41,
+          "n": 7
+        }
+      }
+    },
+    "631.deepsjeng_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 21.62,
+          "std": 0.29,
+          "n": 5
+        },
+        "Backend_Bound": {
+          "mean": 26.1,
+          "std": 0.46,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 5.26,
+          "std": 0.09,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 13.1,
+          "std": 0.12,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 2.12,
+          "std": 0.08,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 13.08,
+          "std": 0.28,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound": {
+          "mean": 14.02,
+          "std": 0.2,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 3.26,
+          "std": 0.51,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 11.16,
+          "std": 0.41,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization": {
+          "mean": 20.06,
+          "std": 0.21,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_2": {
+          "mean": 15.98,
+          "std": 0.13,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m": {
+          "mean": 71.7,
+          "std": 0.68,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_0": {
+          "mean": 21.62,
+          "std": 0.19,
+          "n": 5
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Scalar": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_128b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Retiring.Light_Operations.FP_Arith.FP_Vector.FP_Vector_256b": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_1": {
+          "mean": 21.92,
+          "std": 0.13,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_5": {
+          "mean": 22.54,
+          "std": 0.11,
+          "n": 5
+        },
+        "Backend_Bound.Core_Bound.Ports_Utilization.Ports_Utilized_3m.ALU_Op_Utilization.Port_6": {
+          "mean": 33.2,
+          "std": 0.19,
+          "n": 5
+        }
+      }
+    },
+    "641.leela_s": {
+      "iterations": 5,
+      "metrics": {
+        "Frontend_Bound": {
+          "mean": 26.98,
+          "std": 0.42,
+          "n": 5
+        },
+        "Bad_Speculation": {
+          "mean": 30.98,
+          "std": 0.44,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency": {
+          "mean": 14.02,
+          "std": 0.24,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Bandwidth": {
+          "mean": 12.94,
+          "std": 0.29,
+          "n": 5
+        },
+        "Bad_Speculation.Branch_Mispredicts": {
+          "mean": 30.86,
+          "std": 0.42,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers": {
+          "mean": 12.1,
+          "std": 0.17,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.LCP": {
+          "mean": 0.4,
+          "std": 0.0,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.DSB_Switches": {
+          "mean": 4.56,
+          "std": 0.25,
+          "n": 5
+        },
+        "Frontend_Bound.Fetch_Latency.Branch_Resteers.Mispredicts_Resteers": {
+          "mean": 10.08,
+          "std": 0.11,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L1_Bound.FB_Full": {
+          "mean": 2.42,
+          "std": 0.33,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.L3_Bound.SQ_Full": {
+          "mean": 0.14,
+          "std": 0.05,
+          "n": 5
+        },
+        "Backend_Bound.Memory_Bound.DRAM_Bound.MEM_Bandwidth": {
+          "mean": 1.92,
+          "std": 0.44,
+          "n": 5
+        }
+      }
+    }
+  }
+}

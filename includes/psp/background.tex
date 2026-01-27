@@ -67,7 +67,7 @@ Note that \glspl{JITcomp} typically avoid rewriting the code itself and instead 
 The principal idea behind the transformation stays the same, however.
 \begin{listing}
     \centering
-    \begin{minted}[mathescape]{gas}
+    \begin{minted}[ignorelexererrors=true]{gas}
 ; assuming a pointer to animal is loaded in rdi
 mov     rax, [rdi]         ; load vptr from object
 

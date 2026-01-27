@@ -18,6 +18,7 @@
 \usepackage[latex=false]{svg}
 \usepackage{xifthen}% provides \isempty test
 \usepackage{placeins}
+\usepackage{float} % provides [H] placement specifier for exact figure positioning
 \usepackage{iftex}
 \usepackage[framemethod=tikz]{mdframed}
 \usepackage{siunitx}
@@ -80,7 +81,6 @@
 \setmainfont{TeX Gyre Pagella}
 \setmathfont{TeX Gyre Pagella Math}
 \setmonofont{Noto Sans Mono}[Scale=0.9]
-
 
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \UseTblrLibrary{booktabs,functional}
@@ -192,8 +192,8 @@
 }
 \makeatother
 
-\newcommand{\sbrtodo}[1]{\todo[inline,color=NavyBlue!80]{\textcolor{white}{sbr: #1}}}
-\newcommand{\fbetodo}[1]{\todo[inline,color=ForestGreen!80]{\textcolor{white}{fbe: #1}}}
+\newcommand{\sbrtodo}[1]{\todo[inline,color=NavyBlue!80,textcolor=white]{sbr: #1}}
+\newcommand{\fbetodo}[1]{\todo[inline,color=ForestGreen!80,textcolor=white]{fbe: #1}}
 
 
 
@@ -389,6 +389,7 @@
 \newacronym{IPC}{IPC}{Instructions Per Cycle}
 \newacronym{VRP}{VRP}{Value-Range Partitioning}
 \newacronym{TMA}{TMA}{Top-Down Microarchitectural Analysis}
+\newacronym{LLM}{LLM}{Large Language Models}
 
 \newglossaryentry{CRA}{
 	name={code-reuse attack},
@@ -533,6 +534,9 @@
 
 
 \newcounter{hypothesiscounter}
+\makeatletter
+\@addtoreset{hypothesiscounter}{chapter}
+\makeatother
 \crefname{hypothesiscounter}{Hypothesis}{Hypotheses}
 \Crefname{hypothesiscounter}{Hypothesis}{Hypotheses}
 \makeatletter
@@ -545,11 +549,10 @@
 
 % 2. Configure the new list
 \setlist[hypotheses]{
-	font=\bfseries,   % Makes the label text bold
-	leftmargin=1.5em, % Adjust indentation as needed
-	labelwidth=!,    % Let the label width be determined by the longest label
-	itemsep=2pt,       % Space between items
-	style=nextline
+	font=\bfseries,
+	leftmargin=2em,
+	itemsep=1.5ex,
+	parsep=0.5ex
 }
 
 \makeatletter
@@ -562,14 +565,46 @@
 		% Save the original \@currentlabel (the number).
 		\let\original@currentlabel\@currentlabel
 		% Redefine \@currentlabel to be your custom text for the label.
-		\protected@edef\@currentlabel{\unexpanded{#2}}%
+		\protected@edef\@currentlabel{H\thehypothesiscounter: \unexpanded{#2}}%
 		% Write the label using the new, custom \@currentlabel.
 		\label{#1}%
 		% IMPORTANT: Restore the original \@currentlabel.
 		\let\@currentlabel\original@currentlabel
 	\fi
 	% Now, display the item text in the list.
-	\item[\textbf{Hypothesis #2}]%
+	\item[\textbf{H\thehypothesiscounter: #2}]\hfill\\%
+}
+\makeatother
+
+
+% Research Questions enumeration (similar to hypotheses, for PSC evaluation)
+\newcounter{researchquestioncounter}
+\crefname{researchquestioncounter}{RQ}{RQs}
+\Crefname{researchquestioncounter}{Research Question}{Research Questions}
+\makeatletter
+\crefformat{researchquestioncounter}{#2#1#3}
+\makeatother
+
+\newlist{researchquestions}{description}{1}
+\setlist[researchquestions]{
+	font=\bfseries,
+	leftmargin=3.5em,
+	labelwidth=3em,
+	labelsep=0.5em,
+	itemsep=1ex
+}
+
+\makeatletter
+\newcommand{\researchquestion}[2][]{%
+	\refstepcounter{researchquestioncounter}%
+	\if
+		\relax\detokenize{#1}\relax\else
+		\let\original@currentlabel\@currentlabel
+		\protected@edef\@currentlabel{\unexpanded{#2}}%
+		\label{#1}%
+		\let\@currentlabel\original@currentlabel
+	\fi
+	\item[\textbf{RQ#2:}]%
 }
 \makeatother
 
@@ -602,11 +637,11 @@
 \crefname{inlinenumi}{item}{items}
 
 \newlist{inlinealpha}{enumerate*}{1}
-\setlist[inlinealpha]{label=(\alph*), itemjoin={,\ }, itemjoin*={ and\ }}
+\setlist[inlinealpha]{label=(\alph*)}
 \crefname{inlinealphai}{item}{items}
 
 \newlist{inlinecircle}{enumerate*}{1}
-\setlist[inlinecircle]{label=\protect\Circled{\arabic*}, itemjoin={,\ }, itemjoin*={ and\ }}
+\setlist[inlinecircle]{label=\protect\Circled{\arabic*}}
 \crefname{inlinecirclei}{item}{items}
 
 \newtcolorbox{infobox}{

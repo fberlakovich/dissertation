@@ -121,8 +121,9 @@ def generate_tikz(nodes, output_path):
             col = i % MAX_COLS
             x = -(SPINE_OFFSET_X + SPINE_PADDING_X + (col * COL_WIDTH))
             y = attack_top - (row * ROW_HEIGHT)
-            
-            cite_key = node.get("cite")
+
+            # Use 'cite' field if present (legacy), otherwise use 'id' unless 'nocite' is set
+            cite_key = node.get("cite") or (node.get("id") if not node.get("nocite") else None)
             cite_cmd = r" \allowbreak\cite{" + str(cite_key) + r"}" if cite_key else ""
             label_text = format_label(node["label"])
             node_text = NoEscape(f"{label_text}{cite_cmd}")
@@ -142,8 +143,9 @@ def generate_tikz(nodes, output_path):
             col = i % MAX_COLS
             x = (SPINE_OFFSET_X + SPINE_PADDING_X + (col * COL_WIDTH))
             y = defense_top - (row * ROW_HEIGHT)
-            
-            cite_key = node.get("cite")
+
+            # Use 'cite' field if present (legacy), otherwise use 'id' unless 'nocite' is set
+            cite_key = node.get("cite") or (node.get("id") if not node.get("nocite") else None)
             cite_cmd = r" \allowbreak\cite{" + str(cite_key) + r"}" if cite_key else ""
             label_text = format_label(node["label"])
             node_text = NoEscape(f"{label_text}{cite_cmd}")
@@ -191,14 +193,9 @@ def generate_tikz(nodes, output_path):
         )
     )
 
-    output = [
-        r"\resizebox{\textwidth}{!}{%",
-        tikz.dumps(),
-        r"}",
-    ]
-    
+    # Output raw tikzpicture - let the including document handle sizing
     with open(output_path, "w") as f:
-        f.write("\n".join(output))
+        f.write(tikz.dumps())
 
 def epoch_output_paths(output_path, epochs):
     base = Path(output_path)
@@ -220,7 +217,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("yaml_path")
     parser.add_argument("-o", "--output")
-    parser.add_argument("--split-epochs", action="store_true", help="write one figure per epoch")
+    parser.add_argument("--split-epochs", action="store_true", help="write one figure per epoch (also writes combined file)")
     args = parser.parse_args()
     with open(args.yaml_path, "r") as f:
         data = yaml.safe_load(f)
@@ -234,6 +231,14 @@ def main():
                 continue
             epoch_nodes = [n for n in nodes if start <= n.get("year", 0) <= end]
             generate_tikz(epoch_nodes, output_path)
+
+        # Also generate a combined file with all epochs
+        combined_path = Path(args.output)
+        if combined_path.suffix:
+            combined_file = combined_path.parent / f"{combined_path.stem}-all{combined_path.suffix}"
+        else:
+            combined_file = combined_path.parent / f"{combined_path.name}-all"
+        generate_tikz(nodes, combined_file)
     else:
         generate_tikz(nodes, args.output)
 

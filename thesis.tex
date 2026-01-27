@@ -95,6 +95,16 @@
 %%%%% TABLE OF CONTENTS
 \tableofcontents
 
+%%%%% LIST OF TODOS (only when todos are enabled)
+\makeatletter
+\@ifpackageloaded{todonotes}{%
+  \ifdefined\@todonotes@disabled\else
+    \listoftodos[TODOs]
+    \addcontentsline{toc}{chapter}{TODOs}
+  \fi
+}{}
+\makeatother
+
 %%%%% LIST OF FIGURES
 \listoffigures
 \addcontentsline{toc}{chapter}{\listfigurename}

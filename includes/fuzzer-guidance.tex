@@ -163,8 +163,8 @@ Fuzzer feedback must strike a delicate balance between precision and throughput.
 To avoid frequent cache misses, fuzzers typically limit the size of the coverage bitmap to ensure it fits within the \gls{CPU}'s L2 cache.
 This hardware-imposed limitation implies that the map can represent only a finite number of counters, and each counter possesses a limited value range.
 The standard coverage map size in AFL, for example, is 64KB, with each byte serving as a counter from 0 to 255.
-Previous work has demonstrated that the size of the coverage map significantly impacts fuzzing throughput \fbetodo{cite collafl and survey from 2019}.
-However, the exact relationship between fuzzing throughput, map size, hardware cache specifics, and counter precision remains a subject of further research \fbetodo{cite vasil AFL paper}.
+Previous work has demonstrated that the size of the coverage map significantly impacts fuzzing throughput~\cite{Wang2019}.
+However, the exact relationship between fuzzing throughput, map size, hardware cache specifics, and counter precision remains a subject of further research~\cite{sarafov2024}.
 
 Beyond implementation constraints, edge coverage suffers from conceptual limitations.
 The fundamental issue is that it compresses complex program states into a single, flat metric.

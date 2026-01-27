@@ -6,9 +6,8 @@ A closer examination reveals that this specific blind spot is an instance of a m
 Data dependencies that do not manifest as explicit control flow transitions are invisible to the fuzzer.
 A critical variable might determine which implementation of a function is executed, but if that variable resides solely in data memory, the coverage bitmap remains unchanged.
 Previous work augmented code coverage with additional data dependency~\cite{Mantovani2022} or dataflow coverage~\cite{herrera2022}.
-\fbetodo{expand a little what they did}
 
-Here we present an alternative solution to the problem, which we call \emph{Program State Projection} or \glsshortkey{PSP} for short.
+Here we present an alternative solution to the problem, which we call \gls{PSP}.
 The core idea of \gls{PSP} is to project parts of the program's hidden data state onto the explicit control-flow graph.
 By transforming data dependencies into control dependencies, we force the previously invisible variations in program state to trigger new edges in the coverage instrumentation.
 This allows the fuzzer to distinguish between states that were previously conflated, providing the necessary stepping stones to explore deeper into the state space.

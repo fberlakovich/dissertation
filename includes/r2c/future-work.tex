@@ -123,8 +123,8 @@ The negative consequences for the attacker depend on the booby trap used, but ca
 These observations hold true, however, only in the non-speculative domain.
 
 Over the last 8 years, transient-execution attacks have opened another battleground besides the classic \glspl{CRA}.
-In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code.
-Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods.\fbetodo{cite cache side channels}
+In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code~\cite{Kocher2019,Lipp2018,Bulck2018,VanSchaik2019,Vanbulck2020,Wikner2022}.
+Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods~\cite{Gruss2016,Gruss2015,Gruss2016}.
 Apart from using this principle to directly leak sensitive information, attackers can also lift \glspl{CRA} into the speculative domain.
 
 The Blindside attack, for example, employs the same principles as Blind ROP to speculatively locate gadgets with a technique called \emph{gadget probing}.

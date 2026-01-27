@@ -134,6 +134,54 @@ def write_latex_rows(summary: pl.DataFrame, output_path: Path) -> None:
         f.write("\n")
 
 
+def write_ipc_progression_rows(df: pl.DataFrame, output_path: Path) -> None:
+    """Write LaTeX table rows with absolute IPC values and relative change in parens."""
+    result = compute_overhead_table(df)
+
+    # Get sorted configs
+    configs = sorted(
+        df.select("config").unique().to_series().to_list(),
+        key=natural_sort_key
+    )
+
+    # Get benchmarks sorted by baseline IPC (descending, so CPU-bound first)
+    baseline_df = result.filter(pl.col("config") == "baseline").select([
+        "bench_short", "ipc"
+    ]).sort("ipc", descending=True)
+    benchmarks = baseline_df["bench_short"].to_list()
+
+    lines = []
+    for bench in benchmarks:
+        bench_data = result.filter(pl.col("bench_short") == bench)
+        cells = [f"\\propername{{{bench}}}"]
+
+        baseline_ipc = None
+
+        for config in configs:
+            config_row = bench_data.filter(pl.col("config") == config)
+            if config_row.height == 0:
+                cells.append("--")
+            else:
+                ipc = config_row["ipc"][0]
+                if config == "baseline":
+                    baseline_ipc = ipc
+                    cells.append(f"{ipc:.2f}")
+                else:
+                    # Show absolute IPC with relative change in parens
+                    if baseline_ipc:
+                        delta = ((ipc / baseline_ipc) - 1) * 100
+                        sign = "+" if delta >= 0 else ""
+                        cells.append(f"{ipc:.2f} ({sign}{delta:.0f})")
+                    else:
+                        cells.append(f"{ipc:.2f}")
+
+        lines.append(" & ".join(cells) + r" \\")
+
+    with open(output_path, "w") as f:
+        f.write("\n".join(lines))
+        f.write("\n")
+
+
 def plot_instr_vs_cycles(df: pl.DataFrame, output_path: Path) -> None:
     """Scatter plot of instructions overhead vs cycles overhead."""
     result = compute_overhead_table(df)
@@ -478,6 +526,9 @@ def main():
     if args.latex_output:
         output_path = Path(args.latex_output) / "btra-step-cycles.tex"
         write_latex_rows(summary, output_path)
+
+        ipc_output_path = Path(args.latex_output) / "ipc-progression.tex"
+        write_ipc_progression_rows(df, ipc_output_path)
 
     # Generate a single plot if requested
     if args.plot_mode:

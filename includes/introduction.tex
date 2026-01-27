@@ -4,13 +4,13 @@
 
 The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
 Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
-A modern web browser, for example, now consists of over 30 million lines of code. \todo{Add reference, e.g., Chromium line count}
+Modern web browser, for example, consist of 20 or even 30 million lines of code~\cite{openhub-firefox,openhub-chromium}.
 While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
 
 Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, correct and reliable, and efficient.
 Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
 Each new abstraction layer hides detail but introduces uncertainty; each performance optimization risks new corner cases; each extension of functionality opens new attack surfaces.
-Catastrophic security breaches like Heartbleed (a simple buffer over-read in a core library) \todo{Cite Heartbleed}, Spectre (exploiting CPU-level speculation) \todo{Cite Spectre}, or Log4Shell (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
+Catastrophic security breaches like Heartbleed~\cite{heartbleed} (a simple buffer over-read in a core library), Spectre~\cite{Kocher2019} (exploiting CPU-level speculation), or Log4Shell~\cite{log4shell} (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
 
 Likewise, reliability failures such as silent miscompilations have plagued even widespread production compilers like GCC and LLVM~\cite{yang2011,wang2012}.
 \citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
@@ -37,9 +37,9 @@ Google’s annual Android security review reaches similar conclusions, attributi
 Google's Project Zero also notes that the majority of the 2023 zero-days they investigated ultimately stemmed from memory corruption~\cite{projectzerointhewild2024}.
 
 The rise in security-awareness and with it the increasing adoption of memory-safe languages also for system-related tasks is a welcome development.
-Nonetheless, despite the rise of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices. \todo{Cite TIOBE index}
+Nonetheless, despite the rise of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices~\cite{tiobe2025}.
 Furthermore, even new, memory-safe code is often integrated into legacy systems.
-A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it. \todo{Cite paper on Rust/C FFI vulnerabilities}
+A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it~\cite{mergendahl2022}.
 Even if from now no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise costing billions of euros.
 Thus, memory safety vulnerabilities will remain a critical threat in the foreseeable future and mitigations are needed to deal with them.
 
@@ -55,7 +55,22 @@ For example, without knowing the exact location of functions or gadgets, an atta
 Unfortunately, closing all information channels an attacker could use to undermine the guarantees provided by randomization proves difficult in practice.
 Recent work shows that even when code is perfectly hidden, predictable data structures such as the stack, global objects, or allocator metadata, can leak enough information for a successful attack~\cite{Rudd2017}.
 The consequence is that although, judging by the publication counts, the security community's interest in code-reuse mitigations has declined, unsolved problems remain.
-\fbetodo{provide concrete numbers}
+\Cref{fig:intro:code-reuse-trend} shows the number of code-reuse-related publications in top security venues from 2010 to 2024.
+The figure clearly shows the peak interest around 2015--2016 and the subsequent decline.
+While hardware defenses like Intel CET and ARM PAC have reduced the urgency for software-only solutions, they are not a silver bullet and research continues, particularly for embedded systems and attestation.
+This trend is particularly worrying given the rapidly increasing capabilities of \gls{LLM}s with respect to offensive security.
+Already in the year 2025, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning.
+At these drastically reduced costs, even sophisticated targeted attacks fall within the capabilities of non-state actors.
+In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
+
+\begin{figure}[t]
+    \centering
+    \input{figures/coevolution/code-reuse-trend.tex}
+    \caption{Code reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
+    The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
+    The full list of papers is provided in \Cref{app:code-reuse-papers}.}
+    \label{fig:intro:code-reuse-trend}
+\end{figure}
 
 \section{Reliability}
 Traditional approaches to software reliability—static analysis, unit testing, and formal verification—serve as the foundation of quality assurance.

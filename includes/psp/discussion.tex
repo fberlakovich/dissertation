@@ -1,0 +1,63 @@
+\section{Discussion}\label{psp:s:discussion}
+% -----------------------------------------------------------------------------
+% ANSWERS TO RESEARCH QUESTIONS
+% -----------------------------------------------------------------------------
+% RQ1 (VRP coverage): NO - No statistically significant improvement.
+%     Avg +0.15% across LTO/non-LTO, A12 = 0.51 (negligible)
+%
+% RQ2 (Unfold coverage): NO - No statistically significant improvement.
+%     Avg +0.46%, one benchmark (openssl_x509) shows +8.2% but not significant
+%
+% RQ3 (Throughput): NO PENALTY - VRP shows +1.8% faster execution
+%     PSP transformations do not slow down fuzzing
+%
+% RQ4 (Bug finding): MIXED - Changes which bugs are found, not total count
+%     TIF008: +10-50× with PSP; TIF014: -30-60% with PSP
+%
+% RQ5 (Significance): NO - Only 1/54 comparisons significant (a regression)
+%     Effect sizes uniformly negligible (A12 ≈ 0.5)
+
+% -----------------------------------------------------------------------------
+% INTERPRETATION
+% -----------------------------------------------------------------------------
+% The data suggests PSP transformations have negligible impact on fuzzing
+% effectiveness in 24-hour campaigns on FuzzBench targets.
+%
+% Possible explanations:
+% 1. Campaign duration: 24h may be too short to see benefits in deeper state space
+% 2. Benchmark selection: FuzzBench targets may not exercise transformed code paths
+% 3. Transformation coverage: Compiler may not apply VRP/unfolding in hot paths
+% 4. Already saturated: AFL++ may already cover relevant branches without help
+% 5. Bug sensitivity: Different bugs favor different exploration strategies
+%
+% The time-series data shows benchmark-specific patterns:
+% - libtiff: VRP+LTO maintains consistent ~3% lead (suggests VRP helps here)
+% - openssl_x509: Unfold diverges after cycle 20 (late-stage benefit)
+% - sqlite3: VRP reaches 90% coverage faster but final coverage similar
+% These patterns suggest PSP may provide marginal benefits in specific contexts.
+
+% -----------------------------------------------------------------------------
+% LIMITATIONS
+% -----------------------------------------------------------------------------
+% - 24-hour campaign duration (longer campaigns may show different results)
+% - FuzzBench benchmark selection (may not be representative of all software)
+% - Single LLVM version (transformation applicability varies by compiler)
+% - Coverage-based evaluation (PSP may help with properties not captured by coverage)
+
+% =============================================================================
+% FIGURES AND TABLES TO CREATE
+% =============================================================================
+% FIGURE 1: Final coverage comparison (bar chart with error bars)
+%           Show 3-4 representative benchmarks, all 5 fuzzers
+%
+% FIGURE 2: Coverage over time (line plots)
+%           (a) libtiff_magma - VRP+LTO advantage
+%           (b) openssl_x509_magma - Unfold late divergence
+%           (c) sqlite3_magma - VRP early advantage
+%
+% TABLE 1: Configuration overview (5 rows)
+% TABLE 2: Final coverage statistical summary (3 comparisons)
+% TABLE 3: Per-benchmark results (full 18 benchmarks, can go in appendix)
+% TABLE 4: Coverage-over-time metrics (AUC, time-to-90%)
+% TABLE 5: Magma bug triggering results (focus on TIF008/TIF014/PNG003)
+% =============================================================================

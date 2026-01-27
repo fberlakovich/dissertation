@@ -1,0 +1,39 @@
+% code / cfi / randomization
+% Data from DBLP cache
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=0.45cm,
+    width=\textwidth,
+    height=6cm,
+    xlabel={Year},
+    ylabel={Publications},
+    ymin=0,
+    ymax=27,
+    xtick={2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024},
+    xticklabel style={rotate=45, anchor=east, font=\small, /pgf/number format/1000 sep={}},
+    nodes near coords,
+    nodes near coords style={font=\tiny, above},
+    every node near coord/.append style={yshift=1pt},
+    axis lines*=left,
+    enlarge x limits=0.05,
+]
+\addplot[fill=gray!20, draw=black, line width=0.4pt] coordinates {
+    (2010, 3)
+    (2011, 6)
+    (2012, 6)
+    (2013, 10)
+    (2014, 16)
+    (2015, 23)
+    (2016, 16)
+    (2017, 15)
+    (2018, 7)
+    (2019, 9)
+    (2020, 9)
+    (2021, 5)
+    (2022, 2)
+    (2023, 8)
+    (2024, 7)
+};
+\end{axis}
+\end{tikzpicture}
