@@ -75,7 +75,10 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  std::vector<ShapeParser *> shapeParsers = {new RectangleParser(), new CircleParser()};
+  std::vector<ShapeParser *> shapeParsers = {
+    new RectangleParser(),
+    new CircleParser()
+  };
   std::vector<Shape *> parsedShapes;
   std::string filename1 = argv[1];
   std::ifstream stream(filename);

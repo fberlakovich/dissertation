@@ -28,12 +28,12 @@
 \newcommand*{\bibtitle}{References}
 
 % Environment for the Publications page
-\defbibenvironment{nolabelspaced}
+\defbibenvironment{nolabel}
 {\list{}{\leftmargin=0pt
 \itemindent=0pt
 \labelwidth=0pt
 \labelsep=0pt
-\setlength{\itemsep}{4ex}
+\setlength{\itemsep}{2ex}
 \setlength{\parsep}{0pt}
 }
 \renewcommand*{\makelabel}[1]{}}%
@@ -98,10 +98,10 @@
 %%%%% LIST OF TODOS (only when todos are enabled)
 \makeatletter
 \@ifpackageloaded{todonotes}{%
-  \ifdefined\@todonotes@disabled\else
+    \ifdefined\@todonotes@disabled\else
     \listoftodos[TODOs]
     \addcontentsline{toc}{chapter}{TODOs}
-  \fi
+    \fi
 }{}
 \makeatother
 
@@ -114,15 +114,29 @@
 \addcontentsline{toc}{chapter}{List of Abbreviations}
 
 %%%%% LIST OF PUBLICATIONS
+
+
 \chapter*{Publications}
 \addcontentsline{toc}{chapter}{Publications}
 This dissertation is based in part on the following publications:
 \vspace{2ex}
-\newrefcontext[sorting=ddnt]
-\printbibliography[keyword=own, nottype=unpublished, heading=none, env=nolabelspaced]
+\begin{refsection}
+    \nocite{berlakovich2023,schwarcz2024,berlakovich2026}
+    \newrefcontext[sorting=ddnt]
+    \printbibliography[heading=none, env=nolabel]
+\end{refsection}
+\vspace{6ex}
+\begin{refsection}
+    \nocite{berlakovich2024,berlakovich2022a}
+    \noindent The following publications were not included in the thesis:
+    \vspace{2ex}
+    \newrefcontext[sorting=ddnt]
+    \printbibliography[heading=none, env=nolabel]
+    \vspace{2ex}
+    \noindent  Cross-Module Quickening, while also compiler-related, aligns more with the traditional use of compilers as optimizers.
+    While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
+\end{refsection}
 
-We deliberately did not include Cross-Module Quickening~\cite{berlakovich2024} in this thesis.
-While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
 
 %%%%% MAIN MATTER
 \mainmatter
@@ -130,18 +144,24 @@ While the project is also compiler-related, it aligns more with the traditional 
 \include{includes/introduction}\label{ch:introduction}
 
 \partintro{%
-Memory-unsafe languages like C and \cpp remain the foundation of critical infrastructure, and with them, the threat of memory corruption vulnerabilities persists.
-Among the most dangerous exploitation techniques are \glspl{CRA}, which hijack a program's control flow to execute attacker-chosen code sequences.
+    Memory-unsafe languages like C and \cpp remain the foundation of critical infrastructure, and with them, the threat of memory corruption vulnerabilities persists.
+    Among the most dangerous exploitation techniques are \glspl{CRA}, which hijack a program's control flow to execute attacker-chosen code sequences.
 
-This part of the thesis explores how compiler-driven software diversity can defend against such attacks.
-The compiler's intimate knowledge of program structure---stack layouts, function boundaries, and data dependencies---enables transformations that would be difficult or impossible to achieve through post-hoc binary rewriting or runtime instrumentation.
+    This part of the thesis explores how compiler-driven software diversity can defend against such attacks.
+    The compiler's intimate knowledge of program structure---stack layouts, function boundaries, and data dependencies---enables transformations that would be difficult or impossible to achieve through post-hoc binary rewriting or runtime instrumentation.
 
-\Cref{ch:code-reuse-coevolution} traces the co-evolution of \glspl{CRA} and their defenses, establishing the context for our contribution.
-The subsequent chapter then presents \rtwoc, a defense that leverages compiler knowledge to randomize not only code but also the observable data layouts that recent attacks exploit for reconnaissance.
+    \Cref{ch:code-reuse-coevolution} traces the co-evolution of \glspl{CRA} and their defenses, establishing the context for our contribution.
+    The subsequent chapter then presents \rtwoc, a defense that leverages compiler knowledge to randomize not only code but also the observable data layouts that recent attacks exploit for reconnaissance.
 }
+
+
 \part{Defending Against Code-Reuse with Compiler Assistance}\label{part:defense}
+
+
 \chapter{The Co-Evolution of Code-Reuse Attacks and Defenses}\label{ch:code-reuse-coevolution}
 \input{includes/coevolution}
+
+
 \chapter{Plugging Information Leaks With Mimicry}\label{ch:r2c}
 \input{includes/r2c/motivation}
 \input{includes/r2c/threat-model}
@@ -152,23 +172,29 @@ The subsequent chapter then presents \rtwoc, a defense that leverages compiler k
 \input{includes/r2c/limitations}
 \input{includes/r2c/future-work}
 \input{includes/r2c/summary}
+
+
 \chapter{Outlook}\label{ch:outlook-defense}
 \input{includes/outlook-defense}
 
 \partintro{%
-While the first part of this thesis focused on hardening deployed programs against exploitation, this part addresses the complementary goal of finding bugs before deployment.
-Fuzzing has emerged as one of the most effective techniques for discovering vulnerabilities in complex software, but its effectiveness depends critically on the feedback mechanisms that guide input generation.
+    While the first part of this thesis focused on hardening deployed programs against exploitation, this part addresses the complementary goal of finding bugs before deployment.
+    Fuzzing has emerged as one of the most effective techniques for discovering vulnerabilities in complex software, but its effectiveness depends critically on the feedback mechanisms that guide input generation.
 
-The compiler is uniquely positioned to provide rich feedback signals.
-Beyond the code coverage metrics that most fuzzers rely on, the compiler has access to semantic information about program structure, optimization decisions, and data dependencies.
-This part explores two ways to leverage this information.
+    The compiler is uniquely positioned to provide rich feedback signals.
+    Beyond the code coverage metrics that most fuzzers rely on, the compiler has access to semantic information about program structure, optimization decisions, and data dependencies.
+    This part explores two ways to leverage this information.
 
-\Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
-We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
-Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
+    \Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
+    We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
+    Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
 }
+
+
 \part{Improving Fuzzer-Guidance with Compiler Assistance}\label{part:fuzzing}
 \input{includes/fuzzer-guidance}
+
+
 \chapter{Fuzzer-Guidance with Optimization-Log Counters}\label{ch:lool}
 \input{includes/lool/introduction}
 \input{includes/lool/background}
@@ -178,6 +204,8 @@ Finally, we introduce \emph{Program State Projection} (PSP), a technique that us
 \input{includes/lool/discussion}
 \input{includes/lool/future-work}
 \input{includes/lool/summary}
+
+
 \chapter{Fuzzer-Guidance with Program-State Projection}\label{ch:psp}
 \input{includes/psp/motivation}
 \input{includes/psp/background}
@@ -187,15 +215,21 @@ Finally, we introduce \emph{Program State Projection} (PSP), a technique that us
 \input{includes/psp/discussion}
 \input{includes/psp/future-work}
 \input{includes/psp/summary}
+
+
 \chapter{Outlook}\label{ch:outlook-fuzzing}
 \input{includes/outlook-fuzzing}
 
 \bookmarksetup{startatroot}
+
+
 \chapter{Conclusion}
 \input{includes/conclusion}
 
 %%%%% APPENDICES
 \appendix
+
+
 \chapter{Appendix}
 \input{appendices/appendix-1}
 

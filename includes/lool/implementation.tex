@@ -44,8 +44,8 @@ if (bytes[0] == 'b') {
     }
 }
     \end{minted}
-    \label{lst:lool:java-if-cascade}
     \caption{Java \code{if} cascade to demonstrate coverage instrumentation}
+    \label{lst:lool:java-if-cascade}
 \end{listing}
 
 
@@ -95,7 +95,7 @@ baload
 bipush        98
 if_icmpeq     163
 sipush        585
-// ByteBufferCoverageMap.increaseCounter
+// CoverageMap.incrementCounter
 invokestatic  #105
 goto          234
 aload         6
@@ -104,7 +104,7 @@ baload
 bipush        117
 if_icmpeq     181
 sipush        586
-// ByteBufferCoverageMap.increaseCounter
+// CoverageMap.incrementCounter
 invokestatic  #105
 goto          234
 aload         6
@@ -113,7 +113,7 @@ baload
 bipush        103
 if_icmpeq     199
 sipush        587
-// ByteBufferCoverageMap.increaseCounter
+// CoverageMap.incrementCounter
 invokestatic  #105
 goto          234
 // String Expected
@@ -122,8 +122,8 @@ ldc           #58
 invokestatic  #60
         \end{minted}
     \end{subfigure}
-    \label{lool:lst:code-coverage-instrumentation}
     \caption{Bytecode from \cref{lst:lool:java-if-cascade} instrumented for code coverage.}
+    \label{lool:lst:code-coverage-instrumentation}
 \end{figure}
 
 \subsection{\aflpp-compatible Counter Coverage}
@@ -144,9 +144,10 @@ Note that this bucketization in \aflpp occurs not during the test run, but when 
 
 \begin{figure}[ht]
     \centering
-    \begin{minipage}[c]{0.50\textwidth}
+    \begin{minipage}[t]{0.50\textwidth}
         \centering
-        \textbf{Optimization Log}\par\smallskip
+        \vspace{0pt}
+        \textbf{Optimization Log}\strut\par\smallskip
         \begin{minted}[escapeinside=@@,fontsize=\footnotesize]{json}
 {
   @...@

@@ -27,6 +27,9 @@
 \usepackage{xparse} % <-- Add this package
 \usepackage{luacode}
 \usepackage{pgfplotstable}
+\usepackage{pdflscape}
+\usepackage{rotating}
+
 
 % Check Python version compatibility for minted/latexminted
 % Python 3.14+ has breaking changes in argparse that break latexminted
@@ -296,6 +299,10 @@
 \AtBeginEnvironment{tabular}{\setcounter{rowcounter}{0}}
 \AtBeginEnvironment{tabularx}{\setcounter{rowcounter}{0}} % if you use tabularx
 \AtBeginEnvironment{longtable}{\setcounter{rowcounter}{0}} % if you use longtable
+\AtBeginEnvironment{tabular}{\footnotesize}
+\AtBeginEnvironment{tabularx}{\footnotesize}
+\AtBeginEnvironment{longtable}{\footnotesize}
+\AtBeginEnvironment{tblr}{\footnotesize}
 \newcolumntype{C}{S[table-format=5.0]}
 \newcolumntype{O}{S[table-format=6.1, round-precision=1]}
 \newcolumntype{T}{S[table-format=3.1, round-precision=1]}
@@ -667,8 +674,34 @@
 		font=\footnotesize] (#1) {#2};
 }
 
-\setminted{fontsize=\footnotesize}
-
-\usepackage{pdflscape}
-
-\usepackage{rotating}
+\definecolor{codebackground}{HTML}{F5F5F5}
+\newcommand{\mintedindent}[1]{\makebox[\MyMintedWidth][l]{\hspace{2mm}#1}}
+\setminted{
+	fontsize=\footnotesize,
+	style=tango,
+	frame=none,
+	formatcom=\let\FancyVerbFormatLine\mintedindent\setlength{\fboxsep}{0pt}
+}
+\tcolorboxenvironment{minted}{
+	enhanced,
+	colback=codebackground,
+	colframe=black!30,
+	boxsep=0mm,
+	left=0mm,
+	right=0mm,
+	top=2mm,
+	bottom=2mm,
+	arc=0mm,
+	outer arc=0mm,
+	before upper={\edef\MyMintedWidth{\the\linewidth}\addtolength{\linewidth}{-4mm}%
+		% Redefine highlight to use MyMintedWidth for full-width background
+		\def\FancyVerbHighlightLineFirst##1{%
+			\hspace*{-2mm}%
+			\colorbox{\FancyVerbHighlightColor}{%
+				\makebox[\MyMintedWidth][l]{\hspace{2mm}\strut##1}%
+			}\hss}%
+		\let\FancyVerbHighlightLineSingle\FancyVerbHighlightLineFirst
+		\let\FancyVerbHighlightLineMiddle\FancyVerbHighlightLineFirst
+		\let\FancyVerbHighlightLineLast\FancyVerbHighlightLineFirst
+	}
+}

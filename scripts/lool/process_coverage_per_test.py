@@ -628,14 +628,14 @@ def run_multi_experiment_summary(args):
             test_overview_table,
         )
 
-        # Table B: Only the special subset, filtered to rows where at least one is non-zero/non-null
+        # Table B: Split into two tables - basic stats and attempts
         if afl_cols:
             subset_table = merged_df.select(afl_cols)
             # Extract all numeric values from aggregated strings and test if any > 0 per column
             any_positive_per_col = [
                 pl.col(c)
                 .str.extract_all(r"-?\d+(?:\.\d+)?")
-                .list.eval(pl.element().cast(pl.Float64) > 0)
+                .list.list_eval(pl.element().cast(pl.Float64) > 0)
                 .list.any()
                 .fill_null(False)
                 for c in afl_cols
@@ -645,17 +645,33 @@ def run_multi_experiment_summary(args):
             filtered_subset = subset_table.filter(non_zero_mask)
             if not filtered_subset.is_empty():
                 logging.info(
-                    "\n--- Zero-Edit/Original/Reduced Statistics (only rows with any non-zero) ---"
+                    "\n--- AFL Test Overview Statistics ---"
                 )
 
-                subset_table = filtered_subset.select(
-                    "Experiment", pl.all().exclude("Experiment")
+                # Table B1: Basic stats (Experiment, total, skipped, Identical)
+                basic_cols = ["Experiment", "total", "skipped", "Identical"]
+                basic_table = filtered_subset.select(
+                    [c for c in basic_cols if c in filtered_subset.columns]
                 ).fill_null("0")
-                print(subset_table)
+                print("Basic stats table:")
+                print(basic_table)
                 define_latex_table(
                     args,
                     "afl-test-overview",
-                    subset_table,
+                    basic_table,
+                )
+
+                # Table B2: Attempts (Experiment, First, Once, Twice, Thrice, Four Times, Five Times)
+                attempt_cols = ["Experiment", "First", "Once", "Twice", "Thrice", "Four Times", "Five Times"]
+                attempt_table = filtered_subset.select(
+                    [c for c in attempt_cols if c in filtered_subset.columns]
+                ).fill_null("0")
+                print("Attempts table:")
+                print(attempt_table)
+                define_latex_table(
+                    args,
+                    "afl-test-attempts",
+                    attempt_table,
                 )
             else:
                 logging.info(

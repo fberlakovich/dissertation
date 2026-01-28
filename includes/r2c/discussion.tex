@@ -167,12 +167,25 @@ No increase in the \propername{Frontend Bound} category means that with \rtwoc, 
 Additional cache misses and memory stalls in \propername{perlbench} cause overall only about 1.5\% of the additional cycles.
 The remaining cycle overhead is caused by additional instructions, which cannot hide in the relatively small stall room of the baseline.
 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/r2c/stall-hiding}%
+    \caption{Conceptual figure of stall hiding.
+    Instructions can execute \enquote{for free} during times when the CPU has to wait for the result of a stalling instruction.
+    Which instructions can execute during a stall depends, among other things, on the inter-instruction dependencies.}
+    \label{r2c:fig:stall-hiding}
+\end{figure}
+
 For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
 This phenomenon can happen, for example, through memory stalls.
 Memory stalls enable the \gls{CPU} to execute other instructions in the speculation window \enquote{for free}, while waiting for the fulfillment of the memory request.
 Whether an instruction can hide in such a stall window depends on whether the instruction lands in a speculation window including a stall.
 For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instruction, the \glspl{BTRA} execute essentially for free (not account for stalls the \glspl{BTRA} themselves might cause).
-\fbetodo{Add figure}
+\cref{r2c:fig:stall-hiding} illustrates this principle.
+The instructions within an out-of-order execution window can execute before their program-order predecessors and, if they share the window with a stalling instruction, potentially during the stall cycles.
+The stall cycles of window \propername{W\textsubscript{2}}, for example, are underutilized as there are no instructions that can execute during this stall.
+
 If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
 In benchmarks with memory stalls, thus, \glspl{BTRA} cost fewer cycles on average.
 For example, for \propername{mcf} we observe that while, relative to the baseline, instructions increase by almost 42\%, cycles increase only by about 13\%.
@@ -480,13 +493,22 @@ Care must be taken, however, not to write fake code pointers into stack frames w
 Since an attacker knows which stack frames contain function pointers in the non-randomized binary, the attacker could identify fake pointers in frames that previously did not contain any function pointers.
 
 \subsubsection{Exception handling and stack unwinding}
-\fbetodo{extend with example}
-As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary \code{CFI} directives to support exception handling and stack unwinding.
-\code{CFI} directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/r2c/ehframes}%
+    \caption{Without randomization, an attacker can infer structural information about functions, such as the relative location of the return address from the Call-Frame Information directives in the \code{eh\_frame} section.
+        \rtwoc's (right) randomization measures break the inference step from information in the \code{.eh\_frame} section to functions.}
+    \label{r2c:fig:ehframes}
+\end{figure}
+
+
+As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary Call-Frame Information directives to support exception handling and stack unwinding.
+Call-Frame Information directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
 Since the modifications are recorded relative to the beginning of the frame, decoding the \code{.eh\_frame} section could reveal the location of the return address.
 Entries in the \code{.eh\_frame} are not, however, associated with function symbols, but with \gls{PC} \emph{ranges}.
 These \gls{PC} ranges are unknown to the attacker due to code layout randomization.
 An attacker cannot, therefore, associate entries in the \code{.eh\_frame} table with functions.
+\cref{r2c:fig:ehframes} shows an example of the inference before and after \rtwoc.
 
 The position of an entry in the table---i.e., its row---could provide the attacker with important information.
 Each entry in the table, reflects the position of a function in a compilation unit.

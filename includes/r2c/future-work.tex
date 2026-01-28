@@ -78,20 +78,18 @@ set_up_target:
     \end{minipage}%
     \hfill%
     \begin{minipage}[b]{0.7\linewidth}
-        \resizebox{\linewidth}{!}{
-            \includeDrawioFigure{figures/r2c/btra-only-stack}[remember picture]{
-                \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
-                \draw[dash pattern=on 4pt off 4pt] (CodeBox.north west) rectangle (CodeBox.south east);
-                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
-                \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
-                \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
-                \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
-                \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
-                \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
-                \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
-                \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
-                \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
-            }
+        \includeDrawioFigure[\linewidth]{figures/r2c/btra-only-stack}[remember picture]{
+            \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
+            \draw[dash pattern=on 2pt off 2pt] (CodeBox.north west) rectangle (CodeBox.south east);
+            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
+            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
+            \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
+            \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
+            \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
+            \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
+            \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
+            \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
+            \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
         }
     \end{minipage}
 

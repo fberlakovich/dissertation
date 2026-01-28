@@ -32,20 +32,29 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
 
 \subsection{\aflpp vs. Genetic Parameter Mutation}\label{lool:ss:aflpp-vs-genetic}
 \begin{table}[!t]
-    \small
-    \caption{The number of identical test runs and how many tests were successfully generated on the first try or had to be retried with reduced generation parameters.}
-    \label{tbl:afl-overview}
-    \footnotesize
-    \begin{tabular}{>{\nextrow}E C C C C C C C C C}
+    \centering
+    \begin{tabular}{>{\nextrow}E C C C}
         \toprule
-        \multicolumn{4}{c}{} & \multicolumn{6}{c}{Attempts} \\
-        \cmidrule(lr){5-10}
-        {Experiment} & {Total} & {Skipped} & {Identical} & {First} & {Once} & {Second} & {Third} & {Fourth} & {Fifth} \\
+        {Experiment} & {Total} & {Skipped} & {Identical} \\
         \midrule
         \fileInput{generated/lool/afl-test-overview}
         \bottomrule
     \end{tabular}
+    \caption{The number of total, skipped, and identical test runs for AFL++ configurations.}
+    \label{tbl:afl-overview}
+\end{table}
 
+\begin{table}[!t]
+    \centering
+    \begin{tabular}{>{\nextrow}E C C C C C C}
+        \toprule
+        {Experiment} & {First} & {Once} & {Twice} & {Thrice} & {Fourth} & {Fifth} \\
+        \midrule
+        \fileInput{generated/lool/afl-test-attempts}
+        \bottomrule
+    \end{tabular}
+    \caption{How many tests were successfully generated on the first try or had to be retried with reduced generation parameters.}
+    \label{tbl:afl-attempts}
 \end{table}
 
 
@@ -124,7 +133,7 @@ This loss of context can lead the fuzzer down a route where it tries to, \eg inc
 
     \caption{Rankings of experiments by optimization rareness score or optimization pair rareness score.}
     \label{tbl:contributor-crossover}
-
+    \footnotesize
     \begin{tabular}{>{\nextrow}EOOC}
         \toprule
         {Experiment} & {\makecell{Optimization\\ Score}} & {\makecell{Optimization\\ Pair Score}} & {\makecell{Optimization\\ Pair Rank}} \\

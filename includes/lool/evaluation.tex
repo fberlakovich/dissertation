@@ -224,17 +224,14 @@ In the upper group, there is primarily a difference between configurations that 
 \subsection{Triggering Rare Optimizations}\label{lool:ss:eval-rare-opts}
 \begin{figure}[t]
     \centering
-    \begingroup
-    \pgfplotsset{every axis/.append style={
-        yticklabel style={font=\propernamedecl\footnotesize},
-        execute at begin axis={
-            \pgfplotsset{title={Optimization Uniqueness after 24h},
-                width=0.75\textwidth,
-                height=0.7\linewidth}
-        },
-    }}
-    \input{figures/lool/optimization-rareness-boxplot}%
-    \endgroup
+    \resizebox{\textwidth}{!}{%
+        \begingroup
+        \pgfplotsset{every axis/.append style={
+            yticklabel style={font=\propernamedecl},
+        }}
+        \input{figures/lool/optimization-rareness-boxplot}%
+        \endgroup
+    }
     \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimizations.
     \label{lool:fig:rare-opts}
     See \cref{lool:ss:eval-rare-opts} for details.}
@@ -242,19 +239,15 @@ In the upper group, there is primarily a difference between configurations that 
 
 \begin{figure}[t]
     \centering
-    \begingroup
-    \pgfplotsset{
-        every axis/.append style={
-            yticklabel style={font=\propernamedecl\footnotesize},
-            execute at begin axis={
-                \pgfplotsset{title={Optimization Pair Uniqueness after 24h},
-                    width=0.75\textwidth,
-                    height=0.7\linewidth}
-            },
-        },
+    \resizebox{\textwidth}{!}{%
+        \begingroup
+        \pgfplotsset{every axis/.append style={
+            yticklabel style={font=\propernamedecl},
+            xtick distance=20000,
+        }}
+        \input{figures/lool/optimization-pairs-rareness-boxplot}%
+        \endgroup
     }
-    \input{figures/lool/optimization-pairs-rareness-boxplot}%
-    \endgroup
     \caption{Uniqueness scores of different configurations (and variants) based on triggered rare optimization pairs.
     \label{lool:fig:rare-pairs}
     See \cref{lool:ss:eval-rare-opts} for details.}

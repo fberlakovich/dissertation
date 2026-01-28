@@ -178,7 +178,7 @@ The function \texttt{init\_session} executes the exact same control-flow path (a
 However, these two executions represent fundamentally different program states.
 If a fuzzer discovers the path through \texttt{admin\_login} first, it may mark the edges inside \texttt{init\_session} as covered and deprioritize exploring the same path via \texttt{guest\_login}, potentially missing bugs that only manifest in the guest context.
 
-\begin{listing}[ht]
+\begin{listing}[t]
     \centering
     \begin{minted}{C}
 static bool admin = false;
