@@ -54,20 +54,21 @@ We evaluated the following 8 different configurations:
     \small
     \begin{tabular}{lll}
         \toprule
-        Configuration & Mutation Engine & Coverage Feedback \\
+        Configuration                                               & Mutation Engine   & Coverage Feedback      \\
         \midrule
-        \textbf{\ref{config:static})} Static-Params & None & None \\
-        \textbf{\ref{config:no-feedback})} Random-Params & Random & None \\
-        \textbf{\ref{config:aflcodecov})} \aflpp Code Coverage & \aflpp & Code coverage \\
-        \textbf{\ref{config:aflcontextblind})} \aflpp Context-Blind & \aflpp & Global opt.\ counters \\
-        \textbf{\ref{config:aflcontextaware})} \aflpp Context-Aware & \aflpp & Per-method opt.\ pairs \\
-        \textbf{\ref{config:loolcodecov})} \lool Code Coverage & Genetic algorithm & Code coverage \\
-        \textbf{\ref{config:loolcontextblind})} \lool Context-Blind & Genetic algorithm & Global opt.\ counters \\
-        \textbf{\ref{config:loolfull})} \lool Context-Aware & Genetic algorithm & Per-method opt.\ pairs \\
+        \textbf{\ref{config:static})} Static-Params                 & None              & None                   \\
+        \textbf{\ref{config:no-feedback})} Random-Params            & Random            & None                   \\
+        \textbf{\ref{config:aflcodecov})} \aflpp Code Coverage      & \aflpp            & Code coverage          \\
+        \textbf{\ref{config:aflcontextblind})} \aflpp Context-Blind & \aflpp            & Global opt.\ counters  \\
+        \textbf{\ref{config:aflcontextaware})} \aflpp Context-Aware & \aflpp            & Per-method opt.\ pairs \\
+        \textbf{\ref{config:loolcodecov})} \lool Code Coverage      & Genetic algorithm & Code coverage          \\
+        \textbf{\ref{config:loolcontextblind})} \lool Context-Blind & Genetic algorithm & Global opt.\ counters  \\
+        \textbf{\ref{config:loolfull})} \lool Context-Aware         & Genetic algorithm & Per-method opt.\ pairs \\
         \bottomrule
     \end{tabular}
 \end{table}
 \aflpp configurations, by default, are fully parametric (see \cref{lool:sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{lool:ss:afl-parameter-mutation}).
+
 \paragraph{\aflpp only-params}\label{lool:sss:afl-only-params}
 The \propername{only-params} variants restrict the input bytes that \aflpp mutates to the generator parameters, removing the program bytes from the mutation space.
 For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
@@ -119,6 +120,7 @@ We note, however, that without a ground truth the number of bugs found is unsuit
         \toprule
         {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Med.\ \\ Time (s)}} & {\makecell{Med.\ \\ LoC}} \\
         \midrule
+        \startdatarows
         \fileInput{generated/lool/test-overview}
         \bottomrule
     \end{tabular}
@@ -139,6 +141,7 @@ We discuss this phenomenon in more detail in \cref{lool:ss:aflpp-vs-genetic}.
         \toprule
         {Coverage} & \makecell[r]{Completed\\ Tests}          & \makecell[r]{Throughput\\ Decrease (\%)}          \\
         \midrule
+        \startdatarows
         \propername{none} & 169 & 0  \\
         \propername{code} & 49 & 71 \\
         \propername{context-blind} & 157 & 7 \\
@@ -156,14 +159,15 @@ Using no coverage mechanism forms the baseline.
 \subsection{Code Coverage}\label{lool:sss:eval-code-coverage}
 \begin{figure}[t]
     \centering
-    \begingroup
-    \pgfplotsset{every axis/.append style={
-        width=\linewidth,
-        height=0.8\linewidth,
-    }}
+    \resizebox{\textwidth}{!}{%
+        \begingroup
+        \pgfplotsset{every axis/.append style={
+            width=\linewidth,
+        }}
 
-    \input{figures/lool/coverage-timeline}
-    \endgroup
+        \input{figures/lool/coverage-timeline}
+        \endgroup
+    }
     \caption{Median cumulative edge coverage of different configurations (and variants) over time.
     The shaded area shows the interquartile range.
     The legend is ordered based on the achieved median cumulative coverage after 24 hours.

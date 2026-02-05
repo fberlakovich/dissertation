@@ -7,3 +7,81 @@ The following table lists publications related to code reuse attacks and defense
 The papers were identified using semantic clustering on titles and abstracts from DBLP data.
 
 \input{generated/coevolution/code-reuse-papers-table.tex}
+
+\section{PSP Benchmark Versions}
+\label{app:psp-benchmarks}
+
+\begin{table}[h]
+    \centering
+    \caption{FuzzBench benchmarks used in the evaluation}
+    \label{app:tab:fuzzbench-benchmarks}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Benchmark}                                 & \textbf{Project}           & \textbf{Commit}       \\
+        \midrule
+        \propername{bloaty\_fuzz\_target}                  & \propername{Bloaty}        & \propername{52948c10} \\
+        \propername{curl\_curl\_fuzzer\_http}              & \propername{curl}          & \propername{a20f74a1} \\
+        \propername{freetype2\_ftfuzzer}                   & \propername{FreeType}      & \propername{cd02d359} \\
+        \propername{harfbuzz\_hb-shape-fuzzer}             & \propername{HarfBuzz}      & \propername{cb47dca7} \\
+        \propername{jsoncpp\_jsoncpp\_fuzzer}              & \propername{JsonCpp}       & \propername{8190e061} \\
+        \propername{lcms\_cms\_transform\_fuzzer}          & \propername{Little CMS}    & \propername{f0d96326} \\
+        \propername{libjpeg-turbo\_libjpeg\_turbo\_fuzzer} & \propername{libjpeg-turbo} & \propername{3b19db4e} \\
+        \propername{libpcap\_fuzz\_both}                   & \propername{libpcap}       & \propername{17ff63e8} \\
+        \propername{libpng\_libpng\_read\_fuzzer}          & \propername{libpng}        & \propername{cd0ea2a7} \\
+        \propername{libxml2\_xml}                          & \propername{libxml2}       & \propername{c7260a47} \\
+        \propername{libxslt\_xpath}                        & \propername{libxslt}       & \propername{180cdb80} \\
+        \propername{mbedtls\_fuzz\_dtlsclient}             & \propername{Mbed TLS}      & \propername{169d9e6e} \\
+        \propername{openh264\_decoder\_fuzzer}             & \propername{OpenH264}      & \propername{045aeac1} \\
+        \propername{openssl\_x509}                         & \propername{OpenSSL}       & \propername{b0593c08} \\
+        \propername{openthread\_ot-ip6-send-fuzzer}        & \propername{OpenThread}    & \propername{25506997} \\
+        \propername{proj4\_proj\_crs\_to\_crs\_fuzzer}     & \propername{PROJ}          & \propername{a7482d37} \\
+        \propername{re2\_fuzzer}                           & \propername{RE2}           & \propername{b025c6a3} \\
+        \propername{sqlite3\_ossfuzz}                      & \propername{SQLite}        & (OSS-Fuzz)            \\
+        \propername{stb\_stbi\_read\_fuzzer}               & \propername{stb}           & \propername{5736b15f} \\
+        \propername{systemd\_fuzz-link-parser}             & \propername{systemd}       & \propername{07faa499} \\
+        \propername{vorbis\_decode\_fuzzer}                & \propername{Vorbis}        & \propername{84c02369} \\
+        \propername{woff2\_convert\_woff2ttf\_fuzzer}      & \propername{WOFF2}         & \propername{8109a2cc} \\
+        \propername{zlib\_zlib\_uncompress\_fuzzer}        & \propername{zlib}          & \propername{d71dc66f} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \caption{Magma benchmarks used in the evaluation}
+    \label{app:tab:magma-benchmarks}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Benchmark}                                 & \textbf{Project}           & \textbf{Commit}       \\
+        \midrule
+        \propername{libpng}                                & \propername{libpng}        & \propername{a37d4836} \\
+        \propername{libsndfile}                            & \propername{libsndfile}    & \propername{86c9f9eb} \\
+        \propername{libtiff}                               & \propername{libtiff}       & \propername{c145a6c1} \\
+        \propername{libtiff\_tiffcp}                       & \propername{libtiff}       & \propername{c145a6c1} \\
+        \propername{libtiff\_tiff\_read\_rgba}             & \propername{libtiff}       & \propername{c145a6c1} \\
+        \propername{libxml2\_xmllint}                      & \propername{libxml2}       & \propername{ec6e3efb} \\
+        \propername{libxml2\_xml\_read\_memory}            & \propername{libxml2}       & \propername{ec6e3efb} \\
+        \propername{lua}$^{\ddagger}$                      & \propername{Lua}           & \propername{dbdc74dc} \\
+        \propername{openssl\_asn1}                         & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{openssl\_asn1parse}                    & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{openssl\_bignum}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{openssl\_client}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{openssl\_server}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{openssl\_x509}                         & \propername{OpenSSL}       & \propername{3bd5319b} \\
+        \propername{php\_exif}$^{\dagger}$                 & \propername{PHP}           & \propername{bc39abe8} \\
+        \propername{php\_json}$^{\dagger}$                 & \propername{PHP}           & \propername{bc39abe8} \\
+        \propername{php\_parser}$^{\dagger}$               & \propername{PHP}           & \propername{bc39abe8} \\
+        \propername{php\_unserialize}$^{\dagger}$          & \propername{PHP}           & \propername{bc39abe8} \\
+        \propername{poppler\_pdf\_fuzzer}$^{\ddagger}$     & \propername{Poppler}       & \propername{1d23101c} \\
+        \propername{poppler\_pdfimages}$^{\ddagger}$       & \propername{Poppler}       & \propername{1d23101c} \\
+        \propername{poppler\_pdftoppm}$^{\ddagger}$        & \propername{Poppler}       & \propername{1d23101c} \\
+        \propername{sqlite3}                               & \propername{SQLite}        & \propername{8c432642} \\
+        \bottomrule
+    \end{tabular}
+
+    \smallskip
+    {\footnotesize
+        $^{\dagger}$\,Not evaluated with LTO configurations due to build incompatibilities.\par
+        $^{\ddagger}$\,Not evaluated due to yet unresolved build issues.
+    }
+\end{table}

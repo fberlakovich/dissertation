@@ -70,6 +70,10 @@ def process_page_model(mx_graph_model, output_base, ns_map, page_name):
     for cell in mx_graph_model.findall('.//mxCell[@vertex="1"]', ns_map):
         geo = cell.find('./mxGeometry', ns_map)
         if geo is not None:
+            # Skip edge labels: their x,y are relative positions along the
+            # parent edge (e.g. -1..1), not absolute pixel coordinates.
+            if geo.get('relative') == '1':
+                continue
             try:
                 # (MOD) Get absolute parent coords
                 parent_id = cell.get('parent')
@@ -97,7 +101,20 @@ def process_page_model(mx_graph_model, output_base, ns_map, page_name):
         parent_id = cell.get('parent')
         parent_x, parent_y = get_absolute_parent_coords(parent_id)
 
+        # When an edge is connected to a cell, the sourcePoint/targetPoint
+        # in the XML are phantom values — the actual rendered endpoint is at
+        # the cell boundary (already covered by the vertex bounding box).
+        has_source_cell = cell.get('source') is not None
+        has_target_cell = cell.get('target') is not None
+
         for point in geo.findall('.//mxPoint', ns_map):
+            as_attr = point.get('as', '')
+            if as_attr == 'sourcePoint' and has_source_cell:
+                continue
+            if as_attr == 'targetPoint' and has_target_cell:
+                continue
+            if as_attr == 'offset':
+                continue
             try:
                 x = parent_x + float(point.get('x'))
                 y = parent_y + float(point.get('y'))

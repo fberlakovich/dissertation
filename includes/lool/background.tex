@@ -11,18 +11,32 @@ A high fitness score raises the chance of the genetic algorithm choosing an indi
 This selection process ensures that desirable individuals can pass their properties to more children while less desirable individuals might not reproduce at all.
 
 \subsection{JIT Compiler Fuzzing}\label{lool:ss:jit-compiler-fuzzing}
+\begin{figure}[t]
+    \centering
+    \includeDrawioFigure{figures/lool/problems}{
+        \draw (parser) node {\circledtikz{\code{\footnotesize A}}};
+        \draw (code) node {\circledtikz{\code{\footnotesize B}}};
+        \draw (compiler) node {\circledtikz{\code{\footnotesize C}}};
+        \draw (states) node {\circledtikz{\code{\footnotesize D}}};
+        \draw (feedback) node {\circledtikz{\code{\footnotesize E}}};
+    }
+    \caption{A typical \gls{JITcomp} fuzzing pipeline.
+    The numbers refer to the challenges described in \cref{lool:ss:jit-compiler-fuzzing}.}
+    \label{lool:fig:problems}
+\end{figure}
+
 
 As most software is processed by a compiler at some point, and compiler bugs can have severe consequences, compiler fuzzing is of particular importance~\cite{Ma2023,Xu2023,yang2011}.
 Compiler fuzzers face a number of specific challenges.
+\cref{lool:fig:problems} shows a typical \gls{JITcomp} fuzzing pipeline and where in the pipeline these challenges occur.
 First, constructing valid inputs (\ie inputs that are not rejected at the parsing stage) typically requires specialized input generators.
 Second, miscompilations, \ie incorrect compilations that neither crash the compiler nor the compiled program, but lead to compiled programs that deviate from the source program's semantics, are hard to detect.
 Generic fuzzers typically use sanitizers to detect non-crashing, but faulty program states in their subjects.
 Sanitizers cannot, however, detect miscompilations.
-As JIT compilers form only \emph{part} of a language VM, JIT compiler fuzzers face a specific fourth challenge:
+As JIT compilers form only \emph{part} of a language VM, JIT compiler fuzzers face a specific third challenge:
 Even valid input programs might run solely in the VM's interpreter, never being compiled and thus never reaching the actual fuzzing target.
 Fourth, like fuzzers in general, compiler fuzzers try to reach previously unexplored states in the state space of the compiler, either implicitly without coverage or explicitly.
 To that end, compiler fuzzers must be able to \emph{differentiate} such compiler states and \emph{steer input generation} towards new states.
-\fbetodo{add system architecture figure}
 
 Summarizing, \gls{JITcomp} fuzzers must solve the following problems:
 \begin{problems}
@@ -32,6 +46,7 @@ Summarizing, \gls{JITcomp} fuzzers must solve the following problems:
     \item \label{lool:prob:coverage} How to differentiate compiler states?
     \item \label{lool:prob:steer} How to adjust the input generation to reach new states?
 \end{problems}
+
 
 \subsection{Landscape of \gls{JITcomp} fuzzers}\label{lool:ss:fuzzer-landscape}
 Different \glspl{JITcomp} solutions approach the problems described in \cref{lool:ss:jit-compiler-fuzzing} from different angles.
@@ -64,11 +79,11 @@ JAttack is another unguided, differential \gls{JVM} fuzzer that delegates the re
 Similar in spirit to QuickTest, with JAttack the user writes Java programs containing \enquote{holes}.
 JAttack then replaces these holes with randomly generated expressions matching the hole's requirements, such as a random integer expression or an array-access expression.
 LeJit combines the approaches of JavaTailor and JAttack to eliminate the manual effort in JAttack.
-Specifically, LeJit automatically extracts Java templates from existing code and replaces concrete expresions with holes.
+Specifically, LeJit automatically extracts Java templates from existing code and replaces concrete expressions with holes.
 Like in JAttack, these holes are then filled with random, matching expressions.
 
 Classfuzz mutates Java class files to test \gls{JVM} implementations with differential testing~\cite{Chen2016a}.
-While classfuzz uses code coverage feedback, the produced class are often invalid and, thus, do not reach the \gls{JITcomp}.
+While classfuzz uses code coverage feedback, the produced classes are often invalid and, thus, do not reach the \gls{JITcomp}.
 As a result, classfuzz tends to find issues only in other parts of the \gls{JVM}, such as the bytecode verifier.
 Like classfuzz, classming generates class files as inputs but chooses different coverage feedback.
 Classming prioritizes input mutations based on how much of a class file mutant is executed, as opposed to how much code in the \gls{JVM} is executed.

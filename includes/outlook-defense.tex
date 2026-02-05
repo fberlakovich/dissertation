@@ -17,7 +17,7 @@ This principle goes both ways, however.
 A weak spot in a program's \gls{CFI} policy, \eg caused by an imprecise \gls{CFG} analysis, affects \emph{all} instances of that program alike.
 Similarly, strict memory-safety enforcement, while prohibitively expensive when applied to the whole program, might be necessary only at certain places not covered by cheaper defenses.
 
-Given these mutually exclusive strengths and weaknesses, it is surprising that there is little research on the compositionality of different defense strategies.
+Given these mutually exclusive strengths and weaknesses, it is surprising that there is little research on the composability of different defense strategies.
 While defenses in one category occasionally \enquote{borrow} concepts from another category, \eg \propername{OCFI}, the effectiveness of combining techniques remains unclear.
 That is, what are the security guarantees of drawing multiple lines of defense?
 A combination of \gls{CFI} and software diversity, for example, could provide the dependable guarantees of \gls{CFI}, while various forms of randomization could plug the holes left by an imprecise \gls{CFI} policy.
@@ -38,10 +38,10 @@ Such an inference is only possible (at least reliably) due to the specific layou
 
 On the defense side, a sound security evaluation is equally challenging.
 Many \gls{CFI} techniques, for example, did not take into account that programs using \code{printf} essentially embed a hard-to-restrict interpreter with powerful capabilities.
-Similarly, the Readactor authors speculated about the possibility of a whole-function-reuse attack, but without \gls{AOCR}'s malicious thread blocking and pointer profiling, such an attack was infeasible.
+Similarly, the Readactor authors speculated about the possibility of a whole-function-reuse attack, but without \gls{AOCR}'s malicious thread blocking and pointer profiling, such an attack seemed infeasible at the time.
 Another issue is the lack of metrics formalizing the security capabilities of a defense.
 While metrics such as \gls{AIR}~\cite{zhang2013} and newer variants such as BlockInsulation and CFGInsulation~\cite{frassetto2022} provide a foundation for \gls{CFI}, similar metrics for software diversity are missing.
-The \propername{Survivor} algorithm provided a comparable metric for early variants of software diversity focusing on reducing the risk of \gls{ROP} gadgets.
+The \propername{Survivor} algorithm provided a comparable metric for early variants of code randomization, focusing on reducing the risk of \gls{ROP} gadgets.
 In light of new challenges such as \gls{JITROP} and new diversification techniques that reach far beyond the gadget level a new metric is needed.
 Although transformations like function permutation or stack layout randomization allow for localized probability-theoretic arguments, their effect on real attacks remains hard to predict.
-Thus, we hope that future researchers take up the challenging of formulating a theory of software diversity
+Thus, we hope that future researchers take up the challenge of formulating a theory of software diversity.

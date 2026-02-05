@@ -22,6 +22,7 @@ import shutil
 import subprocess
 import sys
 import shlex
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional
@@ -187,37 +188,21 @@ def export_pages(drawio_exe: str, diagram_path: str, output_dir: Path, pages: li
             )
 
 
-def process_page_model(mx_graph_model, output_base: Path, ns_map: dict, page_name: str, verbose: bool = False) -> None:
-    """
-    Processes a single <mxGraphModel> to find bounds, extract coords,
-    and write the -defs.tex and -coords.tex files.
-    """
-    if mx_graph_model is None:
-        if verbose:
-            print(f"Warning: Page '{page_name}' contains no <mxGraphModel>. Skipping origins.")
-        return
-
-    # Build a map of all cells for easy lookup
+def _build_cell_helpers(mx_graph_model, ns_map: dict):
+    """Build cell_map and get_absolute_parent_coords for an mxGraphModel."""
     all_cells = mx_graph_model.findall('.//mxCell[@id]', ns_map)
     cell_map = {cell.get('id'): cell for cell in all_cells}
 
-    # Cache for memoizing absolute coordinates
-    parent_coords_cache = {}
-    parent_coords_cache["0"] = (0.0, 0.0)  # Root
-    parent_coords_cache["1"] = (0.0, 0.0)  # Default layer
+    parent_coords_cache = {"0": (0.0, 0.0), "1": (0.0, 0.0)}
 
     def get_absolute_parent_coords(cell_id):
-        """Recursively finds the absolute (x, y) coordinates of a cell's origin."""
         if cell_id in parent_coords_cache:
             return parent_coords_cache[cell_id]
-
         if cell_id not in cell_map:
             return (0.0, 0.0)
-
         cell = cell_map[cell_id]
         parent_id = cell.get('parent')
         parent_x, parent_y = get_absolute_parent_coords(parent_id)
-
         geo = cell.find('./mxGeometry', ns_map)
         rel_x, rel_y = 0.0, 0.0
         if geo is not None:
@@ -226,70 +211,236 @@ def process_page_model(mx_graph_model, output_base: Path, ns_map: dict, page_nam
                 rel_y = float(geo.get('y', 0))
             except (ValueError, TypeError):
                 pass
-
         abs_x = parent_x + rel_x
         abs_y = parent_y + rel_y
         parent_coords_cache[cell_id] = (abs_x, abs_y)
         return (abs_x, abs_y)
 
-    # Find bounding box
-    min_x, max_x_right = math.inf, -math.inf
-    min_y_top, max_y_bottom = math.inf, -math.inf
-    found_element = False
+    return cell_map, get_absolute_parent_coords
 
-    # Process all vertices
-    for cell in mx_graph_model.findall('.//mxCell[@vertex="1"]', ns_map):
+
+def extract_svg_crop_info(
+    drawio_exe: str, diagram_path: str, page_index_1based: int,
+    mx_graph_model, ns_map: dict, verbose: bool = False
+) -> Optional[tuple[float, float, float, float]]:
+    """
+    Export an SVG with --crop and extract the exact crop region.
+
+    Returns (origin_x, origin_y, svg_width, svg_height) where:
+      - origin_x = left edge of crop in drawio coordinates
+      - origin_y = bottom edge of crop in drawio coordinates (for Y-flip)
+      - svg_width, svg_height = crop dimensions in drawio pixels
+    Returns None on failure.
+    """
+    cell_map, get_abs = _build_cell_helpers(mx_graph_model, ns_map)
+
+    with tempfile.NamedTemporaryFile(suffix='.svg', delete=False) as tmp:
+        svg_path = tmp.name
+
+    try:
+        subprocess.run(
+            [drawio_exe, '--export', '--format', 'svg',
+             '--page-index', str(page_index_1based),
+             '--crop', '--border', '0', '-t',
+             '--output', svg_path, diagram_path],
+            check=True, capture_output=True, text=True, timeout=60,
+        )
+        with open(svg_path) as f:
+            svg_content = f.read()
+    except Exception as e:
+        if verbose:
+            print(f"  SVG crop extraction failed: {e}", file=sys.stderr)
+        return None
+    finally:
+        try:
+            os.unlink(svg_path)
+        except OSError:
+            pass
+
+    # Parse viewBox
+    vb_match = re.search(r'viewBox="([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)"', svg_content)
+    if not vb_match:
+        return None
+    svg_width = float(vb_match.group(3))
+    svg_height = float(vb_match.group(4))
+
+    # Find a reference vertex to compute the crop offset.
+    # In draw.io SVG exports, elements are wrapped in <g data-cell-id="X"> groups.
+    # We scan for the first <rect> associated with a known vertex cell and compare
+    # its SVG position with its drawio position.
+    #
+    # SVG elements are inside a translate(0.5,0.5) group (anti-alias shift),
+    # so svg_pos ≈ drawio_pos - crop_offset - 0.5.
+    cell_id_re = re.compile(r'data-cell-id="([^"]+)"')
+    rect_re = re.compile(r'<rect\s[^>]*?x="([\d.]+)"[^>]*?y="([\d.]+)"')
+    ellipse_cx_re = re.compile(r'<ellipse\s[^>]*?cx="([\d.]+)"[^>]*?cy="([\d.]+)"[^>]*?rx="([\d.]+)"[^>]*?ry="([\d.]+)"')
+
+    current_cell_id = None
+    for chunk in svg_content.split('<g'):
+        # Check if this <g> has a data-cell-id
+        cid_match = cell_id_re.search(chunk)
+        if cid_match:
+            current_cell_id = cid_match.group(1)
+
+        if current_cell_id is None or current_cell_id not in cell_map:
+            continue
+
+        cell = cell_map[current_cell_id]
+        if cell.get('vertex') != '1':
+            continue
         geo = cell.find('./mxGeometry', ns_map)
-        if geo is not None:
+        if geo is None or geo.get('relative') == '1':
+            continue
+
+        # Try to find a <rect> in this chunk
+        rect_match = rect_re.search(chunk)
+        if rect_match:
+            svg_x = float(rect_match.group(1))
+            svg_y = float(rect_match.group(2))
+
+            parent_id = cell.get('parent')
+            parent_x, parent_y = get_abs(parent_id)
             try:
-                parent_id = cell.get('parent')
-                parent_x, parent_y = get_absolute_parent_coords(parent_id)
-
-                x = parent_x + float(geo.get('x', 0))
-                y = parent_y + float(geo.get('y', 0))
-                width = float(geo.get('width', 0))
-                height = float(geo.get('height', 0))
-
-                if x < min_x: min_x = x
-                if x + width > max_x_right: max_x_right = x + width
-                if y < min_y_top: min_y_top = y
-                if y + height > max_y_bottom: max_y_bottom = y + height
-                found_element = True
+                drawio_x = parent_x + float(geo.get('x', 0))
+                drawio_y = parent_y + float(geo.get('y', 0))
             except (ValueError, TypeError):
                 continue
 
-    # Process all edge points
-    for cell in mx_graph_model.findall('.//mxCell[@edge="1"]', ns_map):
-        geo = cell.find('./mxGeometry', ns_map)
-        if geo is None:
-            continue
+            # Account for the 0.5px anti-alias translate
+            crop_offset_x = drawio_x - (svg_x + 0.5)
+            crop_offset_y = drawio_y - (svg_y + 0.5)
 
-        parent_id = cell.get('parent')
-        parent_x, parent_y = get_absolute_parent_coords(parent_id)
+            origin_x = crop_offset_x
+            origin_y = crop_offset_y + svg_height
 
-        for point in geo.findall('.//mxPoint', ns_map):
+            if verbose:
+                print(f"  SVG crop: ref cell={current_cell_id}, "
+                      f"svg=({svg_x:.1f},{svg_y:.1f}), drawio=({drawio_x:.1f},{drawio_y:.1f}), "
+                      f"offset=({crop_offset_x:.1f},{crop_offset_y:.1f}), "
+                      f"dims={svg_width:.0f}x{svg_height:.0f}")
+
+            return (origin_x, origin_y, svg_width, svg_height)
+
+        # Try ellipse
+        ell_match = ellipse_cx_re.search(chunk)
+        if ell_match:
+            svg_cx = float(ell_match.group(1))
+            svg_cy = float(ell_match.group(2))
+            svg_rx = float(ell_match.group(3))
+            svg_ry = float(ell_match.group(4))
+            svg_x = svg_cx - svg_rx
+            svg_y = svg_cy - svg_ry
+
+            parent_id = cell.get('parent')
+            parent_x, parent_y = get_abs(parent_id)
             try:
-                x = parent_x + float(point.get('x'))
-                y = parent_y + float(point.get('y'))
-
-                if x < min_x: min_x = x
-                if x > max_x_right: max_x_right = x
-                if y < min_y_top: min_y_top = y
-                if y > max_y_bottom: max_y_bottom = y
-                found_element = True
-            except (ValueError, TypeError, KeyError):
+                drawio_x = parent_x + float(geo.get('x', 0))
+                drawio_y = parent_y + float(geo.get('y', 0))
+            except (ValueError, TypeError):
                 continue
 
-    if not found_element:
+            crop_offset_x = drawio_x - (svg_x + 0.5)
+            crop_offset_y = drawio_y - (svg_y + 0.5)
+
+            origin_x = crop_offset_x
+            origin_y = crop_offset_y + svg_height
+
+            if verbose:
+                print(f"  SVG crop: ref cell={current_cell_id} (ellipse), "
+                      f"offset=({crop_offset_x:.1f},{crop_offset_y:.1f}), "
+                      f"dims={svg_width:.0f}x{svg_height:.0f}")
+
+            return (origin_x, origin_y, svg_width, svg_height)
+
+    if verbose:
+        print("  SVG crop: could not find reference vertex in SVG", file=sys.stderr)
+    return None
+
+
+def process_page_model(
+    mx_graph_model, output_base: Path, ns_map: dict, page_name: str,
+    verbose: bool = False,
+    svg_crop: Optional[tuple[float, float, float, float]] = None,
+) -> None:
+    """
+    Processes a single <mxGraphModel> to extract coords and write
+    the -defs.tex and -coords.tex files.
+
+    If svg_crop is provided as (origin_x, origin_y, width, height),
+    those exact values are used instead of computing the bounding box
+    from XML (which can't account for text overflow, stroke widths, etc.).
+    """
+    if mx_graph_model is None:
         if verbose:
-            print(f"Warning: No elements found on page '{page_name}'. Using (0,0) as origin.")
-        min_x, max_x_right, min_y_top, max_y_bottom = 0, 0, 0, 0
+            print(f"Warning: Page '{page_name}' contains no <mxGraphModel>. Skipping origins.")
+        return
 
-    origin_x = min_x
-    origin_y = max_y_bottom
+    cell_map, get_absolute_parent_coords = _build_cell_helpers(mx_graph_model, ns_map)
 
-    diagram_width_px = max_x_right - origin_x
-    diagram_height_px = max_y_bottom - min_y_top
+    if svg_crop is not None:
+        origin_x, origin_y, diagram_width_px, diagram_height_px = svg_crop
+    else:
+        # Fallback: compute bounding box from XML
+        min_x, max_x_right = math.inf, -math.inf
+        min_y_top, max_y_bottom = math.inf, -math.inf
+        found_element = False
+
+        for cell in mx_graph_model.findall('.//mxCell[@vertex="1"]', ns_map):
+            geo = cell.find('./mxGeometry', ns_map)
+            if geo is not None:
+                if geo.get('relative') == '1':
+                    continue
+                try:
+                    parent_id = cell.get('parent')
+                    parent_x, parent_y = get_absolute_parent_coords(parent_id)
+                    x = parent_x + float(geo.get('x', 0))
+                    y = parent_y + float(geo.get('y', 0))
+                    width = float(geo.get('width', 0))
+                    height = float(geo.get('height', 0))
+                    if x < min_x: min_x = x
+                    if x + width > max_x_right: max_x_right = x + width
+                    if y < min_y_top: min_y_top = y
+                    if y + height > max_y_bottom: max_y_bottom = y + height
+                    found_element = True
+                except (ValueError, TypeError):
+                    continue
+
+        for cell in mx_graph_model.findall('.//mxCell[@edge="1"]', ns_map):
+            geo = cell.find('./mxGeometry', ns_map)
+            if geo is None:
+                continue
+            parent_id = cell.get('parent')
+            parent_x, parent_y = get_absolute_parent_coords(parent_id)
+            has_source_cell = cell.get('source') is not None
+            has_target_cell = cell.get('target') is not None
+            for point in geo.findall('.//mxPoint', ns_map):
+                as_attr = point.get('as', '')
+                if as_attr == 'sourcePoint' and has_source_cell:
+                    continue
+                if as_attr == 'targetPoint' and has_target_cell:
+                    continue
+                if as_attr == 'offset':
+                    continue
+                try:
+                    x = parent_x + float(point.get('x'))
+                    y = parent_y + float(point.get('y'))
+                    if x < min_x: min_x = x
+                    if x > max_x_right: max_x_right = x
+                    if y < min_y_top: min_y_top = y
+                    if y > max_y_bottom: max_y_bottom = y
+                    found_element = True
+                except (ValueError, TypeError, KeyError):
+                    continue
+
+        if not found_element:
+            if verbose:
+                print(f"Warning: No elements found on page '{page_name}'. Using (0,0) as origin.")
+            min_x, max_x_right, min_y_top, max_y_bottom = 0, 0, 0, 0
+
+        origin_x = min_x
+        origin_y = max_y_bottom
+        diagram_width_px = max_x_right - origin_x
+        diagram_height_px = max_y_bottom - min_y_top
 
     # Extract coordinates
     coordinates = {}
@@ -370,9 +521,13 @@ def process_page_model(mx_graph_model, output_base: Path, ns_map: dict, page_nam
         print(f"Error: Could not write to {output_coords_file}: {e}", file=sys.stderr)
 
 
-def generate_origins(diagram_path: Path, output_dir: Path, pages: list[tuple[Optional[str], str]], verbose: bool = False) -> None:
+def generate_origins(
+    drawio_exe: str, diagram_path: Path, output_dir: Path,
+    pages: list[tuple[Optional[str], str]], verbose: bool = False,
+) -> None:
     """
     Parses the .drawio file and generates TikZ coordinate files for each page.
+    Uses SVG export to get exact crop dimensions when draw.io is available.
     """
     try:
         tree = ET.parse(diagram_path)
@@ -399,14 +554,32 @@ def generate_origins(diagram_path: Path, output_dir: Path, pages: list[tuple[Opt
                 page_name = page_element.get('name', sanitized_name)
                 output_base = output_dir / sanitized_name
                 mx_graph_model = page_element.find('./mxGraphModel', ns_map)
-                process_page_model(mx_graph_model, output_base, ns_map, page_name, verbose)
+
+                # Try to get exact crop dimensions from SVG export
+                page_index_1based = idx + 1
+                svg_crop = None
+                if drawio_exe and mx_graph_model is not None:
+                    svg_crop = extract_svg_crop_info(
+                        drawio_exe, str(diagram_path), page_index_1based,
+                        mx_graph_model, ns_map, verbose,
+                    )
+
+                process_page_model(mx_graph_model, output_base, ns_map, page_name, verbose, svg_crop=svg_crop)
     else:
         # Single-page file
         if pages:
             _, sanitized_name = pages[0]
             output_base = output_dir / sanitized_name
             mx_graph_model = root.find('.//mxGraphModel', ns_map)
-            process_page_model(mx_graph_model, output_base, ns_map, "Default Page", verbose)
+
+            svg_crop = None
+            if drawio_exe and mx_graph_model is not None:
+                svg_crop = extract_svg_crop_info(
+                    drawio_exe, str(diagram_path), 1,
+                    mx_graph_model, ns_map, verbose,
+                )
+
+            process_page_model(mx_graph_model, output_base, ns_map, "Default Page", verbose, svg_crop=svg_crop)
 
 
 def main(argv: list[str]) -> int:
@@ -475,7 +648,7 @@ def main(argv: list[str]) -> int:
     if args.origins:
         if args.verbose:
             print("Generating TikZ coordinate files...")
-        generate_origins(diagram_path, output_dir, pages, verbose=args.verbose)
+        generate_origins(drawio_exe, diagram_path, output_dir, pages, verbose=args.verbose)
 
     return 0
 

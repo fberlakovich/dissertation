@@ -27,6 +27,7 @@ dependencies = [
     "numba>=0.58",  # JIT compiler, 0.58+ for Python 3.12
     "hdbscan>=0.8.33",  # Better clustering for embedding method
     "umap-learn>=0.5.7",  # Dimensionality reduction for embedding method
+    "statsmodels>=0.14.6",
 ]
 
 [project.optional-dependencies]

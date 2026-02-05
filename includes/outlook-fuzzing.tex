@@ -1,5 +1,40 @@
 % Outlook for Part II (Fuzzing)
-\section{Target-Specific Fuzzing}
+
+\section{Breaking Uniformism}
+One observation that became clearer over the years of working with fuzzing technology is the prevalence of \enquote{uniformism}.
+In many cases fuzzers try to abstract over different targets and fuzzing hardware and to apply the same techniques and configurations \enquote{uniformly}.
+While I understand both the practical and the theoretical appeal of this approach, I think it is not always well justified.
+In particular, assumptions made in one context might be unsuitable when the context changes.
+Code coverage, for example, has emerged as the dominant form of coverage feedback, most commonly in the form of AFL's bucketed edge coverage and a coverage map size of 64KB, dating back to AFL's inception.
+Recent work suggests, however, that the engineering choices made for AFL, such as the coverage map size, might no longer be in line with modern hardware~\cite{sarafov2024}.
+
+Another example of uniformism is the uniform treatment of all coverage edge counters.
+The counter for an edge occupies a single byte in the coverage map, regardless of how often the fuzzer visits the edge (if at all).
+This uniform treatment leads to an underutilization of some counters and overflows in others~\cite{sarafov2024}.
+Thus, a possible research direction are program-dependent coverage maps.
+Such program-dependent maps could allocate more than one byte to hot counters and even compress particularly cold counters.
+Estimates on the hotness of a counter are available both statically from compiler analyses and dynamically from actual target runs.
+
+A new synthetic fuzzing benchmark called \propername{Tephra} shows that fuzzers' abilities to overcome different types of fuzzing blockers vary widely~\cite{sarafov2025}.
+A direct implication of this observation is that different fuzzers are not equally well suited to fuzz different types of targets.
+Various attempts at collaborative fuzzing, all predating \propername{Tephra}, tried to exploit this intuition, but with mixed results~\cite{chen2019a,osterlund2021,fu2023a}.
+This contradiction admits at least two non-mutually exclusive interpretations:
+\begin{inline}
+    \item \propername{Tephra}'s results do not translate to real world benchmarks;
+    \item The exact relationship between fuzzer abilities and targets that profit from them is not understood well enough.
+\end{inline}
+Recent work analyzed the relationship between different fuzzers and targets statistically and also concluded that a clear ranking of fuzzers across different targets is not always possible~\cite{wolff2026}.
+Thus, I believe that especially the second point warrants future research.
 
 
-\fbetodo{Write proper outlook}
+\section{Fuzzer-Target Collaboration}
+Beyond improving code coverage, the optimization-log guided fuzzing approach used in \lool demonstrated a more general principle: fuzzing targets can provide target-specific information that enhances fuzzer performance.
+Making this information accessible allows targets to assist in improving fuzzer effectiveness (e.g., code coverage, bug detection capabilities).
+With \lool, the GraalVM compiler aided the fuzzer by exposing internal counters that facilitated more precise coverage modeling.
+This principle extends to artifacts \emph{produced by targets}.
+Compilers serve as a prime example.
+Compiled binaries encode a compiler's assumptions about runtime conditions.
+A compiler might, for instance, remove bounds checks after concluding that an index will always remain within bounds.
+In this way, the compiler implicitly encodes its analysis conclusions within the generated binary.
+If compilers were to make such implicit predictions explicit---whether through logging or by materializing them as code following the \gls{PSP} approach---fuzzers could scrutinize these predictions.
+A fuzzer could search for inputs to the binary that contradict the compiler's predictions, effectively revealing flaws in the compiler's analysis implementation.

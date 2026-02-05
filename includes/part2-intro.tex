@@ -6,9 +6,9 @@ Fuzzing has emerged as one of the most effective techniques for discovering vuln
 The compiler is uniquely positioned to bridge this gap.
 Beyond the simple code coverage metrics that most fuzzers rely on, the compiler has access to rich semantic information---optimization decisions, data dependency graphs, and intermediate representations.
 By surfacing this internal state, we can transform the compiler into a collaborator in the fuzzing effort.
-Whereas in part I the compiler helped us to hide information from an attacker, in this part we aim to \emph{minimize the information asymmetry} between the program's internal state' and the fuzzer.
+Whereas in part I the compiler helped us to hide information from an attacker, in this part we aim to \emph{minimize the information asymmetry} between the program's internal state and the fuzzer.
 
 
 \Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
 We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
-Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
+Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and evaluate its effectiveness on real-world benchmarks.

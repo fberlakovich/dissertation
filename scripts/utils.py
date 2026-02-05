@@ -49,7 +49,14 @@ def convert_to_int_columns(df: pl.DataFrame) -> pl.DataFrame:
     return pl.DataFrame({col: converted[col] for col in df.columns})
 
 
-def define_latex_table(args, name, df, remove_header=True):
+def define_latex_table(args, name, df, remove_header=True, group_column=None):
+    """Write a LaTeX table body file from a DataFrame.
+
+    Args:
+        group_column: 0-based column index to group by.  When set, the column
+            value is shown only on the first row of each group and an
+            ``\\addlinespace`` is inserted between groups.
+    """
     if args.latex_output is not None:
         with open(Path(args.latex_output, name + ".tex"), "w") as f:
             if isinstance(df, pl.DataFrame):
@@ -63,8 +70,45 @@ def define_latex_table(args, name, df, remove_header=True):
                 .split(r"\bottomrule")[0]
                 .strip()
             )
+
+            if group_column is not None:
+                table_body = _group_rows(table_body, group_column)
+
             f.write(table_body)
             f.write("\n")
+
+
+def _group_rows(table_body, col_idx):
+    """Post-process a LaTeX table body to group consecutive identical values.
+
+    For the column at *col_idx*, repeated values are blanked out and an
+    ``\\addlinespace`` separator is inserted between groups.
+    """
+    lines = [l.strip() for l in table_body.split("\n") if l.strip()]
+    out = []
+    prev_value = None
+    for line in lines:
+        # Detect and preserve the \\ row terminator
+        suffix = ""
+        stripped = line
+        if stripped.rstrip().endswith("\\\\"):
+            suffix = " \\\\"
+            stripped = stripped.rstrip()[:-2].rstrip()
+
+        cells = stripped.split("&")
+        if len(cells) <= col_idx:
+            out.append(line)
+            continue
+        current_value = cells[col_idx].strip()
+        if current_value == prev_value:
+            cells[col_idx] = " "
+        elif prev_value is not None and current_value != "":
+            out.append("\\addlinespace")
+            prev_value = current_value
+        else:
+            prev_value = current_value
+        out.append(" & ".join(c.strip() for c in cells) + suffix)
+    return "\n".join(out)
 
 
 defines_cleared = False

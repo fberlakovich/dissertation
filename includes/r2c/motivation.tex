@@ -10,7 +10,7 @@ Ultimately, even with execute-only memory and without the need for classic \gls{
 
 While indirect JIT-ROP focuses on the discovery of gadgets, address-oblivious code reuse changes the reuse granularity back from sub-function-level reuse to whole-function reuse.
 As a result of this granularity change, defenses focusing on a lower granularity become ineffective.
-Counterfeit object-oriented programming followed a similar strategy, making it immune against sub-function-level granularity defenses~\cite{Schuster2015a}
+Counterfeit object-oriented programming followed a similar strategy, making it immune against sub-function-level granularity defenses~\cite{Schuster2015a}.
 
 The \gls{AOCR} paper assumes the attacker possesses an arbitrary read-write memory corruption capability.
 The \gls{AOCR} attack itself comprises two stages, a profiling stage to harvest valuable code pointers, followed by mounting the actual whole-function reuse attack.
@@ -58,8 +58,8 @@ In the following sections we explore the concept of mimicry in detail and provid
 \begin{figure}[t]
     \centering
     \includeDrawioFigure{figures/r2c/overview}{
-        \draw (PointA) node {\circledtikz{\code{\footnotesize A}}};
-        \draw (PointB) node {\circledtikz{\code{\footnotesize B}}};
+        \draw ([xshift=2pt] PointA) node {\circledtikz{\code{\footnotesize A}}};
+        \draw ([xshift=2pt] PointB) node {\circledtikz{\code{\footnotesize B}}};
         \draw (PointC) node {\circledtikz{\code{\footnotesize C}}};
         \draw (Compare1) node {{\LARGE$\not\equiv$}};
         \draw (Compare5) node {{\LARGE$\not\equiv$}};

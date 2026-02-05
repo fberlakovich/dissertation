@@ -37,6 +37,7 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
         \toprule
         {Experiment} & {Total} & {Skipped} & {Identical} \\
         \midrule
+        \startdatarows
         \fileInput{generated/lool/afl-test-overview}
         \bottomrule
     \end{tabular}
@@ -50,6 +51,7 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
         \toprule
         {Experiment} & {First} & {Once} & {Twice} & {Thrice} & {Fourth} & {Fifth} \\
         \midrule
+        \startdatarows
         \fileInput{generated/lool/afl-test-attempts}
         \bottomrule
     \end{tabular}
@@ -94,8 +96,8 @@ Paradoxically, \propername{afl-contextblind} and \propername{afl-contextblind-on
 The mapping of global optimization counters to \aflpp's coverage bitmap occupies only about 80 bytes, leading to large relative changes if even only one counter changes.
 The code coverage and context-aware coverage types occupy larger parts of the bitmap and lead to higher stability.
 Unstable seeds are not further calibrated, thus avoiding the enormous overhead caused by calibrating slow running seeds.
-This difference is reflected in the low calibration times of 2\% and 4\% of the total runtime in \propername{afl-globalcounters} and \propername{afl-globalcounters-hyperonly}.
-\propername{afl-globalcounter} loses this advantage again, however, by spending 90\% of the total runtime in trimming.
+This difference is reflected in the low calibration times of 2\% and 4\% of the total runtime in \propername{afl-contextblind} and \propername{afl-contextblind-hyperonly}.
+\propername{afl-contextblind} loses this advantage again, however, by spending 90\% of the total runtime in trimming.
 
 Configurations using the genetic algorithm consistently trigger more rare optimizations and optimization pairs than their \aflpp counterparts (see \cref{lool:fig:rare-opts,lool:fig:rare-pairs}).
 For example, \propername{genetic-code} achieves a higher rareness score than \propername{afl-code-only-params} and \propername{afl-code}.
@@ -138,6 +140,7 @@ This loss of context can lead the fuzzer down a route where it tries to, \eg inc
         \toprule
         {Experiment} & {\makecell{Optimization\\ Score}} & {\makecell{Optimization\\ Pair Score}} & {\makecell{Optimization\\ Pair Rank}} \\
         \midrule
+        \startdatarows
         \fileInput{generated/lool/optimization-scores}
         \bottomrule
     \end{tabular}

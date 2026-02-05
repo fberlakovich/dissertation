@@ -70,7 +70,7 @@ add %rsp,0x8 |\circleddashedtikz{5}|
         \label{r2c:fig:rad-insertion-stack}
     \end{subfigure}%
     \caption{Insertion and deletion of booby-trapped return addresses: Code perspective (\Cref{r2c:fig:rad-insertion-code}), and effect on the stack (\Cref{r2c:fig:rad-insertion-stack}).
-    For brevity the figure uses only two \glspl{BTRA} before (\texttt{\gls{BTRA}1}) and \texttt{\gls{BTRA}2}) and one \gls{BTRA} after (\texttt{\gls{BTRA}3}) the return address.}
+    For brevity the figure uses only two \glspl{BTRA} before (\texttt{\gls{BTRA}1}) and (\texttt{\gls{BTRA}2}) and one \gls{BTRA} after (\texttt{\gls{BTRA}3}) the return address.}
     \label{r2c:fig:btra-insertion}
 \end{figure}
 
@@ -104,9 +104,9 @@ This resulting offset is called a \emph{post-offset}.
 
 After adjusting the stack pointer, the callee executes the regular function prologue.
 When reaching the epilogue of the callee, the setup process is reversed as shown in \cref{r2c:fig:btra-insertion}, steps \circleddashedtikz{\code{5}} to \circleddashedtikz{\code{7}}.
-First, to identify the correct return address, the callee reverts the post-offset \circleddashedtikz{\code{1}} before executing the return instruction.
-Next, the return instruction pops the return address from the stack \circleddashedtikz{\code{2}} and transfers control back to the caller.
-Finally, the caller reverts the pre-offset \circleddashedtikz{\code{3}}, which is required to perform stack-relative operations, such as referencing spilled local variables or function parameters.
+First, to identify the correct return address, the callee reverts the post-offset \circleddashedtikz{\code{5}} before executing the return instruction.
+Next, the return instruction pops the return address from the stack \circleddashedtikz{\code{6}} and transfers control back to the caller.
+Finally, the caller reverts the pre-offset \circleddashedtikz{\code{7}}, which is required to perform stack-relative operations, such as referencing spilled local variables or function parameters.
 
 Since the caller chooses the \emph{number} of \glspl{BTRA} to push and the \emph{pre-offset}, while the callee chooses the \emph{post-offset}, caller and callee cooperate in the setup of \glspl{BTRA}.
 For direct call sites, \rtwoc bounds the number of \glspl{BTRA} after the return address at compile-time to fit into the \emph{post-offset}.
@@ -344,7 +344,7 @@ Note that \glspl{heapbt} can point to arbitrary addresses within a guard page an
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
 If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{r2c:fig:hardened-data-traps}).
 Pointers observed in both locations could potentially\footnote{Points in both locations do not have to be \glspl{heapbt} because benign pointers can occur in both locations as well.} be \glspl{heapbt}.
-To avoid the risk of triggering a \gls{heapbt}, an attacker could limit himself to pointers occurring on the stack only.
+To avoid the risk of triggering a \gls{heapbt}, an attacker could limit herself to pointers occurring on the stack only.
 To protect \glspl{heapbt} against such an attack scenario, \rtwoc{} applies \rtwoc{}'s mimicry principle also to the array holding the \glspl{heapbt}.
 Specifically, \rtwoc allocates the pointer array on the \emph{heap} and stores only a \emph{pointer to the array} in the data section.
 That is, instead of containing the \glspl{heapbt} directly, the data section now contains only a single heap pointer (apart from application specific pointers).

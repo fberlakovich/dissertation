@@ -29,7 +29,7 @@
 \usepackage{pgfplotstable}
 \usepackage{pdflscape}
 \usepackage{rotating}
-
+% amssymb not needed — unicode-math provides the same symbols
 
 % Check Python version compatibility for minted/latexminted
 % Python 3.14+ has breaking changes in argparse that break latexminted
@@ -295,10 +295,13 @@
 % @formatter:off
 \newcounter{rowcounter}
 \setcounter{rowcounter}{0}
+\newif\ifdatarows
+\datarowsfalse
 \newcommand{\nextrow}{\stepcounter{rowcounter}}
-\AtBeginEnvironment{tabular}{\setcounter{rowcounter}{0}}
-\AtBeginEnvironment{tabularx}{\setcounter{rowcounter}{0}} % if you use tabularx
-\AtBeginEnvironment{longtable}{\setcounter{rowcounter}{0}} % if you use longtable
+\newcommand{\startdatarows}{\noalign{\global\datarowstrue}}
+\AtBeginEnvironment{tabular}{\setcounter{rowcounter}{0}\datarowsfalse}
+\AtBeginEnvironment{tabularx}{\setcounter{rowcounter}{0}\datarowsfalse} % if you use tabularx
+\AtBeginEnvironment{longtable}{\setcounter{rowcounter}{0}\datarowsfalse} % if you use longtable
 \AtBeginEnvironment{tabular}{\footnotesize}
 \AtBeginEnvironment{tabularx}{\footnotesize}
 \AtBeginEnvironment{longtable}{\footnotesize}
@@ -306,11 +309,26 @@
 \newcolumntype{C}{S[table-format=5.0]}
 \newcolumntype{O}{S[table-format=6.1, round-precision=1]}
 \newcolumntype{T}{S[table-format=3.1, round-precision=1]}
-\newcolumntype{E}{>{\ifnum
-				\value{rowcounter}>0\propernamedecl
-			\fi\arraybackslash}l}
+% Coverage comparison table columns: Δ, Δ%, A12, p
+\newcolumntype{D}{S[table-format=+4.0, retain-explicit-plus, table-number-alignment=right, group-separator={,}, group-minimum-digits=4]}  % absolute delta
+\newcolumntype{R}{S[table-format=+2.1, retain-explicit-plus, table-number-alignment=right]}  % relative delta %
+\newcolumntype{A}{S[table-format=1.2, table-number-alignment=right]}                         % A12 effect size
+\newcolumntype{P}{S[table-format=1.3, table-number-alignment=right, table-text-alignment=right]}  % p-value
+% Bug triggering table columns: instance count, TTF hours
+\newcolumntype{N}{S[table-format=2.0]}                          % instances triggered (0-30)
+\newcolumntype{H}{S[table-format=2.1]}                          % TTF in hours
+\newcolumntype{E}{>{\ifdatarows\propernamedecl\fi\arraybackslash}l}
 
 \definecolor{rowgray}{gray}{0.95} % A very light gray
+% Cell shading for effect sizes (small/medium/large)
+\definecolor{cellbetter1}{HTML}{E8F5E9} % Light green - small effect
+\definecolor{cellbetter2}{HTML}{C8E6C9} % Medium green - medium effect
+\definecolor{cellbetter3}{HTML}{A5D6A7} % Dark green - large effect
+\definecolor{cellworse1}{HTML}{FFEBEE}  % Light red - small effect
+\definecolor{cellworse2}{HTML}{FFCDD2}  % Medium red - medium effect
+\definecolor{cellworse3}{HTML}{EF9A9A}  % Dark red - large effect
+% Shaded cell command - just applies cellcolor, S-column handles alignment
+\newcommand{\shadecell}[2]{\cellcolor{#1}#2}
 \newcommand{\conditionalcell}[1]{
 	\ifnum
 		\value{rowcounter}=1
@@ -496,7 +514,7 @@
 
 \newcommand{\perinstrcache}{per-instruction caches\xspace}
 \newcommand{\Perinstrcache}{Per-instruction caches\xspace}
-
+\newcommand{\mwu}{Mann--Whitney~$U$\xspace}
 
 
 \DeclareRobustCommand{\rtwoc}{
@@ -524,7 +542,7 @@
 
 
 \newlist{problems}{enumerate}{1} % also creates a counter called 'problemsi'
-\setlist[problems,1]{label=\Alph*}
+\setlist[problems,1]{label=\Alph*)}
 \crefname{problemsi}{Problem}{Problems}
 
 \newlist{configurations}{enumerate}{1}

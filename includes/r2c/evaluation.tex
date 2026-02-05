@@ -12,7 +12,7 @@
             },
         },
     }
-    \input{figures/r2c/exec-time}%
+    \resizebox{\textwidth}{!}{\input{figures/r2c/exec-time}}%
     \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{r2c:sss:full-overhead}).}
     % \propername{Geomean int} shows the geometric mean overhead of the SPEC CPU 2017 integer benchmarks only and \propername{geomean all} of the entire benchmark suite.}
     \label{r2c:fig:perf-full}
@@ -32,8 +32,8 @@
             },
         },
     }
-    \input{figures/r2c/comp-full}%
-    \endgroup    \caption{The component-wise overhead of of \rtwoc{}'s components.
+    \resizebox{\textwidth}{!}{\input{figures/r2c/comp-full}}%
+    \endgroup    \caption{The component-wise overhead of \rtwoc{}'s components.
     See \cref{r2c:sss:eval-btra}, \cref{r2c:sss:eval-heapbt} and \cref{r2c:sss:eval-layout} for details.
     The overhead is relative to the baseline without \rtwoc{}.
     Measurements were performed on \propername{EPYC}.}

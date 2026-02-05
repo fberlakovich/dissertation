@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-17T12:00:00.000Z" agent="Claude" version="22.1.0">
+  <diagram name="Memory Stall Hiding" id="dual-view-simplified">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="dv-0" />
+        <mxCell id="dv-1" parent="dv-0" />
+
+        <!-- ============ PANEL A: Program Order ============ -->
+        <mxCell id="dv-panel-a-title" value="(a) Program Order" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="40" width="200" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Program order strip -->
+        <mxCell id="dv-prog-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#999999;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="70" width="1020" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Code sequence -->
+        <mxCell id="dv-code1" value="..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="50" y="90" width="30" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-btra1" value="BTRA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="80" y="90" width="45" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-code2" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="125" y="90" width="50" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-load1" value="LOAD" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="175" y="90" width="40" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-code3" value="..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="215" y="90" width="25" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Large code section without BTRAs -->
+        <mxCell id="dv-bigcode" value="code without BTRAs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;fontStyle=2;" vertex="1" parent="dv-1">
+          <mxGeometry x="250" y="85" width="400" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-load2" value="LOAD" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="430" y="90" width="40" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- After big section -->
+        <mxCell id="dv-code4" value="..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="660" y="90" width="25" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-btra2" value="BTRA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="685" y="90" width="45" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-code5" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="730" y="90" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-load3" value="LOAD" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="790" y="90" width="40" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-code6" value="..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="830" y="90" width="40" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Markers for T1, T2, T3 -->
+        <mxCell id="dv-t1-marker" value="T₁" style="ellipse;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="182" y="130" width="26" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-marker" value="T₂" style="ellipse;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="437" y="130" width="26" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t3-marker" value="T₃" style="ellipse;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="797" y="130" width="26" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ============ PANEL B: OoO snapshots ============ -->
+        <mxCell id="dv-panel-b-title" value="(b) OoO Window Contents at Each Stall" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="170" width="350" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- T1 snapshot -->
+        <mxCell id="dv-t1-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#666666;strokeWidth=2;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="205" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t1-title" value="T₁" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="210" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- T1 window contents -->
+        <mxCell id="dv-t1-btra" value="BTRA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontSize=10;fontColor=#ffffff;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="60" y="245" width="70" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t1-code" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="140" y="245" width="70" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t1-load" value="LOAD&#xa;(stall)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="220" y="245" width="55" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- T1 result -->
+        <mxCell id="dv-t1-result" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#999999;" vertex="1" parent="dv-1">
+          <mxGeometry x="60" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t1-result-text" value="✓ BTRA in window&#xa;→ executes during stall" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="dv-1">
+          <mxGeometry x="60" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- T2 snapshot -->
+        <mxCell id="dv-t2-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#666666;strokeWidth=2;" vertex="1" parent="dv-1">
+          <mxGeometry x="380" y="205" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-title" value="T₂" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="380" y="210" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- T2 window contents -->
+        <mxCell id="dv-t2-code1" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="400" y="245" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-load" value="LOAD&#xa;(stall)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="470" y="245" width="55" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-code2" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="535" y="245" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-nobtra" value="(no BTRA)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;fontColor=#666666;" vertex="1" parent="dv-1">
+          <mxGeometry x="600" y="245" width="60" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- T2 result -->
+        <mxCell id="dv-t2-result" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#999999;" vertex="1" parent="dv-1">
+          <mxGeometry x="400" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t2-result-text" value="✗ No BTRA in window&#xa;→ stall cycles wasted" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="dv-1">
+          <mxGeometry x="400" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- T3 snapshot -->
+        <mxCell id="dv-t3-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#666666;strokeWidth=2;" vertex="1" parent="dv-1">
+          <mxGeometry x="720" y="205" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t3-title" value="T₃" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="720" y="210" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- T3 window contents -->
+        <mxCell id="dv-t3-btra" value="BTRA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;fontSize=10;fontColor=#ffffff;fontStyle=1;" vertex="1" parent="dv-1">
+          <mxGeometry x="740" y="245" width="70" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t3-code" value="code" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="820" y="245" width="70" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t3-load" value="LOAD&#xa;(stall)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;fontSize=9;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="dv-1">
+          <mxGeometry x="900" y="245" width="55" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- T3 result -->
+        <mxCell id="dv-t3-result" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8e8;strokeColor=#999999;" vertex="1" parent="dv-1">
+          <mxGeometry x="740" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-t3-result-text" value="✓ BTRA in window&#xa;→ executes during stall" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="dv-1">
+          <mxGeometry x="740" y="295" width="215" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Key insight -->
+        <mxCell id="dv-insight-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#999999;strokeWidth=2;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="390" width="980" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-insight-text" value="The OoO window is a sliding view over execution. BTRA instructions can only hide in stalls that occur while those BTRAs are still in the window. Code sections larger than the window create gaps where stalls cannot be exploited." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="dv-1">
+          <mxGeometry x="50" y="395" width="960" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="dv-leg-btra" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#404040;strokeColor=#333333;" vertex="1" parent="dv-1">
+          <mxGeometry x="40" y="465" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-leg-btra-t" value="BTRA" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="65" y="462" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-leg-load" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#808080;strokeColor=#666666;" vertex="1" parent="dv-1">
+          <mxGeometry x="130" y="465" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-leg-load-t" value="LOAD (stalling)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="155" y="462" width="90" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-leg-code" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#999999;" vertex="1" parent="dv-1">
+          <mxGeometry x="260" y="465" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="dv-leg-code-t" value="other code" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="dv-1">
+          <mxGeometry x="285" y="462" width="70" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

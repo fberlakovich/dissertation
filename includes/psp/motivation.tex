@@ -6,6 +6,7 @@ This chapter presents a complementary technique called \emph{Program State Proje
 While \lool is tailored to compiler testing, PSP aims to improve fuzzer guidance for arbitrary programs.
 The core insight is that compilers already perform sophisticated analyses to reason about data dependencies---for optimization, for devirtualization, and for security hardening.
 By repurposing these analyses, we can project hidden data-state variations onto the control-flow graph, making them visible to standard coverage instrumentation.
+Whether this additional visibility translates into improved fuzzing effectiveness is an empirical question that we investigate in \cref{psp:s:evaluation}.
 
 In \cref{ch:fuzzer-guidance} we discussed various forms of fuzzer feedback that turn a mere random walk into a guided exploration.
 We also showed how the increasing integration of coverage instrumentation into the compiler improved both the instrumentation's performance and precision.

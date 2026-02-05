@@ -1,63 +1,103 @@
 \section{Discussion}\label{psp:s:discussion}
-% -----------------------------------------------------------------------------
-% ANSWERS TO RESEARCH QUESTIONS
-% -----------------------------------------------------------------------------
-% RQ1 (VRP coverage): NO - No statistically significant improvement.
-%     Avg +0.15% across LTO/non-LTO, A12 = 0.51 (negligible)
-%
-% RQ2 (Unfold coverage): NO - No statistically significant improvement.
-%     Avg +0.46%, one benchmark (openssl_x509) shows +8.2% but not significant
-%
-% RQ3 (Throughput): NO PENALTY - VRP shows +1.8% faster execution
-%     PSP transformations do not slow down fuzzing
-%
-% RQ4 (Bug finding): MIXED - Changes which bugs are found, not total count
-%     TIF008: +10-50× with PSP; TIF014: -30-60% with PSP
-%
-% RQ5 (Significance): NO - Only 1/54 comparisons significant (a regression)
-%     Effect sizes uniformly negligible (A12 ≈ 0.5)
+The median final edge coverage for \gls{VRP} configurations in \cref{psp:tab:coverage-fuzzbench} shows a mixed picture.
+Only two benchmarks have a meaningfully large effect size, and among these two, the negative result (\propername{sqlite3\_ossfuzz}) dominates.
+For the Magma benchmarks in \cref{psp:tab:coverage-magma}, the edge coverage disadvantage is more pronounced with six negatively affected benchmarks.
+These results admit only a rejection of our first hypothesis.
+\begin{infobox}
+    \textbf{\ref{psp:hpt:vrp-coverage}}\hspace{0.8em}\ding{55}\\
+    \gls{VRP} does \emph{not} improve the fuzzer's ability to discover new edges.
+    In fact, \gls{VRP} leads to a disadvantage with respect to edge coverage for certain benchmarks.
+\end{infobox}
 
-% -----------------------------------------------------------------------------
-% INTERPRETATION
-% -----------------------------------------------------------------------------
-% The data suggests PSP transformations have negligible impact on fuzzing
-% effectiveness in 24-hour campaigns on FuzzBench targets.
-%
-% Possible explanations:
-% 1. Campaign duration: 24h may be too short to see benefits in deeper state space
-% 2. Benchmark selection: FuzzBench targets may not exercise transformed code paths
-% 3. Transformation coverage: Compiler may not apply VRP/unfolding in hot paths
-% 4. Already saturated: AFL++ may already cover relevant branches without help
-% 5. Bug sensitivity: Different bugs favor different exploration strategies
-%
-% The time-series data shows benchmark-specific patterns:
-% - libtiff: VRP+LTO maintains consistent ~3% lead (suggests VRP helps here)
-% - openssl_x509: Unfold diverges after cycle 20 (late-stage benefit)
-% - sqlite3: VRP reaches 90% coverage faster but final coverage similar
-% These patterns suggest PSP may provide marginal benefits in specific contexts.
+For Call Unfolding, only two benchmarks show a statistically significant difference in \cref{psp:tab:coverage-fuzzbench}, but their effect size is too small to be meaningful.
+In the Magma suite, Call Unfolding shows no statistically significant difference to the baseline at all.
+The lack of differences leads us to reject also the second hypothesis.
+\begin{infobox}
+    \textbf{\ref{psp:hpt:unfold-coverage}}\hspace{0.8em}\ding{55}\\
+    Call Unfolding does \emph{not} improve the fuzzer's ability to discover new edges.
+    We observed no statistically significant differences to the baseline.
+\end{infobox}
 
-% -----------------------------------------------------------------------------
-% LIMITATIONS
-% -----------------------------------------------------------------------------
-% - 24-hour campaign duration (longer campaigns may show different results)
-% - FuzzBench benchmark selection (may not be representative of all software)
-% - Single LLVM version (transformation applicability varies by compiler)
-% - Coverage-based evaluation (PSP may help with properties not captured by coverage)
+Finally, the bug triggering statistics in \cref{app:tab:magma-benchmarks} show no statistically significant difference except for two bugs, \propername{SND006} and \propername{TIF002}.
+In both cases, \gls{VRP} leads to a measurable deterioration of bug triggering.
+Based on these results we also have to reject the third hypothesis.
+\begin{infobox}
+    \textbf{\ref{psp:hpt:bugs}}\hspace{0.8em}\ding{55}\\
+    \gls{PSP} transformations do \emph{not} improve bug-finding capability.
+    In two cases, \gls{VRP} impeded the fuzzer's ability to trigger a bug.
+\end{infobox}
 
-% =============================================================================
-% FIGURES AND TABLES TO CREATE
-% =============================================================================
-% FIGURE 1: Final coverage comparison (bar chart with error bars)
-%           Show 3-4 representative benchmarks, all 5 fuzzers
-%
-% FIGURE 2: Coverage over time (line plots)
-%           (a) libtiff_magma - VRP+LTO advantage
-%           (b) openssl_x509_magma - Unfold late divergence
-%           (c) sqlite3_magma - VRP early advantage
-%
-% TABLE 1: Configuration overview (5 rows)
-% TABLE 2: Final coverage statistical summary (3 comparisons)
-% TABLE 3: Per-benchmark results (full 18 benchmarks, can go in appendix)
-% TABLE 4: Coverage-over-time metrics (AUC, time-to-90%)
-% TABLE 5: Magma bug triggering results (focus on TIF008/TIF014/PNG003)
-% =============================================================================
+The negative results naturally raise the question of \emph{why} \gls{PSP} fails to improve fuzzer performance and in some cases even hurts a fuzzer's progress.
+The following subsections discuss possible root causes of the negative results.
+
+\subsection{Execution Speed and Bitmap Size}
+Both \gls{PSP} transformations insert additional instructions and with them additional edges.
+\gls{VRP} causes a mean slowdown of 19\% and in the case of Magma's \propername{libsndfile} even 55\%.
+In the case of Call Unfolding, the mean slowdown is around 0, with the worst benchmark at -24\%, but with \propername{sqlite3\_ossfuzz} showing an improvement of 30\%.
+To test whether these observed slowdowns could possibly be a cause of the observed deterioration, we ranked the fuzzers by execution speed delta and by coverage change and computed the Pearson correlation between the two rankings.
+For both \gls{VRP} and Call Unfolding the correlation coefficients were small, and the $p$ values (\num{0.495} and \num{0.161}) too large for statistical significance.
+In other words, based on the data we have we cannot conclude that execution speed differences cause the differences in edge coverage.
+
+To investigate whether the additional \gls{PSP} edges overflow the fuzzer's coverage bitmap, we measured the bitmap utilization across benchmarks.
+We found that only 5 out of 43 benchmarks (FuzzBench and Magma) use more than 50\% of their bitmap, with \propername{openh264\_decoder\_fuzzer} reaching the most at 71\%.
+This utilization suggests that an overflowing coverage bitmap is not the cause of \gls{PSP}'s negative results.
+
+\subsection{Missing Initial Control-Flow}
+
+\begin{listing}[t]
+    \begin{minted}{C}
+
+// Missing in buggy version
+// if ((tmsize_t)sp->stream.avail_out > sp->tbuf_size)
+// {
+//   TIFFErrorExt(tif->tif_clientdata, module,
+//        "sp->stream.avail_out > sp->tbuf_size");
+//   return (0);
+// }
+
+do {
+  int state = inflate(&sp->stream, Z_PARTIAL_FLUSH);
+  if (state == Z_STREAM_END) {
+    break;            /* XXX */
+  }
+// rest of loop
+} while (sp->stream.avail_out > 0);
+
+    \end{minted}
+    \label{psp:lst:libtiff-bug}
+    \caption{Heap overflow bug \propername{TIF002} in \propername{libtiff}.}
+\end{listing}
+
+Our current implementation of \gls{VRP} requires existing comparisons as starting points for further instrumentation.
+Certain bugs, such as \propername{TIF002} in \propername{libtiff} of the Magma benchmark suite, lack such a comparison.
+\cref{psp:lst:libtiff-bug} shows the relevant code snippet.
+The heap overflow caused by \code{inflate} is only triggered when \code{sp->stream.avail\_out} is bigger than \code{sp->tbuf\_size}.
+The relation between the two fields is entirely implicit, however.
+In such cases \gls{VRP} does not instrument the affected code.
+\gls{VRP} would need another mechanism, such as invariant inference to surface this relation, \eg in the form of an assertion.
+Once the relation is materialized into control flow, \gls{VRP} could provide stepping stones for the fuzzer to eventually violate the invariant.
+
+\subsection{Edge Entanglement}
+
+A core assumption behind \gls{PSP} is that the additional edges give a value signal about a hitherto unknown program state to the fuzzer.
+If, on the other hand, a newly discovered \gls{PSP} edge is a direct consequence of a simultaneously discovered baseline edge, the fuzzer gains no new information.
+For each input that discovers new coverage, we can thus distinguish three different events:
+\begin{enumerate}
+    \item Only the baseline discovers the edge.
+    Since the edges in our \gls{PSP} instrumented binaries are a \emph{superset} of the baseline, this event is impossible.
+    \item Only the \gls{PSP} binary discovers the edge.
+    \gls{PSP} has surfaced a program state that would otherwise have been invisible to the fuzzer.
+    \item Both the baseline and the \gls{PSP} binary discover the edge.
+    We call these edges entangled.
+\end{enumerate}
+
+We tested for edge entanglement by rerunning the corpus found by the baseline and the \gls{PSP} configurations and recorded for each input which edges it triggered.
+
+- need to differentiate baseline from VRP edges
+
+\subsection{Queue Explosion}
+
+- how much energy does the fuzzer spend on VRP edges?
+- how big are the queue and corpus sizes?
+- how many dead VRP edges
+- need to differentiate baseline from VRP edges

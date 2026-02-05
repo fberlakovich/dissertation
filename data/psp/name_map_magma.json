@@ -1,0 +1,22 @@
+{
+    "libpng_magma": "libpng",
+    "libsndfile_magma": "libsndfile",
+    "libtiff_magma": "libtiff",
+    "libtiff_tiff_read_rgba_magma": "libtiff\\_tiff\\_read\\_rgba",
+    "libtiff_tiffcp_magma": "libtiff\\_tiffcp",
+    "libxml2_xml_read_memory_magma": "libxml2\\_xml\\_read\\_memory",
+    "libxml2_xmllint_magma": "libxml2\\_xmllint",
+    "openssl_asn1_magma": "openssl\\_asn1",
+    "openssl_asn1parse_magma": "openssl\\_asn1parse",
+    "openssl_bignum_magma": "openssl\\_bignum",
+    "openssl_client_magma": "openssl\\_client",
+    "openssl_server_magma": "openssl\\_server",
+    "openssl_x509_magma": "openssl\\_x509",
+    "php_exif_magma": "php\\_exif",
+    "php_json_magma": "php\\_json",
+    "php_parser_magma": "php\\_parser",
+    "php_unserialize_magma": "php\\_unserialize",
+    "poppler_pdfimages_magma": "poppler\\_pdfimages",
+    "poppler_pdftoppm_magma": "poppler\\_pdftoppm",
+    "sqlite3_magma": "sqlite3"
+}

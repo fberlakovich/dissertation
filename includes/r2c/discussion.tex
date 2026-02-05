@@ -40,7 +40,7 @@
 \begin{table}[t]
     \centering
     \caption{Performance overhead (\%) by \gls{BTRA} count relative to baseline.
-    ALl other \rtwoc components use the same configuration as full \rtwoc (see \cref{r2c:sss:eval-btra}).}
+    All other \rtwoc components use the same configuration as full \rtwoc (see \cref{r2c:sss:eval-btra}).}
     \label{r2c:tab:btra-steps-overhead}
     \footnotesize
     \begin{tabular}{l *{6}{r}}
@@ -54,7 +54,7 @@
 
 As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
-For CPU's without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
+For CPUs without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
 The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) suggests that instruction cache pressure may contribute to the overhead, although our counter analysis does not isolate AVX2 vs \code{push}.
 Similarly, prolog trap insertion likely adds instruction-cache pressure by expanding hot code.
 
@@ -90,7 +90,7 @@ Thus, the stalls might hide the instructions of each component in isolation, but
             },
         },
     }
-    \input{figures/r2c/btra-instr-vs-cycles}%
+    \resizebox{\textwidth}{!}{\input{figures/r2c/btra-instr-vs-cycles}}%
     \endgroup
     \caption{The relationship between instruction overhead and cycle overhead.
     The leftmost points resemble a configuration with 2 \glspl{BTRA}, whereas the rightmost points are 22 \glspl{BTRA} (see \cref{r2c:sss:perf-counters} for details).}
@@ -104,7 +104,7 @@ The difference in seeds and the sampling inaccuracies introduced by \code{perf} 
 The relative differences between configurations and the baseline as well as between counters stay intact, however.
 We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
 
-Two performance counters are particularly important when interpreting the results: cycles, instructions and Intel's \gls{TMA} counters\cite{yasin2014}.
+Three performance counters are particularly important when interpreting the results: cycles, instructions, and Intel's \gls{TMA} counters\cite{yasin2014}.
 The cycles counter tells us the total number of cycles the benchmark run took.
 Given a fixed \gls{CPU} frequency, cycles directly translate to execution time.
 Instructions, on the other hand, tell us how many instructions the \gls{CPU} executed.
@@ -135,7 +135,7 @@ Given that \glspl{BTRA} are responsible for most of the additional instructions,
 \cref{r2c:tab:btra-steps-overhead} shows the performance overhead of each progression relative to the baseline.
 \Cref{r2c:tab:ipc-progression} shows the absolute \gls{IPC} values as the number of \glspl{BTRA} increases from 2 to 22.
 \cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
-In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depication of the numerical values in \cref{r2c:tab:ipc-progression}.
+In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depiction of the numerical values in \cref{r2c:tab:ipc-progression}.
 \begin{table}[t]
     \centering
     \caption{\gls{IPC} progression with increasing \gls{BTRA} count.
@@ -181,7 +181,7 @@ For benchmarks below the diagonal, an additional instruction takes less than one
 This phenomenon can happen, for example, through memory stalls.
 Memory stalls enable the \gls{CPU} to execute other instructions in the speculation window \enquote{for free}, while waiting for the fulfillment of the memory request.
 Whether an instruction can hide in such a stall window depends on whether the instruction lands in a speculation window including a stall.
-For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instruction, the \glspl{BTRA} execute essentially for free (not account for stalls the \glspl{BTRA} themselves might cause).
+For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instruction, the \glspl{BTRA} execute essentially for free (not accounting for stalls the \glspl{BTRA} themselves might cause).
 \cref{r2c:fig:stall-hiding} illustrates this principle.
 The instructions within an out-of-order execution window can execute before their program-order predecessors and, if they share the window with a stalling instruction, potentially during the stall cycles.
 The stall cycles of window \propername{W\textsubscript{2}}, for example, are underutilized as there are no instructions that can execute during this stall.
@@ -194,7 +194,7 @@ This indicates that stalls can absorb many of the additional instructions, expla
 The memory hiding theory is further substantiated by the fact that for both \propername{mcf} and \propername{omnetpp} the \propername{Retiring} category \emph{increases}.
 Such an increase means that the CPU performs more work (presumably the \glspl{BTRA} instructions) relative to the overall cycles instead of \eg waiting for a memory stall.
 
-\propername{Gcc} shows a combination of the phenomenons discussed so far.
+\propername{Gcc} shows a combination of the phenomena discussed so far.
 Like for \propername{perlbench}, the cache hierarchy absorbs the additional instruction pressure well, causing no notable increase in the \propername{Frontend Bound} category.
 Like \propername{mcf} and \propername{omnetpp}, the \propername{gcc} baseline provides some stall room for additional instructions to hide, although the effect is less pronounced than for \propername{mcf} and \propername{omnetpp}.
 Additional instructions that cannot hide in the fewer stall cycles, thus, directly contribute to \propername{gcc}'s overhead.
@@ -369,7 +369,7 @@ In the following subsections we discuss how \rtwoc{} counters each of these atta
 We also discuss the security of stack unwinding tables and the possibility of an attacker corrupting entire or partial code pointers.
 
 Our security evaluation relies on a probabilistic model to estimate an attacker's success rate.
-We instantiate the model's variables (such as stack frame composition and pointer distribution) with empirical measurements from \propername{nginx}, \propername{Apache,} and \propername{ighttpd}.
+We instantiate the model's variables (such as stack frame composition and pointer distribution) with empirical measurements from \propername{nginx}, \propername{Apache}, and \propername{Lighttpd}.
 
 \subsubsection{Leaking Return Addresses}\label{r2c:sss:leaking-return-addresses}
 \rtwoc protects return addresses with \glspl{BTRA}.
@@ -404,10 +404,10 @@ Assuming that an attacker can leak arbitrary stack snapshots (see \cref{r2c:s:th
 An attacker can reasonably differentiate function pointers from the return address and \glspl{BTRA} because these occur only at the top of a frame.
 With value range analysis an attacker can further differentiate function pointers from other stack slots, such as variables values or heap pointers.
 Thus, guessing a function pointer's location means choosing an element from a permutation of all function pointers in the stack frame.
-To measure the probability empirically, we have collected stack snapshots from benchmarking workloads on \propername{Apache}, \propername{nginx,,} and \propername{lighttp}.
+To measure the probability empirically, we have collected stack snapshots from benchmarking workloads on \propername{Apache}, \propername{nginx}, and \propername{Lighttpd}.
 \cref{r2c:tab:func-ptr-dist} shows the function pointer distribution in these snapshots.
 About 25\% to 26\% of stack frames (depending on the software) contain no function pointer at all.
-In \propername{nginx}, 45\% of all stack frames contain only one function pointer, in \propername{Apache} 35\% and in \propername{lighttp} 14\%.
+In \propername{nginx}, 45\% of all stack frames contain only one function pointer, in \propername{Apache} 35\%, and in \propername{Lighttpd} 14\%.
 These cases are troublesome because they mean that an attacker can immediately identify the desired pointer.
 Even with two function pointers per frame (between 4.5\% and 30.5\%) the probability of guessing correctly is still 50\%.
 We note, however, that only very select function pointers are suitable for \gls{AOCR}'s variant of whole-function-reuse attack and that global variable shuffling further frustrates efforts to locate and manipulate default function parameters.
@@ -445,7 +445,7 @@ For \propername{nginx}, we found $C$ to be 4 (median) and 7.3 (average).
 Based on these variables, we derive that between the anchor and the gadget, there are $C_{between} * R_{B} * P_{NOP}$ \code{NOP}s on average.
 The probability of guessing a gadget address thus becomes
 \[ P(\mathrm{gadget})=\frac{1}{C_{between}*B*P_{NOP}}. \]
-With 11 \glspl{BTRA} per return address, a probability of $P_{NOP}=0.35$ and $C_{between}=2$, which we used for full \rtwoc, we get $P(\mathrm{gadget})\approx13.9$.
+With 11 \glspl{BTRA} per return address, a probability of $P_{NOP}=0.35$ and $C_{between}=2$, which we used for full \rtwoc, we get $P(\mathrm{gadget})\approx0.13$.
 Estimating based on the median number of call sites is conservative, as the average number of call sites per function in \propername{nginx} is 7.
 Gadget-based attacks are further impeded by register-allocation randomization.
 
@@ -465,10 +465,10 @@ The probability of correctly guessing a benign heap pointer among all heap point
 The number of $H_{B}$ in turn depends on the number of stack frames in the dump because \rtwoc inserts \glspl{heapbt} into each stack frame, depending on a configuration parameter (see \cref{r2c:ss:impl-heap-boobytraps}).
 The probability of randomly picking a benign pointer is $\frac{H}{H_{B}+H}$.
 The exact number for $H$ is application-specific and depends, for example, on the number of registers containing heap pointers that are spilled to the stack.
-\cref{r2c:tab:heap-ptr-probabilities} shows the empirical distribution of heap pointers in stack snapshots taken from \propername{Apache}, \propername{nginx}, and \propername{lighttp} during benchmark workloads.
+\cref{r2c:tab:heap-ptr-probabilities} shows the empirical distribution of heap pointers in stack snapshots taken from \propername{Apache}, \propername{nginx}, and \propername{Lighttpd} during benchmark workloads.
 The table also shows the success probability of randomly guessing a heap pointer among all heap pointers found in a randomly chosen stack snapshot.
 As the success probability depends on the concrete composition of the stack snapshot, the table shows the worst, average, and best case for the attacker.
-Assuming that an attacker can dump arbitrary many stack snapshots (see \cref{r2c:s:threat-model}), the attacker can repeat the leak until he finds a best-case snapshot.
+Assuming that an attacker can dump arbitrary many stack snapshots (see \cref{r2c:s:threat-model}), the attacker can repeat the leak until she finds a best-case snapshot.
 Generally, snapshots with few stack frames but many heap pointers in those frames constitute the best case for the attacker.
 Since \rtwoc inserts a configurable number of \glspl{heapbt} \emph{per frame}, stack snapshots with fewer frames contain also fewer \glspl{heapbt}.
 \cref{r2c:tab:heap-ptr-probabilities} also shows, however, that even in the worst case (for the attacker), the success probability still ranges between 25\% and 52.6\%.

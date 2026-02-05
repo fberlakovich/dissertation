@@ -134,7 +134,7 @@ An attacker could use this fault-resistant capability to either leak data or to 
 Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
 To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
 Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
-Thus, speculative execution poses a threat to boob-trap functions.
+Thus, speculative execution poses a threat to booby-trap functions.
 
 Booby traps are vulnerable because
 \begin{enumerate*}

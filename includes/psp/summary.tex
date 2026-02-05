@@ -1,5 +1,7 @@
 \section{Summary}
-\glsfirst{PSP} demonstrates that compiler analyses can expose hidden program state to coverage-guided fuzzers.
-By transforming data dependencies into control dependencies, PSP provides stepping stones that help fuzzers explore deeper into the state space.
-
-\fbetodo{write summary}
+In this chapter we explored \glsentrylong{PSP}, a method to expose hidden program state to coverage-guided fuzzers.
+By transforming \eg data dependencies into control dependencies, \gls{PSP} aims to provide additional stepping stones for fuzzers.
+We implemented a prototype of selected heuristics in LLVM and integrated it with \aflpp.
+Our evaluation on FuzzBench and Magma benchmarks shows no statistically significant improvement in edge coverage or bug finding for the tested heuristics.
+While this negative result is instructive, we believe that \gls{PSP} demonstrates a more general principle worth further investigation.
+Different heuristics, longer campaign durations, or benchmarks with richer data-dependent behavior may yield positive results in the future.

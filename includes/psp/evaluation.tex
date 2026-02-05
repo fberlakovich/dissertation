@@ -1,11 +1,11 @@
-\section{Evaluation}
+\section{Evaluation}\label{psp:s:evaluation}
 
 This section describes the evaluation of our prototype implementation described in \cref{psp:s:implementation}.
 With our evaluation we aim to test the following hypotheses:
 \begin{hypotheses}
-    \hypothesis[psp:hpt:vrp-coverage]{VRP Coverage} \gls{VRP} improves the fuzzer's ability to discover new edges;
-    \hypothesis[psp:hpt:unfold-coverage]{Unfolding Coverage} Indirect call unfolding improves the fuzzer's ability to discover new edges;
-    \hypothesis[psp:hpt:bugs]{Bug Finding} \gls{PSP} transformations improve bug-finding capability.
+    \hypothesis[psp:hpt:vrp-coverage]{\acrlong{VRP} Coverage} \acrlong{VRP} improves the fuzzer's ability to discover new edges;
+    \hypothesis[psp:hpt:unfold-coverage]{Call Unfolding Coverage} Indirect call unfolding improves the fuzzer's ability to discover new edges;
+    \hypothesis[psp:hpt:bugs]{Bug Finding with \acrlong{PSP}} \acrlong{PSP} transformations improve bug-finding capability.
 \end{hypotheses}
 
 \subsection{System Configuration}\label{psp:ss:system-configuration}
@@ -19,198 +19,139 @@ Coverage is measured offline after the experiment completes by replaying each sn
 Shared storage for corpora and results is provided via NFS, with results aggregated into a PostgreSQL database.
 The evaluation infrastructure is based on a customized fork of FuzzBench.
 
-% =============================================================================
-% EVALUATION OUTLINE WITH DATA-DRIVEN INSIGHTS
-% =============================================================================
-% Data: vrp-unfold-eval01.zip (40 trials × 18 benchmarks × 5 fuzzers, 24h each)
-% Analysis script: scripts/psp/compare_fuzzers.py
-% =============================================================================
-
 \subsection{Evaluated Configurations and Benchmarks}\label{psp:ss:configurations}
+
+
+\begin{table}[t]
+    \centering
+    \caption{Evaluated fuzzer configurations}
+    \label{tab:psp-configurations}
+    \begin{tabular}{>{\nextrow}E l l}
+        \toprule
+        {Configuration}     & {Description}                        & {Baseline}       \\
+        \midrule
+        \startdatarows
+        aflplusplus         & Standard \aflpp (non-LTO)            & ---              \\
+        aflplusplus\_lto    & \aflpp with LTO instrumentation      & ---              \\
+        aflplusplus\_vrp    & \aflpp + \gls{VRP} transformations   & \propername{aflplusplus} \\
+        aflplusplus\_unfold & \aflpp LTO + indirect call unfolding & \propername{aflplusplus\_lto} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 To test the effectiveness of \gls{PSP} and in particular dynamic call unfolding and \gls{VRP}, we build a separate configuration for each component.
 We use \aflpp version \propername{4.32c} as the fuzzer.
 \gls{PSP} configurations differ from the baseline configurations only in the instrumented binary because \gls{PSP} is compatible with any code-coverage-guided fuzzer.
 As dynamic call unfolding relies on \gls{LTO} for a whole-program view, we test \propername{aflplusplus\_unfold} against an \aflpp configuration with \gls{LTO} enabled.
-We also test \gls{VRP} with \gls{LTO}, again against an \aflpp baseline with \gls{LTO}.
-Although \gls{VRP} does not require \gls{LTO}, the collision-free edge-id assignment enabled by \gls{LTO} can help with the larger number of edge-ids produced by \gls{VRP}.
-\cref{tab:psc-configurations} summarizes the evaluated configurations and their baselines.
+\cref{tab:psp-configurations} summarizes the evaluated configurations and their baselines.
+We let each pair of fuzzer and benchmark run for 24h with a dedicated CPU core and repeated the experiment 30 times.
 
+The 23 FuzzBench and 22 Magma benchmarks used in the evaluation are listed in \cref{app:tab:fuzzbench-benchmarks,app:tab:magma-benchmarks} in the appendix.
+We had to exclude the \propername{poppler} and \propername{lua} benchmarks because of unresolved build issues with our benchmarking infrastructure.
+For \propername{php} \propername{libjpeg} we only tested \propername{aflplusplus} and \propername{aflplusplus\_vrp} because the benchmark builds are not compatible with \gls{LTO}.
 
-\begin{table}[h]
-    \centering
-    \caption{Evaluated fuzzer configurations}
-    \label{tab:psc-configurations}
-    \begin{tabular}{lll}
-        \toprule
-        \textbf{Configuration}             & \textbf{Description}                   & \textbf{Baseline}             \\
-        \midrule
-        \propername{aflplusplus}           & Standard \aflpp (non-LTO)              & ---                           \\
-        \propername{aflplusplus\_lto}      & \aflpp with LTO instrumentation        & ---                           \\
-        \propername{aflplusplus\_vrp}      & \aflpp + \gls{VRP} transformations     & \propername{aflplusplus}      \\
-        \propername{aflplusplus\_vrp\_lto} & \aflpp LTO + \gls{VRP} transformations & \propername{aflplusplus\_lto} \\
-        \propername{aflplusplus\_unfold}   & \aflpp LTO + indirect call unfolding   & \propername{aflplusplus\_lto} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\subsection{Statistical Methodology}\label{psp:ss:statistical-methodology}
 
+Following the recommendations of \citeauthor{klees2018} for fuzzer evaluation, we run 30 independent trials per configuration and apply statistical tests to determine whether observed differences are significant.
+For all tests, we use a significance threshold $\alpha = 0.05$, \ie only observations with $p < 0.05$ are considered statistically significant.
 
-\begin{table}[h]
-    \centering
-    \caption{Benchmark versions used in the evaluation}
-    \label{tab:benchmark-versions}
-    \begin{tabular}{llll}
-        \toprule
-        \textbf{Benchmark}                              & \textbf{Project}        & \textbf{Source} & \textbf{Commit} \\
-        \midrule
-        \propername{curl\_curl\_fuzzer\_http}           & \propername{curl}       & FuzzBench       & \propername{a20f74a1} \\
-        \propername{freetype2\_ftfuzzer}                & \propername{FreeType}   & FuzzBench       & \propername{cd02d359} \\
-        \propername{harfbuzz\_hb-shape-fuzzer}          & \propername{HarfBuzz}   & FuzzBench       & \propername{cb47dca7} \\
-        \propername{jsoncpp\_jsoncpp\_fuzzer}           & \propername{JsonCpp}    & FuzzBench       & \propername{8190e061} \\
-        \propername{libxslt\_xpath}                     & \propername{libxslt}    & FuzzBench       & \propername{180cdb80} \\
-        \propername{mbedtls\_fuzz\_dtlsclient}          & \propername{Mbed TLS}   & FuzzBench       & \propername{169d9e6e} \\
-        \propername{openthread\_ot-ip6-send-fuzzer}     & \propername{OpenThread} & FuzzBench       & \propername{25506997} \\
-        \propername{re2\_fuzzer}                        & \propername{RE2}        & FuzzBench       & \propername{b025c6a3} \\
-        \propername{stb\_stbi\_read\_fuzzer}            & \propername{stb}        & FuzzBench       & \propername{5736b15f} \\
-        \propername{systemd\_fuzz-link-parser}          & \propername{systemd}    & FuzzBench       & \propername{07faa499} \\
-        \propername{woff2\_convert\_woff2ttf\_fuzzer}   & \propername{WOFF2}      & FuzzBench       & \propername{8109a2cc} \\
-        \midrule
-        \propername{libpng}                             & \propername{libpng}     & Magma           & \propername{a37d4836} \\
-        \propername{libtiff}                            & \propername{libtiff}    & Magma           & \propername{c145a6c1} \\
-        \propername{libxml2\_xml\_read\_memory}         & \propername{libxml2}    & Magma           & \propername{ec6e3efb} \\
-        \propername{openssl\_asn1}                      & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
-        \propername{openssl\_bignum}                    & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
-        \propername{openssl\_x509}                      & \propername{OpenSSL}    & Magma           & \propername{3bd5319b} \\
-        \propername{sqlite3}                            & \propername{SQLite}     & Magma           & \propername{8c432642} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\subsubsection{Coverage Comparison}\label{psp:sss:coverage-comparison-method}
+For edge coverage, we use the \mwu test, since it does not assume a normal distribution.
+The \mwu test allows us to estimate how likely an observed difference in edge coverage is assuming that there is no systematic difference between \gls{PSP} configurations and the baseline.
+Intuitively, $p<0.001$ means that if there was no difference between \gls{VRP} and the baseline, the chance of observing such an outcome is less than 0.1\%.
+Even a statistically significant difference can be negligible, however, which is why we also report the Vargha--Delaney effect size~$\hat{A}_{12}$.
+The Vargha--Delaney effect size estimates the probability that a randomly chosen instance from one group outperforms a randomly chosen instance from the comparison group.
+For example, the $\hat{A}_{12}=0.14$ of \propername{sqlite3\_ossfuzz} means that the chance of a randomly chosen \gls{VRP} instance achieving more edge coverage on \propername{sqlite3\_ossfuzz} than the baseline is 14\%.
+We consider deviations of $|0.5 - \hat{A}_{12}| > 0.06$ as non-negligible, with further thresholds at $0.14$ (medium) and $0.21$ (large)~\cite{vargha2000}.
+
+\subsubsection{Bug Triggering Comparison}\label{psp:sss:bug-triggering-method}
+For per-bug triggering rates, we use Fisher's exact test on $2 \times 2$ contingency tables consisting of two rows (\gls{PSP} config and baseline) and two columns (\enquote{triggered} and \enquote{not triggered}).
+The cells contain the number of instances that triggered (or did not trigger) the bug in the respective configuration.
+Fisher's exact test tells us how likely such an observation (or a more extreme one) is, assuming that there is no difference between \gls{PSP} and the baseline.
+One issue with this calculation is that with 33 bugs and, thus, 33 tests, the accepted false positive rate of $\alpha = 0.05$ accumulates.
+Concretely, with $33 \times 0.05 = 1.65$ we expect between 1 and 2 bugs to show a significant difference ($p<0.05$) even if there was actually no real difference between \gls{PSP} and the baseline.
+We thus apply the Benjamini-Hochberg correction to bound the false discovery rate at 5\%.
+\cref{psp:tab:bugs-magma} shades only those differences whose $p$ values is below the adjusted threshold given by the Benjamini-Hochberg correction.
 
 \subsection{Edge Coverage}\label{psp:ss:coverage}
 
 We measure the achieved edge coverage by replaying the corpus found by each configuration on a binary instrumented with Clang's coverage sanitizer.
 Measuring coverage with a common binary is particularly important since \gls{PSP} introduces new edge ids not present in the baseline binary.
+\cref{psp:tab:coverage-fuzzbench,psp:tab:coverage-magma} show the final edge coverage comparison for FuzzBench and Magma benchmarks, respectively.
 
+\begin{table}[t]
+    \centering
+    \caption{Final edge coverage on FuzzBench benchmarks: difference in median edge count~($\Delta$), relative difference~($\Delta\%$), Vargha--Delaney effect size~($\hat{A}_{12}$), and \mwu $p$-value.
+    Shading indicates significant results with non-negligible effect: \colorbox{cellbetter1}{green} for improvement, \colorbox{cellworse1}{red} for degradation; intensity reflects effect magnitude (small/medium/large).
+    See \cref{psp:sss:coverage-comparison-method} for details.}
+    \label{psp:tab:coverage-fuzzbench}
+    \footnotesize
+    \setlength{\extrarowheight}{1pt}
+    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+        \toprule
+        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/coverage-fuzzbench}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-% -----------------------------------------------------------------------------
-% FINAL COVERAGE RESULTS (from data analysis)
-% -----------------------------------------------------------------------------
-% TABLE: Statistical summary of final coverage
-% | Comparison          | Wins | Losses | Ties | Avg Δ    | Avg A12 | Effect     |
-% |---------------------|------|--------|------|----------|---------|------------|
-% | VRP vs Baseline     | 1    | 1      | 16   | -0.01%   | 0.504   | negligible |
-% | VRP+LTO vs LTO      | 0    | 0      | 18   | +0.30%   | 0.515   | negligible |
-% | Unfold vs LTO       | 0    | 0      | 18   | +0.46%   | 0.507   | negligible |
-%
-% KEY INSIGHT: No statistically significant improvements in final coverage.
-% Only 1 significant result across all 54 comparisons (18 benchmarks × 3 comparisons),
-% and it is a regression (stb_stbi_read_fuzzer -1.1%, p<0.01).
+The FuzzBench table shows that \gls{VRP} had a statistically significant ($p<0.05$) positive effect on 4 benchmarks, but also a statistically significant negative effect on 4.
+There are positive and negative effects on other benchmarks as well, but their $p$ value is too large to rule out random measurement noise.
+Of the statistically significant effects, \propername{libpng\_libpng\_read\_fuzzer} has a non-minimal positive effect size and \propername{sqlite3\_ossfuzz} a non-minimal negative effect size.
+The relative negative delta ($-2.5$) of \propername{sqlite3\_ossfuzz} is significantly higher than the positive delta ($0.3$) of \propername{libpng\_libpng\_read\_fuzzer}.
+For Call Unfolding, only two benchmarks show a statistically significant difference, but both with a minimal effect size.
 
-% FIGURE 1: Final coverage bar chart with error bars
-% - Show mean ± std for each fuzzer on representative benchmarks
-% - Highlight: libtiff (+3.2% VRP+LTO), openssl_x509 (+8.2% Unfold), stb (-1.1% VRP)
+\begin{table}[t]
+    \centering
+    \caption{Final edge coverage on Magma benchmarks (columns and shading as in \cref{psp:tab:coverage-fuzzbench}).}
+    \label{psp:tab:coverage-magma}
+    \footnotesize
+    \setlength{\extrarowheight}{1pt}
+    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+        \toprule
+        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/coverage-magma}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-% TABLE: Per-benchmark improvements (top/bottom 3 for each comparison)
-% VRP vs Baseline:
-%   Top: openthread +1.3%, sqlite3 +1.0%, freetype2 +0.8%
-%   Bottom: stb -1.1%*, libxml2 -1.4%, openssl_x509 -1.8%
-% VRP+LTO vs LTO:
-%   Top: libtiff +3.2%, mbedtls +2.0%, freetype2 +1.2%
-%   Bottom: libxml2 -0.4%, sqlite3 -0.7%, openthread -2.0%
-% Unfold vs LTO:
-%   Top: openssl_x509 +8.2%, mbedtls +2.0%, woff2 +0.7%
-%   Bottom: sqlite3 -0.6%, systemd -0.8%, openthread -1.1%
-
-% -----------------------------------------------------------------------------
-% COVERAGE OVER TIME ANALYSIS
-% -----------------------------------------------------------------------------
-% TABLE: Time-based metrics
-% | Comparison          | Avg AUC Δ | Early Cov Δ | Faster 90% | Slower 90% | Same |
-% |---------------------|-----------|-------------|------------|------------|------|
-% | VRP vs Baseline     | -0.42%    | -0.42%      | 4          | 4          | 10   |
-% | VRP+LTO vs LTO      | +0.35%    | +0.44%      | 5          | 3          | 10   |
-% | Unfold vs LTO       | +0.41%    | -0.05%      | 4          | 4          | 10   |
-%
-% KEY INSIGHT: Coverage progression over time shows similarly negligible differences.
-% VRP+LTO shows slight early-coverage advantage (+0.44%) and reaches 90% faster
-% on 5 vs 3 benchmarks, but differences are not substantial.
-
-% FIGURE 2: Coverage over time (line plots for 2-3 benchmarks)
-% Recommended benchmarks showing different patterns:
-%
-% (a) libtiff_magma - VRP+LTO advantage throughout:
-%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
-%     1      | 3057     | 3110  | 3200  | 3266    | 3152
-%     10     | 4341     | 4471  | 4472  | 4606    | 4368
-%     96     | 5298     | 5339  | 5349  | 5518    | 5315
-%     → VRP+LTO consistently ~3% ahead; Unfold falls behind baseline
-%
-% (b) openssl_x509_magma - Unfold late-stage divergence:
-%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
-%     1      | 1789     | 1717  | 1717  | 1752    | 1703
-%     40     | 2496     | 2340  | 2539  | 2579    | 2751   ← Unfold pulls ahead
-%     96     | 2753     | 2704  | 2767  | 2796    | 2995
-%     → Unfold shows +8.2% final coverage, divergence after cycle 20
-%
-% (c) sqlite3_magma - VRP early advantage that diminishes:
-%     Cycle  | baseline | VRP   | LTO   | VRP+LTO | Unfold
-%     5      | 6548     | 6707  | 6859  | 6690    | 6712
-%     96     | 8738     | 8821  | 8937  | 8873    | 8879
-%     → VRP reaches 90% at cycle 25 vs baseline cycle 31
-
-% TABLE: Execution speed
-% | Configuration   | Mean execs/sec | vs Baseline |
-% |-----------------|----------------|-------------|
-% | aflplusplus     | 1628           | -           |
-% | aflplusplus_vrp | 1657           | +1.8%       |
-%
-% KEY INSIGHT: No throughput penalty. VRP actually shows +1.8% faster execution,
-% likely due to variance rather than real improvement. The additional branches
-% from PSP transformations do not measurably slow down fuzzing.
-%
-% (Note: LTO configs lack stats data in current dataset)
+For the Magma benchmark suite, the edge coverage results are more clearly negative.
+Specifically, 7 our of 20 benchmarks show a statistically significant negative effect on the final edge coverage, 6 of which have a moderate effect size.
+The Call Unfolding results are all within the range of statistical uncertainty.
 
 \subsection{Bug Detection (Magma)}\label{psp:ss:bugs}
-% TABLE: Bug triggering summary
-% | Comparison          | More Bugs | Fewer Bugs | Same |
-% |---------------------|-----------|------------|------|
-% | VRP vs Baseline     | 5         | 7          | 14   |
-% | VRP+LTO vs LTO      | 6         | 4          | 16   |
-% | Unfold vs LTO       | 7         | 5          | 14   |
-%
-% KEY INSIGHT: Mixed results - PSP changes WHICH bugs are found, not HOW MANY.
-% No clear winner in aggregate bug finding.
 
-% TABLE: Notable bug differences (biggest deltas)
-% | Bug ID | Target  | PSP Config | PSP Triggers | Baseline | Delta    |
-% |--------|---------|------------|--------------|----------|----------|
-% | TIF008 | libtiff | VRP        | 22,007       | 1,900    | +20,107  | ← PSP helps
-% | TIF008 | libtiff | Unfold     | 16,044       | 445      | +15,599  | ← PSP helps
-% | PNG003 | libpng  | VRP+LTO    | 384,047      | 293,708  | +90,339  | ← PSP helps
-% | PNG003 | libpng  | Unfold     | 410,235      | 293,708  | +116,527 | ← PSP helps
-% | TIF014 | libtiff | VRP        | 187,483      | 217,948  | -30,465  | ← PSP hurts
-% | TIF014 | libtiff | VRP+LTO    | 235,560      | 368,987  | -133,427 | ← PSP hurts
-% | TIF014 | libtiff | Unfold     | 157,176      | 368,987  | -211,811 | ← PSP hurts
-%
-% OBSERVATION: TIF008 consistently benefits from PSP (10-50× more triggers),
-% while TIF014 consistently suffers (30-60% fewer triggers). This suggests
-% PSP transformations change exploration paths in ways that favor some bugs
-% over others, rather than providing uniform improvement.
+\begin{table}[t]
+    \centering
+    \caption{Magma bug triggering statistics.
+    Columns $n$ and $n_b$ show how many instances of a \gls{PSP} configuration ($n$) and how many instances of the baseline configuration ($n_b$) triggered the bug.
+    TTF and TTF$_b$ show the median time to first trigger in minutes for the \gls{PSP} configuration and its baseline, respectively.
+    Table cells which show a significant difference according to an exact Fisher test with Benjamini-Hochberg correction are shaded in \colorbox{cellworse3}{red}.
+    See \cref{psp:sss:bug-triggering-method} for details.}
+    \label{psp:tab:bugs-magma}
+    \footnotesize
+    \begin{tabular}{>{\nextrow}E E NN S[table-format=4.0] S[table-format=4.0] NN S[table-format=4.0] S[table-format=4.0]}
+        \toprule
+        & & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){3-6} \cmidrule(lr){7-10}
+        {Benchmark} & {Bug} & {$n$} & {$n_b$} & {TTF} & {TTF$_b$} & {$n$} & {$n_b$} & {TTF} & {TTF$_b$} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/bugs-magma}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-% Methodology:
-% - 40 trials per benchmark-fuzzer configuration
-% - Mann-Whitney U test for significance (p < 0.05)
-% - Vargha-Delaney A12 effect size (0.5 = no effect)
-%
-% SUMMARY TABLE:
-% | Comparison          | Wins | Losses | Ties | Avg A12 | Interpretation           |
-% |---------------------|------|--------|------|---------|--------------------------|
-% | VRP vs Baseline     | 1    | 1      | 16   | 0.504   | No significant effect    |
-% | VRP+LTO vs LTO      | 0    | 0      | 18   | 0.515   | No significant effect    |
-% | Unfold vs LTO       | 0    | 0      | 18   | 0.507   | No significant effect    |
-%
-% With 40 trials, this study has adequate statistical power to detect medium
-% effects (A12 > 0.64 or < 0.36). The observed A12 values are all within the
-% negligible range (0.44-0.56), indicating true absence of effect rather than
-% insufficient sample size.
-
+\cref{psp:tab:bugs-magma} shows the per-bug triggering results on Magma benchmarks.
+For each seeded bug, we report how many of the 30 trial instances triggered it and the median time to first trigger~(TTF) in minutes among instances that did trigger.
+As pure number differences can be misleading, we apply Fisher's exact test within the two groups (\gls{VRP} vs.\ baseline and Call Unfolding vs.\ baseline) for each bug and apply the Benjamini-Hochberg correction.
+The shaded cells show that \gls{VRP} has a significantly weaker bug-finding performance for two of 33 bugs.
+Triggering rates for other bugs and for Call Unfolding do not show statistically significant differences compared to the respective baseline.

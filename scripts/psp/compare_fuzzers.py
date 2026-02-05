@@ -121,10 +121,8 @@ def get_fuzzer_stats(experiment_folder: str, benchmark: str, fuzzer: str, latest
     all_stats = []
     for trial_dir in folder.iterdir():
         # Support both trial-* and instance-* folder naming conventions
-        if trial_dir.name.startswith("trial-"):
-            instance_num = int(trial_dir.name.split("-")[1])
-        elif trial_dir.name.startswith("instance-"):
-            instance_num = int(trial_dir.name.split("-")[1])
+        if trial_dir.name.startswith(("trial-", "instance-")):
+            instance_num = int(trial_dir.name.split("-")[-1])
         else:
             continue
 
@@ -298,10 +296,8 @@ def collect_plot_data_archives(experiment_folder: str, benchmarks: list, fuzzers
 
             for trial_dir in folder.iterdir():
                 # Support both trial-* and instance-* folder naming conventions
-                if trial_dir.name.startswith("trial-"):
-                    instance_num = int(trial_dir.name.split("-")[1])
-                elif trial_dir.name.startswith("instance-"):
-                    instance_num = int(trial_dir.name.split("-")[1])
+                if trial_dir.name.startswith(("trial-", "instance-")):
+                    instance_num = int(trial_dir.name.split("-")[-1])
                 else:
                     continue
 
@@ -435,10 +431,8 @@ def get_magma_bugs(experiment_folder: str, benchmark: str, fuzzer: str, latest_o
     all_bugs = []
     for instance_dir in folder.iterdir():
         # Support both trial-* and instance-* folder naming conventions
-        if instance_dir.name.startswith("trial-"):
-            instance_num = int(instance_dir.name.split("-")[1])
-        elif instance_dir.name.startswith("instance-"):
-            instance_num = int(instance_dir.name.split("-")[1])
+        if instance_dir.name.startswith(("trial-", "instance-")):
+            instance_num = int(instance_dir.name.split("-")[-1])
         else:
             continue
 
@@ -699,7 +693,7 @@ def get_corpus_size(experiment_folder: str, benchmark: str, fuzzer: str, cycle: 
     for instance_dir in folder.iterdir():
         if not instance_dir.name.startswith("instance-"):
             continue
-        instance_num = int(instance_dir.name.split("-")[1])
+        instance_num = int(instance_dir.name.split("-")[-1])
 
         corpus_dir = instance_dir / "corpus"
         if not corpus_dir.exists():

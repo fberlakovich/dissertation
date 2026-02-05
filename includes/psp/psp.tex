@@ -10,12 +10,55 @@ Previous work augmented code coverage with additional data dependency~\cite{Mant
 Here we present an alternative solution to the problem, which we call \gls{PSP}.
 The core idea of \gls{PSP} is to project parts of the program's hidden data state onto the explicit control-flow graph.
 By transforming data dependencies into control dependencies, we force the previously invisible variations in program state to trigger new edges in the coverage instrumentation.
-This allows the fuzzer to distinguish between states that were previously conflated, providing the necessary stepping stones to explore deeper into the state space.
+This allows the fuzzer to distinguish between states that were previously conflated, potentially providing stepping stones to explore deeper into the state space.
 In the following sections, we present two concrete instantiations of this principle.
 First, we discuss \emph{Dynamic Call Unfolding}, which exposes the hidden targets of indirect calls.
 Second, we introduce \emph{Value Range Partitioning}, which projects possible partitions of a variable's value range onto the control flow.
 
+
 \section{Unfolding Dynamic Calls}
+\begin{listing}
+    \begin{minted}[escapeinside=||]{cpp}
+struct Shape { virtual void draw(int scale) = 0; };
+struct ShapeParser { virtual Shape *parse(std::string pattern) = 0; };
+
+struct Rectangle : Shape {
+  void draw(int scale) override {
+    std::cout << 10 / (scale + 1) << "\n";
+  }
+};
+struct Circle : Shape {
+  void draw(int scale) override {
+    std::cout << 10 / scale << "\n"; // BUG: scale==0
+  }
+};
+struct CircleParser : ShapeParser {
+  Shape *parse(std::string p) override {
+    return p == "circle" ? new Circle() : nullptr;
+  }
+};
+struct RectangleParser : ShapeParser {
+  Shape *parse(std::string p) override {
+    return p == "rectangle" ? new Rectangle() : nullptr;
+  }
+};
+
+int main(int argc, char *argv[]) {
+  std::vector<ShapeParser *> parsers = {new RectangleParser(), new CircleParser()};
+  std::vector<Shape *> shapes;
+  std::ifstream stream(argv[1]);
+  for (std::string line; std::getline(stream, line);)
+    for (auto p : parsers) if (Shape *s = p->parse(line)) shapes.push_back(s);
+
+  for (auto shape : shapes) shape->draw(5);
+  // filter shapes somehow
+  for (auto shape : shapes) shape->draw(0); |\label{psp:line:broken-draw-call}|
+}
+    \end{minted}
+    \caption{Polymorphic call site where a bug in \code{Circle::draw} is masked by prior coverage of both implementations.}
+    \label{psp:lst:vcall-dependence}
+\end{listing}
+
 Our first application of \gls{PSP} addresses the information loss occurring at indirect call sites.
 As discussed in \cref{psp:sec:motivation}, \aflpp's compiler instrumentation for code coverage loses information at indirect call sites because it cannot differentiate the dynamic edges of an indirect call.
 An analysis called \emph{points-to} analysis can, however, determine these edges at compile time.
@@ -36,67 +79,6 @@ In other words, possible variations in data, at least some of them, are now repr
 A representation as control-flow allows \aflpp's coverage instrumentation to instrument the previously invisible dynamic edges.
 We call this principle \emph{Program State Projection}, or \glsshortkey{PSP} for short, because it combines control flow with parts of the program's hidden state.
 
-\begin{listing}
-    \begin{minted}[escapeinside=||]{cpp}
-#include <iostream>
-#include <vector>
-#include <fstream>
-
-class Shape { public: virtual void draw(int scale) = 0; };
-class ShapeParser { public: virtual Shape *parse(std::string pattern) = 0; };
-
-class Rectangle : public Shape {
-public:
-  void draw(int scale) override {
-    std::cout << "[Rectangle] scaled size: " << 10 / (scale + 1) << std::endl;
-  }
-};
-
-class Circle : public Shape {
-public:
-  void draw(int scale) override {
-    // BUG when scale == 0
-    std::cout << "[Circle] scaled size: " << 10 / scale << std::endl;
-  }
-};
-
-class CircleParser : public ShapeParser {
-public:
-  Shape *parse(std::string pattern) override {
-    return pattern == "circle" ? new Circle() : nullptr;
-  }
-};
-
-class RectangleParser : public ShapeParser {
-public:
-  Shape *parse(std::string pattern) override {
-    return pattern == "rectangle" ? new Rectangle() : nullptr;
-  }
-};
-
-int main(int argc, char *argv[]) {
-  std::vector<ShapeParser *> shapeParsers = {
-    new RectangleParser(),
-    new CircleParser()
-  };
-  std::vector<Shape *> parsedShapes;
-  std::string filename1 = argv[1];
-  std::ifstream stream(filename);
-  for (std::string line; std::getline(stream, line);)
-    for (auto parser : shapeParsers)
-      if (Shape *parsed = parser->parse(line)) parsedShapes.push_back(parsed);
-
-  for (auto shape : parsedShapes) shape->draw(5);
-
-  // filter parsedShapes somehow
-
-  for (auto shape : parsedShapes) shape->draw(0); |\label{psp:line:broken-draw-call}|
-}
-    \end{minted}
-    \caption{Polymorphic call site where a bug in \code{Circle::draw} is masked by prior coverage of both implementations.}
-    \label{psp:lst:vcall-dependence}
-\end{listing}
-
 \cref{psp:lst:vcall-dependence} shows a simple polymorphic call example in \cpp.
 The code consists of parser objects that populate a list of shapes based on strings found in an input file.
 After initially drawing the shapes with a scale of $5$, the code filters the list of shapes.
@@ -105,91 +87,103 @@ Whether the bug is triggered depends on the filtering logic and whether circle o
 Since the first loop might have already called the \code{draw} method of both types, compiler-based code coverage considers both methods as covered.
 
 In contrast, \gls{PSP} would conceptually transform line~\ref{psp:line:broken-draw-call} as shown in \cref{psp:lst:broken-draw-call-unfolded}.
-\begin{listing}
+\begin{listing}[t]
     \begin{minted}{cpp}
-if (dynamic_cast<Rectangle *>(*iter))
+if (dynamic_cast<Rectangle *>(*iter)) {
   // call Rectangle::draw without dynamic dispatch
-if (dynamic_cast<Circle *>(*iter))
+} else if (dynamic_cast<Circle *>(*iter)) {
   // call Circle::draw without dynamic dispatch
-(*iter)->draw(5);
+} else {
+  (*iter)->draw(5);
+}
     \end{minted}
     \caption{Conceptual transformation of an indirect call to expose dynamic call targets to coverage instrumentation.}
     \label{psp:lst:broken-draw-call-unfolded}
 \end{listing}
-Each added control-flow branch provides the fuzzer with a potential stepping stone to build a new seed.
+Each added control-flow branch provides the fuzzer, in principle, with a potential stepping stone to build a new seed.
+
 
 \section{Value-Range Partitioning}\label{psp:s:value-range-partitioning}
 Control flow in programs typically depends on variable values.
 An \code{if} statement might check whether a variable \code{x} exceeds a certain bound, or a loop might iterate until an index variable reaches a limit.
 Conventional edge coverage already covers these types of control-flow decisions.
 From the perspective of edge coverage, each control-flow point partitions the value range of the compared variable according to the comparison operator.
-For example, consider the C condition in \cref{psp:lst:c-value-range}.
-\begin{listing}
-    \begin{minted}{C}
+For example, consider the C condition in \cref{psp:fig:vrp-original}.
+\begin{figure}[t]
+    \centering
+    % Original code + unpartitioned visualization
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{minipage}[t]{0.48\textwidth}
+            \begin{minted}[fontsize=\footnotesize]{C}
 void target(int16_t param) {
   if (param < 0) {
-    deal_with_negative(param);
+    process_negative(param);
   } else {
-    deal_with_positive(param);
+    process_positive(param);
   }
 }
-    \end{minted}
-    \caption{A simple branch partitions the value range into negative and non-negative values.}
-    \label{psp:lst:c-value-range}
-\end{listing}
+            \end{minted}
+        \end{minipage}%
+        \hfill
+        \begin{minipage}[t]{0.4\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/psp/unpartitioned.pdf}
+        \end{minipage}
+        \caption{Original code. The branch partitions the value range into two edges.}
+        \label{psp:fig:vrp-original}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    % Transformed code + partitioned visualization
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \begin{minipage}[t]{0.48\textwidth}
+            \begin{minted}[fontsize=\footnotesize]{C}
+void target(int16_t param) {
+  if (param < 0) {
+    // halve the possible range
+    if (param > -16384) {
+        process_negative(param);
+    } else {
+        process_negative(param);
+    }
+  } else {
+    // halve the possible range
+    if (param < 16384) {
+        process_positive(param);
+    } else {
+        process_positive(param);
+    }
+  }
+}
+            \end{minted}
+        \end{minipage}%
+        \hfill
+        \begin{minipage}[t]{0.4\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/psp/partitioned.pdf}
+        \end{minipage}
+        \caption{Transformed code with artificial branches subdividing each of the original ranges into two sub-ranges, resulting in four edges.}
+        \label{psp:fig:vrp-transformed}
+    \end{subfigure}
+
+    \caption{\acrlong{VRP} applied to a simple branch.}
+    \label{psp:fig:vrp-transformation}
+\end{figure}
 The function \code{target} executes different logic depending on whether \code{param} is positive or negative.
 An \code{int16\_t}, however, has a value in the range $[-32768, 32767]$, meaning that from the perspective of edge coverage, all values in the ranges $[-32768, -1]$ and $[0, 32767]$ are treated uniformly.
 Whichever value the fuzzer explores within one of those ranges, it will not trigger new coverage in \code{target}.
 This blind spot can lead to cases where a fuzzer struggles to find certain interesting data points because there is no direct control dependency on them.
 
 Similar to the case of indirect call unfolding, we observe that a compiler already contains elaborate analyses to reason about such value ranges.
-For example, compilers use such analyses to eliminate redundant conditions, as seen in line~\ref{psp:line:redundant-condition} of \cref{psp:lst:redundant-condition}.
-\begin{listing}
-    \begin{minted}[mathescape,escapeinside=||]{C}
-void target(int16_t param) {
-  if (param < 0) {
-
-    // redundant condition
-    if (param == 0) { |\label{psp:line:redundant-condition}|
-      // deal with zero param
-    }
-    deal_with_negative(param);
-  } else {
-    deal_with_positive(param);
-  }
-}
-    \end{minted}
-    \caption{A redundant condition that compilers can eliminate using value range analysis.}
-    \label{psp:lst:redundant-condition}
-\end{listing}
-Assuming that \code{param} is not, \eg \code{volatile}, the compiler can prove that at the time control flow reaches the condition at line~\ref{psp:line:redundant-condition}, \code{param} can never be $0$.
-
-We can use this compiler knowledge to map these hidden data-space boundaries onto the control flow, again making them available for edge-coverage instrumentation.
-For example, a simple compiler transformation can convert \cref{psp:lst:c-value-range} into \cref{psp:lst:c-value-range-transformed}.
-We call this technique \gls{VRP}.
+Value range analysis, for instance, allows compilers to eliminate redundant conditions, \ie nested conditions that are logically implied by the surrounding condition.
+We can repurpose this compiler knowledge to map these hidden data-space boundaries onto the control flow, again making them available for edge-coverage instrumentation.
+For example, the \gls{VRP} transformation shown in \cref{psp:fig:vrp-transformed} converts the original code into a version with artificial branches.
 From the perspective of edge coverage, the transformation effectively divides the data space into four partitions instead of two.
 The semantics of the program remain unchanged because the bodies in the artificially introduced control-flow split are identical.
-\begin{listing}
-    \begin{minted}{C}
-void target(int16_t param) {
-  if (param < 0) {
-    if (param > -16384) {
-        deal_with_negative(param);
-    } else {
-        deal_with_negative(param);
-    }
-  } else {
-    if (param < 16384) {
-        deal_with_positive(param);
-    } else {
-        deal_with_positive(param);
-    }
-  }
-}
-    \end{minted}
-    \caption{Transformed version of \cref{psp:lst:c-value-range} with artificial branches subdividing each value range.}
-    \label{psp:lst:c-value-range-transformed}
-\end{listing}
+The additional edges provide the fuzzer with an approximation of how well the data space of the variable has been samled.
 It is possible that some of these value ranges are in fact unreachable due to constraints not known at compile time.
 
 The technique shown above naturally raises two questions:
@@ -203,7 +197,7 @@ A variable of type \code{int32\_t} has over four billion possible values.
 Partitioning this range into individual values is infeasible, so any practical approach must choose a subset of \emph{split points}.
 A split point is the value on which the artificially inserted control-flow branches.
 The first question, therefore, is really about finding good split points that provide valuable stepping stones for the fuzzer.
-In the example in \cref{psp:lst:c-value-range-transformed} $-16384$ and $16384$ are split points.
+In the example in \cref{psp:fig:vrp-transformed} $-16384$ and $16384$ are split points.
 A naive strategy might split the range at its midpoint, but such a simplistic approach ignores the program's semantics.
 For example, if the variable is used as a divisor, the value zero is far more interesting than an arbitrary midpoint.
 Similarly, if the variable feeds into an addition, the values near the overflow boundary matter most.
@@ -213,7 +207,7 @@ To address the first question, we propose three straightforward split point heur
 However, it is worth noting that the broad \gls{VRP} framework offers a vast design space for further investigation.
 \begin{description}
     \item[midpoint] This heuristic, as used in the examples above, simply splits value ranges in the middle, creating two roughly equal-sized partitions.
-    This heuristic is suitable if nothing is known about the value range in question.
+    This heuristic is suitable if nothing is known about the value range in question or the variable usage.
     \item[boundaries] This heuristic splits at values that form possible boundaries for later value usages.
     For example, typical boundaries for an array usage are $0$ and $\mathrm{arraylength}$\footnote{Negative indices are possible, but rare.}.
     Buffer operations form another example, such as \code{memcpy} or \code{memmove}, where the boundaries are $0$ and $\mathrm{buffersize}$.
@@ -332,9 +326,9 @@ For instance, partitioning a variable just before it is overwritten provides no 
 
 We propose a simple placement heuristic based on existing comparisons.
 The heuristic subdivides each branch of an \emph{existing} comparison based on the previously determined split points.
-For example, the heuristic transforms code patterns like \cref{psp:lst:c-value-range}, but would not transform patterns like \cref{psp:lst:psc-no-transform} due to the lack of existing comparisons.
-This choice is a tradeoff, as functions such as the one in \cref{psp:lst:psc-no-transform} with a flat control-flow and purely value-based bugs are possible and would be missed by the heuristic.
-Apart from a relatively simple implementation, choosing existing comparisons as an insertion-point has advantages as well, however.
+For example, the heuristic transforms code patterns like \cref{psp:fig:vrp-original}, but would not transform patterns like \cref{psp:lst:psp-no-transform} due to the lack of existing comparisons.
+This choice is a tradeoff, as functions such as the one in \cref{psp:lst:psp-no-transform} with a flat control-flow and purely value-based bugs are possible and would be missed by the heuristic.
+Beyond implementation simplicity, choosing existing comparisons as insertion points has further advantages.
 First, if the program's control-flow depends on the value, it is likely not completely irrelevant to the program's computation.
 Second, existing comparisons pre-constraint the value range, making splitting into manageable partitions easier.
 
@@ -343,17 +337,12 @@ Second, existing comparisons pre-constraint the value range, making splitting in
 void target(int16_t param) {
   // other code
   // some function that fails on e.g. the last value in the range
-  deal_with_value(param);
+  process_value(param);
 }
     \end{minted}
     \caption{A function without comparisons: our heuristic cannot partition \code{param} here.}
-    \label{psp:lst:psc-no-transform}
+    \label{psp:lst:psp-no-transform}
 \end{listing}
-
-An alternative to our comparison-based heuristic would be to trace backwards from possibly interesting dataflow sinks, such as calls.
-Such an approach to identifying instrumentation points is similar to the usage-based heuristics \propername{boundaries} and \propername{arithmetic}.
-In the example in \cref{psp:lst:psc-no-transform}, we could reason that because the param value flows into a function call, it is relevant to the program.
-A potential splitting point would then have to include as many of these potentially interesting dataflow sinks as possible.
 
 The downside of all these transformations is code duplication and, as a result, potential runtime performance degradation.
 Thus, the heuristics need to strike a balance between code size bloat and utility for the fuzzer.

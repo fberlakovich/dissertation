@@ -11,7 +11,7 @@ A less precise analysis only means that the compiler can insert fewer coverage s
 In general, static points-to analysis faces theoretical limits (one of the achilles heels of \gls{CFI}), but additional context can help to improve the analysis precision~\cite{Andersen1994,SharirPnueli1981,WilsonLam1995,Milanova2005}.
 In case of \cpp, or more generally object-oriented languages, the program's type hierarchy (if available) provides such context.
 An analysis called \emph{class hierarchy analysis} computes this type hierarchy and provides an upper bound on which call targets are possible at a call site based on the object's static type.
-A polymorphic call site with static type \propername{A} that calls a method \propername{M} can only reach implementations of \propername{M} within \propername{A}'s type hierarchy.\fbetodo{figure}
+A polymorphic call site with static type \propername{A} that calls a method \propername{M} can only reach implementations of \propername{M} within \propername{A}'s type hierarchy.
 
 Class-hierarchy analysis is most precise at the source level, as the notion of classes is lost during the translation to LLVM IR.
 To implement \gls{CFI} and features like devirtualization, LLVM already provides a class-hierarchy analysis.
@@ -21,7 +21,7 @@ LLVM's existing implementation allowed us to implement the unfolding for \cpp ca
 
 In the case of generic indirect calls (\eg from C), we need to rely on other types of context to improve the precision of the points-to analysis.
 We initially tried a few analyses from the SVF framework but were unsatisfied with the results~\cite{sui2016}.
-The purpose of such analyses it to restrict the possible targets at indirect call sites, the so called \emph{target set}.
+The purpose of such analyses is to restrict the possible targets at indirect call sites, the so called \emph{target set}.
 Naive analyses quickly lead to large target sets, where in reality most targets are not actually possible at the call site in question.
 For example, even in a medium-sized program, a function pointer with type \code{void (*)()} can point to potentially many functions.
 Thus, restricting the target set merely based on the function's type is insufficient.
@@ -33,7 +33,7 @@ As an example consider the program in \cref{psp:lst:mlta-example}.
 A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psp:line:mlta-call-1} and \cref{psp:line:mlta-call-2}.
 In contrast, \gls{MLTA} builds up a model of typed structures and function pointers assigned to these structures.
 Based on this model, \gls{MLTA} records that, \eg \code{handle\_positive} is only ever stored into a struct of type \code{HandlerContext} within a struct of type \code{HandlerA}.
-When the program retrieves the function pointer before \cref{psp:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer cal only lead to \code{handle\_positive}.
+When the program retrieves the function pointer before \cref{psp:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer can only lead to \code{handle\_positive}.
 
 \begin{listing}
     \begin{minted}[mathescape]{C}
