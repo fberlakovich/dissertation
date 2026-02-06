@@ -55,6 +55,13 @@
 \usepackage[most]{tcolorbox}
 \usepackage{pifont}
 \usepackage[pdfpagelabels,hidelinks,pdfusetitle]{hyperref}
+\pdfstringdefDisableCommands{%
+    \def\gls#1{#1}%
+    \def\glspl#1{#1s}%
+    \def\Gls#1{#1}%
+    \def\Glspl#1{#1s}%
+    \def\glsfirst#1{#1}%
+}
 \usepackage{bookmark}
 \usepackage{multirow}
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
@@ -229,32 +236,29 @@
 	% #4 overlay tikz code
 
 	% typeset the PDF into a box so we can measure it
-	\savebox{\drawioMacroBox}{\includegraphics[width=#1]{#2.pdf}}%
-	\input{#2-defs.tex}% defines \drawionativewidthpx, \drawionativeheightpx
-
-	% capture target width as a dimen
-	\drawioTargetWidth=#1\relax
-
-	% the formatter gets confused with the braces in the lua code
-	% @formatter:off
-	\directlua{
-		local function sp_to_pt(sp) return sp/65536.0 end
-		local function pt_to_bp(pt) return pt * 72.0 / 72.27 end
-		local w_bp = pt_to_bp(sp_to_pt(\number\wd\drawioMacroBox))
-		local h_bp = pt_to_bp(sp_to_pt(\number\ht\drawioMacroBox))
-		local nat_w = \drawionativewidthpx
-		local nat_h = \drawionativeheightpx
-		local xbp = w_bp / nat_w
-		local ybp = h_bp / nat_h
-		tex.sprint("\\def\\drawioXbp{" .. xbp .. "}\\def\\drawioYbp{" .. ybp .. "}")
-	}%
-
-	\begin{tikzpicture}[x=\drawioXbp bp, y=\drawioYbp bp, #3]
-		\node[anchor=south west, inner sep=0] at (0,0) {\usebox{\drawioMacroBox}};
-		\input{#2-coords.tex}
-		#4
-	\end{tikzpicture}%
-	% @formatter:on
+	        \savebox{\drawioMacroBox}{\includegraphics[width=#1]{#2.pdf}}%
+	        \input{#2-defs.tex}% defines \drawionativewidthpx, \drawionativeheightpx
+	        % capture target width as a dimen
+	        \drawioTargetWidth=#1\relax%
+	        % the formatter gets confused with the braces in the lua code
+	        % @formatter:off
+	        \directlua{
+	                local function sp_to_pt(sp) return sp/65536.0 end
+	                local function pt_to_bp(pt) return pt * 72.0 / 72.27 end
+	                local w_bp = pt_to_bp(sp_to_pt(\number\wd\drawioMacroBox))
+	                local h_bp = pt_to_bp(sp_to_pt(\number\ht\drawioMacroBox))
+	                local nat_w = \drawionativewidthpx
+	                local nat_h = \drawionativeheightpx
+	                local xbp = w_bp / nat_w
+	                local ybp = h_bp / nat_h
+	                tex.sprint("\\def\\drawioXbp{" .. xbp .. "}\\def\\drawioYbp{" .. ybp .. "}")
+	        }%
+	                \begin{tikzpicture}[x=\drawioXbp bp, y=\drawioYbp bp, #3]
+	                        \useasboundingbox (0,0) rectangle (\drawionativewidthpx, \drawionativeheightpx);%
+	                        \node[anchor=south west, inner sep=0] at (0,0) {\usebox{\drawioMacroBox}};%
+	                        \input{#2-coords.tex}%
+	                        #4%
+	                \end{tikzpicture}%	% @formatter:on
 }
 \makeatother
 
@@ -262,7 +266,7 @@
 \newcommand{\specPerfAvg}{1.006$\times$}
 \newcommand{\specQuantRetAddr}{70\%}
 \newcommand{\wox}{W$\oplus$X\xspace}
-\newcommand{\plusplus}{\nolinebreak\hspace{-.02em}\raisebox{.1ex}{\small +}\nolinebreak\hspace{-.10em}\raisebox{.1ex}{\small +}\xspace}
+\newcommand{\plusplus}{\texorpdfstring{\nolinebreak\hspace{-.02em}\raisebox{.1ex}{\small +}\nolinebreak\hspace{-.10em}\raisebox{.1ex}{\small +}}{++}\xspace}
 \newcommand{\cpp}{C\plusplus}
 \newcommand{\maxoverheadcfs}{3.61\%\xspace}
 \newcommand{\geomeancfs}{0.79\%\xspace}

@@ -85,7 +85,7 @@ We compared the median throughput of five runs at the previously determined satu
 %    and to ensure comparability with prior work, we report only the results of the \propername{glibc} based benchmarks here.
 %    The performance results of the benchmarks compiled with the \musllib toolchain can be found in~\cref{apx:additional-benchmarks}.
 
-\subsubsection{\texorpdfstring{\glspl{BTRA}}{BTRAs}}\label{r2c:sss:eval-btra}
+\subsubsection{\glspl{BTRA}}\label{r2c:sss:eval-btra}
 We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with our optimized AVX2 setup sequence respectively.
 To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
 We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{r2c:ss:strengthening}).
@@ -105,7 +105,7 @@ We found that the resulting geometric mean performance overhead is \geomeancfs w
 These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
 
 
-\subsubsection{\texorpdfstring{\glspl{heapbt}}{BTDPs}}\label{r2c:sss:eval-heapbt}
+\subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
 The optimization to insert \glspl{heapbt} only in functions that write to their stack frame improves performance by 1\%.
