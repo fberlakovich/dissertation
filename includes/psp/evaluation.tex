@@ -87,6 +87,7 @@ Measuring coverage with a common binary is particularly important since \gls{PSP
     \label{psp:tab:coverage-fuzzbench}
     \footnotesize
     \setlength{\extrarowheight}{1pt}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
         \toprule
         & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
@@ -96,7 +97,7 @@ Measuring coverage with a common binary is particularly important since \gls{PSP
         \startdatarows
         \fileInput{generated/psp/coverage-fuzzbench}
         \bottomrule
-    \end{tabular}
+    \end{tabular}}
 \end{table}
 
 The FuzzBench table shows that \gls{VRP} had a statistically significant ($p<0.05$) positive effect on 4 benchmarks, but also a statistically significant negative effect on 4.

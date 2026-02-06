@@ -39,7 +39,7 @@ By treating these optimization events as coverage features, \lool can guide inpu
 }
 \begin{figure}[t]
     \centering
-    \input{figures/lool/optimizationcounts.tex}
+    \resizebox{\textwidth}{!}{\input{figures/lool/optimizationcounts.tex}}
     \caption{Counts of selected optimizations during the compilation of \num{1000} fuzzed test cases (logarithmic axis).}\label{lool:fig:optimizations}
 \end{figure}
 
@@ -58,7 +58,7 @@ We developed a compiler fuzzing framework targeting the GraalVM compiler and, in
 The sustained effectiveness of a compiler fuzzer depends on the capabilities of the input code generator.
 The generator can trigger certain compiler optimizations only with very specific combinations of language features.
 A naïve input generation approach uses a fixed probability distribution of language features to include.
-A problem with this approach, however, is the marginally small probability of certain language feature combinations occurring in a test program of limited size.
+A problem with this approach, however, is the small probability of certain language feature combinations occurring in a test program of limited size.
 If these combinations are necessary to trigger a specific optimization, the optimization remains untested with a high probability.
 Optimization frequencies vary: some trigger frequently, while others trigger only rarely.
 \cref{lool:fig:optimizations} shows the execution counts for certain optimizations we recorded for one fuzzing campaign with~1000 randomly generated Java programs using the code generator's default configuration.
@@ -71,7 +71,7 @@ While code coverage is a popular form of feedback, it is less common among compi
 Nevertheless, some JIT compiler fuzzers do guide input mutation using code coverage~\cite{Gross2023,Wu2023}.
 Code coverage would, in principle, tell us whether certain optimizations were exercised or not.
 While AFL's assembly-level instrumentation is not directly applicable to the GraalVM compiler, Java bytecode instrumentation solutions exist to achieve code coverage.
-For example, the coverage instrumentations of JQF~\cite{Padhye2019a}, Jazzer~\cite{jazzer}, and Kelinci~\cite{kelinci} all operate in a similar manner to AFL's coverage instrumentation.
+For example, the coverage instrumentation of JQF~\cite{Padhye2019a}, Jazzer~\cite{jazzer}, and Kelinci~\cite{kelinci} all operate in a similar manner to AFL's coverage instrumentation.
 However, code coverage has two major drawbacks:
 
 \begin{description}
@@ -137,7 +137,7 @@ Based on these observations, we extend the GraalVM compiler fuzzer to leverage a
 We propose to use the GraalVM compiler's optimization log for coverage feedback.
 Our fuzzer uses the precise, domain-specific information from the optimization log as context-rich coverage to guide input generation towards rare or entirely uncovered compiler optimizations.
 At the core of input generation is a genetic algorithm that uses coverage feedback to choose among different generation options.
-We call the combination of optimization-log guided feedback with genetic input generation \lool.
+We call the combination of optimization-log-guided feedback with genetic input generation \lool.
 
 In contrast to code coverage, \lool has lower overhead and allows for domain-specific context sensitivity.
 To understand which type of context is important in compiler fuzzing, consider the example loop in \cref{lool:fig:loop_before_peeling}.

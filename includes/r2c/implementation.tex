@@ -125,7 +125,7 @@ Depending on the relocation model and the setup instructions, the \glspl{BTRA} a
 Since an attacker cannot predictably identify the return address among the \glspl{BTRA}, storing the addresses in the data section does not compromise security.
 
 If the randomly chosen number of \glspl{BTRA} before the return address is odd, \rtwoc{} inserts an additional \gls{BTRA} to keep the stack aligned.
-On x86-64, the stack pointer must be 16 byte aligned, as programs crash when certain instructions access a misaligned stack.
+On x86-64, the stack pointer must be 16-byte aligned, as programs crash when certain instructions access a misaligned stack.
 
 \subsubsection{Stack Arguments}\label{r2c:sss:stack-arguments}
 
@@ -192,7 +192,7 @@ call callee
         \vspace{1cm}
     \end{minipage}%
     \hfill%
-    \begin{minipage}[b]{0.5\linewidth}
+\begin{minipage}[b]{0.5\linewidth}
         \includeDrawioFigure[\linewidth]{figures/r2c/avx-setup}[remember picture]{
             \path
             (Point1) coordinate (A)
@@ -288,34 +288,13 @@ add %rsp, |$\alpha*8$|
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/r2c/btdp-setup}
-    \caption[]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
+    \caption[Naive vs.\ hardened \gls{heapbt} placement.]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
     In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
     The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{r2c:ss:impl-heap-boobytraps}).}
     \label{r2c:fig:hardened-data-traps}
 \end{figure}
 
-\subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/r2c/btdp-stack}
-    \caption{Stack and heap with inserted \glspl{heapbt}.}
-    \label{r2c:fig:btdp-stack}
-\end{figure}
-
-\begin{listing}[t]
-    \begin{minted}{gas}
-mov 0x4f04d7(%rip),%r11  // load the BTDP array pointer
-mov 0x220(%r11),%rax     // load an array entry into rax
-mov %rax,0x30(%rsp)      // store the pointer to a compile-time random slot
-mov 0x600(%r11),%rax     // load another array entry into rax
-mov %rax,0x20(%rsp)      // ...
-mov 0x5b0(%r11),%rax
-mov %rax,0x10(%rsp)
-mov 0x1a0(%r11),%rax
-    \end{minted}
-    \caption{Example \glspl{heapbt} setup code in the prolog of a function.}
-    \label{r2c:lst:btdp-setup-code}
-\end{listing}
+\subsection{\texorpdfstring{\glspl{heapbt}}{BTDPs}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
 
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
 To maintain the illusion of a benign heap pointer, \glspl{heapbt} must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
@@ -340,6 +319,28 @@ As a result, stack slot randomization shuffles \glspl{heapbt} with other stack o
 Storing the \glspl{heapbt} to the stack requires $2*B+1$ instructions, where $B$ is the number of \glspl{heapbt}.
 \cref{r2c:fig:btdp-stack} shows an example stack and heap with inserted \glspl{heapbt}.
 Note that \glspl{heapbt} can point to arbitrary addresses within a guard page and multiple \glspl{heapbt} point to the same guard page.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/r2c/btdp-stack}
+    \caption{Stack and heap with inserted \glspl{heapbt}.}
+    \label{r2c:fig:btdp-stack}
+\end{figure}
+
+\begin{listing}[t]
+    \begin{minted}{gas}
+mov 0x4f04d7(%rip),%r11  // load the BTDP array pointer
+mov 0x220(%r11),%rax     // load an array entry into rax
+mov %rax,0x30(%rsp)      // store the pointer to a compile-time random slot
+mov 0x600(%r11),%rax     // load another array entry into rax
+mov %rax,0x20(%rsp)      // ...
+mov 0x5b0(%r11),%rax
+mov %rax,0x10(%rsp)
+mov 0x1a0(%r11),%rax
+    \end{minted}
+    \caption{Example \glspl{heapbt} setup code in the prolog of a function.}
+    \label{r2c:lst:btdp-setup-code}
+\end{listing}
 
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
 If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{r2c:fig:hardened-data-traps}).

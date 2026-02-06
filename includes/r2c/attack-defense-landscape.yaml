@@ -204,7 +204,7 @@ nodes:
     tags: [ randomization ]
     label: Oxymoron
 
-  - id: niu2014a
+  - id: niu2014
     year: 2014
     type: defense
     tags: [ cfi ]
@@ -249,7 +249,7 @@ nodes:
     tags: [ code-reuse, c++ ]
     label: COOP
 
-  - id: Carlini2015a
+  - id: Carlini2015
     year: 2015
     type: attack
     tags: [ code-reuse ]

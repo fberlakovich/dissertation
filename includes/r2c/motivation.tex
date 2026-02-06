@@ -1,4 +1,4 @@
-\section{Motivation}
+\section{Motivation}\label{r2c:s:aocr}
 
 The previous chapter traced the arms race between code-reuse attacks and defenses.
 A recurring theme in this history is that each new defense closes one avenue of attack, only for attackers to find another.
@@ -8,7 +8,7 @@ Apart from an investigation of potential weaknesses in execute-only memory imple
 Beyond the general issue of whole-function pointer reuse, the \gls{CPH} trampoline table even enables an attacker to directly infer function pointers from return addresses, effectively turning the \gls{CPH} table into an unwilling accomplice.
 Ultimately, even with execute-only memory and without the need for classic \gls{ROP} gadgets, a viable attack surface remains with or without \gls{CPH}.
 
-While indirect JIT-ROP focuses on the discovery of gadgets, address-oblivious code reuse changes the reuse granularity back from sub-function-level reuse to whole-function reuse.
+While indirect JIT-ROP focuses on the discovery of gadgets, address-oblivious code-reuse changes the reuse granularity back from sub-function-level reuse to whole-function reuse.
 As a result of this granularity change, defenses focusing on a lower granularity become ineffective.
 Counterfeit object-oriented programming followed a similar strategy, making it immune against sub-function-level granularity defenses~\cite{Schuster2015a}.
 
@@ -17,14 +17,14 @@ The \gls{AOCR} attack itself comprises two stages, a profiling stage to harvest 
 To be usable in a whole-function reuse attack, function pointers must satisfy two criteria:
 \begin{inline}
     \item they must point to a function useful to the attacker;
-    \item the function's control-flow must be controllable via memory corruptions, \eg by corrupting their parameters.
+    \item the function's control-flow must be controllable via memory corruptions, \eg by corrupting the function's parameters.
     In their attack examples, the \gls{AOCR} authors exploit functions that read parameter values from memory.
-    Examples for such functions are default parameter wrappers, which take fewer parameters than the original function and pass a default value read from memory to the original function.
+    Examples of such functions are default parameter wrappers, which take fewer parameters than the original function and pass a default value read from memory to the original function.
 \end{inline}
 
 In the context of the categorization presented in \cref{ch:code-reuse-coevolution}, a memory-safety enforcement technique would aim to prevent the initial memory corruption.
 \gls{CFI} on the other hand, would aim to prevent the whole-function pointer reuse.
-Note, however, that because \gls{AOCR} does not involve gadget-level code reuse, coarse-grained \gls{CFI} such as Intel CET cannot prevent the attack.
+Note, however, that because \gls{AOCR} does not involve gadget-level code-reuse, coarse-grained \gls{CFI} such as Intel CET cannot prevent the attack.
 A \gls{CFI}-based defense would also have to guarantee that the target function is not in the target set of an exploitable call site.
 Finally, a randomization-based technique would target the profiling stage to prevent an attacker from reliably identifying function pointer locations.
 Disrupting the reliable profiling of function pointer locations is where Readactor falls short.
@@ -36,7 +36,7 @@ Without protection, the global variables, the heap, and the stack remain predict
 Specifically, the attacks in the \gls{AOCR} paper demonstrate how an attacker can \Circled{\code{A}} profile pointer locations on the stack, \Circled{\code{B}} leak heap data to reach the data section, and \Circled{\code{C}} use the predictable data section layout to corrupt function default parameters (see \cref{r2c:fig:overview-unprotected-vs-protected}).
 
 Among the observable data areas, the stack is particularly vulnerable.
-The stack contains a large number of code pointers (return addresses and function pointers) as well as pointers to the heap and thus serves as a stepping stone to reach other data areas.
+The stack contains many code pointers (return addresses and function pointers) as well as pointers to the heap and thus serves as a stepping stone to reach other data areas.
 \gls{AOCR}'s Malicious Thread Blocking further allows an attacker to reliably observe the stack of a single thread.
 
 Existing stack frame diversification techniques, like stack slot randomization, can hinder the exact profiling of function pointer locations~\cite{Jackson2011,Rodes2013,Aga2019}.

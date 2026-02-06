@@ -5,7 +5,7 @@ The unifying insight is that compilers possess semantic knowledge---about progra
 By leveraging this knowledge, we can achieve hardening and testing capabilities that are hard to implement post-compilation.
 
 In Part~\ref{part:defense}, we presented \rtwoc, a compiler-driven defense against code-reuse attacks that exploits the compiler's knowledge of stack frame geometry.
-Unlike prior randomization defenses that focused primarily on code layout, \rtwoc additionally randomizes the datalayout, particularly on the stack.
+Unlike prior randomization defenses that focused primarily on code layout, \rtwoc additionally randomizes the data layout, particularly on the stack.
 By inserting booby-trapped pointers that are indistinguishable from real ones, \rtwoc forces attackers to guess among decoys, increasing the difficulty of reconnaissance-based attacks.
 We evaluated \rtwoc along multiple dimensions, dissecting its performance overhead and analyzing its security guarantees with empirical data.
 

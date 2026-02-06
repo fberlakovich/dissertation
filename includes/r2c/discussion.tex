@@ -10,11 +10,12 @@
 
 \fbetodo{Add section about profile-guided optimization}
 \begin{table}[t]
+    \centering
     \sisetup{
         table-alignment-mode=none,
         table-number-alignment=right,
     }
-    \begin{tabular}{lS[table-format=8.0]}
+    \begin{tabular}{lS[table-format=12.0]}
         \toprule
         Benchmark              & {Call Frequency} \\
         \midrule
@@ -109,7 +110,7 @@ The cycles counter tells us the total number of cycles the benchmark run took.
 Given a fixed \gls{CPU} frequency, cycles directly translate to execution time.
 Instructions, on the other hand, tell us how many instructions the \gls{CPU} executed.
 A single instruction can (and usually does) take more than one cycle.
-At the same time, superscalar pipelining \glspl{CPU} (all of the \glspl{CPU} in our evaluation), overlap instruction execution and can execute multiple micro-operations in parallel, depending on the instruction type.
+At the same time, superscalar, pipelined \glspl{CPU} (all \glspl{CPU} in our evaluation) overlap instruction execution and can execute multiple micro-operations in parallel, depending on the instruction type.
 As a result, the ratio of instructions and cycles, called \gls{IPC}, can be both smaller than, equal to, or greater than 1.
 Intel's \gls{TMA} counters are subdivided into multiple layers, of which the first layer is the most important one for our analysis.
 The first layer classifies pipeline slots into one of four categories:
@@ -131,7 +132,7 @@ Additional instructions can affect execution performance in at least two ways:
 \end{enumerate*}
 Conversely, additional instructions do not necessarily lead to more cycles, as sometimes they can hide in stalls.
 The relationship between an increase in instructions and an increase in cycles (if any), thus, can give us a first hint at a benchmark's performance profile.
-Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all of \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
+Given that \glspl{BTRA} are responsible for most of the additional instructions, we performed a series of experiments with all \rtwoc's defenses in place, but a varying number of \glspl{BTRA}, ranging from 4 to 24.
 \cref{r2c:tab:btra-steps-overhead} shows the performance overhead of each progression relative to the baseline.
 \Cref{r2c:tab:ipc-progression} shows the absolute \gls{IPC} values as the number of \glspl{BTRA} increases from 2 to 22.
 \cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
@@ -533,7 +534,7 @@ Both attacks could be prevented by load time re-randomization.
 
 \rtwoc{} could also deter the corruption of \glspl{BTRA} by checking a random subset of \glspl{BTRA} for consistency after the return.
 
-\rtwoc{} focuses on code-reuse attacks and the leakage of \emph{control-flow} data.
+\rtwoc{} focuses on code-reuse attacks and the leakage of pointers that enable \emph{control-flow} hijacking.
 Although \rtwoc{}'s layout randomization raises the bar for attackers~\cite{Hu2016}, \rtwoc{} does not offer the same protection as defenses specialized for data-only attacks~\cite{Carr}.
 
 A way to strengthen \rtwoc{}'s security would be to combine it with \gls{MVEE}s~\cite{Cox2006,Berger2006,Bruschi2007,Volckaert2016,Voulimeneas2020}.

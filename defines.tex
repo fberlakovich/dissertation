@@ -1,6 +1,7 @@
 % Font setup for LuaLaTeX - Palatino with Noto Mono for code
 \usepackage{fontspec}
 \usepackage{unicode-math}
+\usepackage{microtype}
 \usepackage{tabularray}
 \usepackage{fp}
 \usepackage{mathtools}
@@ -84,6 +85,14 @@
 \setmainfont{TeX Gyre Pagella}
 \setmathfont{TeX Gyre Pagella Math}
 \setmonofont{Noto Sans Mono}[Scale=0.9]
+
+\hyphenation{
+  mis-com-pi-la-tions
+  mis-com-pi-la-tion
+  poly-mor-phic
+  opti-mi-za-tions
+  opti-mi-za-tion
+}
 
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \UseTblrLibrary{booktabs,functional}
@@ -682,8 +691,14 @@
 	%    breakable,            % Allows the box to break across pages
 }
 
-\numberwithin{figure}{section}
-\numberwithin{listing}{section}
+\numberwithin{figure}{chapter}
+\numberwithin{listing}{chapter}
+
+% Widen LoF/LoT page-number column so long captions don't push page numbers out of alignment
+\makeatletter
+\renewcommand{\@pnumwidth}{2.5em}
+\renewcommand{\@tocrmarg}{3.5em}
+\makeatother
 
 % Inline helper: draw a tiny boxed number and mark it with a global node name.
 \newcommand{\numtag}[2]{

@@ -29,7 +29,7 @@ This selection process ensures that desirable individuals can pass their propert
 As most software is processed by a compiler at some point, and compiler bugs can have severe consequences, compiler fuzzing is of particular importance~\cite{Ma2023,Xu2023,yang2011}.
 Compiler fuzzers face a number of specific challenges.
 \cref{lool:fig:problems} shows a typical \gls{JITcomp} fuzzing pipeline and where in the pipeline these challenges occur.
-First, constructing valid inputs (\ie inputs that are not rejected at the parsing stage) typically requires specialized input generators.
+First, constructing valid inputs (\ie inputs that are not rejected at the parsing stage) typically requires specialized input generators (\Circled{A} in the figure).
 Second, miscompilations, \ie incorrect compilations that neither crash the compiler nor the compiled program, but lead to compiled programs that deviate from the source program's semantics, are hard to detect.
 Generic fuzzers typically use sanitizers to detect non-crashing, but faulty program states in their subjects.
 Sanitizers cannot, however, detect miscompilations.
@@ -48,7 +48,7 @@ Summarizing, \gls{JITcomp} fuzzers must solve the following problems:
 \end{problems}
 
 
-\subsection{Landscape of \gls{JITcomp} fuzzers}\label{lool:ss:fuzzer-landscape}
+\subsection{Landscape of \texorpdfstring{\gls{JITcomp}}{JIT compiler} fuzzers}\label{lool:ss:fuzzer-landscape}
 Different \glspl{JITcomp} solutions approach the problems described in \cref{lool:ss:jit-compiler-fuzzing} from different angles.
 The following paragraphs give a short overview of the \gls{JITcomp} fuzzer landscape.
 
@@ -129,7 +129,7 @@ The GraalVM project maintains Truffle implementations of several common language
 The common GraalVM compiler compiles all languages running on GraalVM (\eg Java, Truffle languages, Scala, and Kotlin) to machine code.
 Thus, bugs in the compiler affect \emph{all} GraalVM languages, and the compiler's reliability is of utmost importance to the GraalVM project.
 
-\subsubsection{GraalVM optimization log}\label{lool:sss:graalvm-optimization-log}
+\subsubsection{GraalVM Optimization Log}\label{lool:sss:graalvm-optimization-log}
 The GraalVM compiler can generate an optimization log during compilation.
 This log includes entries for every optimizing code transformation the compiler performs.
 Full log entries include the compiler phase performing the optimization, the name of the optimization performed, and the source code location of the program position where the optimization was performed.
@@ -164,7 +164,7 @@ Future extensions could incorporate more information from the log, such as in wh
 \label{lool:ss:graalvm-fuzzing}
 
 The goal of later sections is to demonstrate the principle of optimization-log coverage (see \cref{lool:s:design}).
-As the GraalVM compiler already provides such an optimization-log, we illustrate the \lool principle on the example of the GraalVM compiler.
+As the GraalVM compiler already provides such an optimization log, we illustrate the \lool principle on the example of the GraalVM compiler.
 We discuss the applicability to other compilers in \cref{lool:ss:other-opt-logs}.
 
 To solve \cref{lool:prob:inputs,lool:prob:miscompilations,lool:prob:compile} discussed in \cref{lool:ss:jit-compiler-fuzzing}, we built a new fuzzer that specifically targets the GraalVM compiler.
@@ -228,10 +228,10 @@ static class Class1 {
       break loop1;
     }
     var6 = var6 + 1;
-    var12 = var5 ? (param0 ? new String[]{var9, ("\\'\\u000f�.�^,")}
-        : (var3 ? new String[]{("��\\u001f\\u0002-=R�:")} : new String[]{var9}))
+    var12 = var5 ? (param0 ? new String[]{var9, ("\\'\\u000f\xef\xbf\xbd.\xef\xbf\xbd^,")}
+        : (var3 ? new String[]{("\xef\xbf\xbd\xef\xbf\xbd\\u001f\\u0002-=R\xef\xbf\xbd:")} : new String[]{var9}))
         : ((param0 | var5)
-        ? (var0 ? new String[]{var9, ("\\u0005�.2Q")} : new String[]{var9, ("�Ng�\\\\0v�")})
+        ? (var0 ? new String[]{var9, ("\\u0005\xef\xbf\xbd.2Q")} : new String[]{var9, ("\xef\xbf\xbdNg\xef\xbf\xbd\\\\0v\xef\xbf\xbd")})
         : new String[]{("*bH[L_T\\\\gE"), var9});
     GraalDirectives.controlFlowAnchor();
     }
@@ -319,6 +319,6 @@ This fuzzing framework has been in regular use within the GraalVM project for fo
 It has been effective at finding both miscompilations and bugs that crash the compiler with failed assertions or unexpected exceptions being thrown.
 
 We use the existing source code reducers Perses~\cite{Sun2018} and C-Reduce~\cite{regehr2012} to reduce programs that provoke errors to minimal versions for easier debugging.
-\cref{lool:fig:example_bug} shows an example of a reduced, crashing compiler bug found by the GraalVM fuzzer without optimization log coverage.
+\cref{lool:fig:example_bug} shows an example of a reduced, crashing compiler bug found by the GraalVM fuzzer without optimization-log coverage.
 During reduction, we ensure that the reducer does not remove methods such as \code{hashcode} and \code{equals}.
 Removing these methods causes the code to fall back to the default implementation that produces non-deterministic results in certain cases.

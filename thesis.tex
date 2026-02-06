@@ -50,7 +50,7 @@
     }
 }
 
-\renewcommand*{\bibfont}{\small}
+\renewcommand*{\bibfont}{\footnotesize}
 \DeclareLanguageMapping{latin}{english}
 \BiblatexSplitbibDefernumbersWarningOff
 \addbibresource{references.bib}
@@ -134,7 +134,6 @@ This dissertation is based in part on the following publications:
     \printbibliography[heading=none, env=nolabel]
     \vspace{2ex}
     \noindent  Cross-Module Quickening, while also compiler-related, aligns more with the traditional use of compilers as optimizers.
-    While the project is also compiler-related, it aligns more with the traditional use of compilers as optimizers.
 \end{refsection}
 
 
@@ -168,25 +167,12 @@ This dissertation is based in part on the following publications:
 \chapter{Outlook}\label{ch:outlook-defense}
 \input{includes/outlook-defense}
 
-\partintro{%
-    While the first part of this thesis focused on hardening deployed programs against exploitation, this part addresses the complementary goal of finding bugs before deployment.
-    Fuzzing has emerged as one of the most effective techniques for discovering vulnerabilities in complex software, but its effectiveness depends critically on the feedback mechanisms that guide input generation.
-
-    The compiler is uniquely positioned to provide rich feedback signals.
-    Beyond the code coverage metrics that most fuzzers rely on, the compiler has access to semantic information about program structure, optimization decisions, and data dependencies.
-    This part explores two ways to leverage this information.
-
-    \Cref{ch:fuzzer-guidance} provides background on fuzzer feedback mechanisms and their limitations.
-    We then present \lool, a fuzzing framework that uses the compiler's optimization log as a domain-specific coverage metric for compiler testing.
-    Finally, we introduce \emph{Program State Projection} (PSP), a technique that uses compiler analyses to project hidden data dependencies onto observable control flow, and present preliminary results exploring its potential.
-}
-
-
-\part{Improving Fuzzer-Guidance with Compiler Assistance}\label{part:fuzzing}
+\part{Improving Fuzzer Guidance with Compiler Assistance}\label{part:fuzzing}
+\partintro{\input{includes/part2-intro}}
 \input{includes/fuzzer-guidance}
 
 
-\chapter{Fuzzer-Guidance with Optimization-Log Counters}\label{ch:lool}
+\chapter{Fuzzer Guidance with Optimization-Log Counters}\label{ch:lool}
 \input{includes/lool/introduction}
 \input{includes/lool/background}
 \input{includes/lool/design}
@@ -197,7 +183,7 @@ This dissertation is based in part on the following publications:
 \input{includes/lool/summary}
 
 
-\chapter{Fuzzer-Guidance with Program-State Projection}\label{ch:psp}
+\chapter{Fuzzer Guidance with Program State Projection}\label{ch:psp}
 \input{includes/psp/motivation}
 \input{includes/psp/background}
 \input{includes/psp/psp}

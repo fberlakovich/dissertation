@@ -7,13 +7,13 @@ Our evaluation aims to confirm or refute the following hypotheses, which we form
         \item triggering rare optimizations;
         \item achieving code coverage.
     \end{itemize}
-    \hypothesis[hpt:coverage-overhead]{Coverage Feedback Overhead} Context-blind and context-aware coverage incurs less overhead than code coverage;
-    \hypothesis[hpt:domain-specific-mutation]{Domain-Specific Mutation vs. Generic Mutation} Domain-specific mutation of generation parameters outperforms parametric, but general-purpose mutation with regards to
+\hypothesis[hpt:coverage-overhead]{Coverage Feedback Overhead} Context-blind and context-aware coverage incur less overhead than code coverage;
+    \hypothesis[hpt:domain-specific-mutation]{Domain-Specific Mutation vs. Generic Mutation} Domain-specific mutation of generation parameters outperforms parametric, but general-purpose mutation with regard to
     \begin{itemize}
         \item triggering rare optimizations;
         \item achieving code coverage.
     \end{itemize}
-    \hypothesis[hpt:contextaware-vs-contextblind]{Context-Aware vs. Context-Blind} Context-aware coverage outperforms context-blind coverage with regards to
+\hypothesis[hpt:contextaware-vs-contextblind]{Context-Aware vs. Context-Blind} Context-aware coverage outperforms context-blind coverage with regard to
     \begin{itemize}
         \item triggering rare optimizations;
         \item achieving code coverage.
@@ -26,7 +26,7 @@ We performed all experiments on GraalVM 25.0 running on 3 identical machines wit
 Each machine is equipped with an AMD Ryzen Threadripper PRO 7995WX with 192 cores (96 physical cores, each with hyper-threading) and 512 GB of RAM\@.
 To account for the large number of experiments, we partitioned each machine with \propername{cgroups} into 3 equally sized partitions with 64 cores each.
 We chose the core assignment such that logical cores are not split across partitions and partitions do not compete for shared resources such as the L3 cache.
-Experiments that use \aflpp as mutation engine, use version \propername{4.34a} with a 256 KB map and otherwise default options.
+Experiments that use \aflpp as mutation engine use version \propername{4.34a} with a 256 KB map and otherwise default options.
 A 256 KB map is less cache-friendly than the default 64 KB map, but for the \aflpp experiments coverage processing
 \begin{enumerate*}[label=(\roman*)]
     \item is not the bottleneck
@@ -81,12 +81,12 @@ Configurations with \propername{memory} accumulate counters over time, whereas \
     We let \aflpp mutate the input generator's parameters by using a proxy binary as \aflpp's test subject, as implemented in Kelinci~\cite{kelinci}, Jazzer~\cite{jazzer} and JQF~\cite{Padhye2019a}.
     The bits in the proxy binary resemble the code generator's parameters, effectively allowing \aflpp to mutate code generation parameters.
     Similarly, the proxy binary allows an application (the GraalVM compiler) running in the JVM to send back coverage information to \aflpp.
-    \configuration{\aflpp Context-Blind}\label{config:aflcontextblind} a configuration where we use \aflpp for parametric input mutation together with lightweight optimization log counters as coverage.
-    The optimization log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
+    \configuration{\aflpp Context-Blind}\label{config:aflcontextblind} a configuration where we use \aflpp for parametric input mutation together with lightweight optimization-log counters as coverage.
+    The optimization-log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
     \configuration{\aflpp Context-Aware}\label{config:aflcontextaware} a configuration where we use \aflpp for parametric input mutation together with per-method optimization pairs as coverage.
     Instead of aggregating the optimization counters, we record them for each method individually to identify pairs of optimizations that occurred together.
     \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{lool:s:design}) with code coverage as feedback.
-    \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization log counters as coverage.
+    \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization-log counters as coverage.
     \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{lool:s:design}).
     During each run, this configuration tries to breed as many generations as possible.
     Each generation consists of 16 parameter vectors, and the fuzzer creates a new generation when each vector has generated 40 tests or after one hour, whichever happens first.
@@ -95,8 +95,8 @@ Configurations with \propername{memory} accumulate counters over time, whereas \
 \cref{config:static,config:no-feedback,config:aflcodecov} serve as baselines to gauge the effectiveness of the other configurations.
 We deliberately chose an \aflpp baseline that uses parametric fuzzing instead of raw mutation of input programs as discussed in \cref{lool:ss:design-overview}.
 \cref{config:static,config:no-feedback} allow us to separate the effect of varying generation parameters, but in an undirected way.
-\cref{config:aflcontextblind,config:aflcontextaware} measure the effectiveness of using optimization log information as coverage, but with an existing, popular mutation engine.
-These configurations essentially use \aflpp's algorithms but replace code-coverage with two different forms of optimization log counter coverage.
+\cref{config:aflcontextblind,config:aflcontextaware} measure the effectiveness of using optimization-log information as coverage, but with an existing, popular mutation engine.
+These configurations essentially use \aflpp's algorithms but replace code-coverage with two different forms of optimization-log counter coverage.
 Like in \cref{config:aflcodecov}, we let \aflpp operate on a proxy binary to bridge the gap between \aflpp and the GraalVM compiler.
 \cref{config:loolcodecov} measures whether a domain-specific input mutation improves upon parametric, but semantics-oblivious mutation.
 \cref{config:loolcontextblind,config:loolfull} combine \lool's contributions: domain-specific input mutation and optimization counters as coverage feedback.
@@ -116,6 +116,7 @@ We note, however, that without a ground truth the number of bugs found is unsuit
     \caption{The total number of successful, failed, skipped and timeout tests in each configuration summed over all runs as well as their median test runtimes and LoC.}
     \label{lool:tbl:test-overview}
     \setlength{\tabcolsep}{4pt}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{>{\nextrow}E C C C C r T T}
         \toprule
         {Experiment} & {Total} & {Passed} & {Timeout} & {Skipped} & {\makecell{Failed \\ (Unique)}} & {\makecell{Med.\ \\ Time (s)}} & {\makecell{Med.\ \\ LoC}} \\
@@ -123,7 +124,7 @@ We note, however, that without a ground truth the number of bugs found is unsuit
         \startdatarows
         \fileInput{generated/lool/test-overview}
         \bottomrule
-    \end{tabular}
+    \end{tabular}}
 \end{table}
 
 
@@ -133,7 +134,7 @@ In the \aflpp configurations the program generator occasionally has to skip test
 We discuss this phenomenon in more detail in \cref{lool:ss:aflpp-vs-genetic}.
 
 \subsection{Overhead of Feedback Mechanisms}
-\begin{table}{}
+\begin{table}[t]
     \caption{Number of tests completed in a 30-minute period with different coverage feedback mechanisms.}
     \label{lool:tbl:coverage-overhead}
     \centering
@@ -177,13 +178,14 @@ Using no coverage mechanism forms the baseline.
 
 \begin{figure}[t]
     \centering
+    \resizebox{\textwidth}{!}{%
     \begingroup
     \pgfplotsset{every axis/.append style={
         width=\linewidth,
         height=0.8\linewidth,
     }}
     \input{figures/lool/coverage-timeline-upper}%
-    \endgroup
+    \endgroup}
     \caption{Median cumulative edge coverage of the better performing configurations after 4 hours.
     See \cref{lool:fig:cumulative-coverage} for the full graph.
     The legend is ordered based on the achieved median cumulative coverage after 24 hours.}

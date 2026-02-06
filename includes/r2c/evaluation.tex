@@ -51,7 +51,7 @@ Machine \propername{TR 3970X} is equipped with an AMD Ryzen Threadripper 3970X C
 Machine \propername{Xeon} is equipped with an Intel Xeon Platinum 8358 CPU running at 2.60GHz, 256GB DDR4 RAM running at 3200 MHz, and Debian 11.
 
 On each machine we used the bundled GCC and gold linker version to compile LLVM.
-Our LLVM modifications are based on LLVM 11 and we compiled the benchmarks against the bundled \propername{glibc} and \propername{libstdc\plusplus} versions.
+Our LLVM modifications are based on LLVM 11, and we compiled the benchmarks against the bundled \propername{glibc} and \propername{libstdc\plusplus} versions.
 %    For \propername{musl} we used version 1.2.2 and the \propername{libc\plusplus} included with LLVM 11.
 
 \subsection{Performance}\label{r2c:ss:perf}
@@ -85,7 +85,7 @@ We compared the median throughput of five runs at the previously determined satu
 %    and to ensure comparability with prior work, we report only the results of the \propername{glibc} based benchmarks here.
 %    The performance results of the benchmarks compiled with the \musllib toolchain can be found in~\cref{apx:additional-benchmarks}.
 
-\subsubsection{\glspl{BTRA}}\label{r2c:sss:eval-btra}
+\subsubsection{\texorpdfstring{\glspl{BTRA}}{BTRAs}}\label{r2c:sss:eval-btra}
 We evaluated the overhead of \glspl{BTRA} with the \code{push} setup and with our optimized AVX2 setup sequence respectively.
 To isolate the overhead of \glspl{BTRA}, we disabled other diversification measures.
 We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BTRA} and between 1 and 9 NOPs (see \cref{r2c:ss:strengthening}).
@@ -105,7 +105,7 @@ We found that the resulting geometric mean performance overhead is \geomeancfs w
 These numbers suggest that the majority of the overhead is caused by writing the \glspl{BTRA} to the stack.
 
 
-\subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
+\subsubsection{\texorpdfstring{\glspl{heapbt}}{BTDPs}}\label{r2c:sss:eval-heapbt}
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
 The optimization to insert \glspl{heapbt} only in functions that write to their stack frame improves performance by 1\%.

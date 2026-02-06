@@ -1,10 +1,10 @@
 The history of software security is characterized by a continuous cycle of new attack avenues and corresponding defensive responses.
-This coevolutionary process has led to a highly sophisticated landscape of memory corruption exploits and mitigations.
+This co-evolutionary process has led to a highly sophisticated landscape of memory corruption exploits and mitigations.
 A particularly common and dangerous class of memory corruption exploits is \glspl{CRA} and their---now mostly obsolete---predecessor code-injection attacks.
 
 Code-injection attacks and \glspl{CRA} typically proceed in three phases:
 \begin{inline}
-    \item a reconnaissance phase where the attacker collects information, such as addresses about the target,
+    \item a reconnaissance phase where the attacker collects information about the target, such as addresses of target code,
     \item a memory corruption to overwrite control-flow data and
     \item the malicious code execution that transfers control to attacker-chosen code.
 \end{inline}
@@ -26,7 +26,7 @@ The following sections trace the historical development of \glspl{CRA} together 
 
 \begin{figure}[p]
     \centering
-    \resizebox{!}{0.88\textheight}{%
+    \resizebox{!}{0.95\textheight}{%
         \input{generated/coevolution/coevolution-epoch-all}%
     }
     \caption{Timeline for code-injection attacks and defenses (1997--Present).}
@@ -34,7 +34,6 @@ The following sections trace the historical development of \glspl{CRA} together 
 \end{figure}
 
 \FloatBarrier
-\stepcounter{section}
 \begin{figure}[H]
     \centering
     \resizebox{\textwidth}{!}{%
@@ -43,7 +42,6 @@ The following sections trace the historical development of \glspl{CRA} together 
     \caption{Epoch timeline for code-injection attacks and defenses (1997--2004).}
     \label{fig:coevolution-epoch-code-injection}
 \end{figure}
-\addtocounter{section}{-1}
 \section{Code Injection (1997--2004)}
 \label{sec:epoch-injection}
 In the earliest era (1997--2004), the adversary's primary goal was to inject new code (\eg shellcode) into the target process' memory space and subsequently redirect execution to the injected code.
@@ -64,7 +62,6 @@ The memory-safety enforcement mechanism leveraging this \gls{CPU} feature is kno
 With the widespread adoption of \gls{DEP}, attackers were forced to switch to more advanced forms of \glspl{CRA}.
 
 \FloatBarrier
-\stepcounter{section}
 \begin{figure}[H]
     \centering
     \resizebox{\textwidth}{!}{%
@@ -73,7 +70,6 @@ With the widespread adoption of \gls{DEP}, attackers were forced to switch to mo
     \caption{Epoch timeline for static return-oriented programming and defenses (2005--2013).}
     \label{fig:coevolution-epoch-static-rop}
 \end{figure}
-\addtocounter{section}{-1}
 \section{Static Return-Oriented Programming (2005--2013)}
 \label{sec:epoch-static-reuse}
 With \gls{DEP} preventing code injection (mid-2000s), attackers were forced to change tactics.
@@ -141,7 +137,7 @@ Binary Stirring performs randomization on a basic-block level by shuffling basic
 To make randomization more practical for deployment, \enquote{Compiler-Assisted Code Randomization} proposed embedding metadata to allow fine-grained diversity without heavy runtime overhead~\cite{Koo2018}.
 \cref{tab:randomization-granularity} contrasts different levels of randomization with the types of attacks they can prevent.
 
-\begin{table}[ht]
+\begin{table}[t]
     \centering
     \caption{Comparison of randomization granularities.}
     \label{tab:randomization-granularity}
@@ -162,16 +158,14 @@ To make randomization more practical for deployment, \enquote{Compiler-Assisted 
 %Thus, code-randomization techniques typically provide finer-grained randomization, such as function permutation~\cite{Kil2006,WilliamsKing2016,Braden2016,Chen2017a}, basic-block shuffling~\cite{Wartell2012,Mohan2015,Pomonis2017,Koo2018}, or instruction-level and register randomization~\cite{Kc2003,Pappas2012a,Braden2016,Crane2015,Crane2015b,Hiser2012,Kooa}.
 
 \FloatBarrier
-\stepcounter{section}
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{%
+    \resizebox{0.95\textwidth}{!}{%
         \input{generated/coevolution/coevolution-epoch-dynamic-semantic}%
     }
     \caption{Epoch timeline for dynamic attacks, semantic bypasses, and corresponding defenses (2013--present).}
     \label{fig:coevolution-epoch-dynamic-semantic}
 \end{figure}
-\addtocounter{section}{-1}
 \section{Dynamic Attacks and Semantic Bypasses (2013--Present)}
 \label{sec:epoch-dynamic-semantic}
 The third epoch (2013--present) was driven by the realization that \emph{static} defenses cannot withstand \emph{dynamic} attacks.
@@ -244,7 +238,7 @@ By instrumenting the program with dynamic binary instrumentation, \propername{Ty
 \propername{CFI-LB} augments the statically determined \gls{CFG} with runtime context at the call site, such as a chain of return addresses on the stack.
 The technique behind \propername{CFI-LB} bears similarities with a concept related to fuzzer code coverage, which we will discuss in a later chapter (see \cref{psp:sec:motivation}).
 Another challenge in \gls{CFG} construction is that it requires a holistic view of the entire program.
-Modular control-flow integrity addresses this limitation by enabling the linkage of independently instrumented program modules~\cite{niu2014a}.
+Modular control-flow integrity addresses this limitation by enabling the linkage of independently instrumented program modules~\cite{niu2014}.
 Unfortunately, even precise \gls{CFG} construction cannot prevent attacks that stay entirely on legitimate control-flow paths.
 \glsfirst{BOP} demonstrated that sufficiently large programs contain enough valid execution paths to construct malicious Turing-complete logic using only whole basic blocks~\cite{Ispoglou2018}.
 
@@ -297,7 +291,7 @@ As the \gls{AOCR} attack demonstrates, even with modern mitigations, the couplin
 
 \section{Summary}
 
-This chapter has traced decades of coevolution between code-reuse attacks and defenses.
+This chapter has traced decades of co-evolution between code-reuse attacks and defenses.
 Each epoch reveals a recurring pattern: a new defense closes one attack vector, only to be circumvented by attackers exploiting a different assumption.
 Code injection was stopped by \gls{DEP}; \gls{ROP} prompted both \gls{CFI} research and fine-grained randomization; and advanced attacks like \gls{COOP} and \gls{JITROP} exposed gaps in existing \gls{CFI} and randomization techniques.
 

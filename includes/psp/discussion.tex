@@ -76,6 +76,7 @@ The relation between the two fields is entirely implicit, however.
 In such cases \gls{VRP} does not instrument the affected code.
 \gls{VRP} would need another mechanism, such as invariant inference to surface this relation, \eg in the form of an assertion.
 Once the relation is materialized into control flow, \gls{VRP} could provide stepping stones for the fuzzer to eventually violate the invariant.
+\citeauthor{fioraldi2021} already explored the use of likely invariants as coverage feedback for fuzzers and \gls{VRP} might help fuzzers \enquote{approach} these invariants more easily.
 
 \subsection{Edge Entanglement}
 
@@ -93,6 +94,7 @@ For each input that discovers new coverage, we can thus distinguish three differ
 
 We tested for edge entanglement by rerunning the corpus found by the baseline and the \gls{PSP} configurations and recorded for each input which edges it triggered.
 
+\fbetodo{Waiting for data to answer questions}
 - need to differentiate baseline from VRP edges
 
 \subsection{Queue Explosion}

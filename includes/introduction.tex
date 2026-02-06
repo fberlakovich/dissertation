@@ -4,15 +4,15 @@
 
 The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
 Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
-Modern web browser, for example, consist of 20 or even 30 million lines of code~\cite{openhub-firefox,openhub-chromium}.
+Modern web browsers, for example, consist of 20 or even 30 million lines of code~\cite{openhub-firefox,openhub-chromium}.
 While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
 
-Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, correct and reliable, and efficient.
+Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, correct, reliable, and efficient.
 Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
 Each new abstraction layer hides detail but introduces uncertainty; each performance optimization risks new corner cases; each extension of functionality opens new attack surfaces.
 Catastrophic security breaches like Heartbleed~\cite{heartbleed} (a simple buffer over-read in a core library), Spectre~\cite{Kocher2019} (exploiting CPU-level speculation), or Log4Shell~\cite{log4shell} (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
 
-Likewise, reliability failures such as silent miscompilations have plagued even widespread production compilers like GCC and LLVM~\cite{yang2011,wang2012}.
+Similarly, reliability failures like silent miscompilations have plagued even widespread production compilers such as GCC and LLVM \cite{yang2011,wang2012}.
 \citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
 Subsequent longitudinal analyses of hundreds of LLVM and GCC bug reports find that miscompilations continue to account for a large fraction of confirmed issues and often remain latent for months before being diagnosed~\cite{chen2016}.
 Recent work also showed that bugs in the compiler not only threaten the reliability of the compiled software, but can also introduce security bugs~\cite{xu2023a,Xu2023}.
@@ -59,14 +59,14 @@ The consequence is that although, judging by the publication counts, the securit
 The figure clearly shows the peak interest around 2015--2016 and the subsequent decline.
 While hardware defenses like Intel CET and ARM PAC have reduced the urgency for software-only solutions, they are not a silver bullet and research continues, particularly for embedded systems and attestation.
 This trend is particularly worrying given the rapidly increasing capabilities of \gls{LLM}s with respect to offensive security.
-Already in the year 2025, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning.
+Already in the year 2026, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning~\cite{anthropic2026zerodays}.
 At these drastically reduced costs, even sophisticated targeted attacks fall within the capabilities of non-state actors.
 In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
 
 \begin{figure}[t]
     \centering
-    \input{figures/coevolution/code-reuse-trend.tex}
-    \caption{Code reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
+    \resizebox{\textwidth}{!}{\input{figures/coevolution/code-reuse-trend.tex}}
+    \caption{Code-reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
     The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
     The full list of papers is provided in \Cref{app:code-reuse-papers}.}
     \label{fig:intro:code-reuse-trend}
@@ -86,7 +86,7 @@ Early fuzzers mostly relied on simple, random input generation and were often di
 Modern fuzzing, by contrast, combines feedback-guided input mutation and scheduling, constraint solving, and domain-specific generators to explore program behaviors more systematically.
 Industrial-strength frameworks such as \aflpp, \propername{libFuzzer}, and their successors have demonstrated that fuzzing can uncover deep, previously unknown bugs in widely deployed software, including operating systems, browsers, cryptographic libraries, and compilers.
 
-Most popular fuzzers like \aflpp and \propername{libfuzzer} rely on code coverage feedback to guide their mutation and scheduling decisions.
+Most popular fuzzers like \aflpp and \propername{libFuzzer} rely on code coverage feedback to guide their mutation and scheduling decisions.
 Despite its widespread use, code coverage is an imperfect proxy for test effectiveness, particularly for state-rich systems such as compilers.
 Code coverage metrics---statement, branch, or edge coverage---abstract away the program’s internal state and treat all executions that follow the same control-flow paths as equivalent.
 As a result, fuzzers can quickly saturate coverage while still failing to explore nuanced interactions within the same control-flow.
@@ -111,7 +111,7 @@ Compilers, for example, know the exact type hierarchy of compiled \cpp programs 
 While this information can be partially recovered from binaries, the reconstruction is notoriously challenging because compilation is a lossy process.
 Similarly, compilers have detailed knowledge about the compilation process itself, such as which transformations were applied and which invariants justified those transformations.
 
-In this thesis I explore how to tap these sources of information for security hardening and improved fuzzing feedback.
+In this thesis I explore how to tap these information sources for security hardening and improved fuzzing feedback.
 
 \section{Contributions}
 
@@ -121,7 +121,7 @@ The common thread is the compiler's unique vantage point: it possesses semantic 
 \paragraph{R2C: Compiler-Driven Data Diversity}
 In Part~\ref{part:defense}, I present \rtwoc, a novel software diversity defense that addresses the challenge of layout inference through information leaks.
 Unlike prior work that focused primarily on code randomization, \rtwoc leverages the compiler's knowledge of stack frame geometry to randomize observable data layouts.
-By disguising sensitive pointers among booby-trapped decoys, \rtwoc renders reconnaissance-based attacks ineffective while incurring moderate performance overhead.
+By disguising sensitive pointers among booby-trapped decoys, \rtwoc substantially raises reconnaissance cost while incurring moderate performance overhead.
 
 \paragraph{LOOL: Optimization-Aware Compiler Fuzzing}
 In Part~\ref{part:fuzzing}, I present \lool, a compiler fuzzing framework based on a new type of coverage feedback.
