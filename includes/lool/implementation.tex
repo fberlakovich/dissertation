@@ -32,8 +32,6 @@ Unlike \aflpp with \gls{LTO}, our coverage agent never has a holistic view of th
 To guarantee consistent ids across runs, the agent relies on an id synchronization file containing the class id ranges assigned in previous runs.
 Before assigning a new range to a class, the agent checks whether a previous run has already assigned a range to the class.
 
-\definecolor{lightyellow}{rgb}{1,1,0.85}
-
 \begin{listing}
     \begin{minted}{Java}
 if (bytes[0] == 'b') {
