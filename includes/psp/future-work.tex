@@ -1,7 +1,6 @@
 \section{Future Work}
 
 \subsection{Extending PSP to Other Analyses}
-
 Program State Projection currently focuses on indirect call targets and value ranges.
 However, compilers perform many other analyses that could expose hidden state:
 \begin{itemize}
@@ -14,6 +13,7 @@ A systematic evaluation of which compiler analyses are most valuable for fuzzing
 \subsection{Better heuristics}
 
 \subsubsection{Backward gradients}
+
 \begin{figure}[t]
     \centering
     \begin{minipage}[t]{0.48\textwidth}
@@ -80,13 +80,6 @@ Note that the backward and forward insertion heuristics are not mutually exclusi
 
 \subsubsection{Value Relation Gradients}
 
-Our \gls{VRP} heuristics currently only insert gradients based on concrete values.
-Certain bugs only trigger, however, if two or more variables have a certain value \emph{relative} to each other.
-As an example, consider the code in \cref{psp:lst:value-relations}.
-The bug triggers when variables \code{A} and \code{B} are in a certain relation to each other.
-In such cases the split point heuristics we showed in \cref{psp:s:program-state-projection} are ineffective because the interesting thresholds are dictated by another variable and not by a usage or the type's value range.
-Nonetheless, more powerful heuristics could handle such cases within the \gls{PSP} framework, \eg by subdividing the range \emph{between} the variables.
-If, for example, variable \code{A} must be at most \code{B} to trigger the bug, \gls{PSP} could insert gradients that reward inputs where \code{A} approaches \code{B} from above, as shown in \cref{psp:lst:value-relations-transformed}.
 
 \begin{figure}[t]
     \centering
@@ -127,3 +120,10 @@ void process_data(uint32_t A, uint32_t B) {
     \label{psp:fig:value-relations}
 \end{figure}
 
+Our \gls{VRP} heuristics currently only insert gradients based on concrete values.
+Certain bugs only trigger, however, if two or more variables have a certain value \emph{relative} to each other.
+As an example, consider the code in \cref{psp:lst:value-relations}.
+The bug triggers when variables \code{A} and \code{B} are in a certain relation to each other.
+In such cases the split point heuristics we showed in \cref{psp:s:program-state-projection} are ineffective because the interesting thresholds are dictated by another variable and not by a usage or the type's value range.
+Nonetheless, more powerful heuristics could handle such cases within the \gls{PSP} framework, \eg by subdividing the range \emph{between} the variables.
+If, for example, variable \code{A} must be at most \code{B} to trigger the bug, \gls{PSP} could insert gradients that reward inputs where \code{A} approaches \code{B} from above, as shown in \cref{psp:lst:value-relations-transformed}.

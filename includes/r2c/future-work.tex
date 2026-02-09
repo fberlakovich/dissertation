@@ -57,6 +57,45 @@ target:
  call alarm|\tikzmark{T-Call-Alarm}|
     \end{lstlisting}
 \end{lrbox}
+Booby traps are an effective measure to deter random probing.
+For booby traps to be effective, two properties must hold:
+\begin{enumerate*}
+    \item they must be indistinguishable from benign code from the attacker's perspective and
+    \item triggering them must have negative consequences for the attacker.
+\end{enumerate*}
+Code-layout randomization in combination with execute-only memory ensures the first property.
+The negative consequences for the attacker depend on the booby trap used, but can range from simply crashing the program over raising an alarm to launching a counter-attack~\cite{Crane2013}.
+These observations hold true, however, only in the non-speculative domain.
+
+Over the last 8 years, transient-execution attacks have opened another battleground besides the classic \glspl{CRA}.
+In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code~\cite{Kocher2019,Lipp2018,Bulck2018,VanSchaik2019,Vanbulck2020,Wikner2022}.
+Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods~\cite{Gruss2016,Gruss2015,Gruss2016}.
+Apart from using this principle to directly leak sensitive information, attackers can also lift \glspl{CRA} into the speculative domain.
+
+The Blindside attack, for example, employs the same principles as Blind ROP to speculatively locate gadgets with a technique called \emph{gadget probing}.
+The idea behind gadget probing is that gadgets can be identified by their cache behavior during speculative execution.
+Similarly, SpecROP~\cite{Bhattacharyya2020} executes entire gadget chains speculatively.
+The speculative execution of gadgets makes these techniques immune to runtime exceptions.
+
+An attacker could use this fault-resistant capability to either leak data or to uncover booby trap addresses.
+Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
+To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
+Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
+Thus, speculative execution poses a threat to booby-trap functions.
+
+Booby traps are vulnerable because
+\begin{enumerate*}
+    \item they exhibit the \emph{same} behavior in both, speculative and non-speculative execution;
+    \item their observable behavior during speculative execution is \emph{different} from benign code.
+\end{enumerate*}
+Protecting booby traps against speculation requires a new approach.
+We call our approach \emph{speculation-aware booby traps}, as it lifts the deceiving properties of booby traps into the speculative domain.
+Although we have prototyped speculation-aware booby traps, we did not include them in the final defense, as we considered them out of scope for \rtwoc.
+We present the idea here to motivate more research in that direction.
+
+Speculation-aware booby traps build on the principle of separating speculative and non-speculative control flow.
+This principle was first demonstrated by retpolines~\cite{Turner2018}, which capture speculative control-flow in a spin loop.
+\cref{lst:retpoline} shows an example of a retpoline protecting an indirect branch to the address in \code{rax} against speculative execution.
 
 
 \begin{figure}[t]
@@ -107,48 +146,6 @@ set_up_target:
         \label{r2c:fig:speculation-aware-boobytrap}
     \end{minipage}
 \end{figure}
-
-
-
-Booby traps are an effective measure to deter random probing.
-For booby traps to be effective, two properties must hold:
-\begin{enumerate*}
-    \item they must be indistinguishable from benign code from the attacker's perspective and
-    \item triggering them must have negative consequences for the attacker.
-\end{enumerate*}
-Code-layout randomization in combination with execute-only memory ensures the first property.
-The negative consequences for the attacker depend on the booby trap used, but can range from simply crashing the program over raising an alarm to launching a counter-attack~\cite{Crane2013}.
-These observations hold true, however, only in the non-speculative domain.
-
-Over the last 8 years, transient-execution attacks have opened another battleground besides the classic \glspl{CRA}.
-In a transient execution attack an attacker abuses the \gls{CPU}'s speculation behavior to transiently execute potentially harmful code~\cite{Kocher2019,Lipp2018,Bulck2018,VanSchaik2019,Vanbulck2020,Wikner2022}.
-Although the code execution is only transient, such speculatively executed code leaves behind traces that an attacker can extract with a variety of methods~\cite{Gruss2016,Gruss2015,Gruss2016}.
-Apart from using this principle to directly leak sensitive information, attackers can also lift \glspl{CRA} into the speculative domain.
-
-The Blindside attack, for example, employs the same principles as Blind ROP to speculatively locate gadgets with a technique called \emph{gadget probing}.
-The idea behind gadget probing is that gadgets can be identified by their cache behavior during speculative execution.
-Similarly, SpecROP~\cite{Bhattacharyya2020} executes entire gadget chains speculatively.
-The speculative execution of gadgets makes these techniques immune to runtime exceptions.
-
-An attacker could use this fault-resistant capability to either leak data or to uncover booby trap addresses.
-Assume, for example, that a booby-trap function is located at address \code{0xbeef} and that the adversary leaks a stack frame with \code{0xbeef} occurring as a potential return address.
-To avoid detection, the attacker speculatively executes the code at \code{0xbeef} and observes its cache behavior.
-Since \code{0xbeef} points to the booby trap, the resulting cache traces differ from those of the actual return site.
-Thus, speculative execution poses a threat to booby-trap functions.
-
-Booby traps are vulnerable because
-\begin{enumerate*}
-    \item they exhibit the \emph{same} behavior in both, speculative and non-speculative execution;
-    \item their observable behavior during speculative execution is \emph{different} from benign code.
-\end{enumerate*}
-Protecting booby traps against speculation requires a new approach.
-We call our approach \emph{speculation-aware booby traps}, as it lifts the deceiving properties of booby traps into the speculative domain.
-Although we have prototyped speculation-aware booby traps, we did not include them in the final defense, as we considered them out of scope for \rtwoc.
-We present the idea here to motivate more research in that direction.
-
-Speculation-aware booby traps build on the principle of separating speculative and non-speculative control flow.
-This principle was first demonstrated by retpolines~\cite{Turner2018}, which capture speculative control-flow in a spin loop.
-\cref{lst:retpoline} shows an example of a retpoline protecting an indirect branch to the address in \code{rax} against speculative execution.
 
 Instead of a spin loop, speculation-aware booby traps redirect speculative control-flow to the code an attacker expects behind an address.
 \cref{r2c:fig:speculation-aware-boobytrap} shows how speculation-aware booby traps could be used in the context of \rtwoc.

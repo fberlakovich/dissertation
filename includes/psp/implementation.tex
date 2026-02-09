@@ -13,27 +13,6 @@ In case of \cpp, or more generally object-oriented languages, the program's type
 An analysis called \emph{class hierarchy analysis} computes this type hierarchy and provides an upper bound on which call targets are possible at a call site based on the object's static type.
 A polymorphic call site with static type \propername{A} that calls a method \propername{M} can only reach implementations of \propername{M} within \propername{A}'s type hierarchy.
 
-Class-hierarchy analysis is most precise at the source level, as the notion of classes is lost during the translation to LLVM IR.
-To implement \gls{CFI} and features like devirtualization, LLVM already provides a class-hierarchy analysis.
-The analysis encodes the relevant information as metadata in the IR.
-We piggyback our indirect call unfolding for \cpp virtual calls on this implementation and consume the recorded metadata.
-LLVM's existing implementation allowed us to implement the unfolding for \cpp calls in only 58 lines of code.
-
-In the case of generic indirect calls (\eg from C), we need to rely on other types of context to improve the precision of the points-to analysis.
-We initially tried a few analyses from the SVF framework but were unsatisfied with the results~\cite{sui2016}.
-The purpose of such analyses is to restrict the possible targets at indirect call sites, the so called \emph{target set}.
-Naive analyses quickly lead to large target sets, where in reality most targets are not actually possible at the call site in question.
-For example, even in a medium-sized program, a function pointer with type \code{void (*)()} can point to potentially many functions.
-Thus, restricting the target set merely based on the function's type is insufficient.
-
-Instead, we built our prototype based on \gls{MLTA}~\cite{lu2019}.
-The basic idea behind \gls{MLTA} is to match a function pointer's type not only against possible function types in the program, but to also consider the function pointer's dataflow.
-More specifically, \gls{MLTA} analyzes \emph{into} which types prior program code has stored the pointer.
-As an example consider the program in \cref{psp:lst:mlta-example}.
-A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psp:line:mlta-call-1} and \cref{psp:line:mlta-call-2}.
-In contrast, \gls{MLTA} builds up a model of typed structures and function pointers assigned to these structures.
-Based on this model, \gls{MLTA} records that, \eg \code{handle\_positive} is only ever stored into a struct of type \code{HandlerContext} within a struct of type \code{HandlerA}.
-When the program retrieves the function pointer before \cref{psp:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer can only lead to \code{handle\_positive}.
 
 \begin{listing}
     \begin{minted}[mathescape]{C}
@@ -87,58 +66,6 @@ int main() {
     \label{psp:lst:mlta-example}
 \end{listing}
 
-We integrated and extended the analysis implementation from \citeauthor{lu2019} and use the analysis results to unfold indirect calls\cite{lu2019}.
-
-\subsection{Value Range Partitioning}
-Our implementation consists of a LLVM pass that implements the splitting point and transformation heuristics described in \cref{psp:s:value-range-partitioning}.
-The pass consists of two phases, resembling the two questions discussed before.
-The first phase collects splitting points based on the configured heuristic and feeds them to the second phase to perform the instrumentation.
-In addition to the individual heuristics (\propername{midpoint}, \propername{boundaries}, and \propername{arithmetic}), our pass also implements a \propername{combined} heuristic.
-The \propername{combined} heuristic combines the \propername{boundaries} and the \propername{arithmetic} heuristics.
-Specifically, the \propername{combined} heuristic first collects splitting points from both and subsequently deduplicates them.
-Our LLVM pass implements the \propername{boundaries} heuristic by identifying array index accesses, buffer allocations, and shift operations, as well as specific string and file I/O function calls.
-
-For variable shift widths, the pass extracts the bitwidth of the operand as a boundary; for other operations, it generates split points at the detected limit values.
-Similarly, the \propername{arithmetic} heuristic targets instructions prone to underflow or overflow, truncating casts, and floating-point operations.
-The implementation calculates the specific input values that would trigger these edge cases—such as the exact integer value causing a wrap-around or the specific operands resulting in \propername{NaN} or \propername{Inf}—and inserts these as split points.
-
-\subsubsection{Supporting analyses}
-The split point heuristics need to know the effective possible value range they are dealing with at each point in the program.
-A naive implementation would simply derive the range from the type of the variable in question.
-The program's control-flow can, however, further constrain the variable's value range.
-Splitting based on the type's full value range would thus create dead code.
-As an example, consider the code in \cref{psp:lst:constraint-value-range}.
-Within the branch of the \code{if} statement, the variable \code{x} has a new effective value range of $[0, 16383]$.
-LLVM provides two analyses to track such value ranges: Lazy Value Info (LVI) and Scalar Evolution (SCEV).
-While LVI tracks constraints based on control-flow, SCEV models induction variables as chains of recurrences.
-Our pass combines both analyses to calculate accurate ranges even within loops.
-
-\begin{listing}
-    \begin{minted}{C}
-void process_data(uint32_t x) {
-    if (x < 16384) {
-        // value already constraint, new effective range = [0, 16383]
-        process_data(x);
-    }
-}
-    \end{minted}
-    \caption{Control-flow constraining the value range of \code{x}.}
-    \label{psp:lst:constraint-value-range}
-\end{listing}
-
-For the \propername{boundaries} and \propername{arithmetic} heuristics to be able to find values that lead to interesting cases in a later operation, they must be able to track the value's dataflow.
-Consider, for example, the code in \cref{psp:lst:offset-tracking-example}.
-The placement heuristic chooses the existing comparison \code{x > 0 \&\& x < 100} as an insertion point, but then the \propername{boundaries} heuristic needs to find a good split point.
-A naive \propername{boundaries} implementation would start with a range based on the array bounds, \ie $[0, 100]$.
-Since the constraint from the control-flow and the array-bounds range match, the range $[0, 100]$ is not constrained further.
-The naive implementation would, thus, transform the example to the code shown in \cref{psp:lst:offset-tracking-example-transformed-naive}.
-The inserted comparisons are redundant and useless.
-
-To deal with such cases, our implementations of the \propername{boundaries} and \propername{arithmetic} heuristics track simple arithmetic modifications of the variable between the insertion point and the usage.
-In the example in \cref{psp:lst:offset-tracking-example}, the \propername{boundaries} heuristic detects the additional offset of $10$ and instead transforms the program as shown in \cref{psp:lst:offset-tracking-example-transformed}.
-\Cref{psp:fig:offset-tracking-comparison} compares both approaches.
-Similarly, the heuristics deal with simple forms of casts and aliasing.
-If \cref{psp:lst:offset-tracking-example} was written as \cref{psp:lst:offset-tracking-example-aliasing}, for example, the heuristics would still perform the transformation, since the value of \code{idx} flows to the usage.
 
 \begin{listing}[t]
     \begin{minted}{C}
@@ -154,6 +81,80 @@ void process_buffer(int idx) {
     \end{minted}
     \caption{Array access with an offset: the OOB boundary depends on the arithmetic.}
     \label{psp:lst:offset-tracking-example}
+\end{listing}
+
+Class-hierarchy analysis is most precise at the source level, as the notion of classes is lost during the translation to LLVM IR.
+To implement \gls{CFI} and features like devirtualization, LLVM already provides a class-hierarchy analysis.
+The analysis encodes the relevant information as metadata in the IR.
+We piggyback our indirect call unfolding for \cpp virtual calls on this implementation and consume the recorded metadata.
+LLVM's existing implementation allowed us to implement the unfolding for \cpp calls in only 58 lines of code.
+
+
+In the case of generic indirect calls (\eg from C), we need to rely on other types of context to improve the precision of the points-to analysis.
+We initially tried a few analyses from the SVF framework but were unsatisfied with the results~\cite{sui2016}.
+The purpose of such analyses is to restrict the possible targets at indirect call sites, the so called \emph{target set}.
+Naive analyses quickly lead to large target sets, where in reality most targets are not actually possible at the call site in question.
+For example, even in a medium-sized program, a function pointer with type \code{void (*)()} can point to potentially many functions.
+Thus, restricting the target set merely based on the function's type is insufficient.
+
+
+Instead, we built our prototype based on \gls{MLTA}~\cite{lu2019}.
+The basic idea behind \gls{MLTA} is to match a function pointer's type not only against possible function types in the program, but to also consider the function pointer's dataflow.
+More specifically, \gls{MLTA} analyzes \emph{into} which types prior program code has stored the pointer.
+As an example consider the program in \cref{psp:lst:mlta-example}.
+A naive points-to analysis based only on the function type would conclude that both handlers, \code{handle\_positive} and \code{handle\_negative} are possible at both call sites in \cref{psp:line:mlta-call-1} and \cref{psp:line:mlta-call-2}.
+In contrast, \gls{MLTA} builds up a model of typed structures and function pointers assigned to these structures.
+Based on this model, \gls{MLTA} records that, \eg \code{handle\_positive} is only ever stored into a struct of type \code{HandlerContext} within a struct of type \code{HandlerA}.
+When the program retrieves the function pointer before \cref{psp:line:mlta-call-1}, \gls{MLTA} combines the information about containing structs with the function type information and concludes that the pointer can only lead to \code{handle\_positive}.
+
+
+We integrated and extended the analysis implementation from \citeauthor{lu2019} and use the analysis results to unfold indirect calls\cite{lu2019}.
+
+\subsection{Value Range Partitioning}
+
+
+Our implementation consists of a LLVM pass that implements the splitting point and transformation heuristics described in \cref{psp:s:value-range-partitioning}.
+The pass consists of two phases, resembling the two questions discussed before.
+The first phase collects splitting points based on the configured heuristic and feeds them to the second phase to perform the instrumentation.
+In addition to the individual heuristics (\propername{midpoint}, \propername{boundaries}, and \propername{arithmetic}), our pass also implements a \propername{combined} heuristic.
+The \propername{combined} heuristic combines the \propername{boundaries} and the \propername{arithmetic} heuristics.
+Specifically, the \propername{combined} heuristic first collects splitting points from both and subsequently deduplicates them.
+Our LLVM pass implements the \propername{boundaries} heuristic by identifying array index accesses, buffer allocations, and shift operations, as well as specific string and file I/O function calls.
+
+For variable shift widths, the pass extracts the bitwidth of the operand as a boundary; for other operations, it generates split points at the detected limit values.
+Similarly, the \propername{arithmetic} heuristic targets instructions prone to underflow or overflow, truncating casts, and floating-point operations.
+The implementation calculates the specific input values that would trigger these edge cases—such as the exact integer value causing a wrap-around or the specific operands resulting in \propername{NaN} or \propername{Inf}—and inserts these as split points.
+
+\subsubsection{Supporting analyses}
+
+\begin{listing}[t]
+    \begin{minted}{C}
+void process_buffer(int idx) {
+  char buf[100];
+  if (idx >= 0 && idx < 100) {
+      // idx is in range [0, 99]
+      int offset = idx + 10;
+      // offset is in range [10, 109]
+      char c = buf[offset];
+  }
+}
+    \end{minted}
+    \caption{Variant with a separate variable: the heuristics trace \code{offset} back to \code{idx}.}
+    \label{psp:lst:offset-tracking-example-aliasing}
+\end{listing}
+
+
+\begin{listing}
+    \begin{minted}{C}
+void process_data(uint32_t x) {
+    if (x < 16384) {
+        // value already constraint, new effective range = [0, 16383]
+        process_data(x);
+    }
+}
+    \end{minted}
+    \caption{Control-flow constraining the value range of \code{x}.}
+    \label{psp:lst:constraint-value-range}
 \end{listing}
 
 \begin{figure}[t]
@@ -207,18 +208,27 @@ void process_buffer(int idx) {
     \label{psp:fig:offset-tracking-comparison}
 \end{figure}
 
-\begin{listing}[t]
-    \begin{minted}{C}
-void process_buffer(int idx) {
-  char buf[100];
-  if (idx >= 0 && idx < 100) {
-      // idx is in range [0, 99]
-      int offset = idx + 10;
-      // offset is in range [10, 109]
-      char c = buf[offset];
-  }
-}
-    \end{minted}
-    \caption{Variant with a separate variable: the heuristics trace \code{offset} back to \code{idx}.}
-    \label{psp:lst:offset-tracking-example-aliasing}
-\end{listing}
+The split point heuristics need to know the effective possible value range they are dealing with at each point in the program.
+A naive implementation would simply derive the range from the type of the variable in question.
+The program's control-flow can, however, further constrain the variable's value range.
+Splitting based on the type's full value range would thus create dead code.
+As an example, consider the code in \cref{psp:lst:constraint-value-range}.
+Within the branch of the \code{if} statement, the variable \code{x} has a new effective value range of $[0, 16383]$.
+LLVM provides two analyses to track such value ranges: Lazy Value Info (LVI) and Scalar Evolution (SCEV).
+While LVI tracks constraints based on control-flow, SCEV models induction variables as chains of recurrences.
+Our pass combines both analyses to calculate accurate ranges even within loops.
+
+
+For the \propername{boundaries} and \propername{arithmetic} heuristics to be able to find values that lead to interesting cases in a later operation, they must be able to track the value's dataflow.
+Consider, for example, the code in \cref{psp:lst:offset-tracking-example}.
+The placement heuristic chooses the existing comparison \code{x > 0 \&\& x < 100} as an insertion point, but then the \propername{boundaries} heuristic needs to find a good split point.
+A naive \propername{boundaries} implementation would start with a range based on the array bounds, \ie $[0, 100]$.
+Since the constraint from the control-flow and the array-bounds range match, the range $[0, 100]$ is not constrained further.
+The naive implementation would, thus, transform the example to the code shown in \cref{psp:lst:offset-tracking-example-transformed-naive}.
+The inserted comparisons are redundant and useless.
+
+To deal with such cases, our implementations of the \propername{boundaries} and \propername{arithmetic} heuristics track simple arithmetic modifications of the variable between the insertion point and the usage.
+In the example in \cref{psp:lst:offset-tracking-example}, the \propername{boundaries} heuristic detects the additional offset of $10$ and instead transforms the program as shown in \cref{psp:lst:offset-tracking-example-transformed}.
+\Cref{psp:fig:offset-tracking-comparison} compares both approaches.
+Similarly, the heuristics deal with simple forms of casts and aliasing.
+If \cref{psp:lst:offset-tracking-example} was written as \cref{psp:lst:offset-tracking-example-aliasing}, for example, the heuristics would still perform the transformation, since the value of \code{idx} flows to the usage.

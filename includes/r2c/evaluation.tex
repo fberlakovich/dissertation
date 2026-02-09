@@ -1,46 +1,4 @@
 \section{Evaluation}\label{sec:r2c:evaluation}
-\begin{figure}[t]
-    \centering
-    \begingroup
-    \pgfplotsset{
-        every axis/.append style={
-            yticklabel style={font=\propernamedecl\footnotesize},
-            execute at begin axis={
-                \pgfplotsset{
-                    width=\textwidth,
-                    height=0.8\linewidth}
-            },
-        },
-    }
-    \resizebox{\textwidth}{!}{\input{figures/r2c/exec-time}}%
-    \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{r2c:sss:full-overhead}).}
-    % \propername{Geomean int} shows the geometric mean overhead of the SPEC CPU 2017 integer benchmarks only and \propername{geomean all} of the entire benchmark suite.}
-    \label{r2c:fig:perf-full}
-\end{figure}
-
-
-\begin{figure}[t]
-    \centering
-    \begingroup
-    \pgfplotsset{
-        every axis/.append style={
-            yticklabel style={font=\propernamedecl\footnotesize},
-            execute at begin axis={
-                \pgfplotsset{
-                    width=\textwidth,
-                    height=0.8\linewidth}
-            },
-        },
-    }
-    \resizebox{\textwidth}{!}{\input{figures/r2c/comp-full}}%
-    \endgroup    \caption{The component-wise overhead of \rtwoc{}'s components.
-    See \cref{r2c:sss:eval-btra}, \cref{r2c:sss:eval-heapbt} and \cref{r2c:sss:eval-layout} for details.
-    The overhead is relative to the baseline without \rtwoc{}.
-    Measurements were performed on \propername{EPYC}.}
-    \label{r2c:fig:perf-components}
-\end{figure}
-
-
 \subsection{System Configuration}\label{r2c:ss:eval-cfg} % about quarter of a page
 % We performed the evaluation of the total overhead on four different machines.
 We evaluate \rtwoc{} on four different machines.
@@ -93,6 +51,28 @@ We configured \rtwoc{} to instrument each call site with a total of 10 \glspl{BT
 For the \code{push} setup, 10 \glspl{BTRA} mean that \rtwoc{} inserts up to 12 push instructions per call site: 11 for the \glspl{BTRA}, one for the return address, and one to keep the stack aligned (see \cref{r2c:ss:impl-btras}).
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of this configuration is 6\%, but the outlier \propername{omnetpp} has an overhead of 21\%.
 
+
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{
+        every axis/.append style={
+            yticklabel style={font=\propernamedecl\footnotesize},
+            execute at begin axis={
+                \pgfplotsset{
+                    width=\textwidth,
+                    height=0.8\linewidth}
+            },
+        },
+    }
+    \resizebox{\textwidth}{!}{\input{figures/r2c/comp-full}}%
+    \endgroup    \caption{The component-wise overhead of \rtwoc{}'s components.
+    See \cref{r2c:sss:eval-btra}, \cref{r2c:sss:eval-heapbt} and \cref{r2c:sss:eval-layout} for details.
+    The overhead is relative to the baseline without \rtwoc{}.
+    Measurements were performed on \propername{EPYC}.}
+    \label{r2c:fig:perf-components}
+\end{figure}
+
 In contrast to the \code{push} instructions, setting up 10 \glspl{BTRA} with AVX2 instructions requires only 7 instructions (see \cref{r2c:ss:impl-btras}).
 Each block of 4 addresses requires one AVX2 instruction to load them into a register and one to write them onto the stack.
 \cref{r2c:fig:perf-components} shows that the optimization improves the overhead caused by \glspl{BTRA} over all benchmarks by 2 percent points.
@@ -106,6 +86,26 @@ These numbers suggest that the majority of the overhead is caused by writing the
 
 
 \subsubsection{\glspl{heapbt}}\label{r2c:sss:eval-heapbt}
+
+\begin{figure}[t]
+    \centering
+    \begingroup
+    \pgfplotsset{
+        every axis/.append style={
+            yticklabel style={font=\propernamedecl\footnotesize},
+            execute at begin axis={
+                \pgfplotsset{
+                    width=\textwidth,
+                    height=0.8\linewidth}
+            },
+        },
+    }
+    \resizebox{\textwidth}{!}{\input{figures/r2c/exec-time}}%
+    \endgroup    \caption{The performance impact of full protection with \rtwoc on four different machines (see \cref{r2c:sss:full-overhead}).}
+    % \propername{Geomean int} shows the geometric mean overhead of the SPEC CPU 2017 integer benchmarks only and \propername{geomean all} of the entire benchmark suite.}
+    \label{r2c:fig:perf-full}
+\end{figure}
+
 We configured \rtwoc{} to insert between zero and five \glspl{heapbt} per function, but disabled other diversification measures.
 \cref{r2c:fig:perf-components} shows that the geometric mean overhead of \glspl{heapbt} is 2\% with \propername{xalancbmk} causing the maximum overhead of 5\%.
 The optimization to insert \glspl{heapbt} only in functions that write to their stack frame improves performance by 1\%.

@@ -1,5 +1,6 @@
 \section{Evaluation}\label{psp:s:evaluation}
 
+
 This section describes the evaluation of our prototype implementation described in \cref{psp:s:implementation}.
 With our evaluation we aim to test the following hypotheses:
 \begin{hypotheses}
@@ -9,7 +10,6 @@ With our evaluation we aim to test the following hypotheses:
 \end{hypotheses}
 
 \subsection{System Configuration}\label{psp:ss:system-configuration}
-
 Experiments were conducted on a private Kubernetes cluster consisting of 10 identical worker nodes, each equipped with dual AMD EPYC 7H12 64-core processors (256 threads) and 1 TB of RAM, running Debian 12.
 The cluster is orchestrated by K3s with the Volcano batch scheduler.
 Fuzzing trials run in parallel across the cluster, with each fuzzer instance limited to a single dedicated CPU core and distributed evenly across machines.
@@ -20,25 +20,6 @@ Shared storage for corpora and results is provided via NFS, with results aggrega
 The evaluation infrastructure is based on a customized fork of FuzzBench.
 
 \subsection{Evaluated Configurations and Benchmarks}\label{psp:ss:configurations}
-
-
-\begin{table}[t]
-    \centering
-    \caption{Evaluated fuzzer configurations}
-    \label{tab:psp-configurations}
-    \begin{tabular}{>{\nextrow}E l l}
-        \toprule
-        {Configuration}     & {Description}                        & {Baseline}       \\
-        \midrule
-        \startdatarows
-        aflplusplus         & Standard \aflpp (non-LTO)            & ---              \\
-        aflplusplus\_lto    & \aflpp with LTO instrumentation      & ---              \\
-        aflplusplus\_vrp    & \aflpp + \gls{VRP} transformations   & \propername{aflplusplus} \\
-        aflplusplus\_unfold & \aflpp LTO + indirect call unfolding & \propername{aflplusplus\_lto} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
 To test the effectiveness of \gls{PSP} and in particular dynamic call unfolding and \gls{VRP}, we build a separate configuration for each component.
 We use \aflpp version \propername{4.32c} as the fuzzer.
 \gls{PSP} configurations differ from the baseline configurations only in the instrumented binary because \gls{PSP} is compatible with any code-coverage-guided fuzzer.
@@ -65,19 +46,6 @@ For example, the $\hat{A}_{12}=0.14$ of \propername{sqlite3\_ossfuzz} means that
 We consider deviations of $|0.5 - \hat{A}_{12}| > 0.06$ as non-negligible, with further thresholds at $0.14$ (medium) and $0.21$ (large)~\cite{vargha2000}.
 
 \subsubsection{Bug Triggering Comparison}\label{psp:sss:bug-triggering-method}
-For per-bug triggering rates, we use Fisher's exact test on $2 \times 2$ contingency tables consisting of two rows (\gls{PSP} config and baseline) and two columns (\enquote{triggered} and \enquote{not triggered}).
-The cells contain the number of instances that triggered (or did not trigger) the bug in the respective configuration.
-Fisher's exact test tells us how likely such an observation (or a more extreme one) is, assuming that there is no difference between \gls{PSP} and the baseline.
-One issue with this calculation is that with 33 bugs and, thus, 33 tests, the accepted false positive rate of $\alpha = 0.05$ accumulates.
-Concretely, with $33 \times 0.05 = 1.65$ we expect between 1 and 2 bugs to show a significant difference ($p<0.05$) even if there was actually no real difference between \gls{PSP} and the baseline.
-We thus apply the Benjamini-Hochberg correction to bound the false discovery rate at 5\%.
-\cref{psp:tab:bugs-magma} shades only those differences whose $p$ values is below the adjusted threshold given by the Benjamini-Hochberg correction.
-
-\subsection{Edge Coverage}\label{psp:ss:coverage}
-
-We measure the achieved edge coverage by replaying the corpus found by each configuration on a binary instrumented with Clang's coverage sanitizer.
-Measuring coverage with a common binary is particularly important since \gls{PSP} introduces new edge ids not present in the baseline binary.
-\cref{psp:tab:coverage-fuzzbench,psp:tab:coverage-magma} show the final edge coverage comparison for FuzzBench and Magma benchmarks, respectively.
 
 \begin{table}[t]
     \centering
@@ -100,35 +68,23 @@ Measuring coverage with a common binary is particularly important since \gls{PSP
     \end{tabular}}
 \end{table}
 
-The FuzzBench table shows that \gls{VRP} had a statistically significant ($p<0.05$) positive effect on 4 benchmarks, but also a statistically significant negative effect on 4.
-There are positive and negative effects on other benchmarks as well, but their $p$ value is too large to rule out random measurement noise.
-Of the statistically significant effects, \propername{libpng\_libpng\_read\_fuzzer} has a non-minimal positive effect size and \propername{sqlite3\_ossfuzz} a non-minimal negative effect size.
-The relative negative delta ($-2.5$) of \propername{sqlite3\_ossfuzz} is significantly higher than the positive delta ($0.3$) of \propername{libpng\_libpng\_read\_fuzzer}.
-For Call Unfolding, only two benchmarks show a statistically significant difference, but both with a minimal effect size.
 
 \begin{table}[t]
     \centering
-    \caption{Final edge coverage on Magma benchmarks (columns and shading as in \cref{psp:tab:coverage-fuzzbench}).}
-    \label{psp:tab:coverage-magma}
-    \footnotesize
-    \setlength{\extrarowheight}{1pt}
-    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+    \caption{Evaluated fuzzer configurations}
+    \label{tab:psp-configurations}
+    \begin{tabular}{>{\nextrow}E l l}
         \toprule
-        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
-        {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
+        {Configuration}     & {Description}                        & {Baseline}       \\
         \midrule
         \startdatarows
-        \fileInput{generated/psp/coverage-magma}
+        aflplusplus         & Standard \aflpp (non-LTO)            & ---              \\
+        aflplusplus\_lto    & \aflpp with LTO instrumentation      & ---              \\
+        aflplusplus\_vrp    & \aflpp + \gls{VRP} transformations   & \propername{aflplusplus} \\
+        aflplusplus\_unfold & \aflpp LTO + indirect call unfolding & \propername{aflplusplus\_lto} \\
         \bottomrule
     \end{tabular}
 \end{table}
-
-For the Magma benchmark suite, the edge coverage results are more clearly negative.
-Specifically, 7 our of 20 benchmarks show a statistically significant negative effect on the final edge coverage, 6 of which have a moderate effect size.
-The Call Unfolding results are all within the range of statistical uncertainty.
-
-\subsection{Bug Detection (Magma)}\label{psp:ss:bugs}
 
 \begin{table}[t]
     \centering
@@ -150,7 +106,48 @@ The Call Unfolding results are all within the range of statistical uncertainty.
         \bottomrule
     \end{tabular}
 \end{table}
+For per-bug triggering rates, we use Fisher's exact test on $2 \times 2$ contingency tables consisting of two rows (\gls{PSP} config and baseline) and two columns (\enquote{triggered} and \enquote{not triggered}).
+The cells contain the number of instances that triggered (or did not trigger) the bug in the respective configuration.
+Fisher's exact test tells us how likely such an observation (or a more extreme one) is, assuming that there is no difference between \gls{PSP} and the baseline.
+One issue with this calculation is that with 33 bugs and, thus, 33 tests, the accepted false positive rate of $\alpha = 0.05$ accumulates.
+Concretely, with $33 \times 0.05 = 1.65$ we expect between 1 and 2 bugs to show a significant difference ($p<0.05$) even if there was actually no real difference between \gls{PSP} and the baseline.
+We thus apply the Benjamini-Hochberg correction to bound the false discovery rate at 5\%.
+\cref{psp:tab:bugs-magma} shades only those differences whose $p$ values is below the adjusted threshold given by the Benjamini-Hochberg correction.
 
+\subsection{Edge Coverage}\label{psp:ss:coverage}
+
+
+\begin{table}[t]
+    \centering
+    \caption{Final edge coverage on Magma benchmarks (columns and shading as in \cref{psp:tab:coverage-fuzzbench}).}
+    \label{psp:tab:coverage-magma}
+    \footnotesize
+    \setlength{\extrarowheight}{1pt}
+    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+        \toprule
+        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/coverage-magma}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+We measure the achieved edge coverage by replaying the corpus found by each configuration on a binary instrumented with Clang's coverage sanitizer.
+Measuring coverage with a common binary is particularly important since \gls{PSP} introduces new edge ids not present in the baseline binary.
+\cref{psp:tab:coverage-fuzzbench,psp:tab:coverage-magma} show the final edge coverage comparison for FuzzBench and Magma benchmarks, respectively.
+The FuzzBench table shows that \gls{VRP} had a statistically significant ($p<0.05$) positive effect on 4 benchmarks, but also a statistically significant negative effect on 4.
+There are positive and negative effects on other benchmarks as well, but their $p$ value is too large to rule out random measurement noise.
+Of the statistically significant effects, \propername{libpng\_libpng\_read\_fuzzer} has a non-minimal positive effect size and \propername{sqlite3\_ossfuzz} a non-minimal negative effect size.
+The relative negative delta ($-2.5$) of \propername{sqlite3\_ossfuzz} is significantly higher than the positive delta ($0.3$) of \propername{libpng\_libpng\_read\_fuzzer}.
+For Call Unfolding, only two benchmarks show a statistically significant difference, but both with a minimal effect size.
+For the Magma benchmark suite, the edge coverage results are more clearly negative.
+Specifically, 7 our of 20 benchmarks show a statistically significant negative effect on the final edge coverage, 6 of which have a moderate effect size.
+The Call Unfolding results are all within the range of statistical uncertainty.
+
+\subsection{Bug Detection (Magma)}\label{psp:ss:bugs}
 \cref{psp:tab:bugs-magma} shows the per-bug triggering results on Magma benchmarks.
 For each seeded bug, we report how many of the 30 trial instances triggered it and the median time to first trigger~(TTF) in minutes among instances that did trigger.
 As pure number differences can be misleading, we apply Fisher's exact test within the two groups (\gls{VRP} vs.\ baseline and Call Unfolding vs.\ baseline) for each bug and apply the Benjamini-Hochberg correction.

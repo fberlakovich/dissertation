@@ -43,10 +43,19 @@ A vulnerability in an underlying C library, for example, can be exploited to und
 Even if from now no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise costing billions of euros.
 Thus, memory safety vulnerabilities will remain a critical threat in the foreseeable future and mitigations are needed to deal with them.
 
+
+\begin{figure}[t]
+    \centering
+    \resizebox{\textwidth}{!}{\input{figures/coevolution/code-reuse-trend.tex}}
+    \caption{Code-reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
+    The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
+    The full list of papers is provided in \Cref{app:code-reuse-papers}.}
+    \label{fig:intro:code-reuse-trend}
+\end{figure}
+
 A dominant class of exploits targeting these vulnerabilities is code-reuse attacks.
 Attackers hijack a program's control flow and subsequently reuse existing code \enquote{gadgets} already present in the target process.
 This approach allows attackers to bypass defenses like \wox, which, thanks to widespread hardware support, have become a de facto standard.
-
 Over the years, different ways of defending against this type of attack have emerged.
 One prominent defense category is randomization or more broadly, software diversity.
 Software diversity embraces the possibility of memory corruptions and control-flow diversion and instead aims to restrict an attacker's mobility.
@@ -62,16 +71,6 @@ This trend is particularly worrying given the rapidly increasing capabilities of
 Already in the year 2026, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning~\cite{anthropic2026zerodays}.
 At these drastically reduced costs, even sophisticated targeted attacks fall within the capabilities of non-state actors.
 In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
-
-\begin{figure}[t]
-    \centering
-    \resizebox{\textwidth}{!}{\input{figures/coevolution/code-reuse-trend.tex}}
-    \caption{Code-reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
-    The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
-    The full list of papers is provided in \Cref{app:code-reuse-papers}.}
-    \label{fig:intro:code-reuse-trend}
-\end{figure}
-
 \section{Reliability}
 Traditional approaches to software reliability—static analysis, unit testing, and formal verification—serve as the foundation of quality assurance.
 While formal verification offers the strongest theoretical guarantees, it faces significant practical hurdles.

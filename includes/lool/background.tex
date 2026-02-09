@@ -297,24 +297,6 @@ Finally, the harness executes the \texttt{main} method again, this time using th
 
 The harness detects crashes of the GraalVM compiler and mismatches in the outputs of the reference and compiled runs, and reports these as errors.
 The differential testing against the interpreter solves \cref{lool:prob:miscompilations}, \ie detection of miscompilations.
-
-\begin{figure}
-% GR-53391, Test_0_86
-    \begin{minted}{java}
-public static void main(String[] args) {
-  double var12 = 95.5965959289008;
-  double var13;
-  for (int i2 = 527935578; i2 <= 527935876; i2 = i2 + 3) {
-    var13 = i2;
-    var12 = var12 - Math.log10(Long.sum(1706025860L, (long) var13));
-  }
-  GraalDirectives.deoptimize();
-}
-    \end{minted}
-    \caption{Example bug after test case reduction. The GraalVM compiler crashed while compiling this method.}
-    \label{lool:fig:example_bug}
-\end{figure}
-
 This fuzzing framework has been in regular use within the GraalVM project for four years.
 It has been effective at finding both miscompilations and bugs that crash the compiler with failed assertions or unexpected exceptions being thrown.
 

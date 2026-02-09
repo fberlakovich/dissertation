@@ -13,39 +13,6 @@ In principle, \gls{LTO} style instrumentation would be possible by instrumenting
 In practice, such an all-encompassing instrumentation is infeasible because classes are loaded dynamically, potentially even from locations only known at runtime.
 While the GraalVM compiler's classpath is known at (Java) compile time, instrumenting all classes, including JDK classes, upfront is still difficult.
 
-Instead, we use the \gls{JVM}'s agent facility to transform classes on the fly.
-Java agents belong to the instrumentation API and allow to alter an application's bytecode dynamically.
-The \gls{JVM} informs an agent whenever a class is loaded and allows the agent to modify the class bytecode.
-Our coverage agent checks whether a loaded class should be instrumented based on a preconfigured filter.
-For our experiments, we limited the filter to classes belonging to the GraalVM compiler project.
-The agent also keeps a cache to avoid paying the overhead of instrumentation for the same class multiple times.
-
-The code coverage instrumentation is based on \jacoco's instrumentation infrastructure and inserts a static method call at each instrumentation point.
-The static call increases the counter of the given edge identifier in a global byte buffer.
-\cref{lst:lool:java-if-cascade} shows a simple Java \code{if} cascade that checks the values in a byte array.
-\cref{lool:lst:code-coverage-instrumentation} shows the corresponding uninstrumented bytecode (left) and the inserted coverage instrumentation (right).
-
-Our coverage agent assigns a range of unique edge identifiers to each class.
-As we want to compare the coverage of different runs (from the same or different configurations), the id assignment must be deterministic and reproducible.
-A deterministic and reproducible assignment is challenging because classes are loaded not necessarily in the same order in different runs.
-Unlike \aflpp with \gls{LTO}, our coverage agent never has a holistic view of the entire program, as new classes could be loaded at any time.
-To guarantee consistent ids across runs, the agent relies on an id synchronization file containing the class id ranges assigned in previous runs.
-Before assigning a new range to a class, the agent checks whether a previous run has already assigned a range to the class.
-
-\begin{listing}
-    \begin{minted}{Java}
-if (bytes[0] == 'b') {
-    if (bytes[1] == 'u') {
-        if (bytes[2] == 'g') {
-            Assert.fail("Expected");
-        }
-    }
-}
-    \end{minted}
-    \caption{Java \code{if} cascade to demonstrate coverage instrumentation}
-    \label{lst:lool:java-if-cascade}
-\end{listing}
-
 
 \begin{figure}[t]
     \centering
@@ -58,8 +25,6 @@ bipush        98
 if_icmpne     126
 
 
-
-
 aload         6
 iconst_1
 baload
@@ -67,15 +32,11 @@ bipush        117
 if_icmpne     126
 
 
-
-
 aload         6
 iconst_2
 baload
 bipush        103
 if_icmpne     126
-
-
 
 
 // String Expected
@@ -124,6 +85,26 @@ invokestatic  #60
     \label{lool:lst:code-coverage-instrumentation}
 \end{figure}
 
+Instead, we use the \gls{JVM}'s agent facility to transform classes on the fly.
+Java agents belong to the instrumentation API and allow to alter an application's bytecode dynamically.
+The \gls{JVM} informs an agent whenever a class is loaded and allows the agent to modify the class bytecode.
+Our coverage agent checks whether a loaded class should be instrumented based on a preconfigured filter.
+For our experiments, we limited the filter to classes belonging to the GraalVM compiler project.
+The agent also keeps a cache to avoid paying the overhead of instrumentation for the same class multiple times.
+
+
+The code coverage instrumentation is based on \jacoco's instrumentation infrastructure and inserts a static method call at each instrumentation point.
+The static call increases the counter of the given edge identifier in a global byte buffer.
+\cref{lst:lool:java-if-cascade} shows a simple Java \code{if} cascade that checks the values in a byte array.
+\cref{lool:lst:code-coverage-instrumentation} shows the corresponding uninstrumented bytecode (left) and the inserted coverage instrumentation (right).
+
+
+Our coverage agent assigns a range of unique edge identifiers to each class.
+As we want to compare the coverage of different runs (from the same or different configurations), the id assignment must be deterministic and reproducible.
+A deterministic and reproducible assignment is challenging because classes are loaded not necessarily in the same order in different runs.
+Unlike \aflpp with \gls{LTO}, our coverage agent never has a holistic view of the entire program, as new classes could be loaded at any time.
+To guarantee consistent ids across runs, the agent relies on an id synchronization file containing the class id ranges assigned in previous runs.
+Before assigning a new range to a class, the agent checks whether a previous run has already assigned a range to the class.
 \subsection{\aflpp-compatible Counter Coverage}
 \begin{figure}[t]
     \centering
@@ -244,6 +225,14 @@ Specifically, the index range assigned to a method is likely to overlap with ano
 We note, however, that the problem of hash collisions is not specific to using optimization-counter coverage, but also occurs \eg when using \aflpp code coverage instrumentation without \gls{LTO}.
 
 \subsection{Parameter Mutation by \aflpp}\label{lool:ss:afl-parameter-mutation}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/lool/fully-parametric}%
+    \caption{When configured to be fully parametric, the program generator reads generation parameters and values driving concrete random decisions from the input.}
+    \label{lool:fig:fully-parametric}
+\end{figure}
+
 In our evaluation (see \cref{lool:s:evaluation}), various configurations use \aflpp as the mutation engine.
 In these configurations the program generator needs to generate test cases based on an input provided by \aflpp.
 The exact composition of a generated program depends on two factors: the generation parameters and the concrete random decisions at various points during generation.
@@ -256,14 +245,6 @@ Even if the statement distribution dictates a 90\% probability for \code{If} sta
 We have implemented and evaluated two ways in the program generator to derive generation parameters and concrete random decisions from \aflpp generated input files.
 
 \subsubsection{Fully Parametric}\label{lool:sss:afl-fully-parametric}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/lool/fully-parametric}%
-    \caption{When configured to be fully parametric, the program generator reads generation parameters and values driving concrete random decisions from the input.}
-    \label{lool:fig:fully-parametric}
-\end{figure}
-
-
 The program generator reads \emph{both} the generation parameters and the values driving concrete random decisions directly from the input file.
 The header of the seed file determines the generation parameters, and each concrete random decision is based on a certain byte sequence in the seed file.
 \cref{lool:fig:fully-parametric} illustrates this principle.
@@ -276,6 +257,14 @@ On each retry, the generator reduces structural parameters by 50\%.
 If all structural parameters have reached their limit, the generator signals an error and skips the seed.
 How often such a reduction is possible depends on the initial generation parameters.
 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/lool/parameters-only}%
+    \caption{When reading only generation parameters from the input, the program generator treats 4 bytes after the header as a seed for an internal random number generator.}
+    \label{lool:fig:parameters-only}
+\end{figure}
+
 Unlike an unconstrained generator, the liveness generator cannot stop generating code at arbitrary points, as it needs to guarantee the liveness property throughout generation.
 Another issue is that the generator occasionally needs to perform backtracking as it cannot decide upfront whether producing, \eg an expression of a certain type is possible with a given set of live variables.
 During these futile generation attempts, the generator uses large amounts of randomness that do not, however, result in concrete program elements.
@@ -287,13 +276,6 @@ In contrast, a smaller program generated from a smaller seed does produce covera
 We discuss the problems with the fully parametric mutation approach in \cref{lool:ss:aflpp-vs-genetic}.
 
 \subsubsection{Generation Parameters Only}\label{lool:sss:afl-hyperonly}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/lool/parameters-only}%
-    \caption{When reading only generation parameters from the input, the program generator treats 4 bytes after the header as a seed for an internal random number generator.}
-    \label{lool:fig:parameters-only}
-\end{figure}
-
 The program generator reads only the generation parameters and a single integer directly from the file.
 All later bytes in the seed file are ignored.
 \cref{lool:fig:parameters-only} illustrates this use of input bytes, again with the statement distribution as an example of a generation parameter.

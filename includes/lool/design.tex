@@ -1,11 +1,5 @@
 \section{Optimization-Driven Mutation}\label{lool:s:design}
 
-In \cref{lool:ss:graalvm-fuzzing} we described how our GraalVM fuzzer solves three of the five challenges described in \cref{lool:ss:jit-compiler-fuzzing} (\cref{lool:prob:inputs,lool:prob:compile,lool:prob:miscompilations}).
-For the remaining challenges (\cref{lool:prob:coverage,lool:prob:steer}), we propose a new, domain-specific approach.
-\lool{} uses the compiler's optimization log (see \cref{lool:sss:graalvm-optimization-log}) to select among suitable parameter vectors.
-The selection process is driven by a genetic algorithm that tries to breed more desirable parameter vectors over time.
-\cref{lool:fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
-
 \begin{figure}
     \centering
     \resizebox{0.5\columnwidth}{!}{%
@@ -17,6 +11,12 @@ The selection process is driven by a genetic algorithm that tries to breed more 
     \label{lool:fig:lool-overview}
 \end{figure}
 
+
+In \cref{lool:ss:graalvm-fuzzing} we described how our GraalVM fuzzer solves three of the five challenges described in \cref{lool:ss:jit-compiler-fuzzing} (\cref{lool:prob:inputs,lool:prob:compile,lool:prob:miscompilations}).
+For the remaining challenges (\cref{lool:prob:coverage,lool:prob:steer}), we propose a new, domain-specific approach.
+\lool{} uses the compiler's optimization log (see \cref{lool:sss:graalvm-optimization-log}) to select among suitable parameter vectors.
+The selection process is driven by a genetic algorithm that tries to breed more desirable parameter vectors over time.
+\cref{lool:fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
 \subsection{Overview}\label{lool:ss:design-overview}
 The idea of using an evolutionary algorithm in (compiler) fuzzing is not new.
 In fact, producing new inputs with an evolutionary algorithm is at the core of the popular fuzzer AFL and its descendants~\cite{Zalewski2016}.
@@ -41,13 +41,6 @@ A parameter vector is desirable if it triggers new optimizations or bugs.
 The genetic algorithm starts with a set of baseline parameter vectors, fuzzes with each vector, and builds a new generation of parameter vectors based on the fuzzed compiler's feedback.
 This process repeats for a set number of generations if specified, otherwise it runs indefinitely.
 We will compare both approaches to input mutation as part of our evaluation (see \cref{lool:s:evaluation}).
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.6\linewidth]{figures/lool/lool-workflow}
-    \caption{Workflow of the genetic algorithm loop (see \cref{lool:ss:fitness} and \cref{lool:ss:building-generations}).}\label{lool:fig:workflow}
-\end{figure}
-
 \subsection{Shrinking the Search Space}
 \label{lool:ss:shrinking-the-search-space}
 Even with a relatively small number of tunable probabilities in a parameter vector, the search space is large.
@@ -75,7 +68,6 @@ With code coverage, the genetic algorithm rewards progress relative to the cover
 That is, like \aflpp the genetic algorithm keeps track of the maximum code coverage achieved so far.
 When the algorithm builds a new generation, it updates the currently known maximum with the progress made by the previous generation.
 Updating the maximum coverage only at the beginning of a new generation (\ie at the end of the current tournament) is important to give each individual an equal chance.
-
 Before calculating the individual fitness, the genetic algorithm bucketizes the coverage execution frequencies of each test case like \aflpp.
 The bucketization accounts for the fact that a change in execution frequency from 1 to 2 is likely more interesting than from 100 to 101.
 The algorithm's fitness function then awards points for newly discovered edges and for changed execution frequencies, whereas new edges receive more points than a mere change in frequencies.
@@ -112,7 +104,6 @@ The corpus resembles either all individuals in the current generation $G$ or all
 The second variant gives the genetic algorithm a memory which prevents bouncing between effective parameter vectors over time.
 We evaluate both corpus variants for both counter-based coverage types.
 Since in our context the algorithm deals with features instead of terms and individuals instead of documents, we call our adaptation \emph{Feature Frequency-Inverse Individual Frequency}.
-
 Let $T_{i}$ be the tests of individual $i$ and $freq_{i}(f, t)$ be the frequency of feature $f$ in test $t$ belonging to individual $i$.
 Let $\mathrm{count}_{i}(f) = |\{t \in T_{i} : \mathrm{freq}_{i}(f, t) > 0\}|$ be the number of tests in individual $i$ where feature $f$ occurs at least once.
 We define the \emph{Feature Frequency} (cf. Term Frequency) as
@@ -145,26 +136,6 @@ If $F$ is the set of all features, the total score of an individual $i$ is given
 \[ score(i) = \sum_{f \in F}{FF(i, f) * IIF(G, f)} \]
 
 \subsection{Building Generations}\label{lool:ss:building-generations}
-As shown in \cref{lool:fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
-During mutation the genetic algorithm adjusts the parameters in a parameter vector.
-Most of these parameters are independent of each other.
-For example, parameters such as \texttt{InitInStaticBlock} (probability that a variable is initialized in a static initializer block) describe probabilities that guide binary decisions in the generation process.
-We randomly decrease or increase independent probabilities by a small amount, while staying in the valid range, typically between~0.05 and~0.95.
-Similarly, for discrete parameters, such as \texttt{StatementDepth} (the maximum expression depth of a statement), we decrease or increase their value by a small discrete amount while staying within defined bounds.
-
-Statement and expression distributions form probability distributions, where each statement or expression type has some probability.
-We mutate distributions by selecting an entry that \enquote{steals} from another entry's probability by increasing itself and decreasing the other.
-This balancing of probabilities ensures that the total sum of probabilities in a distribution stays constant.
-As we only include a subset of the distribution in the parameter vectors (see \cref{lool:ss:shrinking-the-search-space}), we equally distribute the difference to 1 among the excluded probabilities.
-With a low probability, currently 5\%, we perform an extreme mutation where the property steals from \emph{every} other probability, biasing the distribution towards the chosen property.
-\cref{lool:tbl:generation-parameters} shows an abbreviated example of a parameter vector before and after mutation.
-Before mutation, the parameter vector had probabilities 0.0767 and 0.1761 for \texttt{MapFor} and \texttt{While}, respectively.
-The \texttt{MapFor} entry steals an amount of 0.05 from the \texttt{While} entry's probability, resulting in a decreased probability for \texttt{While} ($0.1761 - 0.05 = 0.1261$) and an increased probability for \texttt{MapFor} ($0.0767 + 0.05 = 0.1267$).
-Similarly, the \texttt{Local} entry steals an amount of 0.04 from the \texttt{Param} entries probability.
-In contrast to this stealing process, independent probabilities (e.g. \texttt{InitInStaticBlock}) and discrete parameters (e.g. \texttt{StatementDepth}) do not need to balance the probability distribution and can be mutated independently.
-
-With a configurable probability, we perform a crossover of two parameter vectors to create a vector for the next generation.
-Independent probabilities and discrete parameters are each chosen randomly from either parent, but distributions are chosen as a whole to prevent violation of the constraints.
 
 \begin{table}[t]
     \caption{Simplified genetic representation of an individual before and after mutation.
@@ -203,3 +174,24 @@ Independent probabilities and discrete parameters are each chosen randomly from 
     \end{tabular}
 
 \end{table}
+
+As shown in \cref{lool:fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
+During mutation the genetic algorithm adjusts the parameters in a parameter vector.
+Most of these parameters are independent of each other.
+For example, parameters such as \texttt{InitInStaticBlock} (probability that a variable is initialized in a static initializer block) describe probabilities that guide binary decisions in the generation process.
+We randomly decrease or increase independent probabilities by a small amount, while staying in the valid range, typically between~0.05 and~0.95.
+Similarly, for discrete parameters, such as \texttt{StatementDepth} (the maximum expression depth of a statement), we decrease or increase their value by a small discrete amount while staying within defined bounds.
+
+Statement and expression distributions form probability distributions, where each statement or expression type has some probability.
+We mutate distributions by selecting an entry that \enquote{steals} from another entry's probability by increasing itself and decreasing the other.
+This balancing of probabilities ensures that the total sum of probabilities in a distribution stays constant.
+As we only include a subset of the distribution in the parameter vectors (see \cref{lool:ss:shrinking-the-search-space}), we equally distribute the difference to 1 among the excluded probabilities.
+With a low probability, currently 5\%, we perform an extreme mutation where the property steals from \emph{every} other probability, biasing the distribution towards the chosen property.
+\cref{lool:tbl:generation-parameters} shows an abbreviated example of a parameter vector before and after mutation.
+Before mutation, the parameter vector had probabilities 0.0767 and 0.1761 for \texttt{MapFor} and \texttt{While}, respectively.
+The \texttt{MapFor} entry steals an amount of 0.05 from the \texttt{While} entry's probability, resulting in a decreased probability for \texttt{While} ($0.1761 - 0.05 = 0.1261$) and an increased probability for \texttt{MapFor} ($0.0767 + 0.05 = 0.1267$).
+Similarly, the \texttt{Local} entry steals an amount of 0.04 from the \texttt{Param} entries probability.
+In contrast to this stealing process, independent probabilities (e.g. \texttt{InitInStaticBlock}) and discrete parameters (e.g. \texttt{StatementDepth}) do not need to balance the probability distribution and can be mutated independently.
+
+With a configurable probability, we perform a crossover of two parameter vectors to create a vector for the next generation.
+Independent probabilities and discrete parameters are each chosen randomly from either parent, but distributions are chosen as a whole to prevent violation of the constraints.

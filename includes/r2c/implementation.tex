@@ -117,17 +117,6 @@ While adding \glspl{BTRA} would not harm functionality, unprotected callees woul
 We discuss the security implications in \cref{r2c:ss:limitations-coverage}.
 Our \glspl{BTRA} implementation cooperates with ThinLTO to match as many caller-callee pairs at compile time as possible.
 
-Emitting the setup code for \glspl{BTRA} happens in a target-specific pass.
-This pass is also responsible for inserting the boobytrap functions to which the \glspl{BTRA} point.
-In the current implementation, a boobytrap function simply jumps to a notification routine.
-A refined implementation could let the \glspl{BTRA} point to boobytrap regions \emph{within} the caller function.
-Depending on the relocation model and the setup instructions, the \glspl{BTRA} are either embedded in the \code{push} instructions or read from the data section.
-Since an attacker cannot predictably identify the return address among the \glspl{BTRA}, storing the addresses in the data section does not compromise security.
-
-If the randomly chosen number of \glspl{BTRA} before the return address is odd, \rtwoc{} inserts an additional \gls{BTRA} to keep the stack aligned.
-On x86-64, the stack pointer must be 16-byte aligned, as programs crash when certain instructions access a misaligned stack.
-
-\subsubsection{Stack Arguments}\label{r2c:sss:stack-arguments}
 
 \begin{figure}[t]
     \centering
@@ -147,6 +136,17 @@ On x86-64, the stack pointer must be 16-byte aligned, as programs crash when cer
     \caption{\rtwoc{} uses \cfs{} to account for the dynamic offset introduced by \glspl{BTRA}.}
 \end{figure}
 
+Emitting the setup code for \glspl{BTRA} happens in a target-specific pass.
+This pass is also responsible for inserting the boobytrap functions to which the \glspl{BTRA} point.
+In the current implementation, a boobytrap function simply jumps to a notification routine.
+A refined implementation could let the \glspl{BTRA} point to boobytrap regions \emph{within} the caller function.
+Depending on the relocation model and the setup instructions, the \glspl{BTRA} are either embedded in the \code{push} instructions or read from the data section.
+Since an attacker cannot predictably identify the return address among the \glspl{BTRA}, storing the addresses in the data section does not compromise security.
+
+If the randomly chosen number of \glspl{BTRA} before the return address is odd, \rtwoc{} inserts an additional \gls{BTRA} to keep the stack aligned.
+On x86-64, the stack pointer must be 16-byte aligned, as programs crash when certain instructions access a misaligned stack.
+
+\subsubsection{Stack Arguments}\label{r2c:sss:stack-arguments}
 The \glspl{BTRA} inserted by \rtwoc change the distance between stack objects above and below the return address.
 In particular, the distance increases by the sum of pre- and post-offset.
 This increased distance typically does not cause any compatibility issues because most functions do not access stack objects above their return address.
@@ -169,12 +169,7 @@ In particular, the caller positions the frame pointer \emph{before} the varying 
 Thus, the distance between the frame pointer and the stack arguments can be computed statically.
 In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
 
-\Cfs is required for all functions using both \glspl{BTRA} and stack arguments.
-As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
-Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
-We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
 
-\subsubsection{Optimization with AVX2}
 \begin{figure}[t]
         % --- ROW 1: GRAPHICAL CONTENT ---
         % This row contains the graphics, aligned at their bottom edges.
@@ -222,6 +217,12 @@ call callee
     \label{r2c:fig:avx2-setup}
 
 \end{figure}
+\Cfs is required for all functions using both \glspl{BTRA} and stack arguments.
+As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
+Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
+We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
+
+\subsubsection{Optimization with AVX2}
 Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
 %    During the performance evaluation we noticed a performance impact particularly on call intensive benchmarks.
 %    We speculate that the large number of instructions puts pressure on the instruction cache.
@@ -283,17 +284,6 @@ add %rsp, |$\alpha*8$|
         }
     }
 }
-
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.7\linewidth]{figures/r2c/btdp-setup}
-    \caption[Naive vs.\ hardened \gls{heapbt} placement.]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
-    In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
-    The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{r2c:ss:impl-heap-boobytraps}).}
-    \label{r2c:fig:hardened-data-traps}
-\end{figure}
-
 \subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
 
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
@@ -319,29 +309,6 @@ As a result, stack slot randomization shuffles \glspl{heapbt} with other stack o
 Storing the \glspl{heapbt} to the stack requires $2*B+1$ instructions, where $B$ is the number of \glspl{heapbt}.
 \cref{r2c:fig:btdp-stack} shows an example stack and heap with inserted \glspl{heapbt}.
 Note that \glspl{heapbt} can point to arbitrary addresses within a guard page and multiple \glspl{heapbt} point to the same guard page.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/r2c/btdp-stack}
-    \caption{Stack and heap with inserted \glspl{heapbt}.}
-    \label{r2c:fig:btdp-stack}
-\end{figure}
-
-\begin{listing}[t]
-    \begin{minted}{gas}
-mov 0x4f04d7(%rip),%r11  // load the BTDP array pointer
-mov 0x220(%r11),%rax     // load an array entry into rax
-mov %rax,0x30(%rsp)      // store the pointer to a compile-time random slot
-mov 0x600(%r11),%rax     // load another array entry into rax
-mov %rax,0x20(%rsp)      // ...
-mov 0x5b0(%r11),%rax
-mov %rax,0x10(%rsp)
-mov 0x1a0(%r11),%rax
-    \end{minted}
-    \caption{Example \glspl{heapbt} setup code in the prolog of a function.}
-    \label{r2c:lst:btdp-setup-code}
-\end{listing}
-
 Storing the \glspl{heapbt} in the data section potentially poses a security risk.
 If an attacker has access to the data section (\ie knows its location), she could compare heap pointers found in the data section with pointers observed on the stack (see \cref{r2c:fig:hardened-data-traps}).
 Pointers observed in both locations could potentially\footnote{Points in both locations do not have to be \glspl{heapbt} because benign pointers can occur in both locations as well.} be \glspl{heapbt}.
@@ -353,7 +320,6 @@ Since an attacker might still be able to locate the pointer to the pointer array
 Note, that these additional \glspl{heapbt} never occur on the stack and the pointers on the heap are inaccessible to the attacker.
 The attacker thus loses the ability to reliably identify the location of \glspl{heapbt} in the data section.
 See \cref{r2c:fig:hardened-data-traps} for a comparison of a naive and a hardened implementation.
-
 As a simple optimization, we omit the instrumentation for all functions without stack allocations.
 Such functions are guaranteed to not write benign heap pointers to the stack either.
 While this optimization over-approximates the set of functions to instrument, it still improves performance for simple functions (\eg accessors).

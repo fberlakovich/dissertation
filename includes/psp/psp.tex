@@ -17,6 +17,28 @@ Second, we introduce \emph{Value Range Partitioning}, which projects possible pa
 
 
 \section{Unfolding Dynamic Calls}
+
+Our first application of \gls{PSP} addresses the information loss occurring at indirect call sites.
+As discussed in \cref{psp:sec:motivation}, \aflpp's compiler instrumentation for code coverage loses information at indirect call sites because it cannot differentiate the dynamic edges of an indirect call.
+An analysis called \emph{points-to} analysis can, however, determine these edges at compile time.
+Compilers use this analysis for both security and performance transformations.
+Various \gls{CFI} variants, for example, use static points-to analysis to determine the possible target set for indirect calls (see \cref{ch:code-reuse-coevolution} for a discussion of \gls{CFI}).
+Likewise, when a compiler can statically prove that in a given program an indirect call site can only ever have a single target, the compiler can transform the indirect call into a direct call.
+Such a conversion enables additional optimizations later in the optimization pipeline, such as inlining.
+
+\glspl{JITcomp} perform a similar optimization called \emph{polymorphic inlining} (see \cref{psp:ss:polymorphic-inlining}), typically based on profiling information.
+For \gls{AOT} compilers, this transformation is more challenging because of the lack of runtime profiling information.
+Nonetheless, \gls{AOT} compilers can apply the transformation either heuristically or because they can prove based on dataflow that only certain types can reach a polymorphic call site.
+The fallback option that performs an indirect call guarantees that the program remains correct even if the analysis or the profiling information is incomplete.
+
+The afforded performance improvement depends on the quality of the heuristics or the available profiling information.
+SafeDispatch, a defense against vtable hijacking, uses the same technique to harden \cpp programs~\cite{jang2014}.
+Performance aside, we observe that this type of transformation has another important property: it projects a data dependency---which concrete object reaches a call site---onto the control-flow graph.
+In other words, possible variations in data, at least some of them, are now represented in the \gls{CFG}.
+A representation as control-flow allows \aflpp's coverage instrumentation to instrument the previously invisible dynamic edges.
+We call this principle \emph{Program State Projection}, or \glsshortkey{PSP} for short, because it combines control flow with parts of the program's hidden state.
+
+
 \begin{listing}
     \begin{minted}[escapeinside=||]{cpp}
 struct Shape { virtual void draw(int scale) = 0; };
@@ -59,25 +81,6 @@ int main(int argc, char *argv[]) {
     \label{psp:lst:vcall-dependence}
 \end{listing}
 
-Our first application of \gls{PSP} addresses the information loss occurring at indirect call sites.
-As discussed in \cref{psp:sec:motivation}, \aflpp's compiler instrumentation for code coverage loses information at indirect call sites because it cannot differentiate the dynamic edges of an indirect call.
-An analysis called \emph{points-to} analysis can, however, determine these edges at compile time.
-Compilers use this analysis for both security and performance transformations.
-Various \gls{CFI} variants, for example, use static points-to analysis to determine the possible target set for indirect calls (see \cref{ch:code-reuse-coevolution} for a discussion of \gls{CFI}).
-Likewise, when a compiler can statically prove that in a given program an indirect call site can only ever have a single target, the compiler can transform the indirect call into a direct call.
-Such a conversion enables additional optimizations later in the optimization pipeline, such as inlining.
-
-\glspl{JITcomp} perform a similar optimization called \emph{polymorphic inlining} (see \cref{psp:ss:polymorphic-inlining}), typically based on profiling information.
-For \gls{AOT} compilers, this transformation is more challenging because of the lack of runtime profiling information.
-Nonetheless, \gls{AOT} compilers can apply the transformation either heuristically or because they can prove based on dataflow that only certain types can reach a polymorphic call site.
-The fallback option that performs an indirect call guarantees that the program remains correct even if the analysis or the profiling information is incomplete.
-
-The afforded performance improvement depends on the quality of the heuristics or the available profiling information.
-SafeDispatch, a defense against vtable hijacking, uses the same technique to harden \cpp programs~\cite{jang2014}.
-Performance aside, we observe that this type of transformation has another important property: it projects a data dependency---which concrete object reaches a call site---onto the control-flow graph.
-In other words, possible variations in data, at least some of them, are now represented in the \gls{CFG}.
-A representation as control-flow allows \aflpp's coverage instrumentation to instrument the previously invisible dynamic edges.
-We call this principle \emph{Program State Projection}, or \glsshortkey{PSP} for short, because it combines control flow with parts of the program's hidden state.
 
 \cref{psp:lst:vcall-dependence} shows a simple polymorphic call example in \cpp.
 The code consists of parser objects that populate a list of shapes based on strings found in an input file.
@@ -87,187 +90,10 @@ Whether the bug is triggered depends on the filtering logic and whether circle o
 Since the first loop might have already called the \code{draw} method of both types, compiler-based code coverage considers both methods as covered.
 
 In contrast, \gls{PSP} would conceptually transform line~\ref{psp:line:broken-draw-call} as shown in \cref{psp:lst:broken-draw-call-unfolded}.
-\begin{listing}[t]
-    \begin{minted}{cpp}
-if (dynamic_cast<Rectangle *>(*iter)) {
-  // call Rectangle::draw without dynamic dispatch
-} else if (dynamic_cast<Circle *>(*iter)) {
-  // call Circle::draw without dynamic dispatch
-} else {
-  (*iter)->draw(5);
-}
-    \end{minted}
-    \caption{Conceptual transformation of an indirect call to expose dynamic call targets to coverage instrumentation.}
-    \label{psp:lst:broken-draw-call-unfolded}
-\end{listing}
 Each added control-flow branch provides the fuzzer, in principle, with a potential stepping stone to build a new seed.
 
 
 \section{Value-Range Partitioning}\label{psp:s:value-range-partitioning}
-Control flow in programs typically depends on variable values.
-An \code{if} statement might check whether a variable \code{x} exceeds a certain bound, or a loop might iterate until an index variable reaches a limit.
-Conventional edge coverage already covers these types of control-flow decisions.
-From the perspective of edge coverage, each control-flow point partitions the value range of the compared variable according to the comparison operator.
-For example, consider the C condition in \cref{psp:fig:vrp-original}.
-\begin{figure}[t]
-    \centering
-    % Original code + unpartitioned visualization
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \begin{minipage}[t]{0.48\textwidth}
-            \begin{minted}[fontsize=\footnotesize]{C}
-void target(int16_t param) {
-  if (param < 0) {
-    process_negative(param);
-  } else {
-    process_positive(param);
-  }
-}
-            \end{minted}
-        \end{minipage}%
-        \hfill
-        \begin{minipage}[t]{0.4\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{figures/psp/unpartitioned.pdf}
-        \end{minipage}
-        \caption{Original code. The branch partitions the value range into two edges.}
-        \label{psp:fig:vrp-original}
-    \end{subfigure}
-
-    \vspace{1em}
-
-    % Transformed code + partitioned visualization
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \begin{minipage}[t]{0.48\textwidth}
-            \begin{minted}[fontsize=\footnotesize]{C}
-void target(int16_t param) {
-  if (param < 0) {
-    // halve the possible range
-    if (param > -16384) {
-        process_negative(param);
-    } else {
-        process_negative(param);
-    }
-  } else {
-    // halve the possible range
-    if (param < 16384) {
-        process_positive(param);
-    } else {
-        process_positive(param);
-    }
-  }
-}
-            \end{minted}
-        \end{minipage}%
-        \hfill
-        \begin{minipage}[t]{0.4\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{figures/psp/partitioned.pdf}
-        \end{minipage}
-        \caption{Transformed code with artificial branches subdividing each of the original ranges into two sub-ranges, resulting in four edges.}
-        \label{psp:fig:vrp-transformed}
-    \end{subfigure}
-
-    \caption{\acrlong{VRP} applied to a simple branch.}
-    \label{psp:fig:vrp-transformation}
-\end{figure}
-The function \code{target} executes different logic depending on whether \code{param} is positive or negative.
-An \code{int16\_t}, however, has a value in the range $[-32768, 32767]$, meaning that from the perspective of edge coverage, all values in the ranges $[-32768, -1]$ and $[0, 32767]$ are treated uniformly.
-Whichever value the fuzzer explores within one of those ranges, it will not trigger new coverage in \code{target}.
-This blind spot can lead to cases where a fuzzer struggles to find certain interesting data points because there is no direct control dependency on them.
-
-Similar to the case of indirect call unfolding, we observe that a compiler already contains elaborate analyses to reason about such value ranges.
-Value range analysis, for instance, allows compilers to eliminate redundant conditions, \ie nested conditions that are logically implied by the surrounding condition.
-We can repurpose this compiler knowledge to map these hidden data-space boundaries onto the control flow, again making them available for edge-coverage instrumentation.
-For example, the \gls{VRP} transformation shown in \cref{psp:fig:vrp-transformed} converts the original code into a version with artificial branches.
-From the perspective of edge coverage, the transformation effectively divides the data space into four partitions instead of two.
-The semantics of the program remain unchanged because the bodies in the artificially introduced control-flow split are identical.
-The additional edges provide the fuzzer with an approximation of how well the data space of the variable has been samled.
-It is possible that some of these value ranges are in fact unreachable due to constraints not known at compile time.
-
-The technique shown above naturally raises two questions:
-\begin{inline}
-    \item How to split the value ranges?
-    \item Where to insert the artificial control-flow?
-\end{inline}
-
-Consider the first question.
-A variable of type \code{int32\_t} has over four billion possible values.
-Partitioning this range into individual values is infeasible, so any practical approach must choose a subset of \emph{split points}.
-A split point is the value on which the artificially inserted control-flow branches.
-The first question, therefore, is really about finding good split points that provide valuable stepping stones for the fuzzer.
-In the example in \cref{psp:fig:vrp-transformed} $-16384$ and $16384$ are split points.
-A naive strategy might split the range at its midpoint, but such a simplistic approach ignores the program's semantics.
-For example, if the variable is used as a divisor, the value zero is far more interesting than an arbitrary midpoint.
-Similarly, if the variable feeds into an addition, the values near the overflow boundary matter most.
-The \enquote{right} split points thus depend on what the program does with the variable.
-
-To address the first question, we propose three straightforward split point heuristics.
-However, it is worth noting that the broad \gls{VRP} framework offers a vast design space for further investigation.
-\begin{description}
-    \item[midpoint] This heuristic, as used in the examples above, simply splits value ranges in the middle, creating two roughly equal-sized partitions.
-    This heuristic is suitable if nothing is known about the value range in question or the variable usage.
-    \item[boundaries] This heuristic splits at values that form possible boundaries for later value usages.
-    For example, typical boundaries for an array usage are $0$ and $\mathrm{arraylength}$\footnote{Negative indices are possible, but rare.}.
-    Buffer operations form another example, such as \code{memcpy} or \code{memmove}, where the boundaries are $0$ and $\mathrm{buffersize}$.
-    \Cref{psp:fig:boundaries-example} shows an example where the \propername{boundaries} heuristic can help.
-    The function copies user-controlled data into a fixed-size buffer.
-    The heuristic identifies thresholds at $0$ (empty copy) and $100$ (buffer size).
-    Since the heuristic is usage-based, it requires an analysis to determine the usages of the value in question.
-    Additionally it needs analyses to determine \eg buffer and array sizes, if possible.
-    \item[arithmetic] Another class of sensitive variables are those that can contribute to an arithmetic underflow or overflow.
-    If not properly handled, such underflows or overflows can lead to crashes and security-critical bugs.
-    Similar to the \propername{boundaries} heuristic, the \propername{arithmetic} heuristic is usage-based.
-    Depending on how later arithmetic operations use the variable, the heuristic splits the value range at values that cause an under- or overflow.
-    \Cref{psp:fig:arithmetic-example} shows an example of the \propername{arithmetic} heuristic.
-\end{description}
-
-\begin{figure}[t]
-    \centering
-    \begin{minipage}[t]{0.48\textwidth}
-        \begin{minted}[fontsize=\footnotesize]{C}
-void process_request(size_t len) {
-  char buf[100];
-  if (len > 0) {
-    // len used as memcpy size
-    memcpy(buf, user_data, len);
-    process(buf);
-  }
-}
-        \end{minted}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \begin{minted}[fontsize=\footnotesize]{C}
-void process_request(size_t len) {
-  char buf[100];
-  if (len > 0) {
-    if (len >= 100) {
-      memcpy(buf, user_data, len);
-      process(buf);  // overflow
-    } else {
-      memcpy(buf, user_data, len);
-      process(buf);  // safe
-    }
-  }
-}
-        \end{minted}
-    \end{minipage}
-
-    \begin{minipage}[t]{0.48\textwidth}
-        \subcaption{Original code.}
-        \label{psp:lst:boundaries-example}
-    \end{minipage}%
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \subcaption{After transformation.}
-        \label{psp:lst:boundaries-example-transformed}
-    \end{minipage}
-    \caption{The \propername{boundaries} heuristic splits at the buffer size boundary (100).}
-    \label{psp:fig:boundaries-example}
-\end{figure}
-
 \begin{figure}[t]
     \centering
     \begin{minipage}[t]{0.48\textwidth}
@@ -318,7 +144,61 @@ void process_data(uint8_t x) {
     \label{psp:fig:arithmetic-example}
 \end{figure}
 
+Control flow in programs typically depends on variable values.
+An \code{if} statement might check whether a variable \code{x} exceeds a certain bound, or a loop might iterate until an index variable reaches a limit.
+Conventional edge coverage already covers these types of control-flow decisions.
+From the perspective of edge coverage, each control-flow point partitions the value range of the compared variable according to the comparison operator.
+For example, consider the C condition in \cref{psp:fig:vrp-original}.
+The function \code{target} executes different logic depending on whether \code{param} is positive or negative.
+An \code{int16\_t}, however, has a value in the range $[-32768, 32767]$, meaning that from the perspective of edge coverage, all values in the ranges $[-32768, -1]$ and $[0, 32767]$ are treated uniformly.
+Whichever value the fuzzer explores within one of those ranges, it will not trigger new coverage in \code{target}.
+This blind spot can lead to cases where a fuzzer struggles to find certain interesting data points because there is no direct control dependency on them.
 
+Similar to the case of indirect call unfolding, we observe that a compiler already contains elaborate analyses to reason about such value ranges.
+Value range analysis, for instance, allows compilers to eliminate redundant conditions, \ie nested conditions that are logically implied by the surrounding condition.
+We can repurpose this compiler knowledge to map these hidden data-space boundaries onto the control flow, again making them available for edge-coverage instrumentation.
+For example, the \gls{VRP} transformation shown in \cref{psp:fig:vrp-transformed} converts the original code into a version with artificial branches.
+From the perspective of edge coverage, the transformation effectively divides the data space into four partitions instead of two.
+The semantics of the program remain unchanged because the bodies in the artificially introduced control-flow split are identical.
+The additional edges provide the fuzzer with an approximation of how well the data space of the variable has been samled.
+It is possible that some of these value ranges are in fact unreachable due to constraints not known at compile time.
+
+The technique shown above naturally raises two questions:
+\begin{inline}
+    \item How to split the value ranges?
+    \item Where to insert the artificial control-flow?
+\end{inline}
+
+Consider the first question.
+A variable of type \code{int32\_t} has over four billion possible values.
+Partitioning this range into individual values is infeasible, so any practical approach must choose a subset of \emph{split points}.
+A split point is the value on which the artificially inserted control-flow branches.
+The first question, therefore, is really about finding good split points that provide valuable stepping stones for the fuzzer.
+In the example in \cref{psp:fig:vrp-transformed} $-16384$ and $16384$ are split points.
+A naive strategy might split the range at its midpoint, but such a simplistic approach ignores the program's semantics.
+For example, if the variable is used as a divisor, the value zero is far more interesting than an arbitrary midpoint.
+Similarly, if the variable feeds into an addition, the values near the overflow boundary matter most.
+The \enquote{right} split points thus depend on what the program does with the variable.
+
+To address the first question, we propose three straightforward split point heuristics.
+However, it is worth noting that the broad \gls{VRP} framework offers a vast design space for further investigation.
+\begin{description}
+    \item[midpoint] This heuristic, as used in the examples above, simply splits value ranges in the middle, creating two roughly equal-sized partitions.
+    This heuristic is suitable if nothing is known about the value range in question or the variable usage.
+    \item[boundaries] This heuristic splits at values that form possible boundaries for later value usages.
+    For example, typical boundaries for an array usage are $0$ and $\mathrm{arraylength}$\footnote{Negative indices are possible, but rare.}.
+    Buffer operations form another example, such as \code{memcpy} or \code{memmove}, where the boundaries are $0$ and $\mathrm{buffersize}$.
+    \Cref{psp:fig:boundaries-example} shows an example where the \propername{boundaries} heuristic can help.
+    The function copies user-controlled data into a fixed-size buffer.
+    The heuristic identifies thresholds at $0$ (empty copy) and $100$ (buffer size).
+    Since the heuristic is usage-based, it requires an analysis to determine the usages of the value in question.
+    Additionally it needs analyses to determine \eg buffer and array sizes, if possible.
+    \item[arithmetic] Another class of sensitive variables are those that can contribute to an arithmetic underflow or overflow.
+    If not properly handled, such underflows or overflows can lead to crashes and security-critical bugs.
+    Similar to the \propername{boundaries} heuristic, the \propername{arithmetic} heuristic is usage-based.
+    Depending on how later arithmetic operations use the variable, the heuristic splits the value range at values that cause an under- or overflow.
+    \Cref{psp:fig:arithmetic-example} shows an example of the \propername{arithmetic} heuristic.
+\end{description}
 For the second question, we note that in principle, artificial control-flow splitting can happen at any point of the variable's live range.
 Since we must duplicate the code in both branches (cf. \cref{psp:fig:arithmetic-example}), however, larger branches mean more code bloat.
 Moreover, not every program point is equally useful: a partition is only valuable if it leads to observably different behavior downstream.

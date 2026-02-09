@@ -31,19 +31,6 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
 \end{infobox}
 
 \subsection{\aflpp vs. Genetic Parameter Mutation}\label{lool:ss:aflpp-vs-genetic}
-\begin{table}[!t]
-    \centering
-    \begin{tabular}{>{\nextrow}E C C C}
-        \toprule
-        {Experiment} & {Total} & {Skipped} & {Identical} \\
-        \midrule
-        \startdatarows
-        \fileInput{generated/lool/afl-test-overview}
-        \bottomrule
-    \end{tabular}
-    \caption{The number of total, skipped, and identical test runs for \aflpp configurations.}
-    \label{tbl:afl-overview}
-\end{table}
 
 \begin{table}[!t]
     \centering
@@ -69,6 +56,21 @@ Except for the \propername{afl-contextblind-only-params} configuration, all \afl
 One reason for \aflpp's poor performance lies in the translation of \aflpp generated input files to generated test cases.
 We found that over stretches of dozens of generated tests the \aflpp configurations generate either \emph{identical} tests or \emph{small tests}, which are the result of re-generation attempts.
 The number of identical tests and re-generation attempts are shown in \cref{tbl:afl-overview}.
+
+
+\begin{table}[!t]
+    \centering
+    \begin{tabular}{>{\nextrow}E C C C}
+        \toprule
+        {Experiment} & {Total} & {Skipped} & {Identical} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/lool/afl-test-overview}
+        \bottomrule
+    \end{tabular}
+    \caption{The number of total, skipped, and identical test runs for \aflpp configurations.}
+    \label{tbl:afl-overview}
+\end{table}
 
 Identical tests happen when \aflpp mutates bits in the input file that do not change the code generator's behavior.
 Although \aflpp eventually learns that mutating these bits is useless, the feedback loop in the GraalVM context is slow compared to traditional \aflpp targets such as image libraries.

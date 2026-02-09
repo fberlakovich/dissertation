@@ -30,6 +30,30 @@ Finally, a randomization-based technique would target the profiling stage to pre
 Disrupting the reliable profiling of function pointer locations is where Readactor falls short.
 Although function pointers on the stack are redirected through \gls{CPH}, their stack locations remain predictable.
 
+
+\begin{figure}[t]
+    \centering
+    \includeDrawioFigure{figures/r2c/overview}{
+        \draw ([xshift=2pt] PointA) node {\circledtikz{\code{\footnotesize A}}};
+        \draw ([xshift=2pt] PointB) node {\circledtikz{\code{\footnotesize B}}};
+        \draw (PointC) node {\circledtikz{\code{\footnotesize C}}};
+        \draw (Compare1) node {{\LARGE$\not\equiv$}};
+        \draw (Compare5) node {{\LARGE$\not\equiv$}};
+        \draw (Compare2) node {{\LARGE$\equiv$}};
+        \draw (Compare6) node {{\LARGE$\not\equiv$}};
+        \draw (Compare3) node {{\LARGE$\equiv$}};
+        \draw (Compare7) node {{\LARGE$\threeapprox$}};
+        \draw (Compare4) node {{\LARGE$\equiv$}};
+        \draw (Compare8) node {{\LARGE$\not\equiv$}};
+    }
+
+    \captionsetup{margin={0pt,0.3cm},oneside}
+    \caption{Prior systems primarily diversify code, leaving the layout of observable data predictable (left vs middle, see \cref{r2c:s:aocr}).
+    \rtwoc (right) diversifies code and observable data.}
+    \vspace*{-1em}
+    \label{r2c:fig:overview-unprotected-vs-protected}
+\end{figure}
+
 \gls{AOCR} rests on the fact that existing randomization defenses primarily diversify code but leave the layout of observable \emph{data} intact.
 \cref{r2c:fig:overview-unprotected-vs-protected} shows the information available to an attacker from an unprotected system.
 Without protection, the global variables, the heap, and the stack remain predictable and contain enough information to mount a whole-function reuse attack.
@@ -54,26 +78,3 @@ These insights motivate our compiler-based defense \rtwoc: a defense that extend
 The compiler possesses precise knowledge of stack frame geometry, including the positions of return addresses, spilled registers, and local variables.
 By leveraging this knowledge, the compiler can transform stack layouts to disguise sensitive pointers among indistinguishable decoys---a technique we call \emph{mimicry}.
 In the following sections we explore the concept of mimicry in detail and provide a detailed evaluation of \rtwoc's performance overhead and security guarantees.
-
-\begin{figure}[t]
-    \centering
-    \includeDrawioFigure{figures/r2c/overview}{
-        \draw ([xshift=2pt] PointA) node {\circledtikz{\code{\footnotesize A}}};
-        \draw ([xshift=2pt] PointB) node {\circledtikz{\code{\footnotesize B}}};
-        \draw (PointC) node {\circledtikz{\code{\footnotesize C}}};
-        \draw (Compare1) node {{\LARGE$\not\equiv$}};
-        \draw (Compare5) node {{\LARGE$\not\equiv$}};
-        \draw (Compare2) node {{\LARGE$\equiv$}};
-        \draw (Compare6) node {{\LARGE$\not\equiv$}};
-        \draw (Compare3) node {{\LARGE$\equiv$}};
-        \draw (Compare7) node {{\LARGE$\threeapprox$}};
-        \draw (Compare4) node {{\LARGE$\equiv$}};
-        \draw (Compare8) node {{\LARGE$\not\equiv$}};
-    }
-
-    \captionsetup{margin={0pt,0.3cm},oneside}
-    \caption{Prior systems primarily diversify code, leaving the layout of observable data predictable (left vs middle, see \cref{r2c:s:aocr}).
-    \rtwoc (right) diversifies code and observable data.}
-    \vspace*{-1em}
-    \label{r2c:fig:overview-unprotected-vs-protected}
-\end{figure}

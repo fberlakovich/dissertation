@@ -1,37 +1,8 @@
 \section{The Design of \rtwoc}\label{r2c:s:design}
-
-\begin{figure*}[t]
-    \centering
-    \begin{subfigure}[t]{0.6\linewidth}
-        \figuretitle{Unprotected stack}
-        \resizebox{\linewidth}{!}{%
-        %\includesvg{img/architecture-overview}
-            \includegraphics[trim={0.5cm 0 12.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
-        }
-        \captionsetup{margin={0pt,0.3cm},oneside}
-        \caption{In an unprotected stack frame the return address is at a predictable location surrounded by known values.}
-        \label{r2c:fig:overview-stack-unprotected}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.6\linewidth}
-        \figuretitle{Stack protected with \rtwoc{}}
-        \resizebox{\linewidth}{!}{%
-            \includegraphics[trim={12.5cm 0 0.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
-%            }
-        }
-        \captionsetup{margin={0.3cm,0pt},oneside}
-        \caption{\rtwoc inserts Booby-Trapped Return Addresses to conceal the return address and thus protect it from disclosure.}
-        \label{r2c:fig:overview-stack-protected}
-    \end{subfigure}
-    \caption{The stack layout of an unprotected stack (\emph{top}) and a stack protected by \rtwoc (\emph{bottom}). We assume the System V ABI on the x86\_64 platform.}
-    \label{r2c:fig:overview-stack}
-\end{figure*}
-
 %    We observe that the predictable location of return addresses makes them vulnerable to disclosure.
 %    Previous stack frame diversification techniques have focused on permuting stack objects and on inserting random paddings between the stack frames.
 %    These techniques harden against the profiling of function pointers in \gls{AOCR}.
 %    Return addresses, however, keep their relative position to other stack objects and remain vulnerable to disclosure.
-
 %    maybe explain why hiding the return address with IH is a bad idea
 \rtwoc is a leakage-resilient diversity defense against advanced code-reuse attacks.
 As such, \rtwoc's main objective is to prevent information leakage that could help an attacker to undermine the effects of randomization.
@@ -59,6 +30,34 @@ Second, an attacker can locate pointers based on their value ranges.
 The heap pointer in \cref{r2c:fig:overview-stack-unprotected}, for example, has a different address range than code pointers or the spilled base pointer.
 If both of these methods fail, an attacker can still resort to guessing.
 Under specific circumstances, such brute-force attacks are a reasonable option; some servers restart crashed worker processes without reloading their binary code images (\eg nginx, Apache, OpenSSH)~\cite{Bittau2014a}.
+
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}[t]{0.6\linewidth}
+        \figuretitle{Unprotected stack}
+        \resizebox{\linewidth}{!}{%
+        %\includesvg{img/architecture-overview}
+            \includegraphics[trim={0.5cm 0 12.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
+        }
+        \captionsetup{margin={0pt,0.3cm},oneside}
+        \caption{In an unprotected stack frame the return address is at a predictable location surrounded by known values.}
+        \label{r2c:fig:overview-stack-unprotected}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.6\linewidth}
+        \figuretitle{Stack protected with \rtwoc{}}
+        \resizebox{\linewidth}{!}{%
+            \includegraphics[trim={12.5cm 0 0.5cm 0},clip]{figures/r2c/architecture-overview-with-heap}%
+%            }
+        }
+        \captionsetup{margin={0.3cm,0pt},oneside}
+        \caption{\rtwoc inserts Booby-Trapped Return Addresses to conceal the return address and thus protect it from disclosure.}
+        \label{r2c:fig:overview-stack-protected}
+    \end{subfigure}
+    \caption{The stack layout of an unprotected stack (\emph{top}) and a stack protected by \rtwoc (\emph{bottom}). We assume the System V ABI on the x86\_64 platform.}
+    \label{r2c:fig:overview-stack}
+\end{figure*}
 
 The core idea behind \rtwoc's techniques is \emph{mimicry}: deliberately disguising sensitive information by surrounding it with similar-looking data, so that the real object cannot be distinguished using either spatial or semantic cues.
 In practice, this means creating decoys that match the appearance and behavioral characteristics of the protected object.
@@ -182,8 +181,6 @@ Potential leaks are therefore less likely to meet those requirements.
 Compared with return addresses, function pointers on the stack occur less frequently and are, furthermore, protected by stack slot randomization.
 % Instead of crashing the target process, booby traps can actively react to an ongoing attack.
 % For example, a booby trap could prevent the restart of a crashed process, patch vulnerable code or start a honeypot process instead.
-
-
 
 
 %%    \subsection{Adaptive Security}\label{r2c:ss:adaptive-security}

@@ -9,6 +9,16 @@
 \subsection{Performance}\label{r2c:ss:discussion-evaluation}
 
 \fbetodo{Add section about profile-guided optimization}
+As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
+While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
+For CPUs without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
+The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) suggests that instruction cache pressure may contribute to the overhead, although our counter analysis does not isolate AVX2 vs \code{push}.
+Similarly, prolog trap insertion likely adds instruction-cache pressure by expanding hot code.
+
+% We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
+% We could not evaluate this effect due to the lack of compatible hardware.
+
+
 \begin{table}[t]
     \centering
     \sisetup{
@@ -37,6 +47,16 @@
     \label{tab:call-frequencies}
 \end{table}
 
+\Cref{r2c:fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \rtwoc{}.
+\rtwoc{} adds \glspl{BTRA} \emph{per call site}, explaining the overhead for function heavy benchmarks.
+To test this correlation with call frequency, we instrumented the SPEC CPU benchmark programs to count the number of executed call instructions.
+Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
+\Cref{tab:call-frequencies} shows the median number of calls performed by the SPEC CPU 2017 benchmarks.
+For each benchmark we took the median call frequencies across all inputs.
+The data suggests that there is only a weak direct correlation between calls and the overhead:
+\propername{Perlbench}, for example, has less than half the number of calls as \propername{omnetpp}, but shows a similar overhead.
+The mere call count, therefore, does not sufficiently explain the performance profile.
+
 
 \begin{table}[t]
     \centering
@@ -53,30 +73,19 @@
     \end{tabular}
 \end{table}
 
-As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
-While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
-For CPUs without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.
-The difference between the \code{push} and AVX2 setup sequence (see \cref{r2c:fig:perf-components}) suggests that instruction cache pressure may contribute to the overhead, although our counter analysis does not isolate AVX2 vs \code{push}.
-Similarly, prolog trap insertion likely adds instruction-cache pressure by expanding hot code.
-
-% We speculate that at the other end of the spectrum an implementation with AVX512 registers could improve performance even more.
-% We could not evaluate this effect due to the lack of compatible hardware.
-
-\Cref{r2c:fig:perf-full} shows that benchmarks with a large number of functions and function calls are affected most by \rtwoc{}.
-\rtwoc{} adds \glspl{BTRA} \emph{per call site}, explaining the overhead for function heavy benchmarks.
-To test this correlation with call frequency, we instrumented the SPEC CPU benchmark programs to count the number of executed call instructions.
-Our instrumentation ignores tail calls because tail calls do not push a return address to the stack and, thus, no \glspl{BTRA} are inserted.
-\Cref{tab:call-frequencies} shows the median number of calls performed by the SPEC CPU 2017 benchmarks.
-For each benchmark we took the median call frequencies across all inputs.
-The data suggests that there is only a weak direct correlation between calls and the overhead:
-\propername{Perlbench}, for example, has less than half the number of calls as \propername{omnetpp}, but shows a similar overhead.
-The mere call count, therefore, does not sufficiently explain the performance profile.
-
 A possible explanation for the super-additive overhead (sum of component-overheads is less than actual total overhead) in \propername{mcf} and \propername{omnetpp} are memory stalls.
 Both \propername{mcf} and \propername{omnetpp} are memory-bound benchmarks and memory stalls can hide a certain number of additional instructions.
 Thus, the stalls might hide the instructions of each component in isolation, but the stalls might be too few to hide all components combined.
 
 \subsubsection{Detailed Performance Counter Analysis}\label{r2c:sss:perf-counters}
+The example of call count and performance overhead differences between \propername{perlbench} and \propername{omnetpp} above showed that instructions and call counts alone give an incomplete picture.
+To better understand the exact causes of the overhead, we recorded \code{perf} counters for benchmarks with overhead on \propername{i9}.
+Note that we did not record the counters with the same seeds that were used for the initial performance evaluation.
+The difference in seeds and the sampling inaccuracies introduced by \code{perf} can cause slight differences in the observed cycle overhead compared to the runtime overhead described in \cref{r2c:fig:perf-full}.
+The relative differences between configurations and the baseline as well as between counters stay intact, however.
+We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
+
+
 \begin{figure}[t]
     \centering
     \begingroup
@@ -98,12 +107,15 @@ Thus, the stalls might hide the instructions of each component in isolation, but
     \label{r2c:fig:btra-instr-vs-cycles}
 \end{figure}
 
-The example of call count and performance overhead differences between \propername{perlbench} and \propername{omnetpp} above showed that instructions and call counts alone give an incomplete picture.
-To better understand the exact causes of the overhead, we recorded \code{perf} counters for benchmarks with overhead on \propername{i9}.
-Note that we did not record the counters with the same seeds that were used for the initial performance evaluation.
-The difference in seeds and the sampling inaccuracies introduced by \code{perf} can cause slight differences in the observed cycle overhead compared to the runtime overhead described in \cref{r2c:fig:perf-full}.
-The relative differences between configurations and the baseline as well as between counters stay intact, however.
-We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analysis because of the richer set of performance counters on the Intel machine.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/r2c/stall-hiding}%
+    \caption{Conceptual figure of stall hiding.
+    Instructions can execute \enquote{for free} during times when the CPU has to wait for the result of a stalling instruction.
+    Which instructions can execute during a stall depends, among other things, on the inter-instruction dependencies.}
+    \label{r2c:fig:stall-hiding}
+\end{figure}
 
 Three performance counters are particularly important when interpreting the results: cycles, instructions, and Intel's \gls{TMA} counters\cite{yasin2014}.
 The cycles counter tells us the total number of cycles the benchmark run took.
@@ -120,7 +132,6 @@ The first layer classifies pipeline slots into one of four categories:
     \item \textbf{Frontend Bound}: Slots where the backend could accept work, but the frontend (instruction fetch and decode) cannot supply micro-operations fast enough.
     \item \textbf{Backend Bound}: Slots where the frontend has work ready, but the backend (execution units and memory subsystem) cannot accept it due to resource contention or memory latency.
 \end{enumerate}
-
 As expected, each benchmark shows a significant increase in the number of instructions.
 Most of \rtwoc's diversification measures, \eg prolog trap insertion, \code{NOP} insertion, \glspl{BTRA} and \glspl{heapbt}, require additional instructions.
 Additional instructions can affect execution performance in at least two ways:
@@ -155,9 +166,6 @@ In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depiction of 
         \bottomrule
     \end{tabular}
 \end{table}
-
-
-
 \propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
 \propername{Perlbench} already has a relatively high \gls{IPC} of ~2.5 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
 We initially speculated that \propername{perlbench}, just like \propername{xalancbmk}, is affected by an increased instruction-cache pressure.
@@ -167,17 +175,6 @@ The positive effect of the cache hierarchy is also confirmed by the \gls{TMA} co
 No increase in the \propername{Frontend Bound} category means that with \rtwoc, the \gls{CPU} does not stall more on waiting for instructions than it already did in the baseline.
 Additional cache misses and memory stalls in \propername{perlbench} cause overall only about 1.5\% of the additional cycles.
 The remaining cycle overhead is caused by additional instructions, which cannot hide in the relatively small stall room of the baseline.
-
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/r2c/stall-hiding}%
-    \caption{Conceptual figure of stall hiding.
-    Instructions can execute \enquote{for free} during times when the CPU has to wait for the result of a stalling instruction.
-    Which instructions can execute during a stall depends, among other things, on the inter-instruction dependencies.}
-    \label{r2c:fig:stall-hiding}
-\end{figure}
-
 For benchmarks below the diagonal, an additional instruction takes less than one cycle, on average.
 This phenomenon can happen, for example, through memory stalls.
 Memory stalls enable the \gls{CPU} to execute other instructions in the speculation window \enquote{for free}, while waiting for the fulfillment of the memory request.
@@ -186,6 +183,34 @@ For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instru
 \cref{r2c:fig:stall-hiding} illustrates this principle.
 The instructions within an out-of-order execution window can execute before their program-order predecessors and, if they share the window with a stalling instruction, potentially during the stall cycles.
 The stall cycles of window \propername{W\textsubscript{2}}, for example, are underutilized as there are no instructions that can execute during this stall.
+
+
+\begin{table}[t]
+    \centering
+    \caption{Call density analysis. Call counts are from runtime instrumentation (see \cref{tab:call-frequencies}); baseline instructions from \texttt{perf stat}. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
+    \label{r2c:tab:call-density}
+    \sisetup{
+        table-alignment-mode=none,
+        table-number-alignment=right,
+    }
+    \begin{tabular}{l
+        S[table-format=4.0]
+        S[table-format=2.1]
+        S[table-format=2.1]}
+        \toprule
+        Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
+        \midrule
+        \propername{x264}      & 867                  & 3.4         & 3.9       \\
+        \propername{deepsjeng} & 1957                 & 11.4        & 5.8       \\
+        \propername{leela}     & 1638                 & 13.1        & 8.0       \\
+        \propername{perlbench} & 994                  & 9.4         & 9.5       \\
+        \propername{gcc}       & 781                  & 7.5         & 9.6       \\
+        \propername{xalancbmk} & 1053                 & 12.4        & 11.8      \\
+        \propername{mcf}       & 1965                 & 38.7        & 19.7      \\
+        \propername{omnetpp}   & 1020                 & 23.5        & 23.1      \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
 In benchmarks with memory stalls, thus, \glspl{BTRA} cost fewer cycles on average.
@@ -226,35 +251,6 @@ The perf counter data also show non-trivial memory stalls (about 22\%) and divid
 Both \propername{Backend Bound} and the \propername{Frontend Bound} categories decrease slightly with \rtwoc, consistent with BTRA instructions filling otherwise idle slots.
 Notably, \propername{leela} has the highest \propername{Bad Speculation} rate among our benchmarks ($\approx$22\%), which explains why its baseline \gls{IPC} is low despite not being memory-bound---the CPU frequently discards speculative work.
 However, this misprediction overhead does not itself create hiding capacity; rather, it is the resulting execution port underutilization that provides slack for \gls{BTRA} instructions to execute without extending the critical path.
-
-
-\begin{table}[t]
-    \centering
-    \caption{Call density analysis. Call counts are from runtime instrumentation (see \cref{tab:call-frequencies}); baseline instructions from \texttt{perf stat}. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
-    \label{r2c:tab:call-density}
-    \sisetup{
-        table-alignment-mode=none,
-        table-number-alignment=right,
-    }
-    \begin{tabular}{l
-        S[table-format=4.0]
-        S[table-format=2.1]
-        S[table-format=2.1]}
-        \toprule
-        Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
-        \midrule
-        \propername{x264}      & 867                  & 3.4         & 3.9       \\
-        \propername{deepsjeng} & 1957                 & 11.4        & 5.8       \\
-        \propername{leela}     & 1638                 & 13.1        & 8.0       \\
-        \propername{perlbench} & 994                  & 9.4         & 9.5       \\
-        \propername{gcc}       & 781                  & 7.5         & 9.6       \\
-        \propername{xalancbmk} & 1053                 & 12.4        & 11.8      \\
-        \propername{mcf}       & 1965                 & 38.7        & 19.7      \\
-        \propername{omnetpp}   & 1020                 & 23.5        & 23.1      \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
 \subsubsection{Memory Overhead}
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
@@ -276,93 +272,6 @@ Further research is necessary to substantiate these suspicions.
 %If users require peak performance, compiling multiple variants and selecting the one with the lowest performance impact is a viable option.
 
 \subsection{Security}\label{r2c:ss:discussion-security}
-
-\begin{table}[t]
-    \centering
-    \caption{Empirical distribution of function pointers per stack frame.}
-    \label{r2c:tab:func-ptr-dist}
-    \begin{tabular}{c rr rr rr}
-        \toprule
-        & \multicolumn{2}{c}{\propername{nginx}} & \multicolumn{2}{c}{\propername{Apache}} & \multicolumn{2}{c}{\propername{Lighttpd}} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
-        Count & Frames & \%   & Frames & \%   & Frames & \%   \\
-        \midrule
-        0     & 74     & 18.5 & 266    & 54.4 & 96     & 25.3 \\
-        1     & 174    & 43.5 & 193    & 39.5 & 99     & 26.1 \\
-        2     & 122    & 30.5 & 22     & 4.5  & 48     & 12.6 \\
-        3     & 23     & 5.8  & 3      & 0.6  & 27     & 7.1  \\
-        4     & 5      & 1.3  & 2      & 0.4  & 18     & 4.7  \\
-        5     & 2      & 0.5  & 2      & 0.4  & 12     & 3.2  \\
-        6     & 0      & 0.0  & 1      & 0.2  & 6      & 1.6  \\
-        7     & 0      & 0.0  & 0      & 0.0  & 9      & 2.4  \\
-        8     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
-        9     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
-        10    & 0      & 0.0  & 0      & 0.0  & 3      & 0.8  \\
-        11+   & 0      & 0.0  & 0      & 0.0  & 50     & 13.2 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[t]
-    \centering
-    \caption{\gls{heapbt} single-guess success probabilities for a random stack snapshot.
-    Each stack frame contains three \glspl{heapbt} on average.}
-    \label{r2c:tab:heap-ptr-probabilities}
-    \begin{tabular}{ll rrr r}
-        \toprule
-        \textbf{Server} & \textbf{Case} & Depth & Heap Ptr. & \glspl{heapbt} & $P_{Success}$ \\
-        \midrule
-        \multirow{4}{*}{\propername{nginx}}
-        & Worst         & 12    & 40        & 36             & 52.6\%        \\
-        & Average       & 22    & 100       & 66             & 60.2\%        \\
-        & Median        & 22    & 102       & 66             & 60.7\%        \\
-        & Best          & 15    & 74        & 45             & 62.2\%        \\
-        \midrule
-        \multirow{4}{*}{\propername{Apache}}
-        & Worst         & 174   & 194       & 522            & 27.1\%        \\
-        & Average       & 140   & 269       & 420            & 39.1\%        \\
-        & Median        & 140   & 273       & 420            & 39.4\%        \\
-        & Best          & 4     & 29        & 12             & 70.7\%        \\
-        \midrule
-        \multirow{4}{*}{\propername{Lighttpd}}
-        & Worst         & 4     & 4         & 12             & 25.0\%        \\
-        & Average       & 5     & 48        & 15             & 71.8\%        \\
-        & Median        & 8     & 87        & 24             & 78.4\%        \\
-        & Best          & 7     & 116       & 21             & 84.7\%        \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[t]
-    \centering
-    \caption{Function pointer single-guess success probabilities for a random stack frame.
-    Each stack frame contains three fake function pointers.}
-    \label{r2c:tab:func-ptr-probabilities}
-    \begin{tabular}{ll rr r}
-        \toprule
-        \textbf{Server} & \textbf{Case} & Real Func. Ptr. & Total Func. Ptr. & $P_{Success}$ \\
-        \midrule
-        \multirow{4}{*}{\propername{nginx}}
-        & Worst         & 24              & 27               & 3.7\%         \\
-        & Average       & 2.8             & 5.8              & 17.3\%        \\
-        & Median        & 1               & 4                & 25.0\%        \\
-        & Best          & 1               & 4                & 25.0\%        \\
-        \midrule
-        \multirow{4}{*}{\propername{Apache}}
-        & Worst         & 18              & 21               & 4.8\%         \\
-        & Average       & 1.5             & 4.5              & 22.0\%        \\
-        & Median        & 1               & 4                & 25.0\%        \\
-        & Best          & 1               & 4                & 25.0\%        \\
-        \midrule
-        \multirow{4}{*}{\propername{Lighttpd}}
-        & Worst         & 72              & 75               & 1.3\%         \\
-        & Average       & 19.9            & 22.9             & 4.4\%         \\
-        & Median        & 2               & 5                & 20.0\%        \\
-        & Best          & 1               & 4                & 25.0\%        \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
 While execute-only memory and function shuffling defeat classic ROP and JIT-ROP attacks, indirect JIT-ROP and \gls{AOCR} remain an issue.
 For an indirect JIT-ROP attack, an attacker needs to locate valid code pointers, such as return addresses, in readable memory and infer gadget locations based on the found pointers.
 For an \gls{AOCR} attack, an attacker needs to locate function pointers or infer them from other code pointers (\eg return addresses), as well as manipulate function parameters.
@@ -413,6 +322,33 @@ These cases are troublesome because they mean that an attacker can immediately i
 Even with two function pointers per frame (between 4.5\% and 30.5\%) the probability of guessing correctly is still 50\%.
 We note, however, that only very select function pointers are suitable for \gls{AOCR}'s variant of whole-function-reuse attack and that global variable shuffling further frustrates efforts to locate and manipulate default function parameters.
 
+
+\begin{table}[t]
+    \centering
+    \caption{Empirical distribution of function pointers per stack frame.}
+    \label{r2c:tab:func-ptr-dist}
+    \begin{tabular}{c rr rr rr}
+        \toprule
+        & \multicolumn{2}{c}{\propername{nginx}} & \multicolumn{2}{c}{\propername{Apache}} & \multicolumn{2}{c}{\propername{Lighttpd}} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+        Count & Frames & \%   & Frames & \%   & Frames & \%   \\
+        \midrule
+        0     & 74     & 18.5 & 266    & 54.4 & 96     & 25.3 \\
+        1     & 174    & 43.5 & 193    & 39.5 & 99     & 26.1 \\
+        2     & 122    & 30.5 & 22     & 4.5  & 48     & 12.6 \\
+        3     & 23     & 5.8  & 3      & 0.6  & 27     & 7.1  \\
+        4     & 5      & 1.3  & 2      & 0.4  & 18     & 4.7  \\
+        5     & 2      & 0.5  & 2      & 0.4  & 12     & 3.2  \\
+        6     & 0      & 0.0  & 1      & 0.2  & 6      & 1.6  \\
+        7     & 0      & 0.0  & 0      & 0.0  & 9      & 2.4  \\
+        8     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
+        9     & 0      & 0.0  & 0      & 0.0  & 6      & 1.6  \\
+        10    & 0      & 0.0  & 0      & 0.0  & 3      & 0.8  \\
+        11+   & 0      & 0.0  & 0      & 0.0  & 50     & 13.2 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 Leaking a function pointer from a return address requires more guessing.
 Let us assume that an attacker has successfully leaked a return address $\mathcal{A}$.
 Let us further assume that the attacker \emph{knows} that $\mathcal{A}$ points into a function $\mathcal{F}$.
@@ -461,7 +397,6 @@ As \gls{ASLR} randomizes the heap's location, leaking data requires either a hea
 Such a heap pointer can come either from the data section or the stack.
 Unlike with function pointers, the attacker can pick an arbitrary heap pointer to reach the heap.
 Heap pointers in the data section are rare, which is why we focus our analysis on the stack.
-
 The probability of correctly guessing a benign heap pointer among all heap pointers depends on the number of benign heap pointers $H$, and the number of \glspl{heapbt} $H_{B}$ in a stack dump.
 The number of $H_{B}$ in turn depends on the number of stack frames in the dump because \rtwoc inserts \glspl{heapbt} into each stack frame, depending on a configuration parameter (see \cref{r2c:ss:impl-heap-boobytraps}).
 The probability of randomly picking a benign pointer is $\frac{H}{H_{B}+H}$.
@@ -481,6 +416,77 @@ Alternatively to guessing a heap pointer, an attacker could try to identify even
 For example, by performing heap feng shui an attacker might be able to identify benign heap pointers with a known distance to each other~\cite{Sotirov2007}.
 Note, however, that such an attack requires specific prerequisites and goes significantly beyond the analysis steps of the demonstrated \gls{AOCR} attacks.
 
+
+\begin{table}[t]
+    \centering
+    \caption{\gls{heapbt} single-guess success probabilities for a random stack snapshot.
+    Each stack frame contains three \glspl{heapbt} on average.}
+    \label{r2c:tab:heap-ptr-probabilities}
+    \begin{tabular}{ll rrr r}
+        \toprule
+        \textbf{Server} & \textbf{Case} & Depth & Heap Ptr. & \glspl{heapbt} & $P_{Success}$ \\
+        \midrule
+        \multirow{4}{*}{\propername{nginx}}
+        & Worst         & 12    & 40        & 36             & 52.6\%        \\
+        & Average       & 22    & 100       & 66             & 60.2\%        \\
+        & Median        & 22    & 102       & 66             & 60.7\%        \\
+        & Best          & 15    & 74        & 45             & 62.2\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Apache}}
+        & Worst         & 174   & 194       & 522            & 27.1\%        \\
+        & Average       & 140   & 269       & 420            & 39.1\%        \\
+        & Median        & 140   & 273       & 420            & 39.4\%        \\
+        & Best          & 4     & 29        & 12             & 70.7\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Lighttpd}}
+        & Worst         & 4     & 4         & 12             & 25.0\%        \\
+        & Average       & 5     & 48        & 15             & 71.8\%        \\
+        & Median        & 8     & 87        & 24             & 78.4\%        \\
+        & Best          & 7     & 116       & 21             & 84.7\%        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/r2c/ehframes}%
+    \caption{Without randomization, an attacker can infer structural information about functions, such as the relative location of the return address from the Call-Frame Information directives in the \code{eh\_frame} section.
+        \rtwoc's (right) randomization measures break the inference step from information in the \code{.eh\_frame} section to functions.}
+    \label{r2c:fig:ehframes}
+\end{figure}
+
+
+\begin{table}[t]
+    \centering
+    \caption{Function pointer single-guess success probabilities for a random stack frame.
+    Each stack frame contains three fake function pointers.}
+    \label{r2c:tab:func-ptr-probabilities}
+    \begin{tabular}{ll rr r}
+        \toprule
+        \textbf{Server} & \textbf{Case} & Real Func. Ptr. & Total Func. Ptr. & $P_{Success}$ \\
+        \midrule
+        \multirow{4}{*}{\propername{nginx}}
+        & Worst         & 24              & 27               & 3.7\%         \\
+        & Average       & 2.8             & 5.8              & 17.3\%        \\
+        & Median        & 1               & 4                & 25.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Apache}}
+        & Worst         & 18              & 21               & 4.8\%         \\
+        & Average       & 1.5             & 4.5              & 22.0\%        \\
+        & Median        & 1               & 4                & 25.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
+        \midrule
+        \multirow{4}{*}{\propername{Lighttpd}}
+        & Worst         & 72              & 75               & 1.3\%         \\
+        & Average       & 19.9            & 22.9             & 4.4\%         \\
+        & Median        & 2               & 5                & 20.0\%        \\
+        & Best          & 1               & 4                & 25.0\%        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 Given that \glspl{heapbt} incur overhead but affords only limited protection, an alternative use of the underlying implementation could be to write fake code pointers instead.
 \glspl{BTRA} already provide the means for code pointers pointing to booby traps and the \glspl{heapbt} implementation way of writing pointers to random stack slots.
 The expected overhead would remain the same or be less because the heap is no longer fragmented by guard pages.
@@ -494,15 +500,6 @@ Care must be taken, however, not to write fake code pointers into stack frames w
 Since an attacker knows which stack frames contain function pointers in the non-randomized binary, the attacker could identify fake pointers in frames that previously did not contain any function pointers.
 
 \subsubsection{Exception handling and stack unwinding}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/r2c/ehframes}%
-    \caption{Without randomization, an attacker can infer structural information about functions, such as the relative location of the return address from the Call-Frame Information directives in the \code{eh\_frame} section.
-        \rtwoc's (right) randomization measures break the inference step from information in the \code{.eh\_frame} section to functions.}
-    \label{r2c:fig:ehframes}
-\end{figure}
-
-
 As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary Call-Frame Information directives to support exception handling and stack unwinding.
 Call-Frame Information directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
 Since the modifications are recorded relative to the beginning of the frame, decoding the \code{.eh\_frame} section could reveal the location of the return address.

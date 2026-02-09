@@ -31,18 +31,6 @@ The negative results naturally raise the question of \emph{why} \gls{PSP} fails 
 The following subsections discuss possible root causes of the negative results.
 
 \subsection{Execution Speed and Bitmap Size}
-Both \gls{PSP} transformations insert additional instructions and with them additional edges.
-\gls{VRP} causes a mean slowdown of 19\% and in the case of Magma's \propername{libsndfile} even 55\%.
-In the case of Call Unfolding, the mean slowdown is around 0, with the worst benchmark at -24\%, but with \propername{sqlite3\_ossfuzz} showing an improvement of 30\%.
-To test whether these observed slowdowns could possibly be a cause of the observed deterioration, we ranked the fuzzers by execution speed delta and by coverage change and computed the Pearson correlation between the two rankings.
-For both \gls{VRP} and Call Unfolding the correlation coefficients were small, and the $p$ values (\num{0.495} and \num{0.161}) too large for statistical significance.
-In other words, based on the data we have we cannot conclude that execution speed differences cause the differences in edge coverage.
-
-To investigate whether the additional \gls{PSP} edges overflow the fuzzer's coverage bitmap, we measured the bitmap utilization across benchmarks.
-We found that only 5 out of 43 benchmarks (FuzzBench and Magma) use more than 50\% of their bitmap, with \propername{openh264\_decoder\_fuzzer} reaching the most at 71\%.
-This utilization suggests that an overflowing coverage bitmap is not the cause of \gls{PSP}'s negative results.
-
-\subsection{Missing Initial Control-Flow}
 
 \begin{listing}[t]
     \begin{minted}{C}
@@ -67,6 +55,20 @@ do {
     \label{psp:lst:libtiff-bug}
     \caption{Heap overflow bug \propername{TIF002} in \propername{libtiff}.}
 \end{listing}
+
+Both \gls{PSP} transformations insert additional instructions and with them additional edges.
+\gls{VRP} causes a mean slowdown of 19\% and in the case of Magma's \propername{libsndfile} even 55\%.
+In the case of Call Unfolding, the mean slowdown is around 0, with the worst benchmark at -24\%, but with \propername{sqlite3\_ossfuzz} showing an improvement of 30\%.
+To test whether these observed slowdowns could possibly be a cause of the observed deterioration, we ranked the fuzzers by execution speed delta and by coverage change and computed the Pearson correlation between the two rankings.
+For both \gls{VRP} and Call Unfolding the correlation coefficients were small, and the $p$ values (\num{0.495} and \num{0.161}) too large for statistical significance.
+In other words, based on the data we have we cannot conclude that execution speed differences cause the differences in edge coverage.
+
+To investigate whether the additional \gls{PSP} edges overflow the fuzzer's coverage bitmap, we measured the bitmap utilization across benchmarks.
+We found that only 5 out of 43 benchmarks (FuzzBench and Magma) use more than 50\% of their bitmap, with \propername{openh264\_decoder\_fuzzer} reaching the most at 71\%.
+This utilization suggests that an overflowing coverage bitmap is not the cause of \gls{PSP}'s negative results.
+
+\subsection{Missing Initial Control-Flow}
+
 
 Our current implementation of \gls{VRP} requires existing comparisons as starting points for further instrumentation.
 Certain bugs, such as \propername{TIF002} in \propername{libtiff} of the Magma benchmark suite, lack such a comparison.

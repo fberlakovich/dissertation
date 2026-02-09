@@ -9,20 +9,6 @@ Code-injection attacks and \glspl{CRA} typically proceed in three phases:
     \item the malicious code execution that transfers control to attacker-chosen code.
 \end{inline}
 
-Defenses against such attacks fall into three categories:
-\begin{itemize}
-    \item memory-safety enforcement;
-    \item control-flow enforcement;
-    \item randomization.
-\end{itemize}
-
-Each defense category targets a different step of the attack.
-Memory-safety enforcement aims to prevent the memory corruption required to divert the control flow.
-Control-flow enforcement tolerates the memory corruption but tries to lock the attacker into a previously determined control-flow graph.
-Randomization-based techniques, also called software diversity, aim to disrupt the attacker's reconnaissance phase, by invalidating a priori knowledge the attacker has about the target.
-Increasingly sophisticated \gls{CRA} variants have driven the evolution of defenses in each category.
-The following sections trace the historical development of \glspl{CRA} together with the development of defenses in each category.
-\cref{fig:coevolution-epoch-all} shows the complete timeline for important \glspl{CRA} and defenses and each of the following sections looks at an epoch in this timeline in more detail.
 
 \begin{figure}[p]
     \centering
@@ -33,6 +19,19 @@ The following sections trace the historical development of \glspl{CRA} together 
     \label{fig:coevolution-epoch-all}
 \end{figure}
 
+Defenses against such attacks fall into three categories:
+\begin{itemize}
+    \item memory-safety enforcement;
+    \item control-flow enforcement;
+    \item randomization.
+\end{itemize}
+Each defense category targets a different step of the attack.
+Memory-safety enforcement aims to prevent the memory corruption required to divert the control flow.
+Control-flow enforcement tolerates the memory corruption but tries to lock the attacker into a previously determined control-flow graph.
+Randomization-based techniques, also called software diversity, aim to disrupt the attacker's reconnaissance phase, by invalidating a priori knowledge the attacker has about the target.
+Increasingly sophisticated \gls{CRA} variants have driven the evolution of defenses in each category.
+The following sections trace the historical development of \glspl{CRA} together with the development of defenses in each category.
+\cref{fig:coevolution-epoch-all} shows the complete timeline for important \glspl{CRA} and defenses and each of the following sections looks at an epoch in this timeline in more detail.
 \FloatBarrier
 \begin{figure}[H]
     \centering
