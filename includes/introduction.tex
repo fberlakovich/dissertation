@@ -2,7 +2,7 @@
 
 \chapter{\label{ch:1-intro}Introduction}
 
-The construction of modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
+Modern software relies on an ever-growing ecosystem of technologies and towers of abstraction.
 Contemporary systems integrate dozens of third-party libraries, span multiple programming languages, and depend on countless layers of middleware and hardware interfaces.
 Modern web browsers, for example, consist of 20 or even 30 million lines of code~\cite{openhub-firefox,openhub-chromium}.
 While this ecosystem enables developers to build software systems of unprecedented functionality, the increasing complexity also creates new challenges.
@@ -11,7 +11,8 @@ Despite this rise in complexity, the core expectations of software have remained
 Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
 Each new abstraction layer, for example, hides details but also introduces uncertainty about the layer below.
 Likewise, performance optimization risks new corner cases, and each extension of functionality opens new attack surfaces.
-Catastrophic security breaches like Heartbleed~\cite{heartbleed} (a simple buffer over-read in a core library), Spectre~\cite{Kocher2019} (exploiting CPU-level speculation), or Log4Shell~\cite{log4shell} (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
+Catastrophic security breaches each with global consequences show that these problems are not just hypotheticals.
+Prominent examples are Heartbleed~\cite{heartbleed}, a simple buffer over-read in a core library, Spectre~\cite{Kocher2019}, data-exfiltration via CPU-level speculation), or Log4Shell~\cite{log4shell}, a failure in input sanitization.
 
 Similarly, reliability failures like silent miscompilations have plagued even widespread production compilers such as GCC and LLVM \cite{yang2011,wang2012}.
 \citeauthor{yang2011} showed that the \propername{Csmith} fuzzer alone uncovered more than 325 previously unknown bugs in GCC and LLVM, including release-blocking miscompilations~\cite{yang2011}.
@@ -21,7 +22,7 @@ Recent work also showed that bugs in the compiler not only threaten the reliabil
 These data points underline that both the software we deploy and the toolchains we depend on remain fragile in practice.
 Thus, security and reliability form two sides of the broader struggle for software \emph{trustworthiness}: the ability to rely on software to uphold its specification under \emph{both} benign and adversarial conditions.
 The quest for software trustworthiness is not new.
-Despite decades of academic research and industrial mitigation efforts, however, challenges in software security and reliability remain, not least because the complexity of software keeps growing.
+Despite decades of academic research and industrial mitigation efforts, however, challenges in software security and reliability remain, because the complexity of software keeps growing.
 The following sections analyze in more detail why security and reliability are no \enquote{solved problems} yet.
 
 
@@ -41,7 +42,7 @@ The rise in security-awareness and with it the increasing adoption of memory-saf
 Nonetheless, despite the rise of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices~\cite{tiobe2025}.
 Furthermore, even new, memory-safe code is often integrated into legacy systems.
 A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it~\cite{mergendahl2022}.
-Even if from now no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise costing billions of euros.
+Even if from now on no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise, costing billions of euros.
 Thus, memory safety vulnerabilities will remain a critical threat in the foreseeable future and mitigations are needed to deal with them.
 
 

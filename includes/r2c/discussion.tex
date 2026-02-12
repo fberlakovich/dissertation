@@ -169,7 +169,8 @@ In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depiction of 
 \propername{Perlbench} already has a relatively high \gls{IPC} of ~2.5 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
 We initially speculated that \propername{perlbench}, just like \propername{xalancbmk}, is affected by an increased instruction-cache pressure.
 This hypothesis was supported by the sharp increase in L1 (+72\%) and L2 (+90\%) code cache misses for \propername{perlbench} in the full \rtwoc configuration.
-The relative numbers can be misleading, however, as a comparison of the L1 and L2 miss rates and a relatively low increase in L2 stall cycles suggests that the L2 cache absorbs most of the L1 misses and the L3 cache most of the L2 misses.
+The relative numbers can be misleading, however.
+A comparison of the L1 and L2 miss rates and a relatively low increase in L2 stall cycles suggests that the L2 cache absorbs most of the L1 misses and the L3 cache most of the L2 misses.
 The positive effect of the cache hierarchy is also confirmed by the \gls{TMA} counters: \rtwoc causes no notable increase in the \propername{Frontend Bound} category.
 No increase in the \propername{Frontend Bound} category means that with \rtwoc, the \gls{CPU} does not stall more on waiting for instructions than it already did in the baseline.
 Additional cache misses and memory stalls in \propername{perlbench} cause overall only about 1.5\% of the additional cycles.

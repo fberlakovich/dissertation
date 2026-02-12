@@ -4,4 +4,5 @@ By transforming \eg data dependencies into control dependencies, \gls{PSP} aims 
 We implemented a prototype of selected heuristics in LLVM and integrated it with \aflpp.
 Our evaluation on FuzzBench and Magma benchmarks shows no statistically significant improvement in edge coverage or bug finding with our current heuristics.
 While this negative result is instructive, we believe that \gls{PSP} demonstrates a more general principle worth further investigation.
+With \gls{PSP}, the compiler projects state variables otherwise invisible to the fuzzer onto the control flow.
 Different heuristics, longer campaign durations, or benchmarks with richer data-dependent behavior may yield positive results in the future.

@@ -17,5 +17,9 @@ Our evaluation on the GraalVM compiler showed that \lool outperforms both static
 Finally, we introduced \gls{PSP}, a technique that leverages compiler analyses to expose hidden program state to coverage-guided fuzzers.
 The insight behind \gls{PSP} is that sophisticated analyses already present in compilers, such as devirtualization or value-range analysis, can project their results onto the program's control-flow.
 Such additional control flow could serve as intermediate stepping stones for coverage-guided fuzzers.
-Our evaluation on FuzzBench and Magma benchmarks, however, did not show a statistically significant improvement in coverage or bug finding, suggesting that the tested heuristics are insufficient or that longer campaigns and different benchmark characteristics are needed.
+Our evaluation on FuzzBench and Magma benchmarks, however, did not show a statistically significant improvement in coverage or bug finding.
+This suggests that the tested heuristics are insufficient or that longer campaigns and different benchmark characteristics are needed.
 Despite the negative empirical result, we believe the underlying principle merits further investigation with refined heuristics.
+
+Taken together, these contributions show that a compiler's role goes beyond optimization and that compiler knowledge can yield novel solutions when applied to problems aside from compilation itself.
+
