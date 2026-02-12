@@ -111,16 +111,27 @@ def _group_rows(table_body, col_idx):
     return "\n".join(out)
 
 
-defines_cleared = False
+_defines_cleared: set[str] = set()
 
 
 def define_latex_var(args, name, value):
-    global defines_cleared
+    """Append a ``\\newcommand`` to the defines file.
+
+    When *args* has a ``prefix`` attribute the defines are written to
+    ``defines-<prefix>.tex``; otherwise to ``defines.tex``.  Each file is
+    truncated on first write within a process.
+    """
     if args.latex_output is not None:
-        defines = Path(args.latex_output, "defines.tex")
-        if not defines_cleared:
+        prefix = getattr(args, "prefix", None)
+        if prefix:
+            fname = f"defines-{prefix.replace('_', '-')}.tex"
+        else:
+            fname = "defines.tex"
+        defines = Path(args.latex_output, fname)
+
+        if str(defines) not in _defines_cleared:
             open(defines, "w").close()
-            defines_cleared = True
+            _defines_cleared.add(str(defines))
 
         with open(defines, "a") as f:
             if isinstance(value, float):

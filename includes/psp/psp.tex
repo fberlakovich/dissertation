@@ -208,6 +208,8 @@ We propose a simple placement heuristic based on existing comparisons.
 The heuristic subdivides each branch of an \emph{existing} comparison based on the previously determined split points.
 For example, the heuristic transforms code patterns like \cref{psp:fig:vrp-original}, but would not transform patterns like \cref{psp:lst:psp-no-transform} due to the lack of existing comparisons.
 This choice is a tradeoff, as functions such as the one in \cref{psp:lst:psp-no-transform} with a flat control-flow and purely value-based bugs are possible and would be missed by the heuristic.
+We discuss an alternative insertion heuristic in \cref{psp:sss:insertion-points}.
+
 Beyond implementation simplicity, choosing existing comparisons as insertion points has further advantages.
 First, if the program's control-flow depends on the value, it is likely not completely irrelevant to the program's computation.
 Second, existing comparisons pre-constraint the value range, making splitting into manageable partitions easier.

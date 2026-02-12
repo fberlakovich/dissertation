@@ -1,4 +1,8 @@
 \section{Discussion}\label{psp:s:discussion}
+
+\input{generated/psp/defines-fuzzbench}
+\input{generated/psp/defines-magma}
+
 The median final edge coverage for \gls{VRP} configurations in \cref{psp:tab:coverage-fuzzbench} shows a mixed picture.
 Only two benchmarks have a meaningfully large effect size, and among these two, the negative result (\propername{sqlite3\_ossfuzz}) dominates.
 For the Magma benchmarks in \cref{psp:tab:coverage-magma}, the edge coverage disadvantage is more pronounced with six negatively affected benchmarks.
@@ -52,8 +56,8 @@ do {
 } while (sp->stream.avail_out > 0);
 
     \end{minted}
-    \label{psp:lst:libtiff-bug}
     \caption{Heap overflow bug \propername{TIF002} in \propername{libtiff}.}
+    \label{psp:lst:libtiff-bug}
 \end{listing}
 
 Both \gls{PSP} transformations insert additional instructions and with them additional edges.
@@ -83,25 +87,64 @@ Once the relation is materialized into control flow, \gls{VRP} could provide ste
 \subsection{Edge Entanglement}
 
 A core assumption behind \gls{PSP} is that the additional edges give a value signal about a hitherto unknown program state to the fuzzer.
-If, on the other hand, a newly discovered \gls{PSP} edge is a direct consequence of a simultaneously discovered baseline edge, the fuzzer gains no new information.
-For each input that discovers new coverage, we can thus distinguish three different events:
+If, on the other hand, a newly discovered \gls{PSP} edge is a direct consequence of a simultaneously discovered non-\gls{PSP} edge, the fuzzer gains no new information.
+To distinguish \gls{PSP} from non-\gls{PSP} edges, we record the IDs of \gls{PSP} edges in a dedicated ELF section in the \gls{PSP}-instrumented binary.
+We then replay each \gls{PSP} configuration's corpus on its respective binary and classify every coverage-discovering input into one of three categories:
 \begin{enumerate}
-    \item Only the baseline discovers the edge.
-    Since the edges in our \gls{PSP} instrumented binaries are a \emph{superset} of the baseline, this event is impossible.
-    \item Only the \gls{PSP} binary discovers the edge.
+    \item The input discovers \emph{only} non-\gls{PSP} edges.
+    The baseline binary would have detected these edges as well.
+    An exception are non-\gls{PSP} edges the fuzzer could only reach \emph{because} of a \gls{PSP} edge.
+    Since our edge coverage data suggests that \gls{PSP} configurations hardly ever find more edges than the baseline, we ignore this case.
+    \item The input discovers \emph{only} \gls{PSP} edges.
     \gls{PSP} has surfaced a program state that would otherwise have been invisible to the fuzzer.
-    \item Both the baseline and the \gls{PSP} binary discover the edge.
-    We call these edges entangled.
+    \item The input discovers at least one \gls{PSP} edge \emph{and} at least one non-\gls{PSP} edge simultaneously.
+    We call these inputs \emph{entangled}.
 \end{enumerate}
+From this classification we calculate the entanglement rate~$\mathcal{E}$ over all inputs that discover at least one \gls{PSP} edge (categories 2 and~3):
+\begin{equation}
+    \mathcal{E} = \frac{n_{\text{both}}}{n_{\text{both}} + n_{\text{PSP}}}
+\end{equation}
+where $n_{\text{both}}$ is the number of entangled inputs and $n_{\text{PSP}}$ is the number of inputs that discover exclusively \gls{PSP} edges.
+An entanglement rate of \num{100}\,\% means that every \gls{PSP}-edge-discovering input also discovers a non-\gls{PSP} edge, rendering the \gls{PSP} edges redundant as a coverage signal.
 
-We tested for edge entanglement by rerunning the corpus found by the baseline and the \gls{PSP} configurations and recorded for each input which edges it triggered.
+\Cref{psp:tab:entanglement-fuzzbench,psp:tab:entanglement-magma} show the median (across all 30 runs) per-benchmark fraction of inputs falling into each category for FuzzBench and Magma, respectively.
+The \enquote{Non-PSP}, \enquote{PSP} and \enquote{Both} columns show the percentage of inputs in each category.
+The consistently high entanglement rate $\mathcal{E}$  means that the vast majority of \gls{PSP} edge discoveries coincide with non-\gls{PSP} edge discoveries, rendering the \gls{PSP} edges redundant as a coverage signal.
+This data suggests that for \gls{PSP} to be effective, more powerful heuristics are needed, which better surface program states that are independent of any existing coverage edges.
 
-\fbetodo{Waiting for data to answer questions}
-- need to differentiate baseline from VRP edges
+\begin{table}[t]
+    \centering
+    \caption{Per-input edge entanglement on FuzzBench: median across \num{30} instances. $\mathcal{E}$~is the entanglement rate; the three category columns show the fraction~(\%) of all coverage-discovering inputs per category.}
+    \label{psp:tab:entanglement-fuzzbench}
+    \scriptsize
+    \setlength{\extrarowheight}{1pt}
+    \begin{tabular}{>{\nextrow}E S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1]}
+        \toprule
+        & \multicolumn{4}{c}{\gls{VRP}} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        {Benchmark} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/entanglement-fuzzbench}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-\subsection{Queue Explosion}
+\begin{table}[t]
+    \centering
+    \caption{Per-input edge entanglement on Magma: median across \num{30} instances. $\mathcal{E}$~is the entanglement rate; the three category columns show the fraction~(\%) of all coverage-discovering inputs per category.}
+    \label{psp:tab:entanglement-magma}
+    \scriptsize
+    \setlength{\extrarowheight}{1pt}
+    \begin{tabular}{>{\nextrow}E S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1]}
+        \toprule
+        & \multicolumn{4}{c}{\gls{VRP}} & \multicolumn{4}{c}{Call Unfolding} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        {Benchmark} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} \\
+        \midrule
+        \startdatarows
+        \fileInput{generated/psp/entanglement-magma}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-- how much energy does the fuzzer spend on VRP edges?
-- how big are the queue and corpus sizes?
-- how many dead VRP edges
-- need to differentiate baseline from VRP edges

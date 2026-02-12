@@ -12,7 +12,11 @@ A systematic evaluation of which compiler analyses are most valuable for fuzzing
 
 \subsection{Better heuristics}
 
-\subsubsection{Backward gradients}
+Our evaluation in \cref{psp:s:evaluation} showed that at least the currently implemented \gls{PSP} heuristics are ineffective in helping a fuzzer achieve more coverage or bug triggering.
+This does not mean, however, that \gls{PSP} cannot be effective with a different set of heuristics.
+The following subsections discuss other potential heuristics following the \gls{PSP} principle.
+
+\subsubsection{Approach Gradients}
 
 \begin{figure}[t]
     \centering
@@ -21,7 +25,7 @@ A systematic evaluation of which compiler analyses are most valuable for fuzzing
 void process_data(uint32_t x) {
   // other code manipulating x
   if (x > 12345) {
-    if (x < 12890) {
+    if (x < 12345) {
       crash_program();
     }
   }
@@ -48,7 +52,7 @@ void process_data(uint32_t x) {
 
     \begin{minipage}[t]{0.48\textwidth}
         \subcaption{Original code.}
-        \label{psp:lst:backward-gradients}
+        \label{psp:lst:approach-gradients}
     \end{minipage}%
     \hfill
     \begin{minipage}[t]{0.48\textwidth}
@@ -59,24 +63,26 @@ void process_data(uint32_t x) {
     \label{psp:fig:backward-gradients}
 \end{figure}
 
-As discussed in \cref{psp:s:value-range-partitioning}, our \gls{VRP} instrumentation uses existing comparisons as a starting point to insert additional gradients.
+As discussed in \cref{psp:s:value-range-partitioning}, our \gls{VRP} instrumentation uses existing comparisons as a starting point to insert additional comparisons, partitioning the data space.
 This approach falls short, however, if the starting point comparison itself is the obstacle that the fuzzer struggles to overcome.
-Consider \cref{psp:lst:backward-gradients} as an example.
-Our \gls{VRP} instrumentation would use the \code{x < 12890} comparison as a starting point and insert additional gradients between the two comparisons.
+Consider \cref{psp:lst:approach-gradients} as an example.
+Our \gls{VRP} instrumentation would use the \code{x < 12890} comparison as a starting point and insert additional partitions between the two comparisons.
 A fuzzer would still have to find an \code{x} value that passes the \code{x > 12345} comparison, however.
 An alternative insertion heuristic could insert gradients \emph{approaching} the threshold from below, as shown in \cref{psp:lst:backward-gradients-transformed}.
 When the fuzzer discovers an input with \code{x > 10000}, it gains a new edge; when it finds \code{x > 12000}, it gains another.
 These intermediate edges guide the fuzzer towards the critical threshold at 12345.
+Note that while this approach looks conceptually similar to \gls{VRP}, both have different goals, and they are in fact mutually beneficial.
+The goal of \gls{VRP} is to help the fuzzer sample a variable's data space more evenly.
+The goal of approach gradients is to gradually lead the fuzzer towards thresholds, such as the ones inserted by \gls{VRP}.
 
-Another possibility is to choose a different starting point as well, such as interesting \emph{dataflow sinks}, and to move backwards from there.
+\subsubsection{Alternative Insertion Points}\label{psp:sss:insertion-points}
+An alternative insertion heuristic is to choose an interesting program point, such as \emph{dataflow sinks}, and to move backwards from there.
 Recall the example \cref{psp:lst:psp-no-transform} from \cref{psp:s:value-range-partitioning}.
 Our heuristic would not instrument the code in \cref{psp:lst:psp-no-transform} because it does not contain a comparison as a starting point.
 Interesting data flow sinks could be, for example, calls taking the variable in question as a parameter.
 Such an approach to identifying instrumentation points is similar to the usage-based heuristics \propername{boundaries} and \propername{arithmetic}.
 In the example in \cref{psp:lst:psp-no-transform}, we could reason that because the param value flows into a function call, it is relevant to the program.
 A potential splitting point would then have to include as many of these potentially interesting dataflow sinks as possible.
-
-Note that the backward and forward insertion heuristics are not mutually exclusive, and which one to apply could be based on the size of the value range to partition.
 
 \subsubsection{Value Relation Gradients}
 
@@ -85,7 +91,7 @@ Note that the backward and forward insertion heuristics are not mutually exclusi
     \centering
     \begin{minipage}[t]{0.48\textwidth}
         \begin{minted}[fontsize=\footnotesize]{C}
-void process_data(uint32_t A, uint32_t B) {
+void process(uint32_t A, uint32_t B) {
   if (A <= B) {
     crash_program();
   }
@@ -95,7 +101,7 @@ void process_data(uint32_t A, uint32_t B) {
     \hfill
     \begin{minipage}[t]{0.48\textwidth}
         \begin{minted}[fontsize=\footnotesize]{C}
-void process_data(uint32_t A, uint32_t B) {
+void process(uint32_t A, uint32_t B) {
   if (A <= B + 10000) {   // step 1
     if (A <= B + 1000) {  // step 2
       if (A <= B) {       // threshold

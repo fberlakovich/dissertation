@@ -28,6 +28,8 @@ dependencies = [
     "hdbscan>=0.8.33",  # Better clustering for embedding method
     "umap-learn>=0.5.7",  # Dimensionality reduction for embedding method
     "statsmodels>=0.14.6",
+    "pandas-stubs~=3.0.0",
+    "pyzstd>=0.19.1",
 ]
 
 [project.optional-dependencies]

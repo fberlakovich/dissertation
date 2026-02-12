@@ -4,7 +4,7 @@ The previous chapter presented \lool, a domain-specific approach to compiler fuz
 This chapter presents a complementary technique called \emph{Program State Projection} (PSP) that addresses a more general problem: the blindness of code coverage to data dependencies.
 
 While \lool is tailored to compiler testing, PSP aims to improve fuzzer guidance for arbitrary programs.
-The core insight is that compilers already perform sophisticated analyses to reason about data dependencies---for optimization, for devirtualization, and for security hardening.
+The core insight is that compilers already perform sophisticated analyses to reason about data dependencies, be it for optimization or for security hardening.
 By repurposing these analyses, we can project hidden data-state variations onto the control-flow graph, making them visible to standard coverage instrumentation.
 Whether this additional visibility translates into improved fuzzing effectiveness is an empirical question that we investigate in \cref{psp:s:evaluation}.
 

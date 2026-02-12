@@ -3,7 +3,7 @@
 The previous chapter established that code coverage, while effective, provides an incomplete view of program behavior.
 This chapter presents \lool, an approach tailored specifically to compiler testing that addresses these limitations by using the compiler's own optimization log as a coverage signal.
 
-Compilers are among the most complex software systems in existence, and their correctness is critical---bugs in the compiler can silently propagate to every program it compiles.
+Despite being complex software themselves, the correctness of compilers is even more important than the correctness of other software, given that bugs in the compiler can silently propagate to every program it compiles.
 Yet testing compilers is challenging precisely because the interesting behaviors (optimization interactions, corner cases in code generation) are difficult to trigger with random inputs and difficult to detect with generic coverage metrics.
 
 \lool addresses this challenge by leveraging a unique property of compilers: they already record which optimizations they perform.

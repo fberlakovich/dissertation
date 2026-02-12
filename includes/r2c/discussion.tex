@@ -8,7 +8,6 @@
 
 \subsection{Performance}\label{r2c:ss:discussion-evaluation}
 
-\fbetodo{Add section about profile-guided optimization}
 As evidenced by the benchmarks, the optimized \gls{BTRA} setup sequence improves \rtwoc{}'s performance considerably (see \cref{r2c:fig:perf-components}).
 While our implementation uses AVX2 vector instructions, falling back to SSE vector instructions would be an alternative for more feature constrained CPUs.
 For CPUs without vector extensions the \code{push} based setup sequence provides a viable alternative without loss of security.

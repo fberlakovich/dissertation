@@ -9,7 +9,8 @@ While this ecosystem enables developers to build software systems of unprecedent
 
 Despite this rise in complexity, the core expectations of software have remained unchanged: it is supposed to be secure, correct, reliable, and efficient.
 Yet, as systems grow, these qualities become harder to maintain and are often in tension with one another.
-Each new abstraction layer hides detail but introduces uncertainty; each performance optimization risks new corner cases; each extension of functionality opens new attack surfaces.
+Each new abstraction layer, for example, hides details but also introduces uncertainty about the layer below.
+Likewise, performance optimization risks new corner cases, and each extension of functionality opens new attack surfaces.
 Catastrophic security breaches like Heartbleed~\cite{heartbleed} (a simple buffer over-read in a core library), Spectre~\cite{Kocher2019} (exploiting CPU-level speculation), or Log4Shell~\cite{log4shell} (a failure in input sanitization) --- each with global consequences --- show that these problems are not just hypotheticals.
 
 Similarly, reliability failures like silent miscompilations have plagued even widespread production compilers such as GCC and LLVM \cite{yang2011,wang2012}.
@@ -72,12 +73,12 @@ Already in the year 2026, \gls{LLM}s can reduce the cost of creating highly soph
 At these drastically reduced costs, even sophisticated targeted attacks fall within the capabilities of non-state actors.
 In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
 \section{Reliability}
-Traditional approaches to software reliability—static analysis, unit testing, and formal verification—serve as the foundation of quality assurance.
+Traditional approaches to software reliability, such as static analysis, unit testing, and formal verification, serve as the foundation of quality assurance.
 While formal verification offers the strongest theoretical guarantees, it faces significant practical hurdles.
-A primary obstacle is the \emph{specification bottleneck}: verification requires properties to be formally defined, yet formulating such specifications is often non-trivial.
-Moreover, even when adequate specifications exist, the computational cost and limited scalability of formal methods often prove prohibitive for large, evolving systems.
-Similarly, static analysis suffers from inherent trade-offs between precision and scalability.
-Finally, unit testing remains the most widespread technique but suffers from a critical blind spot: it is inherently limited by human foresight and can only validate scenarios explicitly anticipated by the developer.
+A key problem is often the lack of specification: verification requires properties to be formally defined, yet formulating such specifications is usually non-trivial.
+Even when adequate specifications exist, the computational cost and limited scalability of formal methods prove prohibitive for large, evolving systems.
+Similarly, static analysis faces inherent trade-offs between precision and scalability.
+Finally, unit testing remains the most widespread technique but suffers from a critical blind spot: it is conceptually limited by human foresight and can only validate scenarios explicitly anticipated by the test author.
 
 In light of these shortcomings, a long-neglected technique named fuzz testing, or fuzzing for short, has become increasingly important over the past 10--15 years.
 This rise in popularity happened partly because of \propername{AFL}, a practical and fast fuzzer that combines code coverage feedback with carefully engineered heuristics.
@@ -102,9 +103,9 @@ To find these deeper bugs, the fuzzer needs a better guide---one that considers 
 \section{The Compiler's Role Beyond Optimization}
 In this thesis I argue that compilers are uniquely positioned to help improve both software reliability and security.
 Every non-trivial program passes through a compiler at some point, either ahead of time or just in time\footnote{Interpreted programs are an exception, but the interpreter itself has passed through a compiler as well.}.
-This \enquote{choke point} turns the compiler into a linchpin for software trustworthiness: a single transformation deployed in the toolchain can harden millions of downstream binaries.
+Due to this compilation \enquote{bottleneck}, a single transformation deployed in the toolchain can harden millions of downstream binaries.
 
-Compilers possess semantic insight that no runtime monitor or post-hoc analysis can replicate.
+Compilers possess semantic insight that is hard, if not impossible, for post-compilation transformations to replicate.
 The compiler's knowledge encompasses both programming language semantics and details about the target machine.
 Compilers, for example, know the exact type hierarchy of compiled \cpp programs and the exact geometry of their stack frames.
 While this information can be partially recovered from binaries, the reconstruction is notoriously challenging because compilation is a lossy process.
@@ -112,26 +113,26 @@ Similarly, compilers have detailed knowledge about the compilation process itsel
 
 In this thesis I explore how to tap these information sources for security hardening and improved fuzzing feedback.
 
-\section{Contributions}
+\section{Structure}
 
 This thesis presents three contributions that demonstrate the compiler's potential to improve software security and reliability.
-The common thread is the compiler's unique vantage point: it possesses semantic knowledge about program structure that can be leveraged for purposes beyond optimization.
+The common thread is the compiler's unique vantage point: it possesses semantic knowledge about program structure that can be leveraged for purposes \emph{beyond optimization}.
+The contributions are structured into two parts, with \cref{part:defense} focusing on security and \cref{part:fuzzing} on fuzzing.
+Each part concludes with an \emph{Outlook} chapter that discusses more general ideas and possible future research directions.
 
 \paragraph{R2C: Compiler-Driven Data Diversity}
-In Part~\ref{part:defense}, I present \rtwoc, a novel software diversity defense that addresses the challenge of layout inference through information leaks.
+In \cref{ch:r2c} I present \rtwoc, a novel software diversity defense that addresses the challenge of layout inference through information leaks.
 Unlike prior work that focused primarily on code randomization, \rtwoc leverages the compiler's knowledge of stack frame geometry to randomize observable data layouts.
 By disguising sensitive pointers among booby-trapped decoys, \rtwoc substantially raises reconnaissance cost while incurring moderate performance overhead.
+While introducing new diversity techniques, \rtwoc also reveals the challenges diversity faces when subjected to targeted attacks with a powerful threat model.
 
 \paragraph{LOOL: Optimization-Aware Compiler Fuzzing}
-In Part~\ref{part:fuzzing}, I present \lool, a compiler fuzzing framework based on a new type of coverage feedback.
+In \cref{ch:lool} I present \lool, a compiler fuzzing framework based on a new type of coverage feedback.
 Instead of relying on code coverage, \lool leverages the compiler's own optimization log as a domain-specific feedback signal.
 A genetic algorithm uses this feedback to steer test-case generation toward rare optimization interactions that are difficult to trigger otherwise.
 Our suggested domain-specific coverage is both more efficient and targeted than code coverage.
 
 \paragraph{Program State Projection}
-Finally, I present \emph{Program State Projection} (PSP), a technique that uses compiler analyses to expose hidden data dependencies to coverage-guided fuzzers.
+In \cref{ch:psp} I present \emph{Program State Projection} (PSP), a technique that uses compiler analyses to expose hidden data dependencies to coverage-guided fuzzers.
 By transforming indirect calls into explicit control-flow branches and partitioning value ranges, PSP aims to provide stepping stones that help fuzzers explore program states that conventional coverage metrics would conflate.
-Our evaluation investigates whether these additional stepping stones translate into measurable improvements on real-world benchmarks.
-
-
-We close each part with an outlook, providing more general insights and possible future research directions.
+Although at present our evaluation shows no quantifiable gains in terms of code coverage and bug-finding performance, the broader \gls{PSP} framework reveals a new principle for supporting code-coverage-guided fuzzers.

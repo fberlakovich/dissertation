@@ -825,7 +825,7 @@ def compare_magma_bugs(experiment_folder: str, fuzzer: str, baseline: str, bench
 def export_data_package(experiment: str, coverage_df: pd.DataFrame, experiment_folder: str,
                         fuzzers: list, benchmarks: list, output_path: str,
                         include_plot_data: bool = False):
-    """Export all data needed for offline analysis into a zip file.
+    """Export all data needed for offline analysis into a zstd-compressed tar archive.
 
     Creates a portable package containing:
     - coverage_data.parquet: Coverage over time from database
@@ -838,8 +838,9 @@ def export_data_package(experiment: str, coverage_df: pd.DataFrame, experiment_f
         include_plot_data: If True, extract fine-grained plot_data from corpus archives.
                           This can significantly increase package size.
     """
-    import zipfile
+    import tarfile
     import tempfile
+    import pyzstd
 
     print(f"\nCreating data package: {output_path}")
 
@@ -899,49 +900,58 @@ def export_data_package(experiment: str, coverage_df: pd.DataFrame, experiment_f
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2)
 
-        # 6. Create zip file (use ZIP_STORED for parquet since they're already zstd compressed)
-        with zipfile.ZipFile(output_path, 'w') as zf:
-            zf.write(coverage_path, "coverage_data.parquet", compress_type=zipfile.ZIP_STORED)
-            zf.write(metadata_path, "metadata.json", compress_type=zipfile.ZIP_DEFLATED)
-            if stats_path:
-                zf.write(stats_path, "fuzzer_stats.parquet", compress_type=zipfile.ZIP_STORED)
-            if bugs_path:
-                zf.write(bugs_path, "magma_bugs.parquet", compress_type=zipfile.ZIP_STORED)
-            if plot_data_path:
-                zf.write(plot_data_path, "plot_data.parquet", compress_type=zipfile.ZIP_STORED)
+        # 6. Create tar.zst archive with multicore zstd compression
+        zstd_option = {pyzstd.CParameter.nbWorkers: 0}  # 0 = auto-detect cores
+        with pyzstd.ZstdFile(output_path, 'w', level_or_option=zstd_option) as zf:
+            with tarfile.open(fileobj=zf, mode='w|') as tf:
+                tf.add(coverage_path, "coverage_data.parquet")
+                tf.add(metadata_path, "metadata.json")
+                if stats_path:
+                    tf.add(stats_path, "fuzzer_stats.parquet")
+                if bugs_path:
+                    tf.add(bugs_path, "magma_bugs.parquet")
+                if plot_data_path:
+                    tf.add(plot_data_path, "plot_data.parquet")
 
     file_size = os.path.getsize(output_path) / (1024 * 1024)
     print(f"  Package created: {output_path} ({file_size:.1f} MB)")
 
 
 def load_data_package(package_path: str) -> tuple:
-    """Load data from a previously exported package.
+    """Load data from a previously exported package (.tar.zst).
 
     Returns (coverage_df, stats_df, bugs_df, plot_df, metadata)
     """
-    import zipfile
+    import tarfile
+    import tempfile
+    import pyzstd
 
-    with zipfile.ZipFile(package_path, 'r') as zf:
-        with zf.open("metadata.json") as f:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with pyzstd.ZstdFile(package_path, 'r') as zf:
+            with tarfile.open(fileobj=zf, mode='r|') as tf:
+                tf.extractall(tmpdir, filter='data')
+
+        tmppath = Path(tmpdir)
+
+        with open(tmppath / "metadata.json") as f:
             metadata = json.load(f)
 
-        with zf.open("coverage_data.parquet") as f:
-            coverage_df = pd.read_parquet(f)
+        coverage_df = pd.read_parquet(tmppath / "coverage_data.parquet")
 
         stats_df = None
-        if "fuzzer_stats.parquet" in zf.namelist():
-            with zf.open("fuzzer_stats.parquet") as f:
-                stats_df = pd.read_parquet(f)
+        stats_file = tmppath / "fuzzer_stats.parquet"
+        if stats_file.exists():
+            stats_df = pd.read_parquet(stats_file)
 
         bugs_df = None
-        if "magma_bugs.parquet" in zf.namelist():
-            with zf.open("magma_bugs.parquet") as f:
-                bugs_df = pd.read_parquet(f)
+        bugs_file = tmppath / "magma_bugs.parquet"
+        if bugs_file.exists():
+            bugs_df = pd.read_parquet(bugs_file)
 
         plot_df = None
-        if "plot_data.parquet" in zf.namelist():
-            with zf.open("plot_data.parquet") as f:
-                plot_df = pd.read_parquet(f)
+        plot_file = tmppath / "plot_data.parquet"
+        if plot_file.exists():
+            plot_df = pd.read_parquet(plot_file)
 
     return coverage_df, stats_df, bugs_df, plot_df, metadata
 
@@ -980,10 +990,10 @@ Examples:
   %(prog)s -e vrp-unfold-eval02 aflplusplus_vrp_lto:aflplusplus_lto
 
   # Export data for offline analysis:
-  %(prog)s -c config.yaml --export-package data.zip aflplusplus_vrp:aflplusplus
+  %(prog)s -c config.yaml --export-package data.tar.zst aflplusplus_vrp:aflplusplus
 
   # Load from exported package (no database needed):
-  %(prog)s --from-package data.zip aflplusplus_vrp:aflplusplus
+  %(prog)s --from-package data.tar.zst aflplusplus_vrp:aflplusplus
         """
     )
     parser.add_argument("-e", "--experiment", help="Experiment name (can be read from config)")
@@ -995,7 +1005,7 @@ Examples:
     parser.add_argument("--output-dir", help="Output directory for CSV exports")
     parser.add_argument("--csv", action="store_true", help="Export results to CSV")
     parser.add_argument("--export-package", metavar="PATH",
-                        help="Export all data to a portable zip file for offline analysis")
+                        help="Export all data to a zstd-compressed tar archive for offline analysis")
     parser.add_argument("--from-package", metavar="PATH",
                         help="Load data from a previously exported package (no database needed)")
     parser.add_argument("--include-plot-data", action="store_true",
@@ -1058,7 +1068,7 @@ Examples:
             package_path = args.export_package
         else:
             # Create temp file that persists for the duration
-            tmp_file = tempfile.NamedTemporaryFile(suffix='.zip', delete=False)
+            tmp_file = tempfile.NamedTemporaryFile(suffix='.tar.zst', delete=False)
             package_path = tmp_file.name
             tmp_file.close()
 

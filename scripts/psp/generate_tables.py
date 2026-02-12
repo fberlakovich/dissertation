@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """Generate LaTeX table body files from PSP data packages.
 
-Usage:
-    ./generate_tables.py data/psp/package.zip aflplusplus_vrp:aflplusplus aflplusplus_unfold:aflplusplus_lto
+Usage (subcommands):
+    generate_tables.py edge-coverage  <experiment.tar.zst>  FUZZER:BASELINE [...]  [flags]
+    generate_tables.py bug-data       <experiment.tar.zst>  FUZZER:BASELINE [...]  [flags]
+    generate_tables.py entanglement   <analysis.tar.zstd>   [flags]
+    generate_tables.py stepping-stones       <analysis.tar.zstd>   [flags]
+    generate_tables.py partition-progression <analysis.tar.zstd>   [flags]
 
 Outputs LaTeX table body files (siunitx-compatible, no header) to --latex-output directory.
 """
 
 import argparse
+import json
 import sys
+import tarfile
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -22,14 +29,15 @@ from compare_fuzzers import (
     load_data_package,
     parse_comparisons,
     compare_coverage,
-    compare_fuzzer_stats,
-    compare_magma_bugs,
     vargha_delaney_a12,
     mann_whitney_test,
-    effect_size_interpretation,
 )
 from utils import define_latex_table, define_latex_var, load_name_map
 
+
+# ---------------------------------------------------------------------------
+# Helpers (shared across subcommands)
+# ---------------------------------------------------------------------------
 
 def latex_escape(s):
     """Escape LaTeX special characters in a string."""
@@ -189,7 +197,7 @@ def _shade_cell(value, effect=None):
 def generate_combined_coverage_table(args, comparisons, group_names, coverage_df, name_map, prefix=None):
     """Generate a combined coverage table with column groups for each comparison.
 
-    Each comparison becomes a column group with: Δ, Δ%, A12, p.
+    Each comparison becomes a column group with: Delta, Delta%, A12, p.
     Benchmarks are filtered by name_map if provided.
     If --shade-significant is set, cells for groups with p < 0.05 and non-negligible
     effect size are shaded.
@@ -435,56 +443,6 @@ def generate_combined_bugs_table(args, comparisons, group_names, bugs_df, name_m
     print(f"  Written: {name}.tex ({len(rows)} rows)")
 
 
-def generate_stats_table(args, fuzzer, baseline, stats_df, name_map, prefix=None):
-    """Generate per-metric fuzzer stats comparison table."""
-    if stats_df is None or stats_df.empty:
-        return
-
-    fuzzer_stats = stats_df[stats_df["fuzzer"] == fuzzer]
-    baseline_stats = stats_df[stats_df["fuzzer"] == baseline]
-
-    if fuzzer_stats.empty or baseline_stats.empty:
-        return
-
-    stat_cols = [
-        "execs_done", "execs_per_sec", "corpus_count", "corpus_favored",
-        "edges_found", "cycles_done", "stability", "bitmap_cvg",
-    ]
-
-    rows = []
-    for col in stat_cols:
-        if col not in fuzzer_stats.columns:
-            continue
-        fvals = fuzzer_stats[col].dropna().tolist()
-        bvals = baseline_stats[col].dropna().tolist()
-        if not fvals or not bvals:
-            continue
-
-        fmean = np.mean(fvals)
-        bmean = np.mean(bvals)
-        diff = fmean - bmean
-        rel_pct = ((fmean - bmean) / bmean * 100) if bmean != 0 else 0.0
-        a12 = vargha_delaney_a12(fvals, bvals)
-
-        rows.append({
-            "Metric": display_name(col, name_map),
-            "Fuzzer Mean": f"{fmean:.1f}",
-            "Baseline Mean": f"{bmean:.1f}",
-            "Diff": f"{diff:+.1f}",
-            r"Rel\%": f"{rel_pct:+.1f}",
-            "A12": f"{a12:.2f}",
-            "Effect": effect_size_interpretation(a12),
-        })
-
-    if not rows:
-        return
-
-    df = pd.DataFrame(rows)
-    name = table_name("stats", fuzzer, baseline, prefix)
-    define_latex_table(args, name, df)
-    print(f"  Written: {name}.tex ({len(rows)} rows)")
-
-
 def generate_bugs_table(args, fuzzer, baseline, bugs_df, name_map, prefix=None):
     """Generate per-bug Magma triggering comparison table."""
     if bugs_df is None or bugs_df.empty:
@@ -542,6 +500,27 @@ def _latex_cmd_name(group_name):
     ``"VRP"`` -> ``"Vrp"``, ``"Call Unfolding"`` -> ``"CallUnfolding"``.
     """
     return "".join(w.capitalize() for w in group_name.split())
+
+
+def _prefixed(base: str, prefix: str | None) -> str:
+    """Return ``base-prefix`` if *prefix* is set, otherwise *base*.
+
+    Underscores in *prefix* are replaced with hyphens for LaTeX-safe filenames.
+    """
+    if prefix:
+        return f"{base}-{prefix.replace('_', '-')}"
+    return base
+
+
+def _define_prefix(base: str, prefix: str | None) -> str:
+    r"""Return a LaTeX define name prefix incorporating *prefix*.
+
+    ``_define_prefix("pspEnt", "fuzzbench")`` -> ``"pspEntFuzzbench"``
+    ``_define_prefix("pspEnt", None)`` -> ``"pspEnt"``
+    """
+    if prefix:
+        return base + _latex_cmd_name(prefix)
+    return base
 
 
 def _per_trial_bug_counts(bugs_df, fuzzer, name_map):
@@ -663,7 +642,7 @@ def generate_per_bug_fisher_defines(args, comparisons, group_names, bugs_df, nam
         if f_rates.empty and b_rates.empty:
             continue
 
-        # Merge on (benchmark, bug_id) — keep bugs seen in either config
+        # Merge on (benchmark, bug_id) -- keep bugs seen in either config
         merged = pd.merge(
             f_rates, b_rates,
             on=["benchmark", "bug_id"], how="outer",
@@ -732,65 +711,214 @@ def generate_per_bug_fisher_defines(args, comparisons, group_names, bugs_df, nam
                 print(f"    {d} {bm}/{bug}: {int(row['triggered_f'])}/{int(row['n'])} vs {int(row['triggered_b'])}/{int(row['n'])} (p_adj={row['p_adj']:.3f})")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate LaTeX table bodies from PSP data packages",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s data/psp/vrp-unfold-eval-big04.zip aflplusplus_vrp:aflplusplus
-  %(prog)s data/psp/pkg.zip aflplusplus_vrp:aflplusplus aflplusplus_unfold:aflplusplus_lto --latex-output generated/psp
-        """,
-    )
-    parser.add_argument("package", help="Path to data package zip")
-    parser.add_argument(
-        "comparisons_args", nargs="+", metavar="FUZZER:BASELINE",
-        help="Comparisons in 'fuzzer:baseline' format",
-    )
-    parser.add_argument(
-        "--latex-output", type=str, default="generated/psp",
-        help="Output directory for LaTeX table files (default: generated/psp)",
-    )
-    parser.add_argument(
-        "--name-map", type=str, default=None,
-        help="Path to a JSON file mapping internal names to display names. "
-             "When given, only benchmarks present in the map are included.",
-    )
-    parser.add_argument(
-        "--prefix", type=str, default=None,
-        help="Prefix for output file names (e.g., 'fuzzbench' -> 'coverage-fuzzbench-...').",
-    )
-    parser.add_argument(
-        "--group-names", type=str, nargs="+", default=None,
-        help="Display names for each comparison group (e.g., 'VRP' 'Unfold'). "
-             "When given, generates a combined table with column groups.",
-    )
-    parser.add_argument(
-        "--no-bold-p", action="store_true", default=False,
-        help="Do not bold significant p-values (default: bold them).",
-    )
-    parser.add_argument(
-        "--bold-a12", action="store_true", default=False,
-        help="Bold non-negligible A12 effect sizes (|A12 - 0.5| >= 0.06). Default: False.",
-    )
-    parser.add_argument(
-        "--shade-significant", action="store_true", default=False,
-        help="Shade cells for comparison groups with p < 0.05 and non-negligible effect size.",
-    )
+# ---------------------------------------------------------------------------
+# Analysis package loading
+# ---------------------------------------------------------------------------
 
-    args = parser.parse_args()
+def load_analysis_package(package_path: str) -> tuple:
+    """Load analysis results from a zstd-compressed tar archive.
+
+    Reads individual ``results/{benchmark}/{fuzzer_instance}.json`` files
+    (not all_results.json which is too large).
+
+    Returns:
+        (runs, metadata) where runs is a list of dicts (one per instance)
+        and metadata is the top-level metadata dict.
+    """
+    import pyzstd
+
+    runs = []
+    metadata = {}
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with pyzstd.ZstdFile(package_path, 'r') as zf:
+            with tarfile.open(fileobj=zf, mode='r|') as tf:
+                for member in tf:
+                    if member.name == "metadata.json":
+                        f = tf.extractfile(member)
+                        metadata = json.load(f)
+                    elif member.name.startswith("results/") and member.name.endswith(".json"):
+                        f = tf.extractfile(member)
+                        if f is not None:
+                            try:
+                                run = json.load(f)
+                                runs.append(run)
+                            except json.JSONDecodeError:
+                                continue
+
+    print(f"Loaded {len(runs)} analysis results from {package_path}")
+    if metadata:
+        print(f"Experiment: {metadata.get('experiment', 'unknown')}")
+        print(f"Benchmarks: {len(metadata.get('benchmarks', []))}")
+        print(f"Fuzzers: {metadata.get('fuzzers', [])}")
+
+    return runs, metadata
+
+
+# ---------------------------------------------------------------------------
+# Analysis DataFrames
+# ---------------------------------------------------------------------------
+
+def _analysis_to_df(runs, name_map, fuzzer_filter, extract_fn):
+    """Build a per-benchmark median DataFrame from analysis runs.
+
+    *extract_fn(run)* receives a full run dict and returns a dict of
+    numeric fields, or None to skip the run.
+    """
+    rows = []
+    for run in runs:
+        if fuzzer_filter and run["fuzzer"] != fuzzer_filter:
+            continue
+        if name_map and run["benchmark"] not in name_map:
+            continue
+        fields = extract_fn(run)
+        if fields is None:
+            continue
+        rows.append({
+            "benchmark": run["benchmark"],
+            "fuzzer": run["fuzzer"],
+            "instance": run.get("instance", 0),
+            **fields,
+        })
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    agg_cols = [c for c in df.columns if c not in ("benchmark", "fuzzer", "instance")]
+    return df.groupby(["benchmark", "fuzzer"])[agg_cols].median().reset_index()
+
+
+def _extract_entanglement(run):
+    """Extract entanglement fields from a run.
+
+    The archive stores per-input classifications where:
+      - psp_only_count:    inputs discovering only PSP edges
+      - both_count:        inputs discovering both PSP and non-PSP edges
+      - baseline_only_count: inputs discovering only non-PSP edges
+
+    Entanglement rate = both / (both + psp_only), i.e. among inputs that
+    discover at least one PSP edge, how many also discover a non-PSP edge.
+    """
+    ent = run.get("analyzer_results", {}).get("vrp_hit_entanglement", {}).get("summary")
+    if ent is None:
+        return None
+    both = ent["both_count"]
+    psp_only = ent["psp_only_count"]
+    baseline_only = ent["baseline_only_count"]
+    psp_denom = both + psp_only
+    total_cov = both + psp_only + baseline_only
+    return {
+        "entanglement_rate": (both / psp_denom) if psp_denom > 0 else 0.0,
+        "non_psp_frac": (baseline_only / total_cov) if total_cov > 0 else 0.0,
+        "psp_only_frac": (psp_only / total_cov) if total_cov > 0 else 0.0,
+        "both_frac": (both / total_cov) if total_cov > 0 else 0.0,
+        "total_psp_edges": ent["total_psp_edges"],
+        "total_baseline_edges": ent["total_baseline_edges"],
+    }
+
+
+def _extract_stepping_stone(run):
+    """Extract stepping-stone fields from a run."""
+    ss = run.get("analyzer_results", {}).get("stepping_stone", {}).get("summary")
+    if ss is None:
+        return None
+    return {k: ss[k] for k in (
+        "total_psp_only_inputs", "successful_stepping_stones", "dead_ends",
+        "stepping_stone_success_rate", "avg_hops_to_baseline",
+    )}
+
+
+def _extract_partition_progression(run):
+    """Extract partition-progression fields from a run."""
+    pp = run.get("analyzer_results", {}).get("partition_progression", {}).get("summary")
+    if pp is None:
+        return None
+    return {k: pp[k] for k in (
+        "total_comparison_groups", "fully_reached_groups", "partially_reached_groups",
+        "unreached_groups", "sequential_climbing_rate",
+        "total_psp_edges_in_binary", "total_psp_edges_reached", "psp_reach_rate",
+    )}
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers for subcommand preambles
+# ---------------------------------------------------------------------------
+
+def _load_analysis(args):
+    """Shared preamble for analysis subcommands."""
+    name_map = load_name_map(args.name_map)
+    Path(args.latex_output).mkdir(parents=True, exist_ok=True)
+    runs, metadata = load_analysis_package(args.package)
+    fuzzer_filter = getattr(args, "fuzzer", None)
+    return runs, name_map, fuzzer_filter
+
+
+# ---------------------------------------------------------------------------
+# Subcommand handlers
+# ---------------------------------------------------------------------------
+
+def cmd_edge_coverage(args):
+    """Generate edge-coverage tables from showmap_edge_growth analysis data."""
+    runs, name_map, fuzzer_filter = _load_analysis(args)
 
     comparisons = parse_comparisons(args.comparisons_args)
     if not comparisons:
-        parser.error("No valid comparisons. Use 'fuzzer:baseline' format")
+        print("Error: No valid comparisons. Use 'fuzzer:baseline' format", file=sys.stderr)
+        sys.exit(1)
 
-    # Load name mapping
+    # Build a coverage DataFrame from showmap_edge_growth.final_edges_covered.
+    # Shape: benchmark, fuzzer, cycle (always 0), edges_covered.
+    # This is compatible with compare_coverage().
+    cov_rows = []
+    for run in runs:
+        seg = run.get("analyzer_results", {}).get("showmap_edge_growth")
+        if seg is None:
+            continue
+        cov_rows.append({
+            "benchmark": run["benchmark"],
+            "fuzzer": run["fuzzer"],
+            "cycle": 0,
+            "edges_covered": seg["final_edges_covered"],
+        })
+
+    if not cov_rows:
+        print("No showmap_edge_growth data found.")
+        return
+
+    coverage_df = pd.DataFrame(cov_rows)
+    print(f"Loaded showmap coverage for {coverage_df['benchmark'].nunique()} benchmarks, "
+          f"{coverage_df['fuzzer'].nunique()} fuzzers, "
+          f"{len(coverage_df)} instances")
+
+    prefix = args.prefix
+
+    if args.group_names:
+        if len(args.group_names) != len(comparisons):
+            print(f"Error: --group-names expects {len(comparisons)} names, "
+                  f"got {len(args.group_names)}", file=sys.stderr)
+            sys.exit(1)
+        print("\nGenerating combined coverage table")
+        generate_combined_coverage_table(
+            args, comparisons, args.group_names, coverage_df, name_map, prefix
+        )
+
+    for fuzzer, baseline in comparisons.items():
+        print(f"\nGenerating tables: {fuzzer} vs {baseline}")
+        if not args.group_names:
+            generate_coverage_table(args, fuzzer, baseline, coverage_df, name_map, prefix)
+
+    print("\nDone.")
+
+
+def cmd_bug_data(args):
+    """Generate bug-data tables (combined bugs + aggregate defines + Fisher)."""
+    comparisons = parse_comparisons(args.comparisons_args)
+    if not comparisons:
+        print("Error: No valid comparisons. Use 'fuzzer:baseline' format", file=sys.stderr)
+        sys.exit(1)
+
     name_map = load_name_map(args.name_map)
-
-    # Ensure output directory exists
     Path(args.latex_output).mkdir(parents=True, exist_ok=True)
 
-    # Load data package
     print(f"Loading data from: {args.package}")
     coverage_df, stats_df, bugs_df, plot_df, metadata = load_data_package(args.package)
 
@@ -806,16 +934,17 @@ Examples:
         if baseline not in available:
             print(f"Warning: baseline '{baseline}' not found in data")
 
-    # Generate tables
     prefix = args.prefix
 
     if args.group_names:
         if len(args.group_names) != len(comparisons):
-            parser.error(f"--group-names expects {len(comparisons)} names, got {len(args.group_names)}")
-        print("\nGenerating combined coverage table")
-        generate_combined_coverage_table(args, comparisons, args.group_names, coverage_df, name_map, prefix)
+            print(f"Error: --group-names expects {len(comparisons)} names, "
+                  f"got {len(args.group_names)}", file=sys.stderr)
+            sys.exit(1)
         print("\nGenerating combined bugs table")
-        generate_combined_bugs_table(args, comparisons, args.group_names, bugs_df, name_map, prefix)
+        generate_combined_bugs_table(
+            args, comparisons, args.group_names, bugs_df, name_map, prefix
+        )
         print("\nGenerating aggregate bug defines")
         generate_aggregate_bug_defines(args, comparisons, args.group_names, bugs_df, name_map)
         print("\nPer-bug Fisher's exact test (BH-corrected)")
@@ -823,12 +952,372 @@ Examples:
 
     for fuzzer, baseline in comparisons.items():
         print(f"\nGenerating tables: {fuzzer} vs {baseline}")
-        if not args.group_names:
-            generate_coverage_table(args, fuzzer, baseline, coverage_df, name_map, prefix)
-        generate_stats_table(args, fuzzer, baseline, stats_df, name_map, prefix)
         generate_bugs_table(args, fuzzer, baseline, bugs_df, name_map, prefix)
 
     print("\nDone.")
+
+
+def cmd_entanglement(args):
+    """Generate entanglement table and defines from analysis package."""
+    runs, name_map, fuzzer_filter = _load_analysis(args)
+
+    fuzzers = args.fuzzers if args.fuzzers else None
+    group_names = args.group_names
+
+    if fuzzers and group_names:
+        if len(group_names) != len(fuzzers):
+            print(f"Error: --group-names expects {len(fuzzers)} names, "
+                  f"got {len(group_names)}", file=sys.stderr)
+            sys.exit(1)
+        _cmd_entanglement_grouped(args, runs, name_map, fuzzers, group_names)
+    else:
+        # Single-fuzzer mode (use --fuzzer filter or show all)
+        df = _analysis_to_df(runs, name_map, fuzzer_filter, _extract_entanglement)
+        if df.empty:
+            print("No entanglement data found.")
+            return
+        _cmd_entanglement_single(args, df, name_map)
+
+
+def _cmd_entanglement_single(args, df, name_map):
+    """Write a single-fuzzer entanglement table."""
+    rows = []
+    for _, r in df.iterrows():
+        rows.append({
+            "Benchmark": display_name(r["benchmark"], name_map),
+            r"$\mathcal{E}$\ (\%)": f"{r['entanglement_rate'] * 100:.1f}",
+            r"Non-PSP (\%)": f"{r['non_psp_frac'] * 100:.1f}",
+            "PSP Edges": f"{r['total_psp_edges']:.0f}",
+            "Base Edges": f"{r['total_baseline_edges']:.0f}",
+        })
+    if not rows:
+        print("No rows to write.")
+        return
+
+    prefix = args.prefix
+    tbl_name = _prefixed("entanglement", prefix)
+    def_pfx = _define_prefix("pspEnt", prefix)
+
+    define_latex_table(args, tbl_name, pd.DataFrame(rows))
+    print(f"  Written: {tbl_name}.tex ({len(rows)} rows)")
+
+    median_ent_rate = df["entanglement_rate"].median() * 100
+    n_benchmarks = df["benchmark"].nunique()
+    define_latex_var(args, f"{def_pfx}MedianEntanglementRate", round(median_ent_rate, 1))
+    define_latex_var(args, f"{def_pfx}BenchmarkCount", n_benchmarks)
+    print(f"  Median entanglement rate: {median_ent_rate:.1f}%")
+    print(f"  Benchmarks: {n_benchmarks}")
+    print("\nDone.")
+
+
+def _cmd_entanglement_grouped(args, runs, name_map, fuzzers, group_names):
+    """Write a combined entanglement table with column groups per fuzzer."""
+    # Build per-fuzzer DataFrames
+    per_fuzzer = {}
+    for fz in fuzzers:
+        df = _analysis_to_df(runs, name_map, fz, _extract_entanglement)
+        if not df.empty:
+            per_fuzzer[fz] = df.set_index("benchmark")
+
+    if not per_fuzzer:
+        print("No entanglement data found.")
+        return
+
+    # Collect all benchmarks that appear in any fuzzer
+    all_benchmarks = sorted(set().union(*(df.index for df in per_fuzzer.values())))
+
+    rows = []
+    for bm in all_benchmarks:
+        if name_map and bm not in name_map:
+            continue
+        row = {"Benchmark": display_name(bm, name_map)}
+        has_any = False
+        base_edges = None
+        for fz, gname in zip(fuzzers, group_names):
+            df = per_fuzzer.get(fz)
+            if df is not None and bm in df.index:
+                r = df.loc[bm]
+                has_any = True
+                row[f"{gname} $\\mathcal{{E}}$\\ (\\%)"] = f"{r['entanglement_rate'] * 100:.1f}"
+                row[f"{gname} Non-PSP (\\%)"] = f"{r['non_psp_frac'] * 100:.1f}"
+                row[f"{gname} PSP-only (\\%)"] = f"{r['psp_only_frac'] * 100:.1f}"
+                row[f"{gname} Both (\\%)"] = f"{r['both_frac'] * 100:.1f}"
+            else:
+                row[f"{gname} $\\mathcal{{E}}$\\ (\\%)"] = "{---}"
+                row[f"{gname} Non-PSP (\\%)"] = "{---}"
+                row[f"{gname} PSP-only (\\%)"] = "{---}"
+                row[f"{gname} Both (\\%)"] = "{---}"
+        if has_any:
+            rows.append(row)
+
+    if not rows:
+        print("No rows to write.")
+        return
+
+    prefix = args.prefix
+    tbl_name = _prefixed("entanglement", prefix)
+    def_pfx = _define_prefix("pspEnt", prefix)
+
+    define_latex_table(args, tbl_name, pd.DataFrame(rows))
+    print(f"  Written: {tbl_name}.tex ({len(rows)} rows)")
+
+    # Emit per-group defines
+    for fz, gname in zip(fuzzers, group_names):
+        df = per_fuzzer.get(fz)
+        if df is None:
+            continue
+        suffix = _latex_cmd_name(gname)
+        median_non_psp = df["non_psp_frac"].median() * 100
+        median_psp_only = df["psp_only_frac"].median() * 100
+        median_both = df["both_frac"].median() * 100
+        median_ent = df["entanglement_rate"].median() * 100
+        n_bm = len(df)
+        define_latex_var(args, f"{def_pfx}{suffix}MedianNonPspFrac", round(median_non_psp, 1))
+        define_latex_var(args, f"{def_pfx}{suffix}MedianPspOnlyFrac", round(median_psp_only, 1))
+        define_latex_var(args, f"{def_pfx}{suffix}MedianBothFrac", round(median_both, 1))
+        define_latex_var(args, f"{def_pfx}{suffix}MedianEntanglementRate", round(median_ent, 1))
+        define_latex_var(args, f"{def_pfx}{suffix}BenchmarkCount", n_bm)
+        print(f"  {gname}: non-PSP={median_non_psp:.1f}%, PSP-only={median_psp_only:.1f}%, both={median_both:.1f}%, E={median_ent:.1f}%, benchmarks={n_bm}")
+
+    print("\nDone.")
+
+
+def cmd_stepping_stones(args):
+    """Generate stepping-stones table and defines from analysis package."""
+    runs, name_map, fuzzer_filter = _load_analysis(args)
+
+    df = _analysis_to_df(runs, name_map, fuzzer_filter, _extract_stepping_stone)
+    if df.empty:
+        print("No stepping-stone data found.")
+        return
+
+    rows = []
+    for _, r in df.iterrows():
+        rows.append({
+            "Benchmark": display_name(r["benchmark"], name_map),
+            "PSP-only": f"{r['total_psp_only_inputs']:.0f}",
+            "Successful": f"{r['successful_stepping_stones']:.0f}",
+            "Dead Ends": f"{r['dead_ends']:.0f}",
+            r"Success Rate \%": f"{r['stepping_stone_success_rate'] * 100:.1f}",
+            "Avg Hops": f"{r['avg_hops_to_baseline']:.1f}",
+        })
+
+    if not rows:
+        print("No rows to write.")
+        return
+
+    prefix = args.prefix
+    tbl_name = _prefixed("stepping-stones", prefix)
+    def_pfx = _define_prefix("pspStep", prefix)
+
+    table_df = pd.DataFrame(rows)
+    define_latex_table(args, tbl_name, table_df)
+    print(f"  Written: {tbl_name}.tex ({len(rows)} rows)")
+
+    # Emit defines
+    median_success_rate = df["stepping_stone_success_rate"].median() * 100
+    median_avg_hops = df["avg_hops_to_baseline"].median()
+    n_benchmarks = df["benchmark"].nunique()
+
+    define_latex_var(args, f"{def_pfx}MedianSuccessRate", round(median_success_rate, 1))
+    define_latex_var(args, f"{def_pfx}MedianAvgHops", round(float(median_avg_hops), 1))
+    define_latex_var(args, f"{def_pfx}BenchmarkCount", n_benchmarks)
+
+    print(f"  Median success rate: {median_success_rate:.1f}%")
+    print(f"  Median avg hops: {median_avg_hops:.1f}")
+    print(f"  Benchmarks: {n_benchmarks}")
+    print("\nDone.")
+
+
+def cmd_partition_progression(args):
+    """Generate partition-progression table and defines from analysis package."""
+    runs, name_map, fuzzer_filter = _load_analysis(args)
+
+    df = _analysis_to_df(runs, name_map, fuzzer_filter, _extract_partition_progression)
+    if df.empty:
+        print("No partition-progression data found.")
+        return
+
+    rows = []
+    for _, r in df.iterrows():
+        rows.append({
+            "Benchmark": display_name(r["benchmark"], name_map),
+            "Groups": f"{r['total_comparison_groups']:.0f}",
+            "Full": f"{r['fully_reached_groups']:.0f}",
+            "Partial": f"{r['partially_reached_groups']:.0f}",
+            "Unreached": f"{r['unreached_groups']:.0f}",
+            r"Climbing \%": f"{r['sequential_climbing_rate'] * 100:.1f}",
+            "PSP Edges": f"{r['total_psp_edges_in_binary']:.0f}",
+            "Reached": f"{r['total_psp_edges_reached']:.0f}",
+            r"Reach \%": f"{r['psp_reach_rate'] * 100:.1f}",
+        })
+
+    if not rows:
+        print("No rows to write.")
+        return
+
+    prefix = args.prefix
+    tbl_name = _prefixed("partition-progression", prefix)
+    def_pfx = _define_prefix("pspPart", prefix)
+
+    table_df = pd.DataFrame(rows)
+    define_latex_table(args, tbl_name, table_df)
+    print(f"  Written: {tbl_name}.tex ({len(rows)} rows)")
+
+    # Emit defines
+    median_climbing = df["sequential_climbing_rate"].median() * 100
+    median_reach = df["psp_reach_rate"].median() * 100
+    n_benchmarks = df["benchmark"].nunique()
+
+    define_latex_var(args, f"{def_pfx}MedianClimbingRate", round(median_climbing, 1))
+    define_latex_var(args, f"{def_pfx}MedianReachRate", round(median_reach, 1))
+    define_latex_var(args, f"{def_pfx}BenchmarkCount", n_benchmarks)
+
+    print(f"  Median climbing rate: {median_climbing:.1f}%")
+    print(f"  Median reach rate: {median_reach:.1f}%")
+    print(f"  Benchmarks: {n_benchmarks}")
+    print("\nDone.")
+
+
+# ---------------------------------------------------------------------------
+# CLI setup
+# ---------------------------------------------------------------------------
+
+def main():
+    # -- Parent parsers (shared argument groups) --
+
+    # Common args: --latex-output, --name-map, --prefix
+    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser.add_argument(
+        "--latex-output", type=str, default="generated/psp",
+        help="Output directory for LaTeX table files (default: generated/psp)",
+    )
+    common_parser.add_argument(
+        "--name-map", type=str, default=None,
+        help="Path to a JSON file mapping internal names to display names. "
+             "When given, only benchmarks present in the map are included.",
+    )
+    common_parser.add_argument(
+        "--prefix", type=str, default=None,
+        help="Prefix for output file names (e.g., 'fuzzbench' -> 'entanglement-fuzzbench.tex').",
+    )
+
+    # Analysis args: package, --fuzzer
+    analysis_parser = argparse.ArgumentParser(add_help=False)
+    analysis_parser.add_argument("package", help="Path to analysis data package (.tar.zstd)")
+    analysis_parser.add_argument(
+        "--fuzzer", type=str, default=None,
+        help="Filter results to a specific fuzzer name.",
+    )
+
+    # -- Top-level parser with subcommands --
+
+    parser = argparse.ArgumentParser(
+        description="Generate LaTeX table bodies from PSP data packages",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Subcommands:
+  edge-coverage           Coverage comparison tables from experiment packages
+  bug-data                Bug triggering tables from experiment packages
+  entanglement            VRP hit/bucket entanglement from analysis packages
+  stepping-stones         Stepping-stone analysis from analysis packages
+  partition-progression   Partition progression from analysis packages
+
+Examples:
+  %(prog)s edge-coverage data/psp/pkg.tar.zst aflplusplus_vrp:aflplusplus --group-names VRP
+  %(prog)s bug-data data/psp/pkg.tar.zst aflplusplus_vrp:aflplusplus --group-names VRP
+  %(prog)s entanglement data/psp/analysis-data.tar.zstd --latex-output generated/psp
+  %(prog)s stepping-stones data/psp/analysis-data.tar.zstd
+  %(prog)s partition-progression data/psp/analysis-data.tar.zstd --fuzzer aflplusplus_vrp
+        """,
+    )
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
+
+    # edge-coverage
+    sp_cov = subparsers.add_parser(
+        "edge-coverage",
+        parents=[common_parser, analysis_parser],
+        help="Generate edge-coverage comparison tables from showmap analysis data",
+    )
+    sp_cov.add_argument(
+        "comparisons_args", nargs="+", metavar="FUZZER:BASELINE",
+        help="Comparisons in 'fuzzer:baseline' format",
+    )
+    sp_cov.add_argument(
+        "--group-names", type=str, nargs="+", default=None,
+        help="Display names for each comparison group (e.g., 'VRP' 'Unfold'). "
+             "When given, generates a combined table with column groups.",
+    )
+    sp_cov.add_argument(
+        "--no-bold-p", action="store_true", default=False,
+        help="Do not bold significant p-values (default: bold them).",
+    )
+    sp_cov.add_argument(
+        "--bold-a12", action="store_true", default=False,
+        help="Bold non-negligible A12 effect sizes (|A12 - 0.5| >= 0.06). Default: False.",
+    )
+    sp_cov.add_argument(
+        "--shade-significant", action="store_true", default=False,
+        help="Shade cells for comparison groups with p < 0.05 and non-negligible effect size.",
+    )
+    sp_cov.set_defaults(func=cmd_edge_coverage)
+
+    # bug-data
+    sp_bug = subparsers.add_parser(
+        "bug-data",
+        parents=[common_parser],
+        help="Generate bug triggering tables and defines",
+    )
+    sp_bug.add_argument("package", help="Path to experiment data package (.tar.zst)")
+    sp_bug.add_argument(
+        "comparisons_args", nargs="+", metavar="FUZZER:BASELINE",
+        help="Comparisons in 'fuzzer:baseline' format",
+    )
+    sp_bug.add_argument(
+        "--group-names", type=str, nargs="+", default=None,
+        help="Display names for each comparison group (e.g., 'VRP' 'Unfold'). "
+             "When given, generates a combined table with column groups.",
+    )
+    sp_bug.add_argument(
+        "--shade-significant", action="store_true", default=False,
+        help="Shade cells for bugs with significantly different triggering rates.",
+    )
+    sp_bug.set_defaults(func=cmd_bug_data)
+
+    # entanglement
+    sp_ent = subparsers.add_parser(
+        "entanglement",
+        parents=[common_parser, analysis_parser],
+        help="Generate VRP entanglement table from analysis data",
+    )
+    sp_ent.add_argument(
+        "fuzzers", nargs="*", default=None,
+        help="Fuzzer names to include as column groups (e.g., aflplusplus_vrp aflplusplus_unfold_all).",
+    )
+    sp_ent.add_argument(
+        "--group-names", type=str, nargs="+", default=None,
+        help="Display names for each fuzzer group (e.g., 'VRP' 'Call Unfolding').",
+    )
+    sp_ent.set_defaults(func=cmd_entanglement)
+
+    # stepping-stones
+    sp_step = subparsers.add_parser(
+        "stepping-stones",
+        parents=[common_parser, analysis_parser],
+        help="Generate stepping-stones table from analysis data",
+    )
+    sp_step.set_defaults(func=cmd_stepping_stones)
+
+    # partition-progression
+    sp_part = subparsers.add_parser(
+        "partition-progression",
+        parents=[common_parser, analysis_parser],
+        help="Generate partition-progression table from analysis data",
+    )
+    sp_part.set_defaults(func=cmd_partition_progression)
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == "__main__":

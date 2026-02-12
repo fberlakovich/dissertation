@@ -8,6 +8,7 @@ The papers were identified using semantic clustering on titles and abstracts fro
 
 \input{generated/coevolution/code-reuse-papers-table.tex}
 
+
 \section{PSP Benchmark Versions}
 \label{app:psp-benchmarks}
 
@@ -36,7 +37,7 @@ The papers were identified using semantic clustering on titles and abstracts fro
         \propername{openthread\_ot-ip6-send-fuzzer}        & \propername{OpenThread}    & \propername{25506997} \\
         \propername{proj4\_proj\_crs\_to\_crs\_fuzzer}     & \propername{PROJ}          & \propername{a7482d37} \\
         \propername{re2\_fuzzer}                           & \propername{RE2}           & \propername{b025c6a3} \\
-        \propername{sqlite3\_ossfuzz}                      & \propername{SQLite}        & (OSS-Fuzz)            \\
+        \propername{sqlite3\_ossfuzz}                      & \propername{SQLite}        & ---$^{\P}$            \\
         \propername{stb\_stbi\_read\_fuzzer}               & \propername{stb}           & \propername{5736b15f} \\
         \propername{systemd\_fuzz-link-parser}             & \propername{systemd}       & \propername{07faa499} \\
         \propername{vorbis\_decode\_fuzzer}                & \propername{Vorbis}        & \propername{84c02369} \\
@@ -44,6 +45,11 @@ The papers were identified using semantic clustering on titles and abstracts fro
         \propername{zlib\_zlib\_uncompress\_fuzzer}        & \propername{zlib}          & \propername{d71dc66f} \\
         \bottomrule
     \end{tabular}
+
+    \smallskip
+    {\footnotesize
+        $^{\P}$\,SQLite Fossil repository source hash \propername{c78cbf2e86850cc6}.
+    }
 \end{table}
 
 \begin{table}[t]
@@ -52,30 +58,30 @@ The papers were identified using semantic clustering on titles and abstracts fro
     \label{app:tab:magma-benchmarks}
     \begin{tabular}{lll}
         \toprule
-        \textbf{Benchmark}                                 & \textbf{Project}           & \textbf{Commit}       \\
+        \textbf{Benchmark}                             & \textbf{Project}        & \textbf{Commit}       \\
         \midrule
-        \propername{libpng}                                & \propername{libpng}        & \propername{a37d4836} \\
-        \propername{libsndfile}                            & \propername{libsndfile}    & \propername{86c9f9eb} \\
-        \propername{libtiff}                               & \propername{libtiff}       & \propername{c145a6c1} \\
-        \propername{libtiff\_tiffcp}                       & \propername{libtiff}       & \propername{c145a6c1} \\
-        \propername{libtiff\_tiff\_read\_rgba}             & \propername{libtiff}       & \propername{c145a6c1} \\
-        \propername{libxml2\_xmllint}                      & \propername{libxml2}       & \propername{ec6e3efb} \\
-        \propername{libxml2\_xml\_read\_memory}            & \propername{libxml2}       & \propername{ec6e3efb} \\
-        \propername{lua}$^{\ddagger}$                      & \propername{Lua}           & \propername{dbdc74dc} \\
-        \propername{openssl\_asn1}                         & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{openssl\_asn1parse}                    & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{openssl\_bignum}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{openssl\_client}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{openssl\_server}                       & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{openssl\_x509}                         & \propername{OpenSSL}       & \propername{3bd5319b} \\
-        \propername{php\_exif}$^{\dagger}$                 & \propername{PHP}           & \propername{bc39abe8} \\
-        \propername{php\_json}$^{\dagger}$                 & \propername{PHP}           & \propername{bc39abe8} \\
-        \propername{php\_parser}$^{\dagger}$               & \propername{PHP}           & \propername{bc39abe8} \\
-        \propername{php\_unserialize}$^{\dagger}$          & \propername{PHP}           & \propername{bc39abe8} \\
-        \propername{poppler\_pdf\_fuzzer}$^{\ddagger}$     & \propername{Poppler}       & \propername{1d23101c} \\
-        \propername{poppler\_pdfimages}$^{\ddagger}$       & \propername{Poppler}       & \propername{1d23101c} \\
-        \propername{poppler\_pdftoppm}$^{\ddagger}$        & \propername{Poppler}       & \propername{1d23101c} \\
-        \propername{sqlite3}                               & \propername{SQLite}        & \propername{8c432642} \\
+        \propername{libpng}                            & \propername{libpng}     & \propername{a37d4836} \\
+        \propername{libsndfile}                        & \propername{libsndfile} & \propername{86c9f9eb} \\
+        \propername{libtiff}                           & \propername{libtiff}    & \propername{c145a6c1} \\
+        \propername{libtiff\_tiffcp}                   & \propername{libtiff}    & \propername{c145a6c1} \\
+        \propername{libtiff\_tiff\_read\_rgba}         & \propername{libtiff}    & \propername{c145a6c1} \\
+        \propername{libxml2\_xmllint}                  & \propername{libxml2}    & \propername{ec6e3efb} \\
+        \propername{libxml2\_xml\_read\_memory}        & \propername{libxml2}    & \propername{ec6e3efb} \\
+        \propername{lua}$^{\ddagger}$                  & \propername{Lua}        & \propername{dbdc74dc} \\
+        \propername{openssl\_asn1}                     & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{openssl\_asn1parse}                & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{openssl\_bignum}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{openssl\_client}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{openssl\_server}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{openssl\_x509}                     & \propername{OpenSSL}    & \propername{3bd5319b} \\
+        \propername{php\_exif}$^{\dagger}$             & \propername{PHP}        & \propername{bc39abe8} \\
+        \propername{php\_json}$^{\dagger}$             & \propername{PHP}        & \propername{bc39abe8} \\
+        \propername{php\_parser}$^{\dagger}$           & \propername{PHP}        & \propername{bc39abe8} \\
+        \propername{php\_unserialize}$^{\dagger}$      & \propername{PHP}        & \propername{bc39abe8} \\
+        \propername{poppler\_pdf\_fuzzer}$^{\ddagger}$ & \propername{Poppler}    & \propername{1d23101c} \\
+        \propername{poppler\_pdfimages}$^{\ddagger}$   & \propername{Poppler}    & \propername{1d23101c} \\
+        \propername{poppler\_pdftoppm}$^{\ddagger}$    & \propername{Poppler}    & \propername{1d23101c} \\
+        \propername{sqlite3}                           & \propername{SQLite}     & \propername{8c432642} \\
         \bottomrule
     \end{tabular}
 
