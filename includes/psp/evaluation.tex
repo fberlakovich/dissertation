@@ -1,4 +1,23 @@
 \section{Evaluation}\label{psp:s:evaluation}
+\begin{table}[t]
+    \centering
+    \caption{Evaluated fuzzer configurations}
+    \label{tab:psp-configurations}
+    \begin{thesistable}{
+        colspec = {l l l},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+    }
+        \toprule
+        {Configuration}     & {Description}                        & {Baseline}       \\
+        \midrule
+        aflplusplus         & Standard \aflpp (non-LTO)            & ---              \\
+        aflplusplus\_lto    & \aflpp with LTO instrumentation      & ---              \\
+        aflplusplus\_vrp    & \aflpp + \gls{VRP} transformations   & \propername{aflplusplus} \\
+        aflplusplus\_unfold & \aflpp LTO + indirect call unfolding & \propername{aflplusplus\_lto} \\
+        \bottomrule
+    \end{thesistable}
+\end{table}
 
 
 This section describes the evaluation of our prototype implementation described in \cref{psp:s:implementation}.
@@ -53,37 +72,24 @@ We consider deviations of $|0.5 - \hat{A}_{12}| > 0.06$ as non-negligible, with 
     Shading indicates significant results with non-negligible effect: \colorbox{cellbetter1}{green} for improvement, \colorbox{cellworse1}{red} for degradation; intensity reflects effect magnitude (small/medium/large).
     See \cref{psp:sss:coverage-comparison-method} for details.}
     \label{psp:tab:coverage-fuzzbench}
-    \footnotesize
-    \setlength{\extrarowheight}{1pt}
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+    \scriptsize
+    \loadTableData{generated/psp/coverage-fuzzbench}
+    \begin{thesistable}[expand={\tabledata,\shadecell}]{
+        colspec = {l S[table-format=+4.0,retain-explicit-plus,table-number-alignment=right,group-separator={,},group-minimum-digits=4] S[table-format=+2.1,retain-explicit-plus,table-number-alignment=right] S[table-format=1.2,table-number-alignment=right] S[table-format=1.3,table-number-alignment=right,table-text-alignment=right] S[table-format=+4.0,retain-explicit-plus,table-number-alignment=right,group-separator={,},group-minimum-digits=4] S[table-format=+2.1,retain-explicit-plus,table-number-alignment=right] S[table-format=1.2,table-number-alignment=right] S[table-format=1.3,table-number-alignment=right,table-text-alignment=right]},
+        headrows = 2,
+        cell{3-Z}{1} = {font=\propernamedecl},
+        colsep = 3pt,
+        column{2} = {leftsep=5pt},
+        column{6} = {leftsep=7pt},
+    }
         \toprule
-        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & \SetCell[c=4]{c} {VRP} & & & & \SetCell[c=4]{c} {Call Unfolding} & & & \\
+        \cmidrule[lr]{2-5} \cmidrule[lr]{6-9}
         {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/psp/coverage-fuzzbench}
+        \tabledata
         \bottomrule
-    \end{tabular}}
-\end{table}
-
-
-\begin{table}[t]
-    \centering
-    \caption{Evaluated fuzzer configurations}
-    \label{tab:psp-configurations}
-    \begin{tabular}{>{\nextrow}E l l}
-        \toprule
-        {Configuration}     & {Description}                        & {Baseline}       \\
-        \midrule
-        \startdatarows
-        aflplusplus         & Standard \aflpp (non-LTO)            & ---              \\
-        aflplusplus\_lto    & \aflpp with LTO instrumentation      & ---              \\
-        aflplusplus\_vrp    & \aflpp + \gls{VRP} transformations   & \propername{aflplusplus} \\
-        aflplusplus\_unfold & \aflpp LTO + indirect call unfolding & \propername{aflplusplus\_lto} \\
-        \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 \begin{table}[t]
@@ -95,16 +101,20 @@ We consider deviations of $|0.5 - \hat{A}_{12}| > 0.06$ as non-negligible, with 
     See \cref{psp:sss:bug-triggering-method} for details.}
     \label{psp:tab:bugs-magma}
     \footnotesize
-    \begin{tabular}{>{\nextrow}E E NN S[table-format=4.0] S[table-format=4.0] NN S[table-format=4.0] S[table-format=4.0]}
+    \loadTableData{generated/psp/bugs-magma}
+    \begin{thesistable}[expand={\tabledata,\shadecell}]{
+        colspec = {l l S[table-format=2.0] S[table-format=2.0] S[table-format=4.0] S[table-format=4.0] S[table-format=2.0] S[table-format=2.0] S[table-format=4.0] S[table-format=4.0]},
+        headrows = 2,
+        cell{3-Z}{1-2} = {font=\propernamedecl},
+    }
         \toprule
-        & & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){3-6} \cmidrule(lr){7-10}
+        & & \SetCell[c=4]{c} {VRP} & & & & \SetCell[c=4]{c} {Call Unfolding} & & & \\
+        \cmidrule[lr]{3-6} \cmidrule[lr]{7-10}
         {Benchmark} & {Bug} & {$n$} & {$n_b$} & {TTF} & {TTF$_b$} & {$n$} & {$n_b$} & {TTF} & {TTF$_b$} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/psp/bugs-magma}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 For per-bug triggering rates, we use Fisher's exact test on $2 \times 2$ contingency tables consisting of two rows (\gls{PSP} config and baseline) and two columns (\enquote{triggered} and \enquote{not triggered}).
 The cells contain the number of instances that triggered (or did not trigger) the bug in the respective configuration.
@@ -123,16 +133,23 @@ We thus apply the Benjamini-Hochberg correction to bound the false discovery rat
     \label{psp:tab:coverage-magma}
     \footnotesize
     \setlength{\extrarowheight}{1pt}
-    \begin{tabular}{>{\nextrow}E DRAP @{\hspace{1.5em}} DRAP}
+    \loadTableData{generated/psp/coverage-magma}
+    \begin{thesistable}[expand={\tabledata,\shadecell}]{
+        colspec = {l S[table-format=+4.0,retain-explicit-plus,table-number-alignment=right,group-separator={,},group-minimum-digits=4] S[table-format=+2.1,retain-explicit-plus,table-number-alignment=right] S[table-format=1.2,table-number-alignment=right] S[table-format=1.3,table-number-alignment=right,table-text-alignment=right] S[table-format=+4.0,retain-explicit-plus,table-number-alignment=right,group-separator={,},group-minimum-digits=4] S[table-format=+2.1,retain-explicit-plus,table-number-alignment=right] S[table-format=1.2,table-number-alignment=right] S[table-format=1.3,table-number-alignment=right,table-text-alignment=right]},
+        headrows = 2,
+        cell{3-Z}{1} = {font=\propernamedecl},
+        colsep = 3pt,
+        column{2} = {leftsep=5pt},
+        column{6} = {leftsep=7pt},
+    }
         \toprule
-        & \multicolumn{4}{c}{VRP} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & \SetCell[c=4]{c} {VRP} & & & & \SetCell[c=4]{c} {Call Unfolding} & & & \\
+        \cmidrule[lr]{2-5} \cmidrule[lr]{6-9}
         {Benchmark} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} & {$\Delta$} & {$\Delta$\%} & {$\hat{A}_{12}$} & {$p$} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/psp/coverage-magma}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 We measure the achieved edge coverage by replaying the corpus found by each configuration on a binary instrumented with Clang's coverage sanitizer.

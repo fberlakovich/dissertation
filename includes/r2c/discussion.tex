@@ -20,28 +20,23 @@ Similarly, prolog trap insertion likely adds instruction-cache pressure by expan
 
 \begin{table}[t]
     \centering
-    \sisetup{
-        table-alignment-mode=none,
-        table-number-alignment=right,
+    \begin{thesistable}{
+        colspec = {l S[table-format=12.0,table-alignment-mode=none,table-number-alignment=right] @{\hskip 2em} l S[table-format=12.0,table-alignment-mode=none,table-number-alignment=right]},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+        cell{2-Z}{3} = {font=\propernamedecl},
     }
-    \begin{tabular}{lS[table-format=12.0]}
         \toprule
-        Benchmark              & {Call Frequency} \\
+        Benchmark & {Call Frequency} & Benchmark & {Call Frequency} \\
         \midrule
-        \propername{perlbench} & 9435182963       \\
-        \propername{gcc}       & 7471474392       \\
-        \propername{mcf}       & 38657893688      \\
-        \propername{lbm}       & 20906700         \\
-        \propername{omnetpp}   & 23536583520      \\
-        \propername{xalancbmk} & 12430137048      \\
-        \propername{x264}      & 3400115007       \\
-        \propername{deepsjeng} & 11366032234      \\
-        \propername{imagick}   & 10441212712      \\
-        \propername{leela}     & 13108456661      \\
-        \propername{nab}       & 135237228510     \\
-        \propername{xz}        & 3287645643       \\
+        perlbench & 9435182963       & x264      & 3400115007       \\
+        gcc       & 7471474392       & deepsjeng & 11366032234      \\
+        mcf       & 38657893688      & imagick   & 10441212712      \\
+        lbm       & 20906700         & leela     & 13108456661      \\
+        omnetpp   & 23536583520      & nab       & 135237228510     \\
+        xalancbmk & 12430137048      & xz        & 3287645643       \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
     \caption{Median call frequencies of SPEC CPU 2017 benchmarks across all inputs.}
     \label{tab:call-frequencies}
 \end{table}
@@ -57,19 +52,23 @@ The data suggests that there is only a weak direct correlation between calls and
 The mere call count, therefore, does not sufficiently explain the performance profile.
 
 
+\loadTableData{generated/r2c/btra-steps}
 \begin{table}[t]
     \centering
     \caption{Performance overhead (\%) by \gls{BTRA} count relative to baseline.
     All other \rtwoc components use the same configuration as full \rtwoc (see \cref{r2c:sss:eval-btra}).}
     \label{r2c:tab:btra-steps-overhead}
     \footnotesize
-    \begin{tabular}{l *{6}{r}}
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l r r r r r r},
+        headrows = 1,
+    }
         \toprule
         Benchmark & 2 \glspl{BTRA} & 6 \glspl{BTRA} & 10 \glspl{BTRA} & 14 \glspl{BTRA} & 18 \glspl{BTRA} & 22 \glspl{BTRA} \\
         \midrule
-        \fileInput{generated/r2c/btra-steps}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 A possible explanation for the super-additive overhead (sum of component-overheads is less than actual total overhead) in \propername{mcf} and \propername{omnetpp} are memory stalls.
@@ -92,6 +91,7 @@ We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analy
         every axis/.append style={
             yticklabel style={font=\footnotesize},
             xticklabel style={font=\footnotesize},
+            legend style={font=\propernamedecl},
             execute at begin axis={
                 \pgfplotsset{
                     width=\textwidth,
@@ -99,7 +99,7 @@ We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analy
             },
         },
     }
-    \resizebox{\textwidth}{!}{\input{figures/r2c/btra-instr-vs-cycles}}%
+    \resizebox{0.9\textwidth}{!}{\input{figures/r2c/btra-instr-vs-cycles}}%
     \endgroup
     \caption{The relationship between instruction overhead and cycle overhead.
     The leftmost points resemble a configuration with 2 \glspl{BTRA}, whereas the rightmost points are 22 \glspl{BTRA} (see \cref{r2c:sss:perf-counters} for details).}
@@ -107,7 +107,7 @@ We choose \propername{i9} instead of \propername{EPYC} for the \code{perf} analy
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{figures/r2c/stall-hiding}%
     \caption{Conceptual figure of stall hiding.
@@ -147,24 +147,7 @@ Given that \glspl{BTRA} are responsible for most of the additional instructions,
 \Cref{r2c:tab:ipc-progression} shows the absolute \gls{IPC} values as the number of \glspl{BTRA} increases from 2 to 22.
 \cref{r2c:fig:btra-instr-vs-cycles} shows the relation between the cycle overhead and instruction overhead for increasing numbers of \glspl{BTRA}, relative to the baseline.
 In other words, \cref{r2c:fig:btra-instr-vs-cycles} is a graphical depiction of the numerical values in \cref{r2c:tab:ipc-progression}.
-\begin{table}[t]
-    \centering
-    \caption{\gls{IPC} progression with increasing \gls{BTRA} count.
-    Benchmarks with memory slack show \gls{IPC} improvement as \gls{BTRA} instructions fill idle cycles; \gls{CPU}-bound benchmarks show flat or slightly decreasing \gls{IPC}.}
-    \label{r2c:tab:ipc-progression}
-    \footnotesize
-    \begin{tabular}{l
-    S[table-format=1.2]
-        c c c c c c}
-        \toprule
-        & & \multicolumn{6}{c}{\glspl{BTRA} ($\Delta$\%)} \\
-        \cmidrule(lr){3-8}
-        Benchmark & {Baseline} & {2} & {6} & {10} & {14} & {18} & {22} \\
-        \midrule
-        \fileInput{generated/r2c/ipc-progression}
-        \bottomrule
-    \end{tabular}
-\end{table}
+
 \propername{Perlbench}, for example, shows an almost perfectly linear correlation, meaning that each additional instruction also requires a proportional number of additional cycles.
 \propername{Perlbench} already has a relatively high \gls{IPC} of ~2.5 in the baseline, meaning that \propername{perlbench} utilizes the \gls{CPU}'s pipeline well and there is little room for additional instructions to hide.
 We initially speculated that \propername{perlbench}, just like \propername{xalancbmk}, is affected by an increased instruction-cache pressure.
@@ -184,32 +167,25 @@ For example, if the \glspl{BTRA} setup sequence is preceded by a stalling instru
 The instructions within an out-of-order execution window can execute before their program-order predecessors and, if they share the window with a stalling instruction, potentially during the stall cycles.
 The stall cycles of window \propername{W\textsubscript{2}}, for example, are underutilized as there are no instructions that can execute during this stall.
 
-
+\loadTableData{generated/r2c/ipc-progression}
 \begin{table}[t]
     \centering
-    \caption{Call density analysis. Call counts are from runtime instrumentation (see \cref{tab:call-frequencies}); baseline instructions from \texttt{perf stat}. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
-    \label{r2c:tab:call-density}
-    \sisetup{
-        table-alignment-mode=none,
-        table-number-alignment=right,
+    \caption{\gls{IPC} progression with increasing \gls{BTRA} count.
+    Benchmarks with memory slack show \gls{IPC} improvement as \gls{BTRA} instructions fill idle cycles; \gls{CPU}-bound benchmarks show flat or slightly decreasing \gls{IPC}.}
+    \label{r2c:tab:ipc-progression}
+    \footnotesize
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l c c c c c c c},
+        headrows = 2,
     }
-    \begin{tabular}{l
-        S[table-format=4.0]
-        S[table-format=2.1]
-        S[table-format=2.1]}
         \toprule
-        Benchmark              & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
+        & & \SetCell[c=6]{c} \glspl{BTRA} ($\Delta$\%) & & & & & \\
+        \cmidrule[lr]{3-8}
+        Benchmark & {Baseline} & {2} & {6} & {10} & {14} & {18} & {22} \\
         \midrule
-        \propername{x264}      & 867                  & 3.4         & 3.9       \\
-        \propername{deepsjeng} & 1957                 & 11.4        & 5.8       \\
-        \propername{leela}     & 1638                 & 13.1        & 8.0       \\
-        \propername{perlbench} & 994                  & 9.4         & 9.5       \\
-        \propername{gcc}       & 781                  & 7.5         & 9.6       \\
-        \propername{xalancbmk} & 1053                 & 12.4        & 11.8      \\
-        \propername{mcf}       & 1965                 & 38.7        & 19.7      \\
-        \propername{omnetpp}   & 1020                 & 23.5        & 23.1      \\
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 If no such stalling instruction exists in the \glspl{BTRA}'s proximity, the \glspl{BTRA} execution delays the execution of other instructions.
@@ -251,6 +227,32 @@ The perf counter data also show non-trivial memory stalls (about 22\%) and divid
 Both \propername{Backend Bound} and the \propername{Frontend Bound} categories decrease slightly with \rtwoc, consistent with BTRA instructions filling otherwise idle slots.
 Notably, \propername{leela} has the highest \propername{Bad Speculation} rate among our benchmarks ($\approx$22\%), which explains why its baseline \gls{IPC} is low despite not being memory-bound---the CPU frequently discards speculative work.
 However, this misprediction overhead does not itself create hiding capacity; rather, it is the resulting execution port underutilization that provides slack for \gls{BTRA} instructions to execute without extending the critical path.
+
+
+\begin{table}[t]
+    \centering
+    \caption{Call density analysis. Call counts are from runtime instrumentation (see \cref{tab:call-frequencies}); baseline instructions from \texttt{perf stat}. Density is calls per 1000 baseline instructions; higher density means more \gls{BTRA} overhead per unit of work.}
+    \label{r2c:tab:call-density}
+    \begin{thesistable}{
+        colspec = {l S[table-format=4.0] S[table-format=2.1] S[table-format=2.1]},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+    }
+        \toprule
+        Benchmark & {Baseline Instr (B)} & {Calls (B)} & {Density} \\
+        \midrule
+        x264      & 867                  & 3.4         & 3.9       \\
+        deepsjeng & 1957                 & 11.4        & 5.8       \\
+        leela     & 1638                 & 13.1        & 8.0       \\
+        perlbench & 994                  & 9.4         & 9.5       \\
+        gcc       & 781                  & 7.5         & 9.6       \\
+        xalancbmk & 1053                 & 12.4        & 11.8      \\
+        mcf       & 1965                 & 38.7        & 19.7      \\
+        omnetpp   & 1020                 & 23.5        & 23.1      \\
+        \bottomrule
+    \end{thesistable}
+\end{table}
+
 \subsubsection{Memory Overhead}
 Surprised by the difference of memory overhead between SPEC CPU 2017 benchmarks and webserver benchmarks, we verified the memory SPEC results by applying the same methodology as for the webserver benchmarks.
 Instead of relying on the \propername{maxrss} counter, we recorded the RSS usage of the SPEC benchmarks with a separate monitoring process.
@@ -327,10 +329,13 @@ We note, however, that only very select function pointers are suitable for \gls{
     \centering
     \caption{Empirical distribution of function pointers per stack frame.}
     \label{r2c:tab:func-ptr-dist}
-    \begin{tabular}{c rr rr rr}
+    \begin{thesistable}{
+        colspec = {c r r r r r r},
+        headrows = 2,
+    }
         \toprule
-        & \multicolumn{2}{c}{\propername{nginx}} & \multicolumn{2}{c}{\propername{Apache}} & \multicolumn{2}{c}{\propername{Lighttpd}} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+        & \SetCell[c=2]{c} \propername{nginx} & & \SetCell[c=2]{c} \propername{Apache} & & \SetCell[c=2]{c} \propername{Lighttpd} & \\
+        \cmidrule[lr]{2-3} \cmidrule[lr]{4-5} \cmidrule[lr]{6-7}
         Count & Frames & \%   & Frames & \%   & Frames & \%   \\
         \midrule
         0     & 74     & 18.5 & 266    & 54.4 & 96     & 25.3 \\
@@ -346,7 +351,7 @@ We note, however, that only very select function pointers are suitable for \gls{
         10    & 0      & 0.0  & 0      & 0.0  & 3      & 0.8  \\
         11+   & 0      & 0.0  & 0      & 0.0  & 50     & 13.2 \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 Leaking a function pointer from a return address requires more guessing.
@@ -422,69 +427,63 @@ Note, however, that such an attack requires specific prerequisites and goes sign
     \caption{\gls{heapbt} single-guess success probabilities for a random stack snapshot.
     Each stack frame contains three \glspl{heapbt} on average.}
     \label{r2c:tab:heap-ptr-probabilities}
-    \begin{tabular}{ll rrr r}
+    \begin{thesistable}{
+        colspec = {l l r r r r},
+    }
         \toprule
         \textbf{Server} & \textbf{Case} & Depth & Heap Ptr. & \glspl{heapbt} & $P_{Success}$ \\
         \midrule
-        \multirow{4}{*}{\propername{nginx}}
+        \SetCell[r=4]{l} \propername{nginx}
         & Worst         & 12    & 40        & 36             & 52.6\%        \\
         & Average       & 22    & 100       & 66             & 60.2\%        \\
         & Median        & 22    & 102       & 66             & 60.7\%        \\
         & Best          & 15    & 74        & 45             & 62.2\%        \\
         \midrule
-        \multirow{4}{*}{\propername{Apache}}
+        \SetCell[r=4]{l} \propername{Apache}
         & Worst         & 174   & 194       & 522            & 27.1\%        \\
         & Average       & 140   & 269       & 420            & 39.1\%        \\
         & Median        & 140   & 273       & 420            & 39.4\%        \\
         & Best          & 4     & 29        & 12             & 70.7\%        \\
         \midrule
-        \multirow{4}{*}{\propername{Lighttpd}}
+        \SetCell[r=4]{l} \propername{Lighttpd}
         & Worst         & 4     & 4         & 12             & 25.0\%        \\
         & Average       & 5     & 48        & 15             & 71.8\%        \\
         & Median        & 8     & 87        & 24             & 78.4\%        \\
         & Best          & 7     & 116       & 21             & 84.7\%        \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
-
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/r2c/ehframes}%
-    \caption{Without randomization, an attacker can infer structural information about functions, such as the relative location of the return address from the Call-Frame Information directives in the \code{eh\_frame} section.
-        \rtwoc's (right) randomization measures break the inference step from information in the \code{.eh\_frame} section to functions.}
-    \label{r2c:fig:ehframes}
-\end{figure}
-
 
 \begin{table}[t]
     \centering
     \caption{Function pointer single-guess success probabilities for a random stack frame.
     Each stack frame contains three fake function pointers.}
     \label{r2c:tab:func-ptr-probabilities}
-    \begin{tabular}{ll rr r}
+    \begin{thesistable}{
+        colspec = {l l r r r},
+    }
         \toprule
         \textbf{Server} & \textbf{Case} & Real Func. Ptr. & Total Func. Ptr. & $P_{Success}$ \\
         \midrule
-        \multirow{4}{*}{\propername{nginx}}
+        \SetCell[r=4]{l} \propername{nginx}
         & Worst         & 24              & 27               & 3.7\%         \\
         & Average       & 2.8             & 5.8              & 17.3\%        \\
         & Median        & 1               & 4                & 25.0\%        \\
         & Best          & 1               & 4                & 25.0\%        \\
         \midrule
-        \multirow{4}{*}{\propername{Apache}}
+        \SetCell[r=4]{l} \propername{Apache}
         & Worst         & 18              & 21               & 4.8\%         \\
         & Average       & 1.5             & 4.5              & 22.0\%        \\
         & Median        & 1               & 4                & 25.0\%        \\
         & Best          & 1               & 4                & 25.0\%        \\
         \midrule
-        \multirow{4}{*}{\propername{Lighttpd}}
+        \SetCell[r=4]{l} \propername{Lighttpd}
         & Worst         & 72              & 75               & 1.3\%         \\
         & Average       & 19.9            & 22.9             & 4.4\%         \\
         & Median        & 2               & 5                & 20.0\%        \\
         & Best          & 1               & 4                & 25.0\%        \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 Given that \glspl{heapbt} incur overhead but affords only limited protection, an alternative use of the underlying implementation could be to write fake code pointers instead.
@@ -500,6 +499,15 @@ Care must be taken, however, not to write fake code pointers into stack frames w
 Since an attacker knows which stack frames contain function pointers in the non-randomized binary, the attacker could identify fake pointers in frames that previously did not contain any function pointers.
 
 \subsubsection{Exception handling and stack unwinding}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/r2c/ehframes}%
+    \caption{Without randomization, an attacker can infer structural information about functions, such as the relative location of the return address from the Call-Frame Information directives in the \code{eh\_frame} section.
+    \rtwoc's (right) randomization measures break the inference step from information in the \code{.eh\_frame} section to functions.}
+    \label{r2c:fig:ehframes}
+\end{figure}
+
 As part of the \gls{BTRA} setup and teardown code, \rtwoc{} also emits the necessary Call-Frame Information directives to support exception handling and stack unwinding.
 Call-Frame Information directives record stack pointer and frame modifications in the \code{.eh\_frame} section.
 Since the modifications are recorded relative to the beginning of the frame, decoding the \code{.eh\_frame} section could reveal the location of the return address.

@@ -184,7 +184,7 @@ To pass the tests, we had to modify a single source file in Chromium, and three 
 In both cases, unprotected code called an \rtwoc compiled function with stack arguments.
 An example is the following function signature from WebKit's \propername{WebCore} module:
 \begin{minted}[breaklines]{cpp}
-        static void gbkCallbackEscape(const void* context, UConverterFromUnicodeArgs* fromUArgs, const UChar* codeUnits, int32_t length, UChar32 codePoint, UConverterCallbackReason reason, UErrorCode* error);
+static void gbkCallbackEscape(const void* context, UConverterFromUnicodeArgs* fromUArgs, const UChar* codeUnits, int32_t length, UChar32 codePoint, UConverterCallbackReason reason, UErrorCode* error);
 \end{minted}
 WebKit registers this function as a callback in the ICU unicode library.
 The function has more parameters than can be passed in registers and, thus, needs stack arguments.

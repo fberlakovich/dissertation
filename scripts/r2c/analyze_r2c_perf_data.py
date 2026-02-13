@@ -153,7 +153,7 @@ def write_ipc_progression_rows(df: pl.DataFrame, output_path: Path) -> None:
     lines = []
     for bench in benchmarks:
         bench_data = result.filter(pl.col("bench_short") == bench)
-        cells = [f"\\propername{{{bench}}}"]
+        cells = [bench]
 
         baseline_ipc = None
 

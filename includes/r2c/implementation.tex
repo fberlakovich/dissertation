@@ -10,6 +10,7 @@ Specifically, our compiler
     \item instruments functions to insert \glspl{heapbt}, which thwart the statistical analysis of pointers on the stack (see \cref{r2c:ss:impl-heap-boobytraps}).
 \end{enumerate*}
 
+\filbreak
 \subsection{BTRAs: Booby-Trapped Return Addresses}\label{r2c:ss:impl-btras}
 
 \newsavebox{\btrasetup}
@@ -116,18 +117,16 @@ Per default, \rtwoc does not add \glspl{BTRA} to call sites that call unprotecte
 While adding \glspl{BTRA} would not harm functionality, unprotected callees would overwrite \emph{all} \glspl{BTRA} after the return address.
 We discuss the security implications in \cref{r2c:ss:limitations-coverage}.
 Our \glspl{BTRA} implementation cooperates with ThinLTO to match as many caller-callee pairs at compile time as possible.
-
-
 \begin{figure}[t]
     \centering
-    \begin{subfigure}[t]{0.3\linewidth}
+    \begin{subfigure}[t]{0.4\linewidth}
         \centering
         \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-plain}
         \caption{Without \cfs the base pointer points below the spilled base pointer.}
         \label{r2c:fig:stack-arguments}
     \end{subfigure}
     \quad
-    \begin{subfigure}[t]{0.3\linewidth}
+    \begin{subfigure}[t]{0.4\linewidth}
         \centering
         \includegraphics[width=0.9\linewidth]{figures/r2c/parameter-addressing-btra}
         \caption{With \cfs the caller positions the base pointer below the first stack argument.}
@@ -168,14 +167,12 @@ To access stack arguments despite the varying distance, we devised a method call
 In particular, the caller positions the frame pointer \emph{before} the varying pre-offset (see \cref{r2c:fig:stack-arguments-with-btras} for an illustration).
 Thus, the distance between the frame pointer and the stack arguments can be computed statically.
 In the callee we omit the frame pointer setup, and use the already prepared frame pointer to access stack arguments.
-
-
 \begin{figure}[t]
         % --- ROW 1: GRAPHICAL CONTENT ---
         % This row contains the graphics, aligned at their bottom edges.
 
-\begin{minipage}[b]{0.4\linewidth}
-    \begin{lstlisting}[style=asmcode,style=coloredrads]
+    \begin{minipage}[b]{0.4\linewidth}
+        \begin{lstlisting}[style=asmcode,style=coloredrads]
 vmovdqa %ymm13,(arr) |\tikzmark{T-First-Vex-Mov}|
 vmovdqu -0x20(%rsp),%ymm13
 vmovdqa %ymm13,0x20(arr) |\tikzmark{T-Second-Vex-Mov}|
@@ -183,11 +180,11 @@ vmovdqu -0x40(%rsp),%ymm13
 vzeroupper
 sub $0x30,%rsp
 call callee
-    \end{lstlisting}
-    \vspace{1cm}
-\end{minipage}%
-\hfill%
-\begin{minipage}[b]{0.5\linewidth}
+        \end{lstlisting}
+        \vspace{1cm}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.5\linewidth}
         \includeDrawioFigure[\linewidth]{figures/r2c/avx-setup}[remember picture]{
             \path
             (Point1) coordinate (A)
@@ -221,6 +218,7 @@ call callee
 As \cfs requires a frame pointer, it inhibits an optimization called frame-pointer omission.
 Frame-pointer omission re-purposes the frame register as a general purpose register and addresses all stack arguments via the stack pointer instead.
 We discuss the introduced performance overhead in \cref{sec:r2c:evaluation}.
+
 
 \subsubsection{Optimization with AVX2}
 Implementing the \gls{BTRA} setup with \code{push} instructions is conceptually straightforward, but exerts significant pressure on the instruction cache.
@@ -285,6 +283,12 @@ add %rsp, |$\alpha*8$|
     }
 }
 \subsection{\glspl{heapbt}: Booby-Trap Data Pointers}\label{r2c:ss:impl-heap-boobytraps}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/r2c/btdp-stack}
+    \caption{Stack and heap with inserted \glspl{heapbt}.}
+    \label{r2c:fig:btdp-stack}
+\end{figure}
 
 \glspl{heapbt} aim to stop an attacker from following heap pointers found on the stack.
 To maintain the illusion of a benign heap pointer, \glspl{heapbt} must have the same value range as real heap pointers, but at the same time cause a fault when being dereferenced.
@@ -306,6 +310,15 @@ How many \glspl{heapbt} are written per function is chosen randomly using compil
 The stack slots for the \glspl{heapbt} are allocated like stack slots for local variables during compilation.
 As a result, stack slot randomization shuffles \glspl{heapbt} with other stack objects, including benign heap pointers.
 \cref{r2c:lst:btdp-setup-code} shows the \glspl{heapbt} setup code in the prolog of a function.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/r2c/btdp-setup}
+    \caption[Naive vs.\ hardened \gls{heapbt} placement.]{An attacker could observe the \glspl{heapbt} \propername{S1}, \propername{S2} and \propername{S3} occurring in the data section \emph{and} on the stack (left, \textsf{naive}).
+    In \rtwoc{} no single \gls{heapbt} occurs in both places (right).
+    The \glspl{heapbt} \propername{X} and \propername{Y} mislead attempts to disclose the \gls{heapbt} array pointer from the data section (see \cref{r2c:ss:impl-heap-boobytraps}).}
+    \label{r2c:fig:hardened-data-traps}
+\end{figure}
 Storing the \glspl{heapbt} to the stack requires $2*B+1$ instructions, where $B$ is the number of \glspl{heapbt}.
 \cref{r2c:fig:btdp-stack} shows an example stack and heap with inserted \glspl{heapbt}.
 Note that \glspl{heapbt} can point to arbitrary addresses within a guard page and multiple \glspl{heapbt} point to the same guard page.
@@ -323,3 +336,18 @@ See \cref{r2c:fig:hardened-data-traps} for a comparison of a naive and a hardene
 As a simple optimization, we omit the instrumentation for all functions without stack allocations.
 Such functions are guaranteed to not write benign heap pointers to the stack either.
 While this optimization over-approximates the set of functions to instrument, it still improves performance for simple functions (\eg accessors).
+
+\begin{listing}[t]
+    \begin{minted}{gas}
+mov 0x4f04d7(%rip),%r11  // load the BTDP array pointer
+mov 0x220(%r11),%rax     // load an array entry into rax
+mov %rax,0x30(%rsp)      // store the pointer to a compile-time random slot
+mov 0x600(%r11),%rax     // load another array entry into rax
+mov %rax,0x20(%rsp)      // ...
+mov 0x5b0(%r11),%rax
+mov %rax,0x10(%rsp)
+mov 0x1a0(%r11),%rax
+    \end{minted}
+    \caption{Example \glspl{heapbt} setup code in the prolog of a function.}
+    \label{r2c:lst:btdp-setup-code}
+\end{listing}

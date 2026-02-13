@@ -41,6 +41,7 @@ A parameter vector is desirable if it triggers new optimizations or bugs.
 The genetic algorithm starts with a set of baseline parameter vectors, fuzzes with each vector, and builds a new generation of parameter vectors based on the fuzzed compiler's feedback.
 This process repeats for a set number of generations if specified, otherwise it runs indefinitely.
 We will compare both approaches to input mutation as part of our evaluation (see \cref{lool:s:evaluation}).
+
 \subsection{Shrinking the Search Space}
 \label{lool:ss:shrinking-the-search-space}
 Even with a relatively small number of tunable probabilities in a parameter vector, the search space is large.
@@ -137,42 +138,12 @@ If $F$ is the set of all features, the total score of an individual $i$ is given
 
 \subsection{Building Generations}\label{lool:ss:building-generations}
 
-\begin{table}[t]
-    \caption{Simplified genetic representation of an individual before and after mutation.
-    Changed values are shown in bold.
-    For example, probabilities shifted from \texttt{While} to \texttt{MapFor} and from \texttt{Param} to \texttt{Local}.
-    Note that the table does not show all the probabilities, which is why the sum of probability distributions does not sum up to 1.}
-    \label{lool:tbl:generation-parameters}
-
+\begin{figure}[t]
     \centering
-
-    \begin{tabular}{lrr}
-        \toprule
-        Parameter                  & Before & After           \\
-        \hline
-        \multicolumn{3}{c}{Statement distribution} \\
-        \texttt{If}                & 0.0637 & 0.0637          \\
-        \texttt{FoldFor}           & 0.0726 & 0.0726          \\
-        \texttt{MapFor}            & 0.0767 & \textbf{0.1267} \\
-        \texttt{While}             & 0.1761 & \textbf{0.1261} \\
-        \midrule
-        \multicolumn{3}{c}{Expression distribution} \\
-        \texttt{Init}              & 0.0703 & 0.0703          \\
-        \texttt{Local}             & 0.0891 & \textbf{0.1291} \\
-        \texttt{Param}             & 0.1206 & \textbf{0.0806} \\
-        \texttt{Binary}            & 0.1059 & 0.1059          \\
-        \midrule
-        \multicolumn{3}{c}{Independent probabilities} \\
-        \texttt{InitInStaticBlock} & 0.2548 & \textbf{0.2367} \\
-        \texttt{InheritClass}      & 0.5162 & \textbf{0.5001} \\
-        \texttt{Cloneable}         & 0.2074 & 0.2074          \\
-        \midrule
-        \multicolumn{3}{c}{Discrete parameters} \\
-        \texttt{StatementDepth}    & 2      & \textbf{3}      \\
-        \bottomrule
-    \end{tabular}
-
-\end{table}
+    \includegraphics[width=0.6\linewidth]{figures/lool/lool-workflow}
+    \caption{Workflow of the genetic algorithm loop (see \cref{lool:ss:fitness} and \cref{lool:ss:building-generations}).}
+    \label{lool:fig:workflow}
+\end{figure}
 
 As shown in \cref{lool:fig:workflow}, the genetic algorithm mutates and crossbreeds parameter vectors to form a new generation.
 During mutation the genetic algorithm adjusts the parameters in a parameter vector.
@@ -191,6 +162,46 @@ Before mutation, the parameter vector had probabilities 0.0767 and 0.1761 for \t
 The \texttt{MapFor} entry steals an amount of 0.05 from the \texttt{While} entry's probability, resulting in a decreased probability for \texttt{While} ($0.1761 - 0.05 = 0.1261$) and an increased probability for \texttt{MapFor} ($0.0767 + 0.05 = 0.1267$).
 Similarly, the \texttt{Local} entry steals an amount of 0.04 from the \texttt{Param} entries probability.
 In contrast to this stealing process, independent probabilities (e.g. \texttt{InitInStaticBlock}) and discrete parameters (e.g. \texttt{StatementDepth}) do not need to balance the probability distribution and can be mutated independently.
+
+
+\begin{table}[t]
+    \caption{Simplified genetic representation of an individual before and after mutation.
+    Changed values are shown in bold.
+    For example, probabilities shifted from \texttt{While} to \texttt{MapFor} and from \texttt{Param} to \texttt{Local}.
+    Note that the table does not show all the probabilities, which is why the sum of probability distributions does not sum up to 1.}
+    \label{lool:tbl:generation-parameters}
+
+    \centering
+
+    \begin{thesistable}{
+        colspec = {l r r},
+    }
+        \toprule
+        Parameter                  & Before & After           \\
+        \midrule
+        \SetCell[c=3]{c} Statement distribution & & \\
+        \texttt{If}                & 0.0637 & 0.0637          \\
+        \texttt{FoldFor}           & 0.0726 & 0.0726          \\
+        \texttt{MapFor}            & 0.0767 & \textbf{0.1267} \\
+        \texttt{While}             & 0.1761 & \textbf{0.1261} \\
+        \midrule
+        \SetCell[c=3]{c} Expression distribution & & \\
+        \texttt{Init}              & 0.0703 & 0.0703          \\
+        \texttt{Local}             & 0.0891 & \textbf{0.1291} \\
+        \texttt{Param}             & 0.1206 & \textbf{0.0806} \\
+        \texttt{Binary}            & 0.1059 & 0.1059          \\
+        \midrule
+        \SetCell[c=3]{c} Independent probabilities & & \\
+        \texttt{InitInStaticBlock} & 0.2548 & \textbf{0.2367} \\
+        \texttt{InheritClass}      & 0.5162 & \textbf{0.5001} \\
+        \texttt{Cloneable}         & 0.2074 & 0.2074          \\
+        \midrule
+        \SetCell[c=3]{c} Discrete parameters & & \\
+        \texttt{StatementDepth}    & 2      & \textbf{3}      \\
+        \bottomrule
+    \end{thesistable}
+
+\end{table}
 
 With a configurable probability, we perform a crossover of two parameter vectors to create a vector for the next generation.
 Independent probabilities and discrete parameters are each chosen randomly from either parent, but distributions are chosen as a whole to prevent violation of the constraints.

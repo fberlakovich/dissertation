@@ -66,11 +66,17 @@
 \usepackage{multirow}
 \sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
 \usepackage{array}
-\UseTblrLibrary{booktabs,functional}
+\UseTblrLibrary{booktabs,siunitx}
 \usepackage{tabularx}
 \usepackage[htt]{hyphenat}
 \usepackage{collcell}   % To capture cell content
 \usepackage{makecell}
+
+% Load external table data for use inside tabularray tables.
+% CatchFileDef reads with correct catcodes (& as alignment tab).
+% Usage: \loadTableData{file} before the table, then \tabledata inside the body.
+\usepackage{catchfile}
+\newcommand{\loadTableData}[1]{\CatchFileDef{\tabledata}{#1}{}}
 
 % --- FLOAT TUNING START ---
 % Encourage floats to be placed on the page where they are defined
@@ -101,8 +107,6 @@
   opti-mi-za-tion
 }
 
-\sisetup{round-mode=places,round-precision=3,round-pad=false,group-minimum-digits=4,group-separator={,},scientific-notation=fixed}
-\UseTblrLibrary{booktabs,functional}
 \usetikzlibrary{arrows.meta,arrows,automata,positioning,tikzmark,decorations.pathreplacing,backgrounds,calc}
 %\usetikzlibrary{external}
 %\tikzexternalize[prefix=figures/tikz-ext/]
@@ -195,6 +199,7 @@
 }
 
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
+\AtBeginDocument{\DeclareCaptionSubType{listing}}
 
 \makeatletter
 \newcommand{\closepart}{
@@ -306,19 +311,38 @@
 
 
 % @formatter:off
-\newcounter{rowcounter}
-\setcounter{rowcounter}{0}
-\newif\ifdatarows
-\datarowsfalse
-\newcommand{\nextrow}{\stepcounter{rowcounter}}
-\newcommand{\startdatarows}{\noalign{\global\datarowstrue}}
-\AtBeginEnvironment{tabular}{\setcounter{rowcounter}{0}\datarowsfalse}
-\AtBeginEnvironment{tabularx}{\setcounter{rowcounter}{0}\datarowsfalse} % if you use tabularx
-\AtBeginEnvironment{longtable}{\setcounter{rowcounter}{0}\datarowsfalse} % if you use longtable
+\definecolor{tablerowgray}{gray}{0.96}
+
+% Custom tabularray key: headrows=N declares N header rows.
+% Zebra striping starts after the headers; first data row is always white.
+\ExplSyntaxOn
+\DeclareTblrKeys { table/inner } {
+    headrows .code:n = {
+        \int_if_odd:nTF { #1 }
+        {
+            \keys_set:nn { tabularray/table/inner } { row{odd} = {bg=tablerowgray} }
+            \int_step_inline:nnnn { 1 } { 2 } { #1 }
+            { \keys_set:nn { tabularray/table/inner } { row{##1} = {bg=white} } }
+        }
+        {
+            \keys_set:nn { tabularray/table/inner } { row{even} = {bg=tablerowgray} }
+            \int_step_inline:nnnn { 2 } { 2 } { #1 }
+            { \keys_set:nn { tabularray/table/inner } { row{##1} = {bg=white} } }
+        }
+    }
+}
+\ExplSyntaxOff
+
+\SetTblrInner{rowsep=1.2pt}
+
+\NewTblrEnviron{thesistable}
+\SetTblrInner[thesistable]{rowsep=1.2pt}
+
+\AtBeginEnvironment{tblr}{\footnotesize}
 \AtBeginEnvironment{tabular}{\footnotesize}
 \AtBeginEnvironment{tabularx}{\footnotesize}
 \AtBeginEnvironment{longtable}{\footnotesize}
-\AtBeginEnvironment{tblr}{\footnotesize}
+\AtBeginEnvironment{thesistable}{\footnotesize}
 \newcolumntype{C}{S[table-format=5.0]}
 \newcolumntype{O}{S[table-format=6.1, round-precision=1]}
 \newcolumntype{T}{S[table-format=3.1, round-precision=1]}
@@ -330,7 +354,6 @@
 % Bug triggering table columns: instance count, TTF hours
 \newcolumntype{N}{S[table-format=2.0]}                          % instances triggered (0-30)
 \newcolumntype{H}{S[table-format=2.1]}                          % TTF in hours
-\newcolumntype{E}{>{\ifdatarows\propernamedecl\fi\arraybackslash}l}
 
 \definecolor{rowgray}{gray}{0.95} % A very light gray
 % Cell shading for effect sizes (small/medium/large)
@@ -340,8 +363,8 @@
 \definecolor{cellworse1}{HTML}{FFEBEE}  % Light red - small effect
 \definecolor{cellworse2}{HTML}{FFCDD2}  % Medium red - medium effect
 \definecolor{cellworse3}{HTML}{EF9A9A}  % Dark red - large effect
-% Shaded cell command - just applies cellcolor, S-column handles alignment
-\newcommand{\shadecell}[2]{\cellcolor{#1}#2}
+% Shaded cell command - uses tabularray's SetCell for bg in thesistable
+\newcommand{\shadecell}[2]{\SetCell{bg=#1}#2}
 \newcommand{\conditionalcell}[1]{
 	\ifnum
 		\value{rowcounter}=1

@@ -14,9 +14,9 @@ In practice, such an all-encompassing instrumentation is infeasible because clas
 While the GraalVM compiler's classpath is known at (Java) compile time, instrumenting all classes, including JDK classes, upfront is still difficult.
 
 
-\begin{figure}[t]
+\begin{listing}[t]
     \centering
-    \begin{subfigure}[t]{0.48\textwidth}
+    \begin{sublisting}[t]{0.48\textwidth}
         \begin{minted}[fontsize=\footnotesize]{javabytecode}
 aload         6
 iconst_0
@@ -44,9 +44,11 @@ ldc           #58
 // Assert.fail
 invokestatic  #60
         \end{minted}
-    \end{subfigure}
+        \caption{Uninstrumented bytecode}
+        \label{lool:lst:bytecode-uninstrumented}
+    \end{sublisting}
     \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
+    \begin{sublisting}[t]{0.48\textwidth}
         \begin{minted}[fontsize=\footnotesize,highlightlines={5-9,14-18,23-27},highlightcolor=lightyellow]{javabytecode}
 aload         6
 iconst_0
@@ -80,10 +82,28 @@ ldc           #58
 // Assert.fail
 invokestatic  #60
         \end{minted}
-    \end{subfigure}
-    \caption{Bytecode from \cref{lst:lool:java-if-cascade} instrumented for code coverage.}
+        \caption{Coverage-instrumented bytecode}
+        \label{lool:lst:bytecode-instrumented}
+    \end{sublisting}
+
+    \medskip
+
+    \begin{sublisting}[b]{\textwidth}
+        \begin{minted}{Java}
+if (bytes[0] == 'b') {
+    if (bytes[1] == 'u') {
+        if (bytes[2] == 'g') {
+            Assert.fail("Expected");
+        }
+    }
+}
+        \end{minted}
+        \caption{Java source code}
+        \label{lst:lool:java-if-cascade}
+    \end{sublisting}
+    \caption{Java \code{if} cascade and corresponding bytecode instrumented for code coverage. Highlighted lines show inserted coverage tracking.}
     \label{lool:lst:code-coverage-instrumentation}
-\end{figure}
+\end{listing}
 
 Instead, we use the \gls{JVM}'s agent facility to transform classes on the fly.
 Java agents belong to the instrumentation API and allow to alter an application's bytecode dynamically.
@@ -95,6 +115,7 @@ The agent also keeps a cache to avoid paying the overhead of instrumentation for
 
 The code coverage instrumentation is based on \jacoco's instrumentation infrastructure and inserts a static method call at each instrumentation point.
 The static call increases the counter of the given edge identifier in a global byte buffer.
+
 \cref{lst:lool:java-if-cascade} shows a simple Java \code{if} cascade that checks the values in a byte array.
 \cref{lool:lst:code-coverage-instrumentation} shows the corresponding uninstrumented bytecode (left) and the inserted coverage instrumentation (right).
 

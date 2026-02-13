@@ -86,13 +86,13 @@ One such alternative was \propername{XFI} (2006), which used binary rewriting an
 \gls{CFI} aims to restrict control-flow transfers at runtime to the ones intended by the programmer for a particular program point and for a particular program state.
 \begin{listing}
     \begin{minted}[escapeinside=||]{C}
-        int dispatch(short param) {
-          void (*targets[])(void) = { func1, func2 };
-          if (param > 3) {
-            targets[0]();
-          }
-          |...|
-        }
+int dispatch(short param) {
+  void (*targets[])(void) = { func1, func2 };
+  if (param > 3) {
+    targets[0]();
+  }
+  |...|
+}
     \end{minted}
     \label{r2c:lst:indirect-call-c}
     \caption{Example function in C with an indirect function call depending on a parameter.}
@@ -141,7 +141,10 @@ To make randomization more practical for deployment, \enquote{Compiler-Assisted 
     \caption{Comparison of randomization granularities.}
     \label{tab:randomization-granularity}
     \footnotesize
-    \begin{tabular}{llll}
+    \begin{thesistable}{
+        colspec = {l l l l},
+        headrows = 1,
+    }
         \toprule
         \textbf{Technique} & \textbf{Granularity} & \textbf{Prevents} & \textbf{Limitation} \\
         \midrule
@@ -150,7 +153,7 @@ To make randomization more practical for deployment, \enquote{Compiler-Assisted 
         Basic Block & Basic Block & \gls{ROP} Gadget Chains & Performance overhead \\
         Instruction & Instruction & All \gls{ROP} Gadgets & High overhead; Compatibility issues \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 %A crucial factor for the security of code randomization is the granularity of randomization.

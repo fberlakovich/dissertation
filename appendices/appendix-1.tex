@@ -12,39 +12,43 @@ The papers were identified using semantic clustering on titles and abstracts fro
 \section{PSP Benchmark Versions}
 \label{app:psp-benchmarks}
 
-\begin{table}[t]
+\begin{table}[H]
     \centering
     \caption{FuzzBench benchmarks used in the evaluation}
     \label{app:tab:fuzzbench-benchmarks}
-    \begin{tabular}{lll}
+    \begin{thesistable}{
+        colspec = {l l l},
+        headrows = 1,
+        row{2-Z} = {font=\propernamedecl},
+    }
         \toprule
-        \textbf{Benchmark}                                 & \textbf{Project}           & \textbf{Commit}       \\
+        {Benchmark}                                        & {Project}                  & {Commit}              \\
         \midrule
-        \propername{bloaty\_fuzz\_target}                  & \propername{Bloaty}        & \propername{52948c10} \\
-        \propername{curl\_curl\_fuzzer\_http}              & \propername{curl}          & \propername{a20f74a1} \\
-        \propername{freetype2\_ftfuzzer}                   & \propername{FreeType}      & \propername{cd02d359} \\
-        \propername{harfbuzz\_hb-shape-fuzzer}             & \propername{HarfBuzz}      & \propername{cb47dca7} \\
-        \propername{jsoncpp\_jsoncpp\_fuzzer}              & \propername{JsonCpp}       & \propername{8190e061} \\
-        \propername{lcms\_cms\_transform\_fuzzer}          & \propername{Little CMS}    & \propername{f0d96326} \\
-        \propername{libjpeg-turbo\_libjpeg\_turbo\_fuzzer} & \propername{libjpeg-turbo} & \propername{3b19db4e} \\
-        \propername{libpcap\_fuzz\_both}                   & \propername{libpcap}       & \propername{17ff63e8} \\
-        \propername{libpng\_libpng\_read\_fuzzer}          & \propername{libpng}        & \propername{cd0ea2a7} \\
-        \propername{libxml2\_xml}                          & \propername{libxml2}       & \propername{c7260a47} \\
-        \propername{libxslt\_xpath}                        & \propername{libxslt}       & \propername{180cdb80} \\
-        \propername{mbedtls\_fuzz\_dtlsclient}             & \propername{Mbed TLS}      & \propername{169d9e6e} \\
-        \propername{openh264\_decoder\_fuzzer}             & \propername{OpenH264}      & \propername{045aeac1} \\
-        \propername{openssl\_x509}                         & \propername{OpenSSL}       & \propername{b0593c08} \\
-        \propername{openthread\_ot-ip6-send-fuzzer}        & \propername{OpenThread}    & \propername{25506997} \\
-        \propername{proj4\_proj\_crs\_to\_crs\_fuzzer}     & \propername{PROJ}          & \propername{a7482d37} \\
-        \propername{re2\_fuzzer}                           & \propername{RE2}           & \propername{b025c6a3} \\
-        \propername{sqlite3\_ossfuzz}                      & \propername{SQLite}        & ---$^{\P}$            \\
-        \propername{stb\_stbi\_read\_fuzzer}               & \propername{stb}           & \propername{5736b15f} \\
-        \propername{systemd\_fuzz-link-parser}             & \propername{systemd}       & \propername{07faa499} \\
-        \propername{vorbis\_decode\_fuzzer}                & \propername{Vorbis}        & \propername{84c02369} \\
-        \propername{woff2\_convert\_woff2ttf\_fuzzer}      & \propername{WOFF2}         & \propername{8109a2cc} \\
-        \propername{zlib\_zlib\_uncompress\_fuzzer}        & \propername{zlib}          & \propername{d71dc66f} \\
+        bloaty\_fuzz\_target                               & Bloaty                     & 52948c10              \\
+        curl\_curl\_fuzzer\_http                           & curl                       & a20f74a1              \\
+        freetype2\_ftfuzzer                                & FreeType                   & cd02d359              \\
+        harfbuzz\_hb-shape-fuzzer                          & HarfBuzz                   & cb47dca7              \\
+        jsoncpp\_jsoncpp\_fuzzer                           & JsonCpp                    & 8190e061              \\
+        lcms\_cms\_transform\_fuzzer                       & Little CMS                 & f0d96326              \\
+        libjpeg-turbo\_libjpeg\_turbo\_fuzzer              & libjpeg-turbo              & 3b19db4e              \\
+        libpcap\_fuzz\_both                                & libpcap                    & 17ff63e8              \\
+        libpng\_libpng\_read\_fuzzer                       & libpng                     & cd0ea2a7              \\
+        libxml2\_xml                                       & libxml2                    & c7260a47              \\
+        libxslt\_xpath                                     & libxslt                    & 180cdb80              \\
+        mbedtls\_fuzz\_dtlsclient                          & Mbed TLS                   & 169d9e6e              \\
+        openh264\_decoder\_fuzzer                          & OpenH264                   & 045aeac1              \\
+        openssl\_x509                                      & OpenSSL                    & b0593c08              \\
+        openthread\_ot-ip6-send-fuzzer                     & OpenThread                 & 25506997              \\
+        proj4\_proj\_crs\_to\_crs\_fuzzer                  & PROJ                       & a7482d37              \\
+        re2\_fuzzer                                        & RE2                        & b025c6a3              \\
+        sqlite3\_ossfuzz                                   & SQLite                     & ---$^{\P}$            \\
+        stb\_stbi\_read\_fuzzer                            & stb                        & 5736b15f              \\
+        systemd\_fuzz-link-parser                          & systemd                    & 07faa499              \\
+        vorbis\_decode\_fuzzer                             & Vorbis                     & 84c02369              \\
+        woff2\_convert\_woff2ttf\_fuzzer                   & WOFF2                      & 8109a2cc              \\
+        zlib\_zlib\_uncompress\_fuzzer                     & zlib                       & d71dc66f              \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 
     \smallskip
     {\footnotesize
@@ -52,38 +56,42 @@ The papers were identified using semantic clustering on titles and abstracts fro
     }
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
     \centering
     \caption{Magma benchmarks used in the evaluation}
     \label{app:tab:magma-benchmarks}
-    \begin{tabular}{lll}
+    \begin{thesistable}{
+        colspec = {l l l},
+        headrows = 1,
+        row{2-Z} = {font=\propernamedecl},
+    }
         \toprule
-        \textbf{Benchmark}                             & \textbf{Project}        & \textbf{Commit}       \\
+        {Benchmark}                                    & {Project}               & {Commit}              \\
         \midrule
-        \propername{libpng}                            & \propername{libpng}     & \propername{a37d4836} \\
-        \propername{libsndfile}                        & \propername{libsndfile} & \propername{86c9f9eb} \\
-        \propername{libtiff}                           & \propername{libtiff}    & \propername{c145a6c1} \\
-        \propername{libtiff\_tiffcp}                   & \propername{libtiff}    & \propername{c145a6c1} \\
-        \propername{libtiff\_tiff\_read\_rgba}         & \propername{libtiff}    & \propername{c145a6c1} \\
-        \propername{libxml2\_xmllint}                  & \propername{libxml2}    & \propername{ec6e3efb} \\
-        \propername{libxml2\_xml\_read\_memory}        & \propername{libxml2}    & \propername{ec6e3efb} \\
-        \propername{lua}$^{\ddagger}$                  & \propername{Lua}        & \propername{dbdc74dc} \\
-        \propername{openssl\_asn1}                     & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{openssl\_asn1parse}                & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{openssl\_bignum}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{openssl\_client}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{openssl\_server}                   & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{openssl\_x509}                     & \propername{OpenSSL}    & \propername{3bd5319b} \\
-        \propername{php\_exif}$^{\dagger}$             & \propername{PHP}        & \propername{bc39abe8} \\
-        \propername{php\_json}$^{\dagger}$             & \propername{PHP}        & \propername{bc39abe8} \\
-        \propername{php\_parser}$^{\dagger}$           & \propername{PHP}        & \propername{bc39abe8} \\
-        \propername{php\_unserialize}$^{\dagger}$      & \propername{PHP}        & \propername{bc39abe8} \\
-        \propername{poppler\_pdf\_fuzzer}$^{\ddagger}$ & \propername{Poppler}    & \propername{1d23101c} \\
-        \propername{poppler\_pdfimages}$^{\ddagger}$   & \propername{Poppler}    & \propername{1d23101c} \\
-        \propername{poppler\_pdftoppm}$^{\ddagger}$    & \propername{Poppler}    & \propername{1d23101c} \\
-        \propername{sqlite3}                           & \propername{SQLite}     & \propername{8c432642} \\
+        libpng                                         & libpng                  & a37d4836              \\
+        libsndfile                                     & libsndfile              & 86c9f9eb              \\
+        libtiff                                        & libtiff                 & c145a6c1              \\
+        libtiff\_tiffcp                                & libtiff                 & c145a6c1              \\
+        libtiff\_tiff\_read\_rgba                      & libtiff                 & c145a6c1              \\
+        libxml2\_xmllint                               & libxml2                 & ec6e3efb              \\
+        libxml2\_xml\_read\_memory                     & libxml2                 & ec6e3efb              \\
+        lua$^{\ddagger}$                               & Lua                     & dbdc74dc              \\
+        openssl\_asn1                                  & OpenSSL                 & 3bd5319b              \\
+        openssl\_asn1parse                             & OpenSSL                 & 3bd5319b              \\
+        openssl\_bignum                                & OpenSSL                 & 3bd5319b              \\
+        openssl\_client                                & OpenSSL                 & 3bd5319b              \\
+        openssl\_server                                & OpenSSL                 & 3bd5319b              \\
+        openssl\_x509                                  & OpenSSL                 & 3bd5319b              \\
+        php\_exif$^{\dagger}$                          & PHP                     & bc39abe8              \\
+        php\_json$^{\dagger}$                          & PHP                     & bc39abe8              \\
+        php\_parser$^{\dagger}$                        & PHP                     & bc39abe8              \\
+        php\_unserialize$^{\dagger}$                   & PHP                     & bc39abe8              \\
+        poppler\_pdf\_fuzzer$^{\ddagger}$              & Poppler                 & 1d23101c              \\
+        poppler\_pdfimages$^{\ddagger}$                & Poppler                 & 1d23101c              \\
+        poppler\_pdftoppm$^{\ddagger}$                 & Poppler                 & 1d23101c              \\
+        sqlite3                                        & SQLite                  & 8c432642              \\
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 
     \smallskip
     {\footnotesize

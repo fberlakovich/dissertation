@@ -3,7 +3,7 @@
 \input{generated/lool/defines}
 
 \subsection{Coverage vs. No Coverage}
-The main advantage of having no coverage at all is the higher execution speed, as evidenced by the data in \cref{lool:tbl:coverage-overhead}.
+The main advantage of having no coverage at all is the higher execution speed, as evidenced by the data in \cref{lool:fig:coverage-overhead}.
 On the other hand, coverage feedback enables guidance through feedback-directed input mutation.
 \cref{lool:fig:cumulative-coverage} shows that \propername{random-params}, \ie without feedback but with random generation parameters, achieves the highest cumulative code coverage of all configurations.
 This advantage in code coverage is not, however, reflected in the achieved rare optimization scores (see \cref{lool:fig:rare-opts,lool:fig:rare-pairs}).
@@ -32,20 +32,23 @@ We attribute the improvement of the unguided configurations over \aflpp to the m
 
 \subsection{\aflpp vs. Genetic Parameter Mutation}\label{lool:ss:aflpp-vs-genetic}
 
+\loadTableData{generated/lool/afl-test-overview}
 \begin{table}[!t]
     \centering
-    \begin{tabular}{>{\nextrow}E C C C C C C}
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l S[table-format=5.0] S[table-format=5.0] S[table-format=5.0]},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+    }
         \toprule
-        {Experiment} & {First} & {Once} & {Twice} & {Thrice} & {Fourth} & {Fifth} \\
+        {Experiment} & {Total} & {Skipped} & {Identical} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/lool/afl-test-attempts}
+        \tabledata
         \bottomrule
-    \end{tabular}
-    \caption{How many tests were successfully generated on the first try or had to be retried with reduced generation parameters.}
-    \label{tbl:afl-attempts}
+    \end{thesistable}
+    \caption{The number of total, skipped, and identical test runs for \aflpp configurations.}
+    \label{lool:tbl:afl-overview}
 \end{table}
-
 
 The cumulative coverage in \cref{lool:fig:cumulative-coverage} indicates that our custom genetic algorithm outperforms the \aflpp and \propername{static-params} configurations in terms of code coverage.
 The only exception is \propername{genetic-code}, which achieves less code coverage than the \propername{static-params} and the \propername{random-params} configuration.
@@ -55,22 +58,7 @@ We attribute this difference to the significantly reduced test throughput of \pr
 Except for the \propername{afl-contextblind-only-params} configuration, all \aflpp-based configurations achieve less coverage than even the \propername{static-params} configuration.
 One reason for \aflpp's poor performance lies in the translation of \aflpp generated input files to generated test cases.
 We found that over stretches of dozens of generated tests the \aflpp configurations generate either \emph{identical} tests or \emph{small tests}, which are the result of re-generation attempts.
-The number of identical tests and re-generation attempts are shown in \cref{tbl:afl-overview}.
-
-
-\begin{table}[!t]
-    \centering
-    \begin{tabular}{>{\nextrow}E C C C}
-        \toprule
-        {Experiment} & {Total} & {Skipped} & {Identical} \\
-        \midrule
-        \startdatarows
-        \fileInput{generated/lool/afl-test-overview}
-        \bottomrule
-    \end{tabular}
-    \caption{The number of total, skipped, and identical test runs for \aflpp configurations.}
-    \label{tbl:afl-overview}
-\end{table}
+The number of identical tests and re-generation attempts are shown in \cref{lool:tbl:afl-overview} and \cref{lool:tbl:afl-attempts}, respectively.
 
 Identical tests happen when \aflpp mutates bits in the input file that do not change the code generator's behavior.
 Although \aflpp eventually learns that mutating these bits is useless, the feedback loop in the GraalVM context is slow compared to traditional \aflpp targets such as image libraries.
@@ -79,14 +67,34 @@ In the variants that mutate only generation parameters (see \cref{lool:sss:afl-o
 Nonetheless, even though we started with an ideally sized seed file, \aflpp eventually tries different sizes as well and wastes time with meaningless mutations.
 Another source of identical tests are \aflpp calibration runs, which become particularly expensive with long-running tests.
 The problem is compounded by the fact that neither the coverage feedback nor the execution times are fully stable, due to the JVM's profiling and class-loading heuristics.
-\cref{tbl:afl-overview} shows the number of identical tests summed over all runs of an experiment for each of the \aflpp configurations.
+\cref{lool:tbl:afl-overview} shows the number of identical tests summed over all runs of an experiment for each of the \aflpp configurations.
+
+
+
+\loadTableData{generated/lool/afl-test-attempts}
+\begin{table}[!t]
+    \centering
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l S[table-format=5.0] S[table-format=5.0] S[table-format=5.0] S[table-format=5.0] S[table-format=5.0] S[table-format=5.0]},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+    }
+        \toprule
+        {Experiment} & {First} & {Once} & {Twice} & {Thrice} & {Fourth} & {Fifth} \\
+        \midrule
+        \tabledata
+        \bottomrule
+    \end{thesistable}
+    \caption{How many tests were successfully generated on the first try or had to be retried with reduced generation parameters.}
+    \label{lool:tbl:afl-attempts}
+\end{table}
 
 Small tests happen when \aflpp generates input files that are too small for the generator to generate valid test cases.
 Again, this is more likely to happen in the fully parametric case because there, earlier bits in the file can change how many more random bits are needed later on.
 This variable length requirement makes it difficult for \aflpp to infer useful file sizes.
 In cases where there is too little randomness for the generator's random decisions, the generator tries to size down the generated test case by adapting structural parameters (see \cref{lool:sss:afl-fully-parametric}).
 We found that in the fully parametric variant (see \cref{lool:sss:afl-fully-parametric}) the generator reduced the parameters of almost all tests at least once.
-\cref{tbl:afl-overview} shows the number of tests with reduced generation parameters for each configuration.
+\cref{lool:tbl:afl-overview} shows the number of tests with reduced generation parameters for each configuration.
 As expected, this effect is mitigated in the variant that reads only generation parameters from the seed (see \cref{lool:sss:afl-only-params}).
 In this variant, the generator fails only if the seed is even too short to read generation parameters, which happened in about 5\% of the generated tests.
 The \enquote{Skipped} column in \cref{lool:tbl:test-overview} shows the number of tests that had to be skipped due to such an unusable seed file.
@@ -116,7 +124,7 @@ Overall, \aflpp's heuristics are tuned for fast iterations.
 \end{infobox}
 
 \subsection{Code Coverage vs. Optimization-Log Coverage}
-\cref{lool:tbl:coverage-overhead} shows that coverage feedback based on the optimization log (either global counters or per-method counters) has a significantly lower overhead than code coverage.
+\cref{lool:fig:coverage-overhead} shows that coverage feedback based on the optimization log (either global counters or per-method counters) has a significantly lower overhead than code coverage.
 While our code coverage implementation is not fully optimized for speed, a considerable overhead, in particular for CPU-intensive code such as compilation, is likely to remain.
 \begin{infobox}
     \textbf{\ref{hpt:coverage-overhead}}\hspace{0.8em}\ding{51}
@@ -133,19 +141,23 @@ Second, code coverage does not differentiate between \enquote{interesting} code 
 This loss of context can lead the fuzzer down a route where it tries to, \eg increase the coverage of some library method called during compilation.
 
 \subsection{Context-Aware Coverage vs. Context-Blind Coverage}\label{lool:ss:context-aware-vs-context-blind}
+\loadTableData{generated/lool/optimization-scores}
 \begin{table}[!t]
     \centering
     \caption{Rankings of experiments by optimization rareness score or optimization pair rareness score.}
     \label{tbl:contributor-crossover}
     \footnotesize
-    \begin{tabular}{>{\nextrow}EOOC}
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l S[table-format=6.1,round-precision=1] S[table-format=6.1,round-precision=1] S[table-format=5.0]},
+        headrows = 1,
+        cell{2-Z}{1} = {font=\propernamedecl},
+    }
         \toprule
         {Experiment} & {\makecell{Optimization\\ Score}} & {\makecell{Optimization\\ Pair Score}} & {\makecell{Optimization\\ Pair Rank}} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/lool/optimization-scores}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 
 \end{table}
 

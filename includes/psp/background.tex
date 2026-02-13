@@ -27,8 +27,45 @@ A polymorphic method call consists of
 This process of dynamic dispatch is sometimes emulated in languages such as C, which lack builtin support for polymorphic method calls.
 
 \subsection{Polymorphic Inlining}\label{psp:ss:polymorphic-inlining}
+While dynamic binding is a powerful feature, the indirect calls required for vtable lookups can introduce performance overhead and hinder other compiler optimizations.
+To mitigate this overhead, in particular \glspl{JITcomp} use techniques to devirtualize these calls when possible.
+In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite polymorphic call sites to exploit the usually high type stability of call sites.
+For example, consider the Java Program in \cref{psp:lst:polymorphic-call}.
+\begin{listing}
+    \centering
+    \begin{minted}[mathescape,escapeinside=||]{Java}
+abstract class Animal { public void makeSound(); }
+class Cat extends Animal  { public void makeSound() {|$\dots$|} }
+class Dog extends Animal  { public void makeSound() {|$\dots$|} }
+class Elephant extends Animal  { public void makeSound() {|$\dots$|} }
 
+Animal[] animals = {new Dog(), new Cat()};
+for (int i=0; i<1000; i++) {
+    Animal animal = animals[i % animals.length];
+    animal.makeSound(); |\label{psp:line:polymorphic-call}|
+}
+    \end{minted}
+    \label{psp:lst:polymorphic-call}
+\end{listing}
 
+The polymorphic call site in \cref{psp:line:polymorphic-call} calls either \code{Cat}'s or \code{Dog}'s implementation of \code{makeSound}.
+On the assembly level, the call site looks like in \cref{psp:lst:vcall-pseudocode}.
+\begin{listing}
+    \centering
+    \begin{minted}{gas}
+; assuming a pointer to animal is loaded in rdi
+mov     rax, [rdi]         ; load vptr from object
+mov     rax, [rax]         ; load function pointer for makeSound from vtable slot 0
+call    rax                ; indirect call through the function pointer
+ret
+    \end{minted}
+    \label{psp:lst:vcall-pseudocode}
+\end{listing}
+
+After an initial profiling period, the \gls{JITcomp} detects the type stability of the polymorphic call site and might transform the call site into the code in \cref{psp:lst:polymorphic-inlining}.
+In case of multiple possible targets, the \gls{JITcomp} typically orders the direct calls based on their observed frequency, with the most frequent at the top.
+Note that \glspl{JITcomp} typically avoid rewriting the code itself and instead cache a direct pointer to the target function in what is called an inline cache.
+The principal idea behind the transformation stays the same, however.
 \begin{listing}
     \centering
     \begin{minted}[ignorelexererrors=true]{gas}
@@ -60,44 +97,3 @@ ret
     \end{minted}
     \label{psp:lst:polymorphic-inlining}
 \end{listing}
-
-\begin{listing}
-    \centering
-    \begin{minted}[mathescape,escapeinside=||]{Java}
-abstract class Animal { public void makeSound(); }
-class Cat extends Animal  { public void makeSound() {$\dots$} }
-class Dog extends Animal  { public void makeSound() {$\dots$} }
-class Elephant extends Animal  { public void makeSound() {$\dots$} }
-
-Animal[] animals = {new Dog(), new Cat()};
-for (int i=0; i<1000; i++) {
-    Animal animal = animals[i % animals.length];
-    animal.makeSound(); |\label{psp:line:polymorphic-call}|
-}
-    \end{minted}
-    \label{psp:lst:polymorphic-call}
-\end{listing}
-
-While dynamic binding is a powerful feature, the indirect calls required for vtable lookups can introduce performance overhead and hinder other compiler optimizations.
-To mitigate this overhead, in particular \glspl{JITcomp} use techniques to devirtualize these calls when possible.
-In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite polymorphic call sites to exploit the usually high type stability of call sites.
-For example, consider the Java Program in \cref{psp:lst:polymorphic-call}.
-
-The polymorphic call site in \cref{psp:line:polymorphic-call} calls either \code{Cat}'s or \code{Dog}'s implementation of \code{makeSound}.
-On the assembly level, the call site looks like in \cref{psp:lst:vcall-pseudocode}.
-\begin{listing}
-    \centering
-    \begin{minted}{gas}
-; assuming a pointer to animal is loaded in rdi
-mov     rax, [rdi]         ; load vptr from object
-mov     rax, [rax]         ; load function pointer for makeSound from vtable slot 0
-call    rax                ; indirect call through the function pointer
-ret
-    \end{minted}
-    \label{psp:lst:vcall-pseudocode}
-\end{listing}
-
-After an initial profiling period, the \gls{JITcomp} detects the type stability of the polymorphic call site and might transform the call site into the code in \cref{psp:lst:polymorphic-inlining}.
-In case of multiple possible targets, the \gls{JITcomp} typically orders the direct calls based on their observed frequency, with the most frequent at the top.
-Note that \glspl{JITcomp} typically avoid rewriting the code itself and instead cache a direct pointer to the target function in what is called an inline cache.
-The principal idea behind the transformation stays the same, however.

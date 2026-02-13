@@ -24,7 +24,7 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{\baseclass}}
 \ProcessOptions\relax
 
-\LoadClass[11pt,a4paper,twoside,openright]{\baseclass}
+\LoadClass[11pt,a4paper,twoside,openany]{\baseclass}
 
 %----------------------------------------------------------------------------------------
 % REQUIRED PACKAGES
@@ -172,13 +172,8 @@
   \@haspartintrotrue
 }
 
-% Redefine \@endpart - just go to next page
-\def\@endpart{\vfil\newpage
-              \if@twoside
-                \if@openright
-                  \null\thispagestyle{empty}\newpage
-                \fi
-              \fi}
+% Redefine \@endpart - just go to next page (no blank verso page)
+\def\@endpart{\vfil\newpage}
 
 \def\@part[#1]#2{%
   \ifnum \c@secnumdepth >-2\relax

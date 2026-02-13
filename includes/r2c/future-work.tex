@@ -9,7 +9,6 @@ Since both the caller and the callee know the callee's address, the caller can c
 An added benefit of this approach would be that the position of the real return address changes with each program start.
 Even without load-time function permutation, \gls{ASLR} moves function addresses on each program load.
 
-
 \subsection{Implementation on ARM}
 Our implementation of \rtwoc is based on the x86-64 architecture and aims to respect archi\-tecture-specific behavior such as that the \code{CALL} instruction automatically pushes the return address onto the stack.
 The idiosyncrasy of the \code{CALL} instruction makes the \gls{BTRA} setup challenging.
@@ -38,7 +37,6 @@ Second, the fake objects should closely resemble the data structures of real hea
 For example, if a program only allocates structures with a single function pointer, then fake objects containing multiple function pointers are immediately recognizable to the attacker.
 Such data structure imitation could happen based on the types used for real heap allocations.
 
-
 \subsection{Speculative Booby Traps}\label{r2c:ss:speculative-booby-traps}%
 
 \newsavebox{\speculativebt}
@@ -57,6 +55,57 @@ target:
  call alarm|\tikzmark{T-Call-Alarm}|
     \end{lstlisting}
 \end{lrbox}
+
+\begin{figure}[t]
+    % --- ROW 1: GRAPHICAL CONTENT ---
+    % This row contains the graphics, aligned at their bottom edges.
+
+    \begin{minipage}[b]{0.25\linewidth}
+        \begin{lstlisting}[style=asmcode,basicstyle=\footnotesize\ttfamily]
+call set_up_target
+
+capture_spec:
+ pause
+ jmp capture_spec
+
+set_up_target:
+ mov (%rsp), %rax
+ ret
+        \end{lstlisting}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[b]{0.7\linewidth}
+        \includeDrawioFigure[0.9\linewidth]{figures/r2c/btra-only-stack}[remember picture]{
+            \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
+            \draw[dash pattern=on 2pt off 2pt] (CodeBox.north west) rectangle (CodeBox.south east);
+            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
+            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
+            \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
+            \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
+            \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
+            \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
+            \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
+            \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
+            \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
+        }
+    \end{minipage}
+
+    % --- ROW 2: CAPTIONS ---
+    % This row contains the captions, aligned at their top edges.
+    % The \subcaption command will work inside the minipage.
+
+    \begin{minipage}[t]{0.3\linewidth}
+        \subcaption{Retpolines control the branch target speculation for indirect branches.}
+        \label{lst:retpoline}
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{0.6\linewidth}
+        \subcaption{A speculation aware booby trap that looks like the expected code during speculative execution.}
+        \label{r2c:fig:speculation-aware-boobytrap}
+    \end{minipage}
+    \caption{Retpolines and how speculation-aware booby-traps can use the retpoline principle for deception.}
+\end{figure}
+
 Booby traps are an effective measure to deter random probing.
 For booby traps to be effective, two properties must hold:
 \begin{enumerate*}
@@ -96,56 +145,6 @@ We present the idea here to motivate more research in that direction.
 Speculation-aware booby traps build on the principle of separating speculative and non-speculative control flow.
 This principle was first demonstrated by retpolines~\cite{Turner2018}, which capture speculative control-flow in a spin loop.
 \cref{lst:retpoline} shows an example of a retpoline protecting an indirect branch to the address in \code{rax} against speculative execution.
-
-
-\begin{figure}[t]
-    % --- ROW 1: GRAPHICAL CONTENT ---
-    % This row contains the graphics, aligned at their bottom edges.
-
-\begin{minipage}[b]{0.25\linewidth}
-    \begin{lstlisting}[style=asmcode,basicstyle=\footnotesize\ttfamily]
-call set_up_target
-
-capture_spec:
- pause
- jmp capture_spec
-
-set_up_target:
- mov (%rsp), %rax
- ret
-    \end{lstlisting}
-\end{minipage}%
-\hfill%
-\begin{minipage}[b]{0.7\linewidth}
-        \includeDrawioFigure[\linewidth]{figures/r2c/btra-only-stack}[remember picture]{
-            \node[anchor=north west] (CodeBox) at (Code) {\usebox\speculativebt};
-            \draw[dash pattern=on 2pt off 2pt] (CodeBox.north west) rectangle (CodeBox.south east);
-            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.north west);
-            \draw[dash pattern=on 2pt off 2pt] (Bomb) -- (CodeBox.south west);
-            \draw[-latex, dash dot] ([shift={(-1pt,2pt)}] pic cs:T-Decoy-Gadget) -| (Elbow) |- (ReturnInstr);
-            \node[yshift={1.5*\ht\pgfnodeparttextbox}] at (Elbow) {\scriptsize{}\code{\Circled{\ttfamily2}}};
-            \coordinate (RetAlarm) at ([shift={(2pt,2pt)}] pic cs:T-Ret-Alarm);
-            \coordinate (RightOffset) at ($ (CodeBox.west)!.8!(CodeBox.east) $, 0);
-            \coordinate (OffsetPoint) at (RightOffset |- RetAlarm);
-            \draw[-latex, solid] (RetAlarm) -- (OffsetPoint) |- ([shift={(2pt,2pt)}] pic cs:T-Call-Alarm);
-            \node[shift={(-\ht\pgfnodeparttextbox, -\ht\pgfnodeparttextbox)}] at (OffsetPoint)  {\scriptsize{\Circled{\ttfamily3}}};
-        }
-    \end{minipage}
-
-    % --- ROW 2: CAPTIONS ---
-    % This row contains the captions, aligned at their top edges.
-    % The \subcaption command will work inside the minipage.
-
-    \begin{minipage}[t]{0.3\linewidth}
-        \subcaption{Retpolines control the branch target speculation for indirect branches.}
-        \label{lst:retpoline}
-    \end{minipage}%
-\hfill%
-\begin{minipage}[t]{0.6\linewidth}
-        \subcaption{A speculation aware booby trap that looks like the expected code during speculative execution.}
-        \label{r2c:fig:speculation-aware-boobytrap}
-    \end{minipage}
-\end{figure}
 
 Instead of a spin loop, speculation-aware booby traps redirect speculative control-flow to the code an attacker expects behind an address.
 \cref{r2c:fig:speculation-aware-boobytrap} shows how speculation-aware booby traps could be used in the context of \rtwoc.

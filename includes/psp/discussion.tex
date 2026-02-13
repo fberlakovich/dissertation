@@ -117,17 +117,20 @@ This data suggests that for \gls{PSP} to be effective, more powerful heuristics 
     \caption{Per-input edge entanglement on FuzzBench: median across \num{30} instances. $\mathcal{E}$~is the entanglement rate; the three category columns show the fraction~(\%) of all coverage-discovering inputs per category.}
     \label{psp:tab:entanglement-fuzzbench}
     \scriptsize
-    \setlength{\extrarowheight}{1pt}
-    \begin{tabular}{>{\nextrow}E S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1]}
+    \loadTableData{generated/psp/entanglement-fuzzbench}
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1]},
+        headrows = 2,
+        cell{3-Z}{1} = {font=\propernamedecl},
+    }
         \toprule
-        & \multicolumn{4}{c}{\gls{VRP}} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & \SetCell[c=4]{c} {\gls{VRP}} & & & & \SetCell[c=4]{c} {Call Unfolding} & & & \\
+        \cmidrule[lr]{2-5} \cmidrule[lr]{6-9}
         {Benchmark} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/psp/entanglement-fuzzbench}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
 \begin{table}[t]
@@ -135,16 +138,19 @@ This data suggests that for \gls{PSP} to be effective, more powerful heuristics 
     \caption{Per-input edge entanglement on Magma: median across \num{30} instances. $\mathcal{E}$~is the entanglement rate; the three category columns show the fraction~(\%) of all coverage-discovering inputs per category.}
     \label{psp:tab:entanglement-magma}
     \scriptsize
-    \setlength{\extrarowheight}{1pt}
-    \begin{tabular}{>{\nextrow}E S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1]}
+    \loadTableData{generated/psp/entanglement-magma}
+    \begin{thesistable}[expand=\tabledata]{
+        colspec = {l S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1] S[table-format=3.1] S[table-format=2.1] S[table-format=2.1] S[table-format=2.1]},
+        headrows = 2,
+        cell{3-Z}{1} = {font=\propernamedecl},
+    }
         \toprule
-        & \multicolumn{4}{c}{\gls{VRP}} & \multicolumn{4}{c}{Call Unfolding} \\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & \SetCell[c=4]{c} {\gls{VRP}} & & & & \SetCell[c=4]{c} {Call Unfolding} & & & \\
+        \cmidrule[lr]{2-5} \cmidrule[lr]{6-9}
         {Benchmark} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} & {$\mathcal{E}$} & {$\lnot$PSP} & {PSP} & {Both} \\
         \midrule
-        \startdatarows
-        \fileInput{generated/psp/entanglement-magma}
+        \tabledata
         \bottomrule
-    \end{tabular}
+    \end{thesistable}
 \end{table}
 
