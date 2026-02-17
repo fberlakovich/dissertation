@@ -1,3 +1,23 @@
+\begin{figure}[t]
+    \centering
+    \resizebox{\textwidth}{!}{\input{figures/coevolution/code-reuse-trend.tex}}
+    \caption{Code-reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
+    The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
+    The full list of papers is provided in \Cref{app:code-reuse-papers}.}
+    \label{fig:intro:code-reuse-trend}
+\end{figure}
+
+Despite unsolved problems, the security community's interest in code-reuse mitigations seems to decline, judging by the publication counts,
+\Cref{fig:intro:code-reuse-trend} shows the number of code-reuse-related publications in top security venues from 2010 to 2024.
+The figure clearly shows the peak interest around 2015--2016 and the subsequent decline.
+While hardware defenses like Intel CET and ARM PAC have reduced the urgency for software-only solutions, they are not a silver bullet.
+This trend is particularly worrying given the rapidly increasing capabilities of \gls{LLM}s with respect to offensive security.
+Already in the year 2026, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning~\cite{anthropic2026zerodays}.
+At these drastically reduced costs, even sophisticated, targeted attacks fall within the capabilities of non-state actors.
+In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
+The following two subsections describe possible future research directions.
+
+
 \section{Combining Defense Strategies}
 In \cref{ch:code-reuse-coevolution} we gave a brief overview of the defensive strategies against \glspl{CRA} that have emerged over time.
 The description in \cref{ch:code-reuse-coevolution} already hints at the fact that none of these strategies are a silver bullet.

@@ -7,7 +7,7 @@ Data dependencies that do not manifest as explicit control flow transitions are 
 A critical variable might determine which implementation of a function is executed, but if that variable resides solely in data memory, the coverage bitmap remains unchanged.
 Previous work augmented code coverage with additional data dependency~\cite{Mantovani2022} or dataflow coverage~\cite{herrera2022}.
 
-Here we present an alternative solution to the problem, which we call \gls{PSP}.
+Here we present an alternative solution to the problem, which we call \acrfull{PSP}.
 The core idea of \gls{PSP} is to project parts of the program's hidden data state onto the explicit control-flow graph.
 By transforming data dependencies into control dependencies, we force the previously invisible variations in program state to trigger new edges in the coverage instrumentation.
 This allows the fuzzer to distinguish between states that were previously conflated, potentially providing stepping stones to explore deeper into the state space.
@@ -36,11 +36,11 @@ SafeDispatch, a defense against vtable hijacking, uses the same technique to har
 Performance aside, we observe that this type of transformation has another important property: it projects a data dependency---which concrete object reaches a call site---onto the control-flow graph.
 In other words, possible variations in data, at least some of them, are now represented in the \gls{CFG}.
 A representation as control-flow allows \aflpp's coverage instrumentation to instrument the previously invisible dynamic edges.
-We call this principle \emph{Program State Projection}, or \glsshortkey{PSP} for short, because it combines control flow with parts of the program's hidden state.
+We call this principle \emph{Program State Projection}, or \gls{PSP} for short, because it combines control flow with parts of the program's hidden state.
 
 
 \begin{listing}
-    \begin{minted}[escapeinside=||]{cpp}
+    \begin{minted}[escapeinside=||,linenos]{cpp}
 struct Shape { virtual void draw(int scale) = 0; };
 struct ShapeParser { virtual Shape *parse(std::string pattern) = 0; };
 

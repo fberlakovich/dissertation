@@ -8,7 +8,7 @@
 \usepackage{subcaption}
 \usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
-\usepackage{todonotes} % Provides tooltip-like todo notes.
+\usepackage[disable]{todonotes} % Provides tooltip-like todo notes.
 \usepackage[acronym,toc]{glossaries} % Enables acronyms
 \usepackage{xspace} % automatic space after user defined commands
 \usepackage[normalem]{ulem}
@@ -200,6 +200,7 @@
 
 \AtBeginDocument{\DeclareCaptionSubType{lstlisting}}
 \AtBeginDocument{\DeclareCaptionSubType{listing}}
+\crefname{sublisting}{Listing}{Listings}
 
 \makeatletter
 \newcommand{\closepart}{
@@ -304,10 +305,10 @@
 }
 
 
-\newcommand{\propernamedecl}{\ttfamily\hyphenchar\font=`-\relax}
+\newcommand{\propernamedecl}{\sffamily\hyphenchar\font=`-\relax}
 \newcommand{\propername}[1]{{\propernamedecl#1}}
-\newcommand{\afl}{AFL}
-\newcommand{\aflpp}{AFL\plusplus}
+\newcommand{\afl}{\propername{AFL}\xspace}
+\newcommand{\aflpp}{\propername{AFL}\plusplus}
 
 
 % @formatter:off
@@ -680,6 +681,17 @@
 
 \crefname{codelisting}{Listing}{Listings}
 \Crefname{codelisting}{Listing}{Listings}
+
+\crefname{FancyVerbLine}{line}{lines}
+\Crefname{FancyVerbLine}{Line}{Lines}
+\newcommand{\mintedlinelabel}[1]{%
+  \begingroup
+  \renewcommand{\theFancyVerbLine}{\arabic{FancyVerbLine}}%
+  \addtocounter{FancyVerbLine}{-1}%
+  \refstepcounter{FancyVerbLine}%
+  \phantomsection\label{#1}%
+  \endgroup
+}
 
 \crefname{enumfigure}{List}{Lists}
 \Crefname{enumfigure}{List}{Lists}

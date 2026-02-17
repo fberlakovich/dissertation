@@ -35,7 +35,7 @@
   % Year 2011%
 \node[year node] at (0.0,-10.8) {2011};%
 \node[attack node] at (-2.6,-10.8) {JOP \allowbreak\cite{Bletsch2011a}};%
-\node[defense node] at (2.6,-10.8) {ROPdefender};%
+\node[defense node] at (2.6,-10.8) {ROPdefender \allowbreak\cite{davi2011}};%
   % Year 2012%
 \node[year node] at (0.0,-12.5) {2012};%
 \node[defense node] at (2.6,-12.0) {Instruction{-}Layout\\ Randomization \allowbreak\cite{Hiser2012}};%
@@ -54,9 +54,9 @@
 \node[year node] at (0.0,-18.4) {2014};%
 \node[attack node] at (-2.6,-17.4) {Blind ROP \allowbreak\cite{Bittau2014a}};%
 \node[attack node] at (-6.6,-17.4) {Framing Signals \allowbreak\cite{Bittau2014a}};%
-\node[attack node] at (-2.6,-18.4) {SROP};%
-\node[attack node] at (-6.6,-18.4) {Out of Control};%
-\node[attack node] at (-2.6,-19.4) {ROP is Still Dangerous};%
+\node[attack node] at (-2.6,-18.4) {SROP \allowbreak\cite{bosman2014}};%
+\node[attack node] at (-6.6,-18.4) {Out of Control \allowbreak\cite{Goktas2016b}};%
+\node[attack node] at (-2.6,-19.4) {ROP is Still Dangerous \allowbreak\cite{carlini2014}};%
 \node[defense node] at (2.6,-17.4) {Oxymoron \allowbreak\cite{Backes2014f}};%
 \node[defense node] at (6.6,-17.4) {Modular CFI \allowbreak\cite{niu2014}};%
 \node[defense node] at (2.6,-18.4) {Code Pointer Integrity \allowbreak\cite{Kuznetsov2014}};%
@@ -68,7 +68,7 @@
 \node[attack node] at (-6.6,-22.1) {Control Flow Bending \allowbreak\cite{Carlini2015}};%
 \node[attack node] at (-2.6,-23.1) {Control Jujutsu \allowbreak\cite{Evans2015a}};%
 \node[attack node] at (-6.6,-23.1) {Missing the Point(er) \allowbreak\cite{Evans2015}};%
-\node[attack node] at (-2.6,-24.1) {Losing Control};%
+\node[attack node] at (-2.6,-24.1) {Losing Control \allowbreak\cite{conti2015}};%
 \node[defense node] at (2.6,-20.6) {Isomeron \allowbreak\cite{Davi2015}};%
 \node[defense node] at (6.6,-20.6) {Readactor \allowbreak\cite{Crane2015}};%
 \node[defense node] at (2.6,-21.6) {Its a TRaP \allowbreak\cite{Crane2015b}};%
@@ -85,9 +85,8 @@
 \node[attack node] at (-2.6,-27.8) {Undermining\\ Information Hiding \allowbreak\cite{Goktas2016}};%
 \node[attack node] at (-6.6,-27.8) {Poking Holes \allowbreak\cite{Oikonomopoulos2016a}};%
 \node[attack node] at (-2.6,-28.8) {Data{-}Oriented\\ Programming \allowbreak\cite{Hu2016}};%
-\node[attack node] at (-6.6,-28.8) {Position Independent ROP};%
 \node[defense node] at (2.6,-26.8) {No Execute After Read \allowbreak\cite{Werner2016}};%
-\node[defense node] at (6.6,-26.8) {Juggling the Gadgets};%
+\node[defense node] at (6.6,-26.8) {Juggling the Gadgets \allowbreak\cite{koo2016}};%
 \node[defense node] at (2.6,-27.8) {Shuffler \allowbreak\cite{WilliamsKing2016}};%
 \node[defense node] at (6.6,-27.8) {Leakage Resilient\\ Randomization \allowbreak\cite{Braden2016}};%
 \node[defense node] at (2.6,-28.8) {TypeArmor \allowbreak\cite{VanderVeen2015b}};%
@@ -100,28 +99,28 @@
 \node[defense node] at (2.6,-31.0) {kRX \allowbreak\cite{Pomonis2019}};%
 \node[defense node] at (6.6,-31.0) {CodeArmor \allowbreak\cite{Chen2017a}};%
   % Year 2018%
-\node[year node] at (0.0,-32.2) {2018};%
+\node[year node] at (0.0,-32.7) {2018};%
 \node[attack node] at (-2.6,-32.2) {Block{-}Oriented\\ Programming \allowbreak\cite{Ispoglou2018}};%
-\node[attack node] at (-6.6,-32.2) {Back To The Epilogue};%
-\node[defense node] at (2.6,-32.2) {CFIXX \allowbreak\cite{Burow2018CFIXX}};%
-\node[defense node] at (6.6,-32.2) {Compiler Assisted\\ Code Randomization \allowbreak\cite{Koo2018}};%
+\node[attack node] at (-6.6,-32.2) {Back To The Epilogue \allowbreak\cite{biondo2018}};%
+\node[attack node] at (-2.6,-33.2) {Position Independent\\ ROP \allowbreak\cite{Goktas2018}};%
+\node[defense node] at (2.6,-32.7) {CFIXX \allowbreak\cite{Burow2018CFIXX}};%
+\node[defense node] at (6.6,-32.7) {Compiler Assisted\\ Code Randomization \allowbreak\cite{Koo2018}};%
   % Year 2019%
-\node[year node] at (0.0,-33.9) {2019};%
-\node[defense node] at (2.6,-33.4) {Origin{-}sensitive CFI};%
-\node[defense node] at (6.6,-33.4) {Adaptive Call{-}Site\\ Sensitive CFI};%
-\node[defense node] at (2.6,-34.4) {SafeHidden};%
+\node[year node] at (0.0,-34.9) {2019};%
+\node[defense node] at (2.6,-34.4) {Origin{-}sensitive CFI \allowbreak\cite{khandaker2019}};%
+\node[defense node] at (6.6,-34.4) {Adaptive Call{-}Site\\ Sensitive CFI \allowbreak\cite{khandaker2019a}};%
+\node[defense node] at (2.6,-35.4) {SafeHidden \allowbreak\cite{wang2019a}};%
   % Year 2020%
-\node[year node] at (0.0,-35.6) {2020};%
-\node[attack node] at (-2.6,-35.6) {ROP on RISC{-}V};%
-\node[attack node] at (-6.6,-35.6) {Finding Cracks in Shields};%
-\node[defense node] at (2.6,-35.6) {Saffire};%
+\node[year node] at (0.0,-36.6) {2020};%
+\node[attack node] at (-2.6,-36.6) {ROP on RISC{-}V \allowbreak\cite{jaloyan2020}};%
+\node[attack node] at (-6.6,-36.6) {Finding Cracks\\ in Shields \allowbreak\cite{li2020}};%
   % Year 2022%
-\node[year node] at (0.0,-36.8) {2022};%
-\node[defense node] at (2.6,-36.8) {Taming of the Stack};%
+\node[year node] at (0.0,-37.8) {2022};%
+\node[defense node] at (2.6,-37.8) {Taming of the Stack \allowbreak\cite{huang2022a}};%
   % Year 2023%
-\node[year node] at (0.0,-38.0) {2023};%
-\node[attack node] at (-2.6,-38.0) {CHOP \allowbreak\cite{duta2023}};%
-\node[defense node] at (2.6,-38.0) {R2C};%
-\path[spine,draw] (0.0,0.8) -- (0.0,-39.0);%
-\path[use as bounding box] (-8.40,-39.00) rectangle (8.40,2.00);%
+\node[year node] at (0.0,-39.0) {2023};%
+\node[attack node] at (-2.6,-39.0) {CHOP \allowbreak\cite{duta2023}};%
+\node[defense node] at (2.6,-39.0) {R2C \allowbreak\cite{berlakovich2023}};%
+\path[spine,draw] (0.0,0.8) -- (0.0,-40.0);%
+\path[use as bounding box] (-8.40,-40.00) rectangle (8.40,2.00);%
 \end{tikzpicture}

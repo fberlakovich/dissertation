@@ -19,7 +19,7 @@ The selection process is driven by a genetic algorithm that tries to breed more 
 \cref{lool:fig:lool-overview} shows an overview of the interaction between the genetic algorithm, the input generator, and the optimization log.
 \subsection{Overview}\label{lool:ss:design-overview}
 The idea of using an evolutionary algorithm in (compiler) fuzzing is not new.
-In fact, producing new inputs with an evolutionary algorithm is at the core of the popular fuzzer AFL and its descendants~\cite{Zalewski2016}.
+In fact, producing new inputs with an evolutionary algorithm is at the core of the popular fuzzer \propername{AFL} and its descendants~\cite{Zalewski2016}.
 Some fuzzers even use genetic algorithms, a subbranch of evolutionary algorithms that includes crossover, to generate inputs~\cite{Veggalam2016,Hough2024}.
 The genetic algorithm can either mutate the inputs directly, or it can mutate the parameters of the input generator, an approach called \emph{parametric fuzzing}, exemplified by Zest~\cite{Padhye2019}.
 Zest treats the input generator's parameters as bit strings and applies bit-level mutations to those bit strings.

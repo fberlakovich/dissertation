@@ -31,29 +31,19 @@ The tradeoff between abstraction and performance explains, in part, why language
 The potential for high performance\footnote{Not every program written in C or \cpp is automatically fast.} and direct control of machine internals make C and \cpp popular choices for operating systems, browsers, and embedded systems.
 However, C and \cpp are also notorious for their lack of automatic memory management (memory unsafety) and, more broadly, for the pitfalls of undefined behavior.
 
-These pitfalls regularly lead to dangerous vulnerabilities.
+Such pitfalls regularly lead to dangerous vulnerabilities.
 These vulnerabilities---which include both spatial (\eg buffer and heap overflows) and temporal memory safety (\eg use-after-free) issues---are the vector for a majority of remote code execution exploits.
 Industry telemetry highlights the breadth of the problem.
 In 2019, Microsoft’s Security Response Center reported that roughly 70\% of the critical vulnerabilities it handled over the past decade were due to memory-safety errors, despite major investments in defensive coding practices~\cite{msrcreport2019}.
-Google’s annual Android security review reaches similar conclusions, attributing more than three quarters of high-severity platform bugs between 2019 and 2022 to memory-safety violations, many rooted in native code dependencies\cite{projectzeroandroid2022}.
+Google’s annual Android security review reaches similar conclusions, attributing more than three quarters of high-severity platform bugs between 2019 and 2022 to memory-safety violations, many rooted in native code dependencies~\cite{projectzeroandroid2022}.
 Google's Project Zero also notes that the majority of the 2023 zero-days they investigated ultimately stemmed from memory corruption~\cite{projectzerointhewild2024}.
 
 The rise in security-awareness and with it the increasing adoption of memory-safe languages also for system-related tasks is a welcome development.
-Nonetheless, despite the rise of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices~\cite{tiobe2025}.
-Furthermore, even new, memory-safe code is often integrated into legacy systems.
+Nonetheless, despite the growing popularity of languages like Rust, C and \cpp remain dominant, consistently ranking in the top tiers of language popularity indices~\cite{tiobe2025}.
+Furthermore, even new, memory-safe code is often integrated with legacy systems.
 A vulnerability in an underlying C library, for example, can be exploited to undermine the guarantees of a Rust or Swift application that links against it~\cite{mergendahl2022}.
 Even if from now on no new code was written in memory-unsafe languages, migrating the billions of lines of C and \cpp code already in production would be a multi-year enterprise, costing billions of euros.
 Thus, memory safety vulnerabilities will remain a critical threat in the foreseeable future and mitigations are needed to deal with them.
-
-
-\begin{figure}[t]
-    \centering
-    \resizebox{\textwidth}{!}{\input{figures/coevolution/code-reuse-trend.tex}}
-    \caption{Code-reuse attack and defense publications in security venues (IEEE S\&P, USENIX Security, CCS, NDSS, AsiaCCS, Euro S\&P) from 2010 to 2024.
-    The paper metadata was retrieved from DBLP, and filtered using semantic clustering on titles and abstracts.
-    The full list of papers is provided in \Cref{app:code-reuse-papers}.}
-    \label{fig:intro:code-reuse-trend}
-\end{figure}
 
 A dominant class of exploits targeting these vulnerabilities is code-reuse attacks.
 Attackers hijack a program's control flow and subsequently reuse existing code \enquote{gadgets} already present in the target process.
@@ -64,15 +54,9 @@ Software diversity embraces the possibility of memory corruptions and control-fl
 By introducing controlled randomness into code or data layouts, software diversity disrupts attackers’ assumptions.
 For example, without knowing the exact location of functions or gadgets, an attacker can no longer use them in a code-reuse attack.
 Unfortunately, closing all information channels an attacker could use to undermine the guarantees provided by randomization proves difficult in practice.
-Recent work shows that even when code is perfectly hidden, predictable data structures such as the stack, global objects, or allocator metadata, can leak enough information for a successful attack~\cite{Rudd2017}.
-The consequence is that although, judging by the publication counts, the security community's interest in code-reuse mitigations has declined, unsolved problems remain.
-\Cref{fig:intro:code-reuse-trend} shows the number of code-reuse-related publications in top security venues from 2010 to 2024.
-The figure clearly shows the peak interest around 2015--2016 and the subsequent decline.
-While hardware defenses like Intel CET and ARM PAC have reduced the urgency for software-only solutions, they are not a silver bullet and research continues, particularly for embedded systems and attestation.
-This trend is particularly worrying given the rapidly increasing capabilities of \gls{LLM}s with respect to offensive security.
-Already in the year 2026, \gls{LLM}s can reduce the cost of creating highly sophisticated code-reuse exploits from days or even weeks down to a few hours and an investment of a few euros, and this is likely only the beginning~\cite{anthropic2026zerodays}.
-At these drastically reduced costs, even sophisticated targeted attacks fall within the capabilities of non-state actors.
-In light of these developments, we hope that the loss of interest in \glspl{CRA} is only temporary and that research on more capable defenses continues.
+Attacks like \acrlong{AOCR} show that even when code is perfectly hidden, predictable data structures such as the stack, global objects, or allocator metadata, can leak enough information for a successful attack~\cite{Rudd2017}.
+Thus, despite years of research and defense improvements, unsolved problems remain.
+
 \section{Reliability}
 Traditional approaches to software reliability, such as static analysis, unit testing, and formal verification, serve as the foundation of quality assurance.
 While formal verification offers the strongest theoretical guarantees, it faces significant practical hurdles.
@@ -102,7 +86,7 @@ To find these deeper bugs, the fuzzer needs a better guide---one that considers 
 %
 
 \section{The Compiler's Role Beyond Optimization}
-In this thesis I argue that compilers are uniquely positioned to help improve both software reliability and security.
+In this thesis I argue that compilers are uniquely positioned to help improve both software security and reliability.
 Every non-trivial program passes through a compiler at some point, either ahead of time or just in time\footnote{Interpreted programs are an exception, but the interpreter itself has passed through a compiler as well.}.
 Due to this compilation \enquote{bottleneck}, a single transformation deployed in the toolchain can harden millions of downstream binaries.
 
@@ -125,7 +109,7 @@ Each part concludes with an \emph{Outlook} chapter that discusses more general i
 In \cref{ch:r2c} I present \rtwoc, a novel software diversity defense that addresses the challenge of layout inference through information leaks.
 Unlike prior work that focused primarily on code randomization, \rtwoc leverages the compiler's knowledge of stack frame geometry to randomize observable data layouts.
 By disguising sensitive pointers among booby-trapped decoys, \rtwoc substantially raises reconnaissance cost while incurring moderate performance overhead.
-While introducing new diversity techniques, \rtwoc also reveals the challenges diversity faces when subjected to targeted attacks with a powerful threat model.
+\rtwoc introduces new diversity techniques, but also highlights the challenges diversity faces when subjected to targeted attacks with a powerful threat model.
 
 \paragraph{LOOL: Optimization-Aware Compiler Fuzzing}
 In \cref{ch:lool} I present \lool, a compiler fuzzing framework based on a new type of coverage feedback.

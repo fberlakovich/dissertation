@@ -69,7 +69,7 @@ This separate measurement step guarantees that experiments without code coverage
 
 \subsection{Experiment Evaluation}\label{lool:ss:experiment-evaluation}
 We evaluated 8 different configurations enumerated below.
-\aflpp configurations, by default, are fully parametric (see \cref{sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{ss:afl-parameter-mutation}).
+\aflpp configurations, by default, are fully parametric (see \cref{lool:sss:afl-fully-parametric}), whereas \propername{only-params} in the name indicates the variant where the generator reads only generation parameters from the input file (cf. \cref{lool:ss:afl-parameter-mutation}).
 For the \lool Context-Blind configuration, which uses global optimization counters, \propername{old} in the name indicates the old weighting algorithm (see \cref{p:old-weighting-scheme}) and \propername{ffiif} in the name indicates the new, generalized Feature Frequency-Inverse Individual Frequency algorithm (see \cref{p:ffiif}).
 Configurations with \propername{memory} accumulate counters over time, whereas \propername{generation} in the name means genetic algorithm measures fitness relative only to other individuals in the same generation.
 \begin{configurations}
@@ -84,9 +84,9 @@ Configurations with \propername{memory} accumulate counters over time, whereas \
     The optimization log counters are a domain-specific and efficient alternative to code coverage, but do not allow one to discern compilation contexts.
     \configuration{\aflpp Context-Aware}\label{config:aflcontextaware} a configuration where we use \aflpp for parametric input mutation together with per-method optimization pairs as coverage.
     Instead of aggregating the optimization counters, we record them for each method individually to identify pairs of optimizations that occurred together.
-    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{s:lool-design}) with code coverage as feedback.
+    \configuration{\lool Code Coverage}\label{config:loolcodecov} a configuration where we use \lool's domain-specific input mutation (see \cref{lool:s:design}) with code coverage as feedback.
     \configuration{\lool Context-Blind}\label{config:loolcontextblind} a configuration where we use \lool's domain-specific input mutation with lightweight optimization log counters as coverage.
-    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{s:lool-design}).
+    \configuration{\lool Context-Aware}\label{config:loolfull} a configuration where we combine per-method optimization pairs as coverage with the domain-specific genetic algorithm for input mutation (see \cref{lool:s:design}).
     During each run, this configuration tries to breed as many generations as possible.
     Each generation consists of 16 parameter vectors, and the fuzzer creates a new generation when each vector has generated 40 tests or after one hour, whichever happens first.
 \end{configurations}
@@ -141,7 +141,7 @@ Like in \cref{config:aflcodecov}, we let \aflpp operate on a proxy binary to bri
         \label{lool:fig:cumulative-coverage}
     \end{subfigure}
 
-    \vspace{0.5em}
+    \vspace{0.3em}
 
     \begin{subfigure}[t]{\textwidth}
         \centering

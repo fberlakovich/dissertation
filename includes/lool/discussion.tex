@@ -63,7 +63,7 @@ The number of identical tests and re-generation attempts are shown in \cref{lool
 Identical tests happen when \aflpp mutates bits in the input file that do not change the code generator's behavior.
 Although \aflpp eventually learns that mutating these bits is useless, the feedback loop in the GraalVM context is slow compared to traditional \aflpp targets such as image libraries.
 On average, a generated test case takes 9--10s, which means that \aflpp often wastes several minutes trying to mutate meaningless bits.
-In the variants that mutate only generation parameters (see \cref{lool:sss:afl-only-params}), the generator reads a short, fixed byte sequence from the \aflpp generated input, making it easier for \aflpp to detect which bits have an effect.
+In the variants that mutate only generation parameters (see \cref{lool:sss:afl-hyperonly}), the generator reads a short, fixed byte sequence from the \aflpp generated input, making it easier for \aflpp to detect which bits have an effect.
 Nonetheless, even though we started with an ideally sized seed file, \aflpp eventually tries different sizes as well and wastes time with meaningless mutations.
 Another source of identical tests are \aflpp calibration runs, which become particularly expensive with long-running tests.
 The problem is compounded by the fact that neither the coverage feedback nor the execution times are fully stable, due to the JVM's profiling and class-loading heuristics.
@@ -95,7 +95,7 @@ This variable length requirement makes it difficult for \aflpp to infer useful f
 In cases where there is too little randomness for the generator's random decisions, the generator tries to size down the generated test case by adapting structural parameters (see \cref{lool:sss:afl-fully-parametric}).
 We found that in the fully parametric variant (see \cref{lool:sss:afl-fully-parametric}) the generator reduced the parameters of almost all tests at least once.
 \cref{lool:tbl:afl-overview} shows the number of tests with reduced generation parameters for each configuration.
-As expected, this effect is mitigated in the variant that reads only generation parameters from the seed (see \cref{lool:sss:afl-only-params}).
+As expected, this effect is mitigated in the variant that reads only generation parameters from the seed (see \cref{lool:sss:afl-hyperonly}).
 In this variant, the generator fails only if the seed is even too short to read generation parameters, which happened in about 5\% of the generated tests.
 The \enquote{Skipped} column in \cref{lool:tbl:test-overview} shows the number of tests that had to be skipped due to such an unusable seed file.
 

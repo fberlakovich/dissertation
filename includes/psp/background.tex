@@ -17,23 +17,19 @@ The \cpp standard requires the implementation of dynamic binding but does not di
 Nonetheless, all major compilers implement dynamic binding in \cpp with \emph{vtables}.
 A vtable is a table that contains pointers to the concrete method implementations for each type.
 A polymorphic method call consists of
-\begin{enumerate*}
+\begin{enumerate}
     \item resolving the vtable for an object's type.
     Object's typically contain a pointer to their type's vtable as their first field.
     \item resolving the correct method implementation.
     The implementation is chosen by indexing into the vtable with a callsite-fixed index.
-\end{enumerate*}
+\end{enumerate}
 
 This process of dynamic dispatch is sometimes emulated in languages such as C, which lack builtin support for polymorphic method calls.
 
 \subsection{Polymorphic Inlining}\label{psp:ss:polymorphic-inlining}
-While dynamic binding is a powerful feature, the indirect calls required for vtable lookups can introduce performance overhead and hinder other compiler optimizations.
-To mitigate this overhead, in particular \glspl{JITcomp} use techniques to devirtualize these calls when possible.
-In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite polymorphic call sites to exploit the usually high type stability of call sites.
-For example, consider the Java Program in \cref{psp:lst:polymorphic-call}.
 \begin{listing}
     \centering
-    \begin{minted}[mathescape,escapeinside=||]{Java}
+    \begin{minted}[mathescape,escapeinside=||,linenos]{Java}
 abstract class Animal { public void makeSound(); }
 class Cat extends Animal  { public void makeSound() {|$\dots$|} }
 class Dog extends Animal  { public void makeSound() {|$\dots$|} }
@@ -42,14 +38,12 @@ class Elephant extends Animal  { public void makeSound() {|$\dots$|} }
 Animal[] animals = {new Dog(), new Cat()};
 for (int i=0; i<1000; i++) {
     Animal animal = animals[i % animals.length];
-    animal.makeSound(); |\label{psp:line:polymorphic-call}|
+    animal.makeSound(); |\mintedlinelabel{psp:line:polymorphic-call}|
 }
     \end{minted}
+    \caption{Java program with a polymorphic method call.}
     \label{psp:lst:polymorphic-call}
 \end{listing}
-
-The polymorphic call site in \cref{psp:line:polymorphic-call} calls either \code{Cat}'s or \code{Dog}'s implementation of \code{makeSound}.
-On the assembly level, the call site looks like in \cref{psp:lst:vcall-pseudocode}.
 \begin{listing}
     \centering
     \begin{minted}{gas}
@@ -59,9 +53,16 @@ mov     rax, [rax]         ; load function pointer for makeSound from vtable slo
 call    rax                ; indirect call through the function pointer
 ret
     \end{minted}
+    \caption{Conceptual assembly of the call in \cref{psp:lst:polymorphic-call}.}
     \label{psp:lst:vcall-pseudocode}
 \end{listing}
 
+While dynamic binding is a powerful feature, the indirect calls required for vtable lookups can introduce performance overhead and hinder other compiler optimizations.
+To mitigate this overhead, in particular \glspl{JITcomp} use techniques to devirtualize these calls when possible.
+In a transformation called \emph{polymorphic inlining}, \glspl{JITcomp} rewrite polymorphic call sites to exploit the usually high type stability of call sites.
+For example, consider the Java Program in \cref{psp:lst:polymorphic-call}.
+The polymorphic call site in \cref{psp:line:polymorphic-call} calls either \code{Cat}'s or \code{Dog}'s implementation of \code{makeSound}.
+On the assembly level, the call site looks like in \cref{psp:lst:vcall-pseudocode}.
 After an initial profiling period, the \gls{JITcomp} detects the type stability of the polymorphic call site and might transform the call site into the code in \cref{psp:lst:polymorphic-inlining}.
 In case of multiple possible targets, the \gls{JITcomp} typically orders the direct calls based on their observed frequency, with the most frequent at the top.
 Note that \glspl{JITcomp} typically avoid rewriting the code itself and instead cache a direct pointer to the target function in what is called an inline cache.
@@ -95,5 +96,6 @@ ret
 call Dog::makeSound
 ret
     \end{minted}
+    \caption{Code from \cref{psp:lst:polymorphic-call} with polymorphic inlining.}
     \label{psp:lst:polymorphic-inlining}
 \end{listing}

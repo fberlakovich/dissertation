@@ -103,12 +103,11 @@ nodes:
     label: Returnless ROP
 
   # ===== 2011 =====
-  - id: D_ROPdefender11
+  - id: davi2011
     year: 2011
     type: defense
     tags: [ cfi ]
     label: ROPdefender
-    nocite: true
 
   - id: Bletsch2011a
     year: 2011
@@ -191,12 +190,11 @@ nodes:
     tags: [ code-reuse ]
     label: Framing Signals
 
-  - id: A_SROP14
+  - id: bosman2014
     year: 2014
     type: attack
     tags: [ code-reuse ]
     label: SROP
-    nocite: true
 
   - id: Backes2014f
     year: 2014
@@ -222,19 +220,17 @@ nodes:
     tags: [ cfi ]
     label: ROPecker
 
-  - id: A_OutOfControl14
+  - id: Goktas2016b
     year: 2014
     type: attack
     tags: [ code-reuse ]
     label: Out of Control
-    nocite: true
 
-  - id: A_ROPStillDangerous14
+  - id: carlini2014
     year: 2014
     type: attack
     tags: [ code-reuse ]
     label: ROP is Still Dangerous
-    nocite: true
 
   - id: jang2014
     year: 2014
@@ -333,12 +329,11 @@ nodes:
     tags: [ enforcement ]
     label: Missing the Point(er)
 
-  - id: A_LosingControl15
+  - id: conti2015
     year: 2015
     type: attack
     tags: [ cfi ]
     label: Losing Control
-    nocite: true
 
   # ===== 2016 =====
   - id: Goktas2016
@@ -359,25 +354,17 @@ nodes:
     tags: [ data-only ]
     label: "Data-Oriented\\\\ Programming"
 
-  - id: A_PIROP16
-    year: 2016
-    type: attack
-    tags: [ code-reuse ]
-    label: Position Independent ROP
-    nocite: true
-
   - id: Werner2016
     year: 2016
     type: defense
     tags: [ XOM ]
     label: No Execute After Read
 
-  - id: D_Juggle16
+  - id: koo2016
     year: 2016
     type: defense
     tags: [ randomization ]
     label: Juggling the Gadgets
-    nocite: true
 
   - id: WilliamsKing2016
     year: 2016
@@ -455,64 +442,56 @@ nodes:
     tags: [ randomization ]
     label: "Compiler Assisted\\\\ Code Randomization"
 
-  - id: A_BackToEpilogue18
+  - id: biondo2018
     year: 2018
     type: attack
     tags: [ cfi ]
     label: Back To The Epilogue
-    nocite: true
+
+  - id: Goktas2018
+    year: 2018
+    type: attack
+    tags: [ code-reuse ]
+    label: "Position Independent\\\\ ROP"
 
   # ===== 2019 =====
-  - id: D_OSCFI19
+  - id: khandaker2019
     year: 2019
     type: defense
     tags: [ cfi ]
     label: Origin-sensitive CFI
-    nocite: true
 
-  - id: D_ACSCFI19
+  - id: khandaker2019a
     year: 2019
     type: defense
     tags: [ cfi ]
     label: "Adaptive Call-Site\\\\ Sensitive CFI"
-    nocite: true
 
-  - id: D_SafeHidden19
+  - id: wang2019a
     year: 2019
     type: defense
     tags: [ randomization, information-hiding ]
     label: SafeHidden
-    nocite: true
 
   # ===== 2020 =====
-  - id: A_RISCVROP20
+  - id: jaloyan2020
     year: 2020
     type: attack
     tags: [ code-reuse ]
     label: ROP on RISC-V
-    nocite: true
 
-  - id: A_FindingCracks20
+  - id: li2020
     year: 2020
     type: attack
     tags: [ cfi ]
-    label: Finding Cracks in Shields
-    nocite: true
-
-  - id: D_Saffire20
-    year: 2020
-    type: defense
-    tags: [ randomization ]
-    label: Saffire
-    nocite: true
+    label: "Finding Cracks\\\\ in Shields"
 
   # ===== 2022 =====
-  - id: D_TamingStack22
+  - id: huang2022a
     year: 2022
     type: defense
     tags: [ enforcement ]
     label: Taming of the Stack
-    nocite: true
 
   # ===== 2023 =====
   - id: duta2023
@@ -521,10 +500,9 @@ nodes:
     tags: [ code-reuse ]
     label: CHOP
 
-  - id: D_R2C23
+  - id: berlakovich2023
     year: 2023
     type: defense
     tags: [ randomization ]
     label: R2C
     highlight: true
-    nocite: true

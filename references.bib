@@ -1322,15 +1322,15 @@
   issn          = 10816011,
   abstract      = {Despite decades of research on software diversification, only address space layout randomization has seen widespread adoption. Code randomization, an effective defense against return-oriented programming exploits, has remained an academic exercise mainly due to i) the lack of a transparent and streamlined deployment model that does not disrupt existing software distribution norms, and ii) the inherent incompatibility of program variants with error reporting, whitelisting, patching, and other operations that rely on code uniformity. In this work we present compiler-assisted code randomization (CCR), a hybrid approach that relies on compiler-rewriter cooperation to enable fast and robust fine-grained code randomization on end-user systems, while maintaining compatibility with existing software distribution models. The main concept behind CCR is to augment binaries with a minimal set of transformation-assisting metadata, which i) facilitate rapid fine-grained code transformation at installation or load time, and ii) form the basis for reversing any applied code transformation when needed, to maintain compatibility with existing mechanisms that rely on referencing the original code. We have implemented a prototype of this approach by extending the LLVM compiler toolchain, and developing a simple binary rewriter that leverages the embedded metadata to generate randomized variants using basic block reordering. The results of our experimental evaluation demonstrate the feasibility and practicality of CCR, as on average it incurs a modest file size increase of 11.46{\%} and a negligible runtime overhead of 0.28{\%}, while it is compatible with link-time optimization and control flow integrity.}
 }
-@inproceedings{Kooa,
-  title         = {Juggling the Gadgets: {{Binary-level}} Code Randomization Using Instruction Displacement},
-  author        = {Koo, Hyungjoon and Polychronakis, Michalis},
-  booktitle     = {{{ASIA CCS}} 2016 - {{Proceedings}} of the 11th {{ACM Asia Conference}} on {{Computer}} and {{Communications Security}}},
-  pages         = {23--34},
-  doi           = {10.1145/2897845.2897863},
-  isbn          = {978-1-4503-4233-9},
-  date          = 2016,
-  abstract      = {Code diversification is an effective mitigation against return-oriented programming attacks, which breaks the assumptions of attackers about the location and structure of useful instruction sequences, known as "gadgets." Although a wide range of code diversification techniques of varying levels of granularity exist, most of them rely on the availability of source code, debug symbols, or the assumption of fully precise code disassembly, limiting their practical applicability for the protection of closed-source third-party applications. In-place code randomization has been proposed as an alternative binary-compatible diversification technique that is tolerant of partial disassembly coverage, in the expense though of leaving some gadgets intact, at the disposal of attackers. Consequently, the possibility of constructing robust ROP payloads using only the remaining non-randomized gadgets is still open. In this paper we present instruction displacement, a code diversification technique based on static binary instrumentation that does not rely on complete code disassembly coverage. Instruction displacement aims to improve the randomization coverage and entropy of existing binary-level code diversification techniques by displacing any remaining non-randomized gadgets to random locations. The results of our experimental evaluation demonstrate that instruction displacement reduces the number of non-randomized gadgets in the extracted code regions from 15.04\% for standalone in-place code randomization, to 2.77\% for the combination of both techniques. At the same time, the additional indirection introduced due to displacement incurs a negligible runtime overhead of 0.36\% on average for the SPEC CPU2006 benchmarks.}
+@inproceedings{koo2016,
+    title = {Juggling the Gadgets: {{Binary-level}} Code Randomization Using Instruction Displacement},
+    author = {Koo, Hyungjoon and Polychronakis, Michalis},
+    booktitle = {{{ASIA CCS}} 2016 - {{Proceedings}} of the 11th {{ACM Asia Conference}} on {{Computer}} and {{Communications Security}}},
+    pages = {23--34},
+    doi = {10.1145/2897845.2897863},
+    isbn = {978-1-4503-4233-9},
+    date = 2016,
+    abstract = {Code diversification is an effective mitigation against return-oriented programming attacks, which breaks the assumptions of attackers about the location and structure of useful instruction sequences, known as "gadgets." Although a wide range of code diversification techniques of varying levels of granularity exist, most of them rely on the availability of source code, debug symbols, or the assumption of fully precise code disassembly, limiting their practical applicability for the protection of closed-source third-party applications. In-place code randomization has been proposed as an alternative binary-compatible diversification technique that is tolerant of partial disassembly coverage, in the expense though of leaving some gadgets intact, at the disposal of attackers. Consequently, the possibility of constructing robust ROP payloads using only the remaining non-randomized gadgets is still open. In this paper we present instruction displacement, a code diversification technique based on static binary instrumentation that does not rely on complete code disassembly coverage. Instruction displacement aims to improve the randomization coverage and entropy of existing binary-level code diversification techniques by displacing any remaining non-randomized gadgets to random locations. The results of our experimental evaluation demonstrate that instruction displacement reduces the number of non-randomized gadgets in the extracted code regions from 15.04\% for standalone in-place code randomization, to 2.77\% for the combination of both techniques. At the same time, the additional indirection introduced due to displacement incurs a negligible runtime overhead of 0.36\% on average for the SPEC CPU2006 benchmarks.}
 }
 @article{krahmer2005,
   title         = {x86-64 buffer overflow exploits and the borrowed code chunks exploitation technique},
@@ -2699,4 +2699,83 @@
   doi           = {10.1145/3510003.3510059},
   issn          = {1558-1225},
   abstract      = {Java Virtual Machine (JVM) provides the runtime environment for Java programs, which allows Java to be ``write once, run anywhere''. JVM plays a decisive role in the correctness of all Java programs running on it. Therefore, ensuring the correctness and robustness of JVM implementations is essential for Java programs. To date, various techniques have been proposed to expose JVM bugs via generating potential bug-revealing test programs. However, the diversity and effectiveness of test programs generated by existing research are far from enough since they mainly focus on minor syntactic/semantic mutations. In this paper, we propose JavaTailor, the first history-driven test program synthesis technique, which synthesizes diverse test programs by weaving the ingredients extracted from JVM historical bug-revealing test programs into seed programs for covering more JVM behaviors/paths. More specifically, JavaTailor first extracts five types of code ingredients from the historical bug-revealing test programs. Then, to synthesize diverse test programs, it iteratively inserts the extracted ingredients into the seed programs and strengthens their interactions via introducing extra data dependencies between them. Finally, JavaTailor employs these synthesized test programs to differentially test JVMs. Our experimental results on popular JVM implementations (i.e., HotSpot and OpenJ9) show that JavaTailor outperforms the state-of-the-art technique in generating more diverse and effective test programs, e.g., test programs generated by JavaTailor can achieve higher JVM code coverage and detect many more unique inconsistencies than the state-of-the-art technique. Furthermore, JavaTailor has detected 10 previously unknown bugs, 6 of which have been confirmed/fixed by developers.}
+}
+
+@inproceedings{davi2011,
+    title = {{{ROPdefender}}: A Detection Tool to Defend against Return-Oriented Programming Attacks},
+    shorttitle = {{{ROPdefender}}},
+    booktitle = {Proceedings of the 6th {{ACM Symposium}} on {{Information}}, {{Computer}} and {{Communications Security}}},
+    author = {Davi, Lucas and Sadeghi, Ahmad-Reza and Winandy, Marcel},
+    date = {2011-03-22},
+    pages = {40--51},
+    publisher = {ACM},
+    location = {Hong Kong China},
+    doi = {10.1145/1966913.1966920},
+    url = {https://dl.acm.org/doi/10.1145/1966913.1966920},
+    urldate = {2026-02-17},
+    eventtitle = {{{ASIA CCS}} '11: 6th {{ACM Symposium}} on {{Information}}, {{Compuer}} and {{Communications Security}}},
+    isbn = {978-1-4503-0564-8},
+    langid = {english}
+}
+
+@inproceedings{carlini2014,
+    title = {{{ROP}} Is Still Dangerous: Breaking Modern Defenses},
+    shorttitle = {{{ROP}} Is Still Dangerous},
+    booktitle = {Proceedings of the 23rd {{USENIX}} Conference on {{Security Symposium}}},
+    author = {Carlini, Nicholas and Wagner, David},
+    date = {2014-08-20},
+    series = {{{SEC}}'14},
+    pages = {385--399},
+    publisher = {USENIX Association},
+    location = {USA},
+    abstract = {Return Oriented Programming (ROP) has become the exploitation technique of choice for modern memory-safety vulnerability attacks. Recently, there have been multiple attempts at defenses to prevent ROP attacks. In this paper, we introduce three new attack methods that break many existing ROP defenses. Then we show how to break kBouncer and ROPecker, two recent low-overhead defenses that can be applied to legacy software on existing hardware. We examine several recent ROP attacks seen in the wild and demonstrate that our techniques successfully cloak them so they are not detected by these defenses. Our attacks apply to many CFI-based defenses which we argue are weaker than previously thought. Future defenses will need to take our attacks into account.},
+    isbn = {978-1-931971-15-7}
+}
+
+@inproceedings{conti2015,
+    title = {Losing {{Control}}: {{On}} the {{Effectiveness}} of {{Control-Flow Integrity}} under {{Stack Attacks}}},
+    shorttitle = {Losing {{Control}}},
+    booktitle = {Proceedings of the 22nd {{ACM SIGSAC Conference}} on {{Computer}} and {{Communications Security}}},
+    author = {Conti, Mauro and Crane, Stephen and Davi, Lucas and Franz, Michael and Larsen, Per and Negro, Marco and Liebchen, Christopher and Qunaibit, Mohaned and Sadeghi, Ahmad-Reza},
+    date = {2015-10-12},
+    pages = {952--963},
+    publisher = {ACM},
+    location = {Denver Colorado USA},
+    doi = {10.1145/2810103.2813671},
+    url = {https://dl.acm.org/doi/10.1145/2810103.2813671},
+    urldate = {2022-10-17},
+    eventtitle = {{{CCS}}'15: {{The}} 22nd {{ACM Conference}} on {{Computer}} and {{Communications Security}}},
+    isbn = {978-1-4503-3832-5},
+    langid = {english},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Conti et al. - 2015 - Losing Control On the Effectiveness of Control-Flow Integrity under Stack Attacks.pdf}
+}
+
+@inproceedings{wang2019a,
+    title = {Safehidden: {{An}} Efficient and Secure Information Hiding Technique Using Re-Randomization},
+    booktitle = {Proceedings of the 28th {{USENIX Security Symposium}}},
+    author = {Wang, Zhe and Wu, Chenggang and Zhang, Yinqian and Tang, Bowen and Yew, Pen Chung and Xie, Mengyao and Lai, Yuanming and Kang, Yan and Cheng, Yueqiang and Shi, Zhiping},
+    date = {2019},
+    pages = {1239--1256},
+    url = {https://www.usenix.org/conference/usenixsecurity19/presentation/wang},
+    urldate = {2020-03-22},
+    abstract = {Information hiding (IH) is an important building block for many defenses against code reuse attacks, such as code-pointer integrity (CPI), control-flow integrity (CFI) and fine-grained code (re-)randomization, because of its effectiveness and performance. It employs randomization to probabilistically “hide” sensitive memory areas, called safe areas, from attackers and ensures their addresses are not leaked by any pointers directly. These defenses used safe areas to protect their critical data, such as jump targets and randomization secrets. However, recent works have shown that IH is vulnerable to various attacks. In this paper, we propose a new IH technique called SafeHidden. It continuously re-randomizes the locations of safe areas and thus prevents the attackers from probing and inferring the memory layout to find its location. A new thread-private memory mechanism is proposed to isolate the thread-local safe areas and prevent adversaries from reducing the randomization entropy. It also randomizes the safe areas after the TLB misses to prevent attackers from inferring the address of safe areas using cache side-channels. Existing IH-based defenses can utilize SafeHidden directly without any change. Our experiments show that SafeHidden not only prevents existing attacks effectively but also incurs low performance overhead.},
+    isbn = {978-1-939133-06-9},
+    keywords = {notion},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Wang et al. - 2019 - Safehidden An efficient and secure information hiding technique using re-randomization.pdf}
+}
+
+@inproceedings{khandaker2019a,
+    title = {Adaptive {{Call-Site Sensitive Control Flow Integrity}}},
+    booktitle = {2019 {{IEEE European Symposium}} on {{Security}} and {{Privacy}} ({{EuroS}}\&{{P}})},
+    author = {Khandaker, Mustakimur and Naser, Abu and Liu, Wenqing and Wang, Zhi and Zhou, Yajin and Cheng, Yueqiang},
+    date = {2019-06},
+    pages = {95--110},
+    doi = {10.1109/EuroSP.2019.00017},
+    url = {https://ieeexplore.ieee.org/document/8806734},
+    urldate = {2026-01-27},
+    abstract = {Low-level languages like C/C++ are widely used in various applications for their performance and flexibility. Unfortunately, these languages are prone to memory corruption vulnerabilities, leading to control-flow hijacking attacks. Control flow integrity (CFI) is a general principle to enforce run-time control flow of a program to a pre-computed control-flow graph (CFG). While the traditional context-insensitive CFI falls short in protecting critical control transfers, recent context-sensitive CFI research shows promising improvements but has various limitations. We present Control Flow Integrity with Look Back (CFI-LB), a call-site sensitive CFI in which a conventional source-target control transfer is strengthened by a look back into its call-sites (return addresses). CFI-LB features the adaptive call-site sensitivity in which each indirect call has its own level of sensitivity and the multi-scope CFG to improve the security even if a precise context-sensitive static CFG is not available, especially for large programs such as GCC and NGINX. One of the CFGs is constructed by our localized concolic execution, which significantly extends the dynamic CFG with very low false positives. In addition, CFI-LB is the first CFI system explicitly designed to protect its reference monitors from race conditions. We have built a prototype of CFI-LB. The evaluation with SPEC CPU2006 benchmarks and NGINX indicates that CFI-LB has a low-performance overhead (less than 5\% on average for the full protection) while increasing the security.},
+    eventtitle = {2019 {{IEEE European Symposium}} on {{Security}} and {{Privacy}} ({{EuroS}}\&{{P}})},
+    keywords = {call sites,CFI,Context,context sensitive,Hardware,Kernel,Monitoring,Prototypes,Security,Sensitivity},
+    file = {/Users/felix/Library/CloudStorage/OneDrive-Berlakovich&SohnKG/Zotero/attachments/Khandaker et al. - 2019 - Adaptive Call-Site Sensitive Control Flow Integrity.pdf}
 }

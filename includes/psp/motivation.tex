@@ -62,10 +62,10 @@ In general, however, where the indirect call targets have multiple callers as we
 The reason is that \aflpp's compiler instrumentation does not assign IDs to edges between calls and functions.
 
 \aflpp's classic instrumentation \enquote{solves} this problem because the edge ID is always a combination of the previous block ID and the current one, regardless of the block's function.
-An important observation, however, is that the instrumentation does not reset the current block ID after a call, \eg after the call to \code{handler1} in \cref{psp:line:handler1-call}.
+An important observation is that the instrumentation does not reset the current block ID after a call, \eg after the call to \code{handler1} in \cref{psp:line:handler1-call}.
 This means that strictly speaking the instrumentation would record an edge $A$ \rightarrow $B$.
 Alternatively, call-context combines the edge ID with a representation of the calling context (either the entire call trace or just a single ID per calling function).
-All these variants rely on runtime hash computation, however, and are thus susceptible to collisions.
+All these variants rely on runtime hash computation and are, thus, susceptible to collisions.
 
 To summarize, \aflpp's compiler-based instrumentation creates an ambiguity of edge IDs for indirect calls.
 In the following sections we explore an alternative way of implementing call-site specific coverage for indirect calls.
